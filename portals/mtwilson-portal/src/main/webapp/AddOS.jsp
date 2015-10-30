@@ -16,17 +16,17 @@
 		<table  cellpadding="3"  cellspacing="3" style="font-size: 14px;margin-top: 10px;border: none;" id="addOSDataTable">
 			<tr>
 				<td data-i18n="table.name">Name</td>
-				<td><input id="MainContent_tbOSName" type="text" class="textBox_Border" name="osName" /></td>
+				<td style="padding-left: 10px"><input id="MainContent_tbOSName" type="text" class="textBox_Border" name="osName" /></td>
 				<td><span class="requiredField">*</span></td>
 			</tr>
 			<tr>
 				<td data-i18n="table.version">Version</td>
-				<td><input type="text" class="textBox_Border" name="osVersion" id="osVerID"/></td>
+				<td style="padding-left: 10px"><input type="text" class="textBox_Border" name="osVersion" id="osVerID"/></td>
 				<td><span class="requiredField">*</span></td>
 			</tr>
 			<tr>
 				<td data-i18n="table.description">Description:</td>
-				<td><input type="text" class="textBox_Border" name="osDescription" /></td>
+				<td style="padding-left: 10px"><input type="text" class="textBox_Border" name="osDescription" /></td>
 				<td></td>
 			</tr>
 			<tr>

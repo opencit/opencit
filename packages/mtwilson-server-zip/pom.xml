@@ -342,7 +342,12 @@
       <artifactId>mtwilson-tpm-endorsement-ws-v2</artifactId>
       <version>${project.version}</version>
     </dependency>
-			
+    <dependency>
+   <groupId>com.intel.mtwilson</groupId>
+    <artifactId>mtwilson-export-data-bundle</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+ 			
   </dependencies>
 
 </project>

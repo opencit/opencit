@@ -84,7 +84,7 @@ public class RegisterUser extends AbstractCommand {
             String[] newTlsCertAliases = elementsAdded(tlsCertAliases0, tlsCertAliases);
             for(String alias : newTlsCertAliases) {
                 X509Certificate cert = keystore.getX509Certificate(alias);
-                System.out.println(String.format("Added TLS Certificate for %s with SHA1 fingerprint %s", cert.getSubjectX500Principal().getName(), X509Util.sha1fingerprint(cert)));
+                System.out.println(String.format("Added TLS Certificate for %s with SHA-256 fingerprint %s", cert.getSubjectX500Principal().getName(), X509Util.sha256fingerprint(cert)));
             }
             
             // register the user with the server

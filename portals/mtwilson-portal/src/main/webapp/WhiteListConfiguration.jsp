@@ -101,18 +101,17 @@
                                     <span class="requiredField">*</span>
                                 </div>
                             </div>
-                            <div class="singleDiv">
+                            <div  name="opensource_credentials" id ="opensource_credentials"><a href="#" onclick="fnShowLoginCredentials()">Show login credentials</a></div>
+                            <div class="singleDiv" id="openSourcesHostType_username">
                                 <div class="labelDiv" data-i18n="input.username">User Name:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListOpenSource_userName">
-                                    <span>&nbsp;***</span>
                                 </div>
                             </div>
-                            <div class="singleDiv">
+                            <div class="singleDiv" id="openSourcesHostType_password">
                                 <div class="labelDiv" data-i18n="input.password">Password:</div>
                                 <div class="valueDiv">
                                     <input type="password" class="textBox_Border" id="whiteListOpenSource_password">
-                                    <span>&nbsp;***</span>
                                 </div>
                             </div>
                         </div>

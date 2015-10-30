@@ -38,7 +38,6 @@
      commit.time
      remote.origin.url
         -->
-        <!--
         <plugin>
             <groupId>pl.project13.maven</groupId>
             <artifactId>git-commit-id-plugin</artifactId>
@@ -58,7 +57,6 @@
                 </execution>
             </executions>
         </plugin>
-        -->
             
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

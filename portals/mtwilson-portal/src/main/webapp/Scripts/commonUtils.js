@@ -347,7 +347,10 @@ function fnChangehostType(element,isWhiteListConfigPage) {
     // drop down box and finds the one thats selected and saves
     // its name in type variable
     // choices are VMware, Citrix, KVM|Xen
-    document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Hypervisor (VMM)";
+    if (isWhiteListConfigPage == true) {
+        document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Hypervisor (VMM)";
+    }
+    
     cleanUpAllDivs();
 	$(element).find('option').each(function() {
 		if ($(this).attr('selected') == 'selected') {
@@ -374,6 +377,8 @@ function fnChangehostType(element,isWhiteListConfigPage) {
         $('#vmwareHostType').hide();
         $('#citrixHostType').hide();
         $('#openSourcesHostType').show();
+        $('#openSourcesHostType_username').hide();
+        $('#openSourcesHostType_password').hide();
         
         if (type == "Linux") {
             document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Kernel and OS";
