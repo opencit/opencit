@@ -110,6 +110,8 @@ cp *.jar ${TOMCAT_HOME}/endorsed/
 cp setenv.sh ${TOMCAT_HOME}/bin/
 chmod +x $TOMCAT_HOME/bin/setenv.sh
 
+# remove jackson jars
+rm -f "${TOMCAT_HOME}"/endorsed/jackson-* 2>/dev/null
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
@@ -123,6 +125,7 @@ chmod +x $TOMCAT_HOME/bin/setenv.sh
 # can use it:
 mysqlconnector_files=`ls -1 ${MTWILSON_HOME}/java/* | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
+  rm -f "${TOMCAT_HOME}"/endorsed/mtwilson-mysql-* 2>/dev/null
   cp $mysqlconnector_files ${TOMCAT_HOME}/endorsed/
 fi
 

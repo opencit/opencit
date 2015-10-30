@@ -3925,8 +3925,12 @@ webservice_uninstall() {
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
-      if [ ! -w "$TOMCAT_HOME/webapps/$WAR_NAME" ] || [ ! -w "$TOMCAT_HOME/webapps/${webservice_application_name}" ]; then
-        echo_failure "Current user does not have permission to remove ${i} from tomcat installation"
+      if [ -f "$TOMCAT_HOME/webapps/$WAR_NAME" ] && [ ! -w "$TOMCAT_HOME/webapps/$WAR_NAME" ]; then
+        echo_failure "Current user does not have permission to remove ${WAR_NAME} from tomcat installation"
+        return 1
+      fi
+      if [ -d "$TOMCAT_HOME/webapps/${webservice_application_name}" ] && [ ! -w "$TOMCAT_HOME/webapps/${webservice_application_name}" ]; then
+        echo_failure "Current user does not have permission to remove ${webservice_application_name} from tomcat installation"
         return 1
       fi
       rm -rf "$TOMCAT_HOME/webapps/$WAR_NAME"
