@@ -38,7 +38,7 @@ function fnUploadFlatFile() {
     $('#successMessage').html('');
     $('#registerHostTableContent').html('');
     $('#registerHostTable').hide();
-    document.getElementById('AuthorizationToken').value = authorizationToken;
+    //document.getElementById('#AuthorizationToken').value = authorizationToken;
     $.ajaxFileUpload({
         url: 'getData/uploadFlatFileRegisterHost.html',
         secureuri: false,

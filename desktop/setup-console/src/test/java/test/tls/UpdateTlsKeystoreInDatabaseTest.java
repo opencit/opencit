@@ -244,7 +244,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
         for(X509Certificate certificate : certificates) {
             log.debug(String.format("Subject: %s", certificate.getSubjectX500Principal().getName()));
             log.debug(String.format("Alternative names: %s", X509Util.alternativeNames(certificate).isEmpty() ? "none" : StringUtils.join(X509Util.alternativeNames(certificate),", ")));
-            log.debug(String.format("Fingerprint: %s", Hex.encodeHexString(X509Util.sha1fingerprint(certificate))));
+            log.debug(String.format("Fingerprint SHA-256: %s", Hex.encodeHexString(X509Util.sha256fingerprint(certificate))));
         }
     }
     

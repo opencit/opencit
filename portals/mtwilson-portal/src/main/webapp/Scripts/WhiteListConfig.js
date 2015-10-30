@@ -142,7 +142,6 @@ $(function() {
 
 
 function fnUploadWhiteListConfigurationData() {
-
 	$('#whiteListMessage').html('');
 	var validation = false;
 	var hostVo = new RegisterHostVo();
@@ -202,15 +201,12 @@ function fnUploadWhiteListConfigurationData() {
                 alert($("#alert_valid_hostname_ip").text());
             }
         } else { // TA
-
             if (fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
 
                 var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
                 var valid2 = fnMWValidatePort('whiteListOpenSource_portNO', true); //fnValidateEmptyValue('whiteListOpenSource_portNO');
-                var valid2 = fnValidateEmptyValue('whiteListOpenSource_userName');
-                var valid3 = fnValidateEmptyValue('whiteListOpenSource_password');
 
-                if (valid1 && valid2 && valid2 && valid3) {
+                if (valid1 && valid2) {
                     validation = true;
                     hostVo.vmWareType = false;
                     hostVo.hostType = "intel";
@@ -287,6 +283,21 @@ function fnUploadWhiteListConfigurationData() {
 //	sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
 //	
 //}
+
+function fnShowLoginCredentials() {
+    str = "<a href=\"#\" onclick=\"fnShowLoginCredentials()\">";
+    if ((document.getElementById('opensource_credentials').innerHTML).indexOf("Show login credentials") > 0) {
+        $('#openSourcesHostType_username').show();
+        $('#openSourcesHostType_password').show();
+        str = str + "Hide login credentials";        
+    } else {
+        $('#openSourcesHostType_username').hide();
+        $('#openSourcesHostType_password').hide();
+        str = str + "Show login credentials";
+    }
+    str = str + "</a>";
+    document.getElementById('opensource_credentials').innerHTML = str;
+}
 
 //called for the response for fnSendWhiteListWithRegisterHostFalse/fnSendWhiteListWithRegisterHostTrue (upload white list button)
 function fnUploadWhiteListSuccess(responseJSON) {
