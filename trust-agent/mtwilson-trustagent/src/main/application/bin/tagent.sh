@@ -25,14 +25,73 @@ DAEMON=/opt/trustagent/bin/$NAME
 #Set environment specific variables here 
 ###################################################################################################
 
-TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
-TRUSTAGENT_CONF=${TRUSTAGENT_CONF:-/opt/trustagent/configuration}
-TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-/opt/trustagent/java}
-TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
-TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
-TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
-TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
-TRUSTAGENT_HTTP_LOG_FILE=/var/log/trustagent/http.log
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
+
+# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env.d and the
+# administrator may use a symlink if necessary to place it anywhere else
+export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
+
+trustagent_load_env() {
+  local env_files="$@"
+  local env_file_exports
+  for env_file in $env_files; do
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+      . $env_file
+      env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+      if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+    fi
+  done  
+}
+
+# load environment variables; these override any existing environment variables.
+# the idea is that if someone wants to override these, they must have write
+# access to the environment files that we load here. 
+if [ -d $TRUSTAGENT_ENV ]; then
+  trustagent_load_env $(ls -1 $TRUSTAGENT_ENV/*)
+fi
+
+###################################################################################################
+
+# if non-root execution is specified, and we are currently root, start over; the TRUSTAGENT_SUDO variable limits this to one attempt
+# we make an exception for the following commands:
+# - 'uninstall' may require root access to delete users and certain directories
+# - 'update-system-info' requires root access to use dmidecode and virsh commands
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$TRUSTAGENT_SUDO" ] && [ "$1" != "uninstall" -a "$1" != "update-system-info" ]; then
+
+  # before we switch to non-root, check if tcsd is running and start it if necessary
+  trousers=$(which tcsd 2>/dev/null)
+  if [ -n "$trousers" ]; then $trousers; fi
+
+  export TRUSTAGENT_SUDO=true
+  sudo -u $TRUSTAGENT_USERNAME -H -E $TRUSTAGENT_BIN/tagent $*
+  exit $?
+fi
+
+###################################################################################################
+
+
+# default directory layout follows the 'home' style
+TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-${TRUSTAGENT_CONF:-$TRUSTAGENT_HOME/configuration}}
+TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
+TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
+TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-$TRUSTAGENT_HOME/env.d}
+TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
+TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
+
+###################################################################################################
+
+# load linux utility
+if [ -f "$TRUSTAGENT_HOME/share/scripts/functions.sh" ]; then
+  . $TRUSTAGENT_HOME/share/scripts/functions.sh
+fi
+
+###################################################################################################
+
+# all other variables with defaults
+TRUSTAGENT_PID_FILE=$TRUSTAGENT_HOME/trustagent.pid
+TRUSTAGENT_HTTP_LOG_FILE=$TRUSTAGENT_LOGS/http.log
 TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate"
 TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
 TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair take-ownership"
@@ -41,21 +100,23 @@ TRUSTAGENT_SETUP_TASKS="update-extensions-cache-file create-keystore-password cr
 # not including configure-from-environment because we are running it always before the user-chosen tasks
 # not including register-tpm-password because we are prompting for it in the setup.sh
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
+JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONFIGURATION/logback.xml -Dfs.name=trustagent"
 
 ###################################################################################################
 
-# load environment variables (these may override the defaults set above)
-if [ -d $TRUSTAGENT_ENV ]; then
-  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
-  for env_file in $TRUSTAGENT_ENV_FILES; do
-    . $env_file
-  done
-fi
+# ensure that our commands can be found
+export PATH=$TRUSTAGENT_BIN/bin:$PATH
 
-# load linux utility
-if [ -f "$TRUSTAGENT_BIN/functions" ]; then
-  . $TRUSTAGENT_BIN/functions
+# ensure that trousers (/usr/sbin) and tpm tools (/usr/local/sbin) are found
+export PATH=$PATH:/usr/sbin:/usr/local/sbin
+
+# java command
+if [ -z "$JAVA_CMD" ]; then
+  if [ -n "$JAVA_HOME" ]; then
+    JAVA_CMD=$JAVA_HOME/bin/java
+  else
+    JAVA_CMD=`which java`
+  fi
 fi
 
 if [ -z "$JAVA_CMD" ]; then
@@ -76,9 +137,16 @@ export CLASSPATH
 
 ###################################################################################################
 
+# run a trustagent command
+trustagent_run() {
+  local args="$*"
+  $JAVA_CMD $JAVA_OPTS com.intel.dcsg.cpg.console.Main $args
+  return $?
+}
+
 # arguments are optional, if provided they are the names of the tasks to run, in order
 trustagent_setup() {
-  export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+  export HARDWARE_UUID=$(trustagent_system_info "dmidecode -s system-uuid")
   local tasklist="$*"
   if [ -z "$tasklist" ]; then
     tasklist=$TRUSTAGENT_SETUP_TASKS
@@ -90,7 +158,7 @@ trustagent_setup() {
 }
 
 trustagent_authorize() {
-  export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+  export HARDWARE_UUID=$(trustagent_system_info "dmidecode -s system-uuid")
   local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
   local default_value
   for v in $authorize_vars
@@ -104,6 +172,20 @@ trustagent_authorize() {
 }
 
 trustagent_start() {
+
+    # check if we're already running - don't start a second instance
+    if trustagent_is_running; then
+        echo "Trust Agent is running"
+        return 0
+    fi
+
+    # check if we need to use authbind or if we can start java directly
+    prog="$JAVA_CMD"
+    if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n "$(which authbind 2>/dev/null)" ]; then
+      prog="authbind $JAVA_CMD"
+      JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+    fi
+
     # the subshell allows the java process to have a reasonable current working
     # directory without affecting the user's working directory. 
     # the last background process pid $! must be stored from the subshell.
@@ -156,13 +238,18 @@ trustagent_stop() {
   fi
 }
 
-# backs up the configuration directory and removes all trustagent files
+# backs up the configuration directory and removes all trustagent files,
+# except for configuration files which are saved and restored
 trustagent_uninstall() {
     datestr=`date +%Y-%m-%d.%H%M`
-    mkdir -p /var/backup/trustagent.configuration.$datestr
-    cp -r /opt/trustagent/configuration/* /var/backup/trustagent.configuration.$datestr
-	rm /usr/local/bin/tagent
-    rm -rf /opt/trustagent
+    mkdir -p /tmp/trustagent.configuration.$datestr
+    chmod 500 /tmp/trustagent.configuration.$datestr
+    cp -r /opt/trustagent/configuration/* /tmp/trustagent.configuration.$datestr
+	rm -f /usr/local/bin/tagent
+    if [ -n "$TRUSTAGENT_HOME" ] && [ -d "$TRUSTAGENT_HOME" ]; then
+      rm -rf $TRUSTAGENT_HOME
+    fi
+    remove_startup_script tagent
     rm -rf /opt/tbootxm
 }
 
@@ -189,7 +276,67 @@ print_help() {
     echo register-tpm-password
 }
 
+# writes system information into files non-root trustagenta can read 
+# (root access required to run)
+trustagent_update_system_info() {
+  if [ "$(whoami)" == "root" ]; then
+    # user is root, so run the commands and cache the output
+    mkdir -p $TRUSTAGENT_VAR/system-info
+    dmidecode -s bios-vendor > $TRUSTAGENT_VAR/system-info/dmidecode.bios-vendor
+    dmidecode -s bios-version > $TRUSTAGENT_VAR/system-info/dmidecode.bios-version
+    dmidecode -s system-uuid > $TRUSTAGENT_VAR/system-info/dmidecode.system-uuid
+    dmidecode --type processor > $TRUSTAGENT_VAR/system-info/dmidecode.processor
+    lsb_release -a > $TRUSTAGENT_VAR/system-info/lsb_release
+    virsh version > $TRUSTAGENT_VAR/system-info/virsh.version
+  else
+    echo_failure "Must run 'tagent update-system-info' as root"
+  fi
+}
+
+trustagent_system_info_get() {
+  local filename=$1
+  if [ -f "$filename" ]; then
+    cat $filename
+  else
+    echo_failure "File not found: $filename"
+    echo "Run 'tagent update-system-info' as root to fix"
+  fi
+}
+
+# uses only information cached by trustagent_update_system_info 
+# (root access not required)
+trustagent_system_info() {
+    case "$*" in
+      "dmidecode -s bios-vendor")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.bios-vendor
+          ;;
+      "dmidecode -s bios-version")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.bios-version
+          ;;
+      "dmidecode -s system-uuid")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.system-uuid
+          ;;
+      "dmidecode --type processor")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.processor
+          ;;
+      "lsb_release -a")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/lsb_release
+          ;;
+      "virsh version")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/virsh.version
+          ;;
+      *)
+          echo_failure "tagent system-info command not supported: $*"
+          ;;
+    esac
+    return $?
+}
+
 trousers_detect_and_run() {
+  # non-root users typically don't have /usr/sbin in their path, so append it
+  # here;  does not affect root user who would have /usr/sbin earlier in the PATH,
+  # and also this change only affects our process
+  PATH=$PATH:/usr/sbin
   trousers=`which tcsd 2>/dev/null`
   if [ -z "$trousers" ]; then
     #echo_failure "trousers installation is required for trust agent to run successfully."
@@ -199,7 +346,7 @@ trousers_detect_and_run() {
     $trousers
   fi
 }
-trousers_detect_and_run
+
 ###################################################################################################
 
 # here we look for specific commands first that we will handle in the
@@ -211,8 +358,7 @@ case "$1" in
     ;;
   start)
     # need to start trousers before we can run tagent
-    #trousers_detect
-    #trousers_detect_and_run
+    trousers_detect_and_run
 
     # run setup before starting trust agent to allow taking ownership again if
     # the tpm has been cleared, or re-initializing the keystore if the server
@@ -226,12 +372,14 @@ case "$1" in
     trustagent_stop
     ;;
   restart)
+    trousers_detect_and_run
     trustagent_stop
     if trustagent_setup $TRUSTAGENT_START_TASKS; then
       trustagent_start
     fi
     ;;
   authorize)
+    trousers_detect_and_run
     if trustagent_authorize; then
       trustagent_stop
       trustagent_start
@@ -245,6 +393,14 @@ case "$1" in
       echo "Trust agent is not running"
       exit 1
     fi
+    ;;
+  update-system-info)
+    shift;
+    trustagent_update_system_info $*
+    ;;
+  system-info)
+    shift;
+    trustagent_system_info $*
     ;;
   setup)
     trousers_detect_and_run
@@ -263,6 +419,7 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
+      trousers_detect_and_run
       "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $*
     fi
     ;;

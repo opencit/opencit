@@ -348,6 +348,11 @@
             <artifactId>mtwilson-client-java6</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java7</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 
         <dependency>
