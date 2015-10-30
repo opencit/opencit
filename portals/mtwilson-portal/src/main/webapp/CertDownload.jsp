@@ -25,6 +25,7 @@ response.setHeader("Content-Disposition",
                         <input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div> -->
                 <div  id ="fdownload"><a href="#" onclick="fnforTLSCertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download TLS Certificate</a></div>
                  <div  id ="fdownload"><a href="#" onclick="fnforSAMLCertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download SAML Certificate</a></div>                
+                 <div  id ="fdownload"><a href="#" onclick="fnforConfigurationDataBundle()"><span class="glyphicon glyphicon-download-alt"></span> Download Configuration Data Bundle</a></div>                
 			<div id="successMessage"></div>
 			
 		</div>

@@ -577,7 +577,7 @@ public class VMwareClient implements TlsClient {
         try {
             vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
         } catch (Exception e) {
-            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); 
+            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, clusterName); 
         }
         try {
             // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet

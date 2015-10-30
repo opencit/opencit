@@ -185,7 +185,7 @@ public class ApiClientBO {
             if (userUuid == null || userUuid.isEmpty()) {
                 MwPortalUser pUser = new MwPortalUser();
                 userUuid = new UUID().toString();
-                pUser.setUuid_hex(userUuid); 
+                pUser.setUuid_hex(userUuid);
                 // We will not set the keystore here. The caller who calls into the keystore.createuserinresource is responsible for updating the 
                 // portal user table with the new keystore.
                 pUser.setStatus(ApiClientStatus.PENDING.toString());
@@ -456,7 +456,7 @@ public class ApiClientBO {
                 try (LoginDAO loginDao = MyJdbi.authz()) {
                     UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha256(apiClientRequest.fingerprint);
                     if (userLoginCertificate == null) {
-                        log.error("User with fingerprint {} is not configured in the system.", Sha1Digest.valueOf(apiClientRequest.fingerprint).toHexString());
+                        log.error("User with fingerprint {} is not configured in the system.", Hex.encodeHexString(apiClientRequest.fingerprint)); //Sha1Digest.valueOf(apiClientRequest.fingerprint).toHexString());
                         throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
                     } else {
                         User user = loginDao.findUserById(userLoginCertificate.getUserId());
@@ -592,6 +592,49 @@ public class ApiClientBO {
         }
     }
         
+    /**
+     * 
+     * @param apiClientRequest 
+     */
+    public void updateV2(ApiClientUpdateRequest apiClientRequest) {
+        String userName;
+        String userLoginCertificateFingerprint = Hex.encodeHexString(apiClientRequest.fingerprint);
+        
+        try {
+            // Check if the user is in the V2 table. Otherwise we need to throw an error
+            log.debug("Looking up user login certificate [{}]...", userLoginCertificateFingerprint);
+            try (LoginDAO loginDao = MyJdbi.authz()) {
+                UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha256(apiClientRequest.fingerprint);
+                if (userLoginCertificate == null) {
+                    log.error("User with certificate fingerprint {} is not configured in the system.", userLoginCertificateFingerprint);
+                    throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userLoginCertificateFingerprint);
+                }
+                
+                User user = loginDao.findUserById(userLoginCertificate.getUserId());
+                if (user == null) {
+                    log.error("User with certificate fingerprint {} is not configured in the system.", userLoginCertificateFingerprint);
+                    throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userLoginCertificateFingerprint);
+                }
+                userName = user.getUsername();
+            }
+            
+            updateShiroUserTables(apiClientRequest, userName);
+
+            // Capture the change in the syslog
+            Object[] paramArray = {userName, Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
+
+        } catch (MSException me) {
+            log.error("Error during API Client update. " + me.getErrorMessage());
+            throw me;
+            
+        } catch (Exception ex) {
+            // throw new MSException(ex);
+            log.error("Error during API user update. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
+        }
+    }
+    
     /**
      * 
      * @param apiClientX509

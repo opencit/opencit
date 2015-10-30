@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustPolicy xmlns="mtwilson:trustdirector:policy:1.1">
+    <Director>
+        <CustomerId>testId</CustomerId>
+    </Director>
+    <Image>
+        <ImageId>53F1D4C7-9215-4386-B134-193F7E3F0CE2</ImageId>
+        <ImageHash>6a749cfc57df53bd36b6ce1cb67c54632be4bc904d084ddd8dbeb79a30f44ccc</ImageHash>
+    </Image>
+    <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>
+    <Whitelist DigestAlg="sha256">
+        <File Path="/boot/grub/menu.lst">bd4b7aa84740262bca78bd8e737693cdf5f90773f7aa2ece36572abb73fa2182</File>
+        <File Path="/boot/vmlinuz-3.2.0-37-virtual">42ec40ce492711bf159c52533ec108cd3f7241892ec6c340134ebb432591fb53</File>
+        <File Path="/boot/config-3.2.0-37-virtual">382fd2a060008f7d0c296a32935d96082d36c8b9e088b131c93a454548eefb00</File>
+        <File Path="/boot/initrd.img-3.2.0-37-virtual">44b6caaf24091f31b52e077f3015955c772f611e90628ed725a2971a32489be1</File>
+        <File Path="/boot/grub/stage1">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</File>
+        <File Path="/boot/grub/e2fs_stage1_5">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</File>
+        <File Path="/boot/grub/stage2">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</File>
+    </Whitelist>
+</TrustPolicy>

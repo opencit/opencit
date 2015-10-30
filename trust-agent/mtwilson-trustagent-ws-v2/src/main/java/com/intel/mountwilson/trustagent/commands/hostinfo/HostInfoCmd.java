@@ -64,7 +64,7 @@ public class HostInfoCmd implements ICommand {
      */
     
     private void getOsAndVersion() throws TAException, IOException {
-        CommandResult commandResult = CommandUtil.runCommand("lsb_release -a");
+        CommandResult commandResult = CommandUtil.runCommand("tagent system-info lsb_release -a");
         if (commandResult != null && commandResult.getStdout() != null) {
             String[] result = commandResult.getStdout().split("\n");
             for (String str : result) {
@@ -101,7 +101,7 @@ public class HostInfoCmd implements ICommand {
      * response of dmidecode -s bios-vendor -> S5500.86B.01.00.0060.090920111354
      */
     private void getBiosAndVersion() throws TAException, IOException {
-        CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
+        CommandResult result = CommandUtil.runCommand("tagent system-info dmidecode -s bios-vendor");
         if (result == null || result.getStdout() == null) { throw new IOException("Command \"dmidecode -s bios-vendor\" gave a null response"); }
         List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
@@ -114,7 +114,7 @@ public class HostInfoCmd implements ICommand {
         }
         log.debug("Bios OEM: " + context.getBiosOem());
 
-        CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
+        CommandResult result2 = CommandUtil.runCommand("tagent system-info dmidecode -s bios-version");
         if (result2 == null || result2.getStdout() == null) { throw new IOException("Command \"dmidecode -s bios-version\" gave a null response"); }
         resultList = Arrays.asList(result2.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
@@ -140,7 +140,7 @@ public class HostInfoCmd implements ICommand {
 
         CommandResult commandResult = null;
         try {
-            commandResult = CommandUtil.runCommand("virsh version");
+            commandResult = CommandUtil.runCommand("tagent system-info virsh version");
         } catch (TAException | IOException ex) {
             log.error("getVmmAndVersion: Error while running virsh command. {}", ex.getMessage());
             if (ex.getMessage().contains("error=2, No such file or directory")) {
@@ -151,8 +151,15 @@ public class HostInfoCmd implements ICommand {
                 log.error("getVmmAndVersion: Unexpected error encountered while running virsh command on system that does not support VMM.");
             }
         }
+        
+        if (commandResult == null || commandResult.getStdout() == null || commandResult.getStdout().isEmpty()) {
+            log.info("getVmmAndVersion: empty virsh version file, assuming no VMM installed");
+            context.setVmmName("Host_No_VMM");
+            context.setVmmVersion("0.0");
+            return;
+        }
                 
-        if (commandResult != null && commandResult.getStdout() != null) {
+        if (commandResult.getStdout() != null ) {
             String cmdOutput = commandResult.getStdout();
             log.debug("getVmmAndVersion: output of virsh version command is {}.", cmdOutput);
             String[] result = cmdOutput.split("\n");
@@ -213,7 +220,7 @@ public class HostInfoCmd implements ICommand {
      */
        private void getProcessorInfo() throws TAException, IOException {
            
-            CommandResult commandResult = CommandUtil.runCommand("dmidecode --type processor");
+            CommandResult commandResult = CommandUtil.runCommand("tagent system-info dmidecode --type processor");
             if (commandResult != null && commandResult.getStdout() != null) {
                 String[] result = commandResult.getStdout().split("\n");
                 String processorInfo = "";
@@ -251,7 +258,7 @@ public class HostInfoCmd implements ICommand {
      * @throws IOException
      */
     public void getHostUUID() throws TAException, IOException {
-        CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
+        CommandResult result = CommandUtil.runCommand("tagent system-info dmidecode -s system-uuid");
         // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
         if (result == null || result.getStdout() == null) { throw new IOException("Command \"dmidecode -s system-uuid\" gave a null response"); }
         List<String> resultList = Arrays.asList(result.getStdout().split("\n"));

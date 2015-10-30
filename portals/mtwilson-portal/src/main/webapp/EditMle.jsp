@@ -41,9 +41,6 @@
 		<div id="messageSpace"></div>
                 <span id="alert_update_mle" data-i18n="alert.update_mle" style="display: none;">Are you Sure you want to update this MLE?</span>
                 <span id="alert_delete_mle" data-i18n="alert.delete_mle" style="display: none;">Are you sure you want to delete this MLE?</span>
-		<div id="dialog-confirm" title="Delete MLE?" style="display:none;">
-                	<p>Are you sure you want to delete this MLE?</p>
-       		</div>
 	</div>
 	<script type="text/javascript" src="Scripts/EditMle.js"></script>
 </body>

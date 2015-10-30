@@ -18,6 +18,7 @@ function populateHostTrustDetails(responsJSON) {
 	$('#disabledDiv').remove();
 	if (responsJSON.result) {
 		$('#mainTrustDetailsDivHidden').show();
+		$('#refresh_all').show();
 		populateHostTrustDataIntoTable(responsJSON.hostVo);
 		//This statement will create pagination div based on the no_of_pages
 		applyPagination('hostTrustPaginationDiv',responsJSON.noOfPages,fngetHostTrustNextPage,1);
@@ -464,7 +465,7 @@ function getFailureReportSuccess(responseJSON) {
 
             var moduleLog = reportdata[item].moduleLogs;
             str += '<tr style="display: none;">';
-            if (moduleLog.length > 0) {
+            if (moduleLog.length > 0 && reportdata[item].moduleLogs[0].componentName != null) {
                 str += '<td class="' + classValue + '" colspan="4">' +
                         '<div class="subTableDivFailureReport" >' +
                         '<table width="100%" cellpadding="0" cellspacing="0">' +

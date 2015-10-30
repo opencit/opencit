@@ -149,6 +149,11 @@ function SetRequired(element) {
 			$(this).parent().find('.validationErrorDiv').remove();
 		});
 		$('#vcenterStringElement').hide();
+//                $('#openSourceStringElement').find('input').each(function() {
+//                    $(this).parent().append(reqStr);
+//                });
+                $('#opensource_credentials').show();
+                $('#openSourceStringElement').hide();
 		$('#citrixStringElement').hide();
                 $('#MainContent_tbHostPort').val("1443");
 	}else if(isVmware == 1){  // VMWARE
@@ -163,7 +168,8 @@ function SetRequired(element) {
 		//$('#MainContent_tbHostIP').parent().find('.validationErrorDiv').remove();
 		$('#MainContent_tbHostPort').parent().find('.validationErrorDiv').remove();
 		$('#hostPortDisplayDiv').hide();
-      
+                $('#openSourceStringElement').hide();
+                $('#opensource_credentials').hide();
 		$('#citrixStringElement').hide();
 	}else { //CITRIX
                 $('#hostPortDisplayDiv').show();
@@ -178,6 +184,8 @@ function SetRequired(element) {
                     $(this).parent().append(reqStr);
                 });
                 $('#citrixStringElement').show();
+                $('#openSourceStringElement').hide(); 
+                $('#opensource_credentials').hide();
                 $('#MainContent_tbHostPort').val("443");
     }
 }
@@ -197,6 +205,19 @@ function hostDataVoObbject(hostId,hostName,hostIPAddress,hostPort,hostDescriptio
 	this.location =location;
 	this.oemName =oemName;
 	this.vCenterDetails =vCenterDetails;
+}
+
+function fnShowLoginCredentials() {
+    str = "<a href=\"#\" onclick=\"fnShowLoginCredentials()\">";
+    if ((document.getElementById('opensource_credentials').innerHTML).indexOf("Show login credentials") > 0) {
+        $('#openSourceStringElement').show();
+        str = str + "Hide login credentials";        
+    } else {
+        $('#openSourceStringElement').hide();
+        str = str + "Show login credentials";
+    }
+    str = str + "</a>";
+    document.getElementById('opensource_credentials').innerHTML = str;
 }
 
 function chechAddHostValidation() {
@@ -220,6 +241,8 @@ function chechAddHostValidation() {
 	var valid4 = true;
 	if (isVmware == 0) { // TA
 		valid2 = fnTestValidation('MainContent_tbHostPort',normalReg);
+                //valid3 =  fnTestValidation('MainContent_tbVopensourceLoginId',new RegExp());
+                //valid3 =  fnTestValidation('MainContent_tbVopensourcePass',new RegExp());
 		//valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
 		/* Soni_Begin_27/09/2012_for_validating IP address */
 		//valid4 = isValidIPAddress('MainContent_tbHostIP');
@@ -304,7 +327,8 @@ function fnGetNewHostData() {
 	hostVo.hostIPAddress = hostVo.hostName; //$.trim($('#MainContent_tbHostIP').val());
 	if (isVmware == 0) { // TA
 		hostVo.hostPort =$.trim($('#MainContent_tbHostPort').val());
-		hostVo.vCenterDetails = "";
+		hostVo.vCenterDetails = "intel:https://"+$('#MainContent_tbHostName').val()+":"+$('#MainContent_tbHostPort').val()+
+                                             "/;"+$('#MainContent_tbVopensourceLoginId').val()+";"+$('#MainContent_tbVopensourcePass').val();
 	}else if(isVmware == 1) { // VMWARE
 	//	hostVo.hostIPAddress = "";
 		hostVo.hostPort =0;

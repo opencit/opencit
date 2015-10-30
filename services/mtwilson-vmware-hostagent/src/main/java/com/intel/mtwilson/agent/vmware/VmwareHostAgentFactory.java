@@ -9,6 +9,7 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.datatypes.Vendor;
 import java.io.IOException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -21,7 +22,9 @@ import org.slf4j.LoggerFactory;
  */
 public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
+    private String vmwareVendorConnectionString = "";
     protected static VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory()); 
+    
     @Override
     public String getVendorProtocol() { return "vmware"; }
     
@@ -29,6 +32,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public VmwareHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
+            vmwareVendorConnectionString = new ConnectionString(Vendor.VMWARE, vendorConnectionString).getConnectionStringWithPrefix();
             // If the connection string does not include the host address, add it here so that if there is an exception in the client layer the hostname will appear when printing the connection string
             ConnectionString.VmwareConnectionString connStr = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
             if( connStr.getHost() == null ) {
@@ -51,6 +55,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     public VmwareHostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
         try {
+            vmwareVendorConnectionString = vendorConnectionString;
           URL url = new URL(vendorConnectionString);
 //            log.debug("getHostAgent {}", vendorConnectionString);
             VMwareClient client = pool.getClientForConnection(new TlsConnection(url, tlsPolicy));
@@ -66,5 +71,10 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
         catch(Exception e) {
             throw new IOException("Cannot get vmware client for host: "+vmware.getHost().toString()+" at vcenter: "+vmware.getVCenter().toString()+" with username: "+vmware.getUsername()+": "+e.toString(), e);
         }
+    }
+
+    @Override
+    public String getVendorConnectionString() {
+        return vmwareVendorConnectionString;
     }
 }

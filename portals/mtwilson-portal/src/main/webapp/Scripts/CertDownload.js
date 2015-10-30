@@ -80,6 +80,13 @@ function fnforTLSCertificate(){
 	//sendJSONAjaxRequest (false, 'getData/getTLSCertificate.html', null, fnTLSDownloadSuccess, null);
 }
 
+function fnforConfigurationDataBundle() {
+	var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    base_url = base_url.replace("mtwilson-portal","");
+    open_in_new_tab(base_url + "mtwilson-portal/v2proxy/configuration/databundle");    
+}
+
 function fnTLSDownloadSuccess(responseJSON){
 	if (responseJSON.result)
 	{ //alert (responseJSON.SAMLcertificate);

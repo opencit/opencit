@@ -4,13 +4,17 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.attestation.client.jaxrs.Hosts;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,6 +31,9 @@ public class HostTest {
     
     @BeforeClass
     public static void init() throws Exception {
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator.class);
+
         client = new Hosts(My.configuration().getClientProperties());
     }
     
@@ -71,6 +78,16 @@ public class HostTest {
     public void testDelete() {
         client.deleteHost("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
         log.debug("Revoked the asset tag certificate successfully");
+    }
+    
+    @Test
+    public void testHostPreRegistration() {
+        log.debug("About to pre-register host details");
+        List<String> hostNames = new  ArrayList<>();
+        hostNames.add("FQDN");
+        hostNames.add("IPAddress");
+        client.preRegisterHostDetails(hostNames, "apiclient", "apipwd");
+        log.debug("Registered successfully");
     }
     
 }

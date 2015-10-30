@@ -46,6 +46,9 @@ public class CreateEndorsementCA extends LocalSetupTask {
         if( !endorsementP12.exists() ) {
             validation("Endorsement P12 file does not exist");
         }
+        if( !endorsementP12.exists() ) {
+            validation("Privacy CA p12 file does not exist");
+        }
     }
 
     @Override

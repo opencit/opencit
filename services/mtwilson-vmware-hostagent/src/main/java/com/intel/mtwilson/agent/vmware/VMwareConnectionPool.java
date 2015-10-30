@@ -5,6 +5,7 @@
 package com.intel.mtwilson.agent.vmware;
 
 //import java.util.HashMap;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
@@ -139,11 +140,7 @@ public class VMwareConnectionPool {
                     else {
                         for(X509Certificate certificate : chain) {
                             try {
-                                log.debug("Server certificate fingerprint: {} and subject: {}", new Sha1Digest(X509Util.sha1fingerprint(certificate)), certificate.getSubjectX500Principal().getName());
-                            }
-                            catch(NoSuchAlgorithmException e4) {
-                                log.error("Cannot read server certificate: {}", e4.toString(), e4);
-                                throw new VMwareConnectionException(e4);
+                                log.debug("Server certificate SHA-256 fingerprint: {} and subject: {}", Digest.sha256().digest(certificate.getEncoded()).toHex(), certificate.getSubjectX500Principal().getName());
                             }
                             catch(CertificateEncodingException e4) {
                                 log.error("Cannot read server certificate: {}", e4.toString(), e4);

@@ -10,8 +10,8 @@ MTWILSON_HOME=/opt/mtwilson
 # TODO: instead of this top-level directory, classpath should be created by listing /opt/mtwilson/features/*/java/*.jar
 MTWILSON_JAVA=/opt/mtwilson/java
 
-MTWILSON_LOGFILE=/var/log/mtwilson/mtwilson.log
-MTWILSON_PIDFILE=/var/run/mtwilson.pid
+MTWILSON_LOGFILE=/opt/mtwilson/logs/mtwilson.log
+MTWILSON_PIDFILE=/opt/mtwilson/mtwilson.pid
 
 # the keystore location and password are stored in mtwilson.properties which may be encrypted...
 #-Djavax.net.ssl.trustStore=$intel_conf_dir/mtwilson.jks -Djavax.net.ssl.keyStore=$intel_conf_dir/mtwilson.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true
