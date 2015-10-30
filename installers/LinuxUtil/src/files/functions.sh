@@ -1722,13 +1722,16 @@ postgres_test_connection() {
   is_postgres_available=""
 
   #check if postgres is installed and we can connect with provided credencials
-
-  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>/tmp/intel.postgres.err >/dev/null
+  POSTGRESS_LOG="/opt/mtwilson/logs/intel.postgres.err"
+  if [ ! -f $POSTGRESS_LOG ]; then
+     touch $POSTGRESS_LOG
+  fi
+  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>$POSTGRESS_LOG >/dev/null
    if [ $? -eq 0 ]; then
     is_postgres_available="yes"
     return 0
   fi
-  postgres_connection_error=`cat /tmp/intel.postgres.err`
+  postgres_connection_error=`cat $POSTGRESS_LOG`
   
   #echo "postgres_connection_error: $postgres_connection_error"
   #rm -f /tmp/intel.postgres.err
@@ -4553,15 +4556,15 @@ function erase_data() {
     postgres_detect
     postgres_version
     postgres_test_connection_report
-    if [ $? -ne 0 ]; 
-     then exit; 
+    if [ $? -ne 0 ];
+     then exit;
     fi
+    postgres_password=${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}
     for table in ${arr[*]}
     do
-     
-     temp=`(cd /tmp && "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
+     temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
     done
-  fi 
+  fi
 }
 
 key_backup() {
