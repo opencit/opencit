@@ -204,6 +204,7 @@ function fnEditOSInfo(element){
         $(this).html('<input type="text" class="edit_textbox" value="'+val+'" name="'+val+'" />');
     });
     $(element).parent().html('<a href="javascript:;" onclick="fnUpdateOSInfo(this)">Update</a><span> | </span><a href="javascript:;" onclick="fnCancelOSInfo(this)"> Cancel </a>');
+	$(".edit_textbox").focus();
 }
 
 function fnUpdateOSInfo(element) {
@@ -243,12 +244,14 @@ function fnCancelOSInfo(element) {
 }
 
 function fnDeleteOSInfo(element) {
-        $("#dialog-confirm").dialog("open");
+		$("#dialog-confirm").remove();
+		var str = '<div id="dialog-confirm" title="Delete OS?" style="display:none;"><p>Are you sure you want to delete this OS?</p></div>';
+		$('.container').append(str);
         // Define the Dialog and its properties.
         $("#dialog-confirm").dialog({
                 resizable: false,
                 modal: true,
-                height: 250,
+                height: 150,
                 width: 400,
                 buttons: {
                         "Delete": function () {
@@ -437,6 +440,7 @@ function fnEditOEMInfo(element){
         $(this).html('<input type="text" class="edit_textbox" value="'+val+'" name="'+val+'" />');
     });
     $(element).parent().html('<a href="javascript:;" onclick="fnUpdateOEMInfo(this)">Update</a><span> | </span><a href="javascript:;" onclick="fnCancelOSInfo(this)"> Cancel </a>');
+	$(".edit_textbox").focus();
 }
 
 function fnUpdateOEMInfo(element) {
@@ -454,12 +458,14 @@ function fnUpdateOEMInfo(element) {
 }
 
 function fnDeleteOemInfo(element) {
-        $("#dialog-confirm").dialog("open");
+		$("#dialog-confirm").remove();
+		var str = '<div id="dialog-confirm" title="Delete OEM?" style="display:none;"><p>Are you sure you want to delete this OEM?</p></div>';
+		$('.container').append(str);
         // Define the Dialog and its properties.
         $("#dialog-confirm").dialog({
                 resizable: false,
                 modal: true,
-                height: 250,
+                height: 150,
                 width: 400,
                 buttons: {
                         "Delete": function () {
@@ -612,13 +618,14 @@ function updateHostInfo() {
 */
 
 function fnDeleteHostInfo(element) {
-        //$("#dialog-confirm").html($("#alert_delete_host").text());
-	$("#dialog-confirm").dialog("open");
+	$("#dialog-confirm").remove();
+	var str = '<div id="dialog-confirm" title="Delete Host?" style="display:none;"><p>Are you sure you want to delete this host?</p></div>';
+	$('.container').append(str);
         // Define the Dialog and its properties.
         $("#dialog-confirm").dialog({
                 resizable: false,
                 modal: true,
-                height: 250,
+                height: 150,
                 width: 400,
                 buttons: {
                         "Delete": function () {

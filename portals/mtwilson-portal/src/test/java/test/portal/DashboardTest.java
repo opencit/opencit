@@ -50,7 +50,7 @@ public class DashboardTest {
         SimpleKeystore keystore = new SimpleKeystore(admin.getKeystoreResource(), My.configuration().getKeystorePassword());
         for(String alias : keystore.listTrustedSamlCertificates()) {
             X509Certificate cert = keystore.getX509Certificate(alias);
-            log.debug("trusted cert: {}", Sha1Digest.valueOf(X509Util.sha1fingerprint(cert)).toHexString());
+            log.debug("trusted cert: {}", Sha1Digest.valueOf(X509Util.sha256fingerprint(cert)).toHexString());
         }
         X509Certificate currentSamlCert = My.client().getSamlCertificate();
         log.debug("current cert: {}", Sha1Digest.digestOf(currentSamlCert.getEncoded()).toHexString());
