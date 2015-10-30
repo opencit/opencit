@@ -7,30 +7,19 @@ package com.intel.mtwilson.tag.setup.cmd;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.ApiClientFactory;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
 import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.datatypes.ApiClientUpdateRequest;
 import com.intel.mtwilson.ms.business.ApiClientBO;
-import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
-import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
-import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
-import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
-import com.intel.mtwilson.ms.data.ApiClientX509;
-import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.shiro.jdbi.LoginDAO;
-import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.user.management.rest.v2.model.Role;
-import com.intel.mtwilson.user.management.rest.v2.model.Status;
-import com.intel.mtwilson.user.management.rest.v2.model.User;
-import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
-import java.io.IOException;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
+import com.intel.mtwilson.v2.client.MwClientUtil;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.MapConfiguration;
@@ -65,7 +54,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         
         // already configured
         if( mtwilsonUrl == null || mtwilsonUrl.isEmpty() ) {
-            mtwilsonUrl = My.configuration().getMtWilsonURL().toString(); // Global.configuration().getMtWilsonURL();
+            mtwilsonUrl = My.configuration().getAssetTagServerString(); //My.configuration().getMtWilsonURL().toString(); // Global.configuration().getMtWilsonURL();
         }
         if( mtwilsonClientKeystoreUsername == null || mtwilsonClientKeystoreUsername.isEmpty() ) {
             mtwilsonClientKeystoreUsername = My.configuration().getTagKeystoreUsername(); // Global.configuration().getMtWilsonClientKeystoreUsername();
@@ -86,35 +75,31 @@ public class TagCreateMtWilsonClient extends TagCommand {
         }
 
         URL url = new URL(mtwilsonUrl);
-        String[] roles = new String[] { "Attestation", "Report","Whitelist", "AssetTagManagement" };
-                
-        ByteArrayResource keystoreResource = new ByteArrayResource();
-//        SimpleKeystore keystore = new SimpleKeystore(keystoreResource, mtwilsonClientKeystorePassword);
-//        TrustFirstCertificateTlsPolicy policy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
-        ApiClientFactory factory = new ApiClientFactory();
-        SimpleKeystore keystore = factory.createUserInResource(keystoreResource, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword, url, new InsecureTlsPolicy(), roles);
-        keystore.save();
-        
-        // save the keystore to database
-        FileDAO fileDao = TagJdbi.fileDao();
-        File keystoreFile = fileDao.findByName(KEYSTORE_FILE);
-        if( keystoreFile == null ) {
-            fileDao.insert(new UUID(), KEYSTORE_FILE, "application/x-java-keystore", keystoreResource.toByteArray());
-        }
-        else {
-            fileDao.update(keystoreFile.getId(), keystoreFile.getName(), keystoreFile.getContentType(), keystoreResource.toByteArray());
-        }
-        fileDao.close();
-        
-        // display configuration so user can copy it to mtwilson.properties 
-        Properties p = new Properties();
-        p.setProperty("mtwilson.tag.api.url", mtwilsonUrl);
-        p.setProperty("mtwilson.tag.api.username", mtwilsonClientKeystoreUsername);
-        p.setProperty("mtwilson.tag.api.password", mtwilsonClientKeystorePassword);
-        //p.store(System.out, "mtwilson.properties"); // user is responsible for copying this into mtwilson.properties (and it might be encrypted etc)
 
-        RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
         
+        ByteArrayResource keystoreResource = new ByteArrayResource();
+        
+        try (FileDAO fileDao = TagJdbi.fileDao()) {
+            File keystoreFile = fileDao.findByName(KEYSTORE_FILE);
+            if (keystoreFile != null) {
+                System.out.println(String.format("%s keystore and user login certificate already exist", mtwilsonClientKeystoreUsername));
+                return;
+            }
+        }
+
+        //set properties
+        Properties properties = My.configuration().getClientProperties();
+        properties.setProperty("mtwilson.api.url", mtwilsonUrl);
+
+        //create keystore and users
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
+        SimpleKeystore keystore = MwClientUtil.createUserInResourceV2(keystoreResource, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword,
+                url, properties, "tagservice user for asset tag functionality", Locale.ENGLISH, "TLS");
+        keystore.save();
+
+        //approve users
+        RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
+        String[] roles = new String[]{"Attestation", "Report", "Whitelist", "AssetTagManagement"};
         try {
             ApiClientUpdateRequest updateRequest = new ApiClientUpdateRequest();
             updateRequest.enabled = true;
@@ -122,12 +107,17 @@ public class TagCreateMtWilsonClient extends TagCommand {
             updateRequest.roles = roles;
             updateRequest.status = "APPROVED";
             ApiClientBO apiClientBO = new ApiClientBO();
-            apiClientBO.update(updateRequest, null);
-            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));
+            apiClientBO.updateV2(updateRequest);
+            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));   
         } catch (Exception e) {
             System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
+            throw new IllegalStateException(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
         }
         
+        try (FileDAO fileDao = TagJdbi.fileDao()) {
+            fileDao.insert(new UUID(), KEYSTORE_FILE, "application/x-java-keystore", keystoreResource.toByteArray());
+            System.out.println(String.format("Saved %s keystore to database", mtwilsonClientKeystoreUsername));
+        }
     }
     
     /***** UNUSED

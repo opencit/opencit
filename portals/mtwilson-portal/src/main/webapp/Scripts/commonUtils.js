@@ -347,7 +347,10 @@ function fnChangehostType(element,isWhiteListConfigPage) {
     // drop down box and finds the one thats selected and saves
     // its name in type variable
     // choices are VMware, Citrix, KVM|Xen
-    document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Hypervisor (VMM)";
+    if (isWhiteListConfigPage == true) {
+        document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Hypervisor (VMM)";
+    }
+    
     cleanUpAllDivs();
 	$(element).find('option').each(function() {
 		if ($(this).attr('selected') == 'selected') {

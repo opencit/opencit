@@ -3,6 +3,7 @@
  */
 package com.intel.mountwilson.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mountwilson.common.DemoPortalException;
@@ -755,10 +756,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	@Override
 	public List<PcrLogReport> getFailureReportData(String hostName,ApiClient attestationService) throws DemoPortalException {
 		log.info("DemoPortalServicesImpl.getFailureReportData >>");
+                ObjectMapper mapper = new ObjectMapper();
 		
 			AttestationReport report;
 			try {
 				report = attestationService.getAttestationReport(new Hostname(hostName));
+                                log.debug("DemoPortalServicesImpl: {}", mapper.writeValueAsString(report));
+
 				
 			} catch (Exception e) {
 				log.error(e.getMessage());

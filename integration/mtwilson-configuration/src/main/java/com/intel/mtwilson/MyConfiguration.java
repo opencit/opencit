@@ -732,6 +732,10 @@ public class MyConfiguration {
         return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(allowed)));
     }
     
+    public File getTlsCertificateFile() {
+        return new File(conf.getString("mtwilson.tls.certificate.file", getMtWilsonConf() + File.separator + "ssl.crt.pem"));
+    }
+    
     public File getTlsKeystoreFile() {
         return new File(conf.getString("mtwilson.tls.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-tls.jks"));
     }

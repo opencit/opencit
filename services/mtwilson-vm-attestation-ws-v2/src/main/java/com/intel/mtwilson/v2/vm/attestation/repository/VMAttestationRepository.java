@@ -47,6 +47,8 @@ import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.measurement.xml.Measurements;
+import com.intel.mtwilson.model.VmMeasurement;
+import com.intel.mtwilson.model.VmMeasurementLog;
 import com.intel.mtwilson.vmquote.xml.VMQuote;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
@@ -326,10 +328,10 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     }
                                     
                                     // Compare the measurements against the whitelists to see which module failed.
-                                    List<Measurement> actualModules;
-                                    List<Measurement> whitelistModules;
+                                    List<VmMeasurement> actualModules;
+                                    List<VmMeasurement> whitelistModules;
 
-                                    actualModules = new XmlMeasurementLog(PcrIndex.PCR19, measurementXml).getMeasurements();
+                                    actualModules = new VmMeasurementLog(measurementXml).getMeasurements();
 
                                     // creating Measurements Object which will be converted into measurement xml string
                                     Measurements whitelistObj = new Measurements();
@@ -352,7 +354,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     }
                                     String whiteListXml = jaxb.write(whitelistObj);
                                     
-                                    whitelistModules = new XmlMeasurementLog(PcrIndex.PCR19, whiteListXml).getMeasurements();
+                                    whitelistModules = new VmMeasurementLog(whiteListXml).getMeasurements();
                                     VmMeasurementLogEquals vmMeasurementLogEqualsRule = new VmMeasurementLogEquals();                                        
                                     vmRuleResult = vmMeasurementLogEqualsRule.apply2(actualModules, whitelistModules);
 
