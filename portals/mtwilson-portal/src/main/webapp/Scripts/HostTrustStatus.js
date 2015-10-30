@@ -465,7 +465,7 @@ function getFailureReportSuccess(responseJSON) {
 
             var moduleLog = reportdata[item].moduleLogs;
             str += '<tr style="display: none;">';
-            if (moduleLog.length > 0) {
+            if (moduleLog.length > 0 && reportdata[item].moduleLogs[0].componentName != null) {
                 str += '<td class="' + classValue + '" colspan="4">' +
                         '<div class="subTableDivFailureReport" >' +
                         '<table width="100%" cellpadding="0" cellspacing="0">' +
