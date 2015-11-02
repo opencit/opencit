@@ -71,7 +71,8 @@
         "asset_tag": "Asset Tag Reference Implementation",
         "tag_management":"Asset Tag Management",
         "tag_selection_management":"Tag Selection",
-        "tag_certificate_management":"Manage Certificates"
+        "tag_certificate_management":"Manage Certificates",
+        "authentication_status":"Authentication Status"
     },
     "header": {
         "about": "",
@@ -115,7 +116,8 @@
         "certificate_creation":"Create New Certificate",
         "certificate_browse":"Browse Certificates",
         "servers_to_provision":"Step 1: Select the servers to provision the tags",
-        "choose_tag_selection":"Step 2: Choose the Tag selection"
+        "choose_tag_selection":"Step 2: Choose the Tag selection",
+        "authentication_header":"View Authentication Status"
     },
     "link": {
         "import": "Import",
@@ -174,7 +176,8 @@
         "encrypted":"Encrypted",
         "deploy":"Deploy",
         "download":"Download",
-        "revoke":"Revoke"
+        "revoke":"Revoke",
+        "authentication":"Authentication"
     },
     "button": {
         "update_trust_status": "Update Trust Status",
