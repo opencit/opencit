@@ -101,17 +101,15 @@ if [ "$(whoami)" == "root" ]; then
     useradd --comment "Mt Wilson Trust Agent" --home $TRUSTAGENT_HOME --system --shell /bin/false $TRUSTAGENT_USERNAME
     usermod --lock $TRUSTAGENT_USERNAME
     # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $TRUSTAGENT_USERNAME"
-
-    # this section adds tagent sudoers file so that user can execute txt-stat command
-    TRUSTAGENT_USERNAME="tagent"
-    txtStat=$(which txt-stat)
-    if [ -z "$txtStat" ]; then
-      echo_failure "txt-stat binary does not exist"
-      exit 1
-    fi
-    echo -e "Cmnd_Alias PACKAGE_MANAGER = ${txtStat}\nDefaults:${TRUSTAGENT_USERNAME} "'!'"requiretty\n${TRUSTAGENT_USERNAME} ALL=(root) NOPASSWD: PACKAGE_MANAGER" > "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
-    chmod 440 "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
   fi
+  # this section adds tagent sudoers file so that user can execute txt-stat command
+  txtStat=$(which txt-stat)
+  if [ -z "$txtStat" ]; then
+    echo_failure "txt-stat binary does not exist"
+    exit 1
+  fi
+  echo -e "Cmnd_Alias PACKAGE_MANAGER = ${txtStat}\nDefaults:${TRUSTAGENT_USERNAME} "'!'"requiretty\n${TRUSTAGENT_USERNAME} ALL=(root) NOPASSWD: PACKAGE_MANAGER" > "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
+  chmod 440 "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
 else
   # already running as trustagent user
   TRUSTAGENT_USERNAME=$(whoami)
