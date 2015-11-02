@@ -216,6 +216,7 @@ function showDialogUpFlatFileHelp() {
     fnOpenDialog(str, "upload_flat_file_help", 500, 275, false);
 }
 
+/*
 function fnRetrieveDatacenters() {
     cleanUpAllDivs();
     $('#MainContent_ddlDatacenterName').empty();
@@ -258,7 +259,7 @@ function fnRetrieveDatacentersSuccess(responseJSON) {
     } else {
         $('#successMessage').html('<span class="errorMessage">Server Error : ' + responseJSON.message + '</span>');
     }
-}
+}*/
 
 function fnRetrieveClusters() {
     cleanUpAllDivs();
@@ -277,7 +278,12 @@ function fnRetrieveClusters() {
             valid = false;
         }
         if (valid) {
+            var e = document.getElementById("tls_policy_select_vmware");
+            var tlsPolicyId = e.options[e.selectedIndex].value;
+            var tlsPolicyText = e.options[e.selectedIndex].text;
             var data = "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            data = data + "&tlsPolicyChoice=" + tlsPolicyId + ";" + tlsPolicyText;
+            alert(data);
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
         }
@@ -315,7 +321,14 @@ function fnRetriveHostFromCluster() {
             valid = false;
         }
         if (valid) {
+            var e = document.getElementById("tls_policy_select_vmware");
+            var tlsPolicyId = e.options[e.selectedIndex].value;
+            var tlsPolicyText = e.options[e.selectedIndex].text;            
+
             var data = "clusterName=" + $('#MainContent_ddlClusterName option:selected').text() + "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            data = data + "&tlsPolicyChoice=" + tlsPolicyId + ";" + tlsPolicyText;
+            alert(data);
+            
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
         }
