@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
+import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.shiro.file.LoginDAO;
 import com.intel.mtwilson.shiro.file.cmd.Password;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
@@ -29,7 +30,7 @@ import org.apache.commons.io.FileUtils;
  * 
  * @author jbuhacoff
  */
-public class CreateAdminUser extends LocalSetupTask {
+public class CreateAdminUser extends AbstractSetupTask {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginRegister.class);    
     private File userFile;
@@ -38,13 +39,20 @@ public class CreateAdminUser extends LocalSetupTask {
     private String adminPassword;
     
     private String getUsername() {
+        if (adminUsername != null)
+            return adminUsername;
+        
         if( System.getenv("TRUSTAGENT_ADMIN_USERNAME") != null && !System.getenv("TRUSTAGENT_ADMIN_USERNAME").isEmpty()) {
             return System.getenv("TRUSTAGENT_ADMIN_USERNAME");
         }
         log.info("CreateAdminUser: Since the user name is not specified creating a default user with name '{}'", "admin");
         return "admin";
     }
+    
     private String getPassword() {
+        if (adminPassword != null)
+            return adminPassword;
+        
         if( System.getenv("TRUSTAGENT_ADMIN_PASSWORD") != null && !System.getenv("TRUSTAGENT_ADMIN_PASSWORD").isEmpty() ) {
             return System.getenv("TRUSTAGENT_ADMIN_PASSWORD");
         }
@@ -55,11 +63,20 @@ public class CreateAdminUser extends LocalSetupTask {
     
     @Override
     protected void configure() throws Exception {
+        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         adminUsername = getUsername();
         adminPassword = getPassword();
-        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         userFile = trustagentConfiguration.getTrustagentUserFile();
         permissionFile = trustagentConfiguration.getTrustagentPermissionsFile();
+
+        // Delete the user if it already exists so that the password gets updated.
+        LoginDAO loginDAO = new LoginDAO(userFile, permissionFile);
+        UserPassword userPassword = loginDAO.findUserByName(adminUsername);
+        if( userPassword != null ) {
+            // For password updates, we will just delete the user and recreate it with new password.
+            loginDAO.deleteUserByName(adminUsername);
+        }
+        
     }
 
     @Override
@@ -70,10 +87,11 @@ public class CreateAdminUser extends LocalSetupTask {
         if( userPassword == null ) {
             validation("User does not exist: %s", adminUsername);
         }
+        
         List<UserPermission> userPermissionList = loginDAO.getPermissions(adminUsername);
         if( userPermissionList == null ||  userPermissionList.isEmpty() ) {
             validation("User does not have permissions assigned: %s", adminUsername);
-        }
+        } 
     }
 
     @Override
@@ -85,7 +103,7 @@ public class CreateAdminUser extends LocalSetupTask {
 
         // We need to store the user name here so that we can use for validation. Password will not be stored in the property file
         log.debug("Setting username {} in the configuration file.", adminUsername);
-        getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_LOGIN_USERNAME, adminUsername);
+        getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_ADMIN_USERNAME, adminUsername);
         
         // save the adminPassword to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
         File privateDir = new File(Folders.configuration() + File.separator + "private");
