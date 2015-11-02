@@ -55,7 +55,7 @@ public class TrustagentConfiguration {
     public static final String SIGNING_KEY_NAME = "sign";
     public static final String SIGNING_KEY_SECRET = "signing.key.secret";
     public static final String SIGNING_KEY_INDEX = "signing.key.index";
-    public static final String TRUSTAGENT_LOGIN_USERNAME = "trustagent.login.username";
+    public static final String TRUSTAGENT_ADMIN_USERNAME = "trustagent.admin.username";
                
     private Configuration conf;
     
@@ -350,7 +350,7 @@ public class TrustagentConfiguration {
         return new File(Folders.configuration() + File.separator + "signingkey.blob");        
     }
 
-    public String getTrustAgentLoginUserName() {
-        return conf.get(TRUSTAGENT_LOGIN_USERNAME); // intentionally no default - this must be generated during setup
+    public String getTrustAgentAdminUserName() {
+        return conf.get(TRUSTAGENT_ADMIN_USERNAME); // intentionally no default - this must be generated during setup
     }    
 }
