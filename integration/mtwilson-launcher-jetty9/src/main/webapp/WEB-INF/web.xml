@@ -183,6 +183,10 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
             <param-name>jersey.config.server.languageMappings</param-name>
             <param-value>en:en, fr:fr</param-value>
         </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
+        </init-param>
         <!--        
 These are the two providers referenced below from the org.glassfish entries:        
 org.glassfish.jersey.client.filter.HttpDigestAuthFilter

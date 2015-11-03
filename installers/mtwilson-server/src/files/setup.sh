@@ -986,6 +986,7 @@ elif using_tomcat; then
   else
     echo_warning "Relying on an existing Tomcat installation"
   fi
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${MTWILSON_HOME}
  
   tomcat_detect
 
