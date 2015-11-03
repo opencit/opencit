@@ -261,6 +261,29 @@ function fnRetrieveDatacentersSuccess(responseJSON) {
     }
 }*/
 
+function fnGetChosenTlsPolicyDetails() {
+
+    var tls = document.getElementById("tls_policy_select_vmware");
+    var tlsPolicyId = tls.options[tls.selectedIndex].value;
+    var tlsPolicyValue = tls.options[tls.selectedIndex].text;
+    
+    // This is needed when the user has not explicitly selected anything by default.
+    if (tlsPolicyId == null || tlsPolicyId == "")
+        tlsPolicyId = tlsPolicyValue;
+    
+    if (tlsPolicyId == "private-certificate")
+        tlsPolicyValue = document.getElementById("tls_policy_data_certificate").value;
+    else if (tlsPolicyId == "private-certificate-digest")
+        tlsPolicyValue = document.getElementById("tls_policy_data_certificate_digest").value;
+    else if (tlsPolicyId == "private-public-key")
+        tlsPolicyValue = document.getElementById("tls_policy_data_public_key").value;
+    else if (tlsPolicyId == "private-public-key-digest")
+        tlsPolicyValue = document.getElementById("tls_policy_data_public_key_digest").value;
+
+    var tlsOption = "&tlsPolicyId=" + tlsPolicyId + ";" + tlsPolicyValue;    
+    return tlsOption;
+}
+
 function fnRetrieveClusters() {
     cleanUpAllDivs();
     $('#MainContent_ddlClusterName').empty();
@@ -278,12 +301,8 @@ function fnRetrieveClusters() {
             valid = false;
         }
         if (valid) {
-            var e = document.getElementById("tls_policy_select_vmware");
-            var tlsPolicyId = e.options[e.selectedIndex].value;
-            var tlsPolicyText = e.options[e.selectedIndex].text;
             var data = "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
-            data = data + "&tlsPolicyChoice=" + tlsPolicyId + ";" + tlsPolicyText;
-            alert(data);
+            data = data + fnGetChosenTlsPolicyDetails();
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
         }
@@ -321,13 +340,8 @@ function fnRetriveHostFromCluster() {
             valid = false;
         }
         if (valid) {
-            var e = document.getElementById("tls_policy_select_vmware");
-            var tlsPolicyId = e.options[e.selectedIndex].value;
-            var tlsPolicyText = e.options[e.selectedIndex].text;            
-
             var data = "clusterName=" + $('#MainContent_ddlClusterName option:selected').text() + "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
-            data = data + "&tlsPolicyChoice=" + tlsPolicyId + ";" + tlsPolicyText;
-            alert(data);
+            data = data + fnGetChosenTlsPolicyDetails();
             
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
