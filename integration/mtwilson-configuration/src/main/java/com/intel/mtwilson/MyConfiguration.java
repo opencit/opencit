@@ -733,7 +733,8 @@ public class MyConfiguration {
     }
     
     public File getTlsCertificateFile() {
-        return new File(conf.getString("mtwilson.tls.certificate.file", getMtWilsonConf() + File.separator + "ssl.crt.pem"));
+        return findConfigurationFile(conf.getString("mtwilson.tls.certificate.file", "ssl.crt.pem"));
+        //return new File(conf.getString("mtwilson.tls.certificate.file", getMtWilsonConf() + File.separator + "ssl.crt.pem"));
     }
     
     public File getTlsKeystoreFile() {
