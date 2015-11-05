@@ -32,9 +32,8 @@ public class MwHostPreRegistrationDetailsJpaController implements Serializable {
     }
 
     public void create(MwHostPreRegistrationDetails mwHostPreRegistrationDetails) throws PreexistingEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwHostPreRegistrationDetails);
             em.getTransaction().commit();
@@ -44,16 +43,13 @@ public class MwHostPreRegistrationDetailsJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void edit(MwHostPreRegistrationDetails mwHostPreRegistrationDetails) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             mwHostPreRegistrationDetails = em.merge(mwHostPreRegistrationDetails);
             em.getTransaction().commit();
@@ -67,16 +63,13 @@ public class MwHostPreRegistrationDetailsJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(String id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             MwHostPreRegistrationDetails mwHostPreRegistrationDetails;
             try {
@@ -88,9 +81,7 @@ public class MwHostPreRegistrationDetailsJpaController implements Serializable {
             em.remove(mwHostPreRegistrationDetails);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
