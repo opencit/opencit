@@ -9,7 +9,6 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import com.intel.mtwilson.shiro.setup.HostFilterCheck;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.MediaType;
 
@@ -24,14 +23,12 @@ import javax.ws.rs.core.MediaType;
 public class AuthenticationApi{
     
     @GET
-    @Consumes({MediaType.TEXT_PLAIN})
-    @Produces({MediaType.TEXT_PLAIN})
+    @Produces({MediaType.APPLICATION_JSON})
     
     public boolean Authentication_status() throws Exception{
             
-    HostFilterCheck auth_status = new HostFilterCheck();
-            return auth_status.authentication_check();
-    
-    
+    HostFilterCheck authentication_status = new HostFilterCheck();
+    return authentication_status.authentication_check();
     }
+    
 }
