@@ -17,6 +17,9 @@
         <div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.authentication_status">Authentication Status</span></div>
 	<div id="nameOfPage" class="NameHeader" data-i18n="header.authentication_header">View Authentication Status</div>		
 	</div>
+        <div id="mainLoadingDiv" class="mainContainer">                
+            	<div  id ="authenticationstatus"><a href="#" onclick="getAuthenticationStatus()"><span data-i18n="label.get_authentication_status"></span></a></div>
+        </div>
 
 <script type="text/javascript" src="Scripts/Authentication.js"></script>
 </body>

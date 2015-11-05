@@ -25,7 +25,7 @@ public class AuthenticationApi{
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     
-    public boolean Authentication_status() throws Exception{
+    public String Authentication_status() throws Exception{
             
     HostFilterCheck authentication_status = new HostFilterCheck();
     return authentication_status.authentication_check();

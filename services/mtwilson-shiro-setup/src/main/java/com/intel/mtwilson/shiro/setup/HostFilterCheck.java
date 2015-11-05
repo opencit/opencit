@@ -24,7 +24,7 @@ public class HostFilterCheck extends LocalSetupTask {
 
     private File ShiroIniFile;
 
-    public boolean authentication_check() {
+    public String authentication_check() {
 
         //check if the shiro.ini file exists
         //if it does not exist, display an appropriate error message
@@ -40,25 +40,25 @@ public class HostFilterCheck extends LocalSetupTask {
             ShiroFile.load(FileUtils.readFileToString(ShiroIniFile));
         } catch (IOException ex) {
             log.debug("Shiro.ini file not found");
-            return false;
+            return "Whitelisting feature is Disabled";
         }
 
         try {
             String hostfilterCheck = ShiroFile.getSectionProperty("main", "hostAllow");
             log.debug("String value of hostfilter : " + hostfilterCheck);
             if (hostfilterCheck == null) {
-                return false;
+                return "Whitelisting feature is Disabled";
             }
 
             String hostfilterValue = "com.intel.mtwilson.shiro.authc.host.HostAuthenticationFilter";
 
             if (hostfilterValue.equals(hostfilterCheck)) {
-                return true;
+                return "Whitelisting feature is enabled";
             }
 
-            return false;
+            return "Whitelisting feature is Disabled";
         }catch (Exception ex) {
-            return false;
+            return "Whitelisting feature is Disabled";
         }
     }
 
