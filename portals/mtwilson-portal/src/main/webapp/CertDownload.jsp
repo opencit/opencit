@@ -19,7 +19,7 @@ response.setHeader("Content-Disposition",
 		<div id="nameOfPage" class="NameHeader" data-i18n="header.cert_download">Certificate Download</div>
 		<div id="mainLoadingDiv" class="mainContainer">                
               
-		<div  id ="fdownloadRCA"><a href="#" onclick="fnforRootCACertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download Root Ca Certificate</a></div>
+		<div  id ="fdownloadRCA"><a href="#" onclick="fnforRootCACertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download Root CA Certificate</a></div>
 	        <div  id ="fdownload"><a href="#" onclick="fnforPrivacyCACertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download the Privacy CA Certificates</a></div>
             <!-- <div  id ="fdownload"class="registerUser">Download all trusted Privacy CA Certificates
                         <input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div> -->

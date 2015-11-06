@@ -216,6 +216,7 @@ function showDialogUpFlatFileHelp() {
     fnOpenDialog(str, "upload_flat_file_help", 500, 275, false);
 }
 
+/*
 function fnRetrieveDatacenters() {
     cleanUpAllDivs();
     $('#MainContent_ddlDatacenterName').empty();
@@ -258,6 +259,29 @@ function fnRetrieveDatacentersSuccess(responseJSON) {
     } else {
         $('#successMessage').html('<span class="errorMessage">Server Error : ' + responseJSON.message + '</span>');
     }
+}*/
+
+function fnGetChosenTlsPolicyDetails() {
+
+    var tls = document.getElementById("tls_policy_select_vmware");
+    var tlsPolicyId = tls.options[tls.selectedIndex].value;
+    var tlsPolicyValue = tls.options[tls.selectedIndex].text;
+    
+    // This is needed when the user has not explicitly selected anything by default.
+    if (tlsPolicyId == null || tlsPolicyId == "")
+        tlsPolicyId = tlsPolicyValue;
+    
+    if (tlsPolicyId == "private-certificate")
+        tlsPolicyValue = document.getElementById("tls_policy_data_certificate").value;
+    else if (tlsPolicyId == "private-certificate-digest")
+        tlsPolicyValue = document.getElementById("tls_policy_data_certificate_digest").value;
+    else if (tlsPolicyId == "private-public-key")
+        tlsPolicyValue = document.getElementById("tls_policy_data_public_key").value;
+    else if (tlsPolicyId == "private-public-key-digest")
+        tlsPolicyValue = document.getElementById("tls_policy_data_public_key_digest").value;
+
+    var tlsOption = "&tlsPolicyId=" + tlsPolicyId + ";" + tlsPolicyValue;    
+    return tlsOption;
 }
 
 function fnRetrieveClusters() {
@@ -278,6 +302,7 @@ function fnRetrieveClusters() {
         }
         if (valid) {
             var data = "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            data = data + fnGetChosenTlsPolicyDetails();
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
         }
@@ -316,6 +341,8 @@ function fnRetriveHostFromCluster() {
         }
         if (valid) {
             var data = "clusterName=" + $('#MainContent_ddlClusterName option:selected').text() + "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            data = data + fnGetChosenTlsPolicyDetails();
+            
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
         }
