@@ -72,12 +72,27 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.CertificateDigestTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyDigestTlsPolicy;
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
+import com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.CertificateTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstPublicKeyTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.factory.impl.TxtHostRecordTlsPolicyFactory;
 //import com.intel.mtwilson.tag.model.Selection;
 //import com.intel.mtwilson.tag.model.SelectionCollection;
 //import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -114,6 +129,17 @@ public class ManagementConsoleDataController extends MultiActionController {
     private VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory());
     private final int DEFAULT_ROWS_PER_PAGE = 10;
 
+    public ManagementConsoleDataController() {
+        Extensions.register(TlsPolicyFactory.class, TxtHostRecordTlsPolicyFactory.class);
+        Extensions.register(TlsPolicyCreator.class, PublicKeyDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, PublicKeyTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, CertificateDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, CertificateTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTrustFirstPublicKeyTlsPolicyCreator.class);
+    }
+
+    
     /**
      * @param HttpServletRequest
      * @param HttpServletResponse
@@ -421,7 +447,7 @@ public class ManagementConsoleDataController extends MultiActionController {
      * @param res
      * @return
      */
-    public ModelAndView retrieveDatacenters(HttpServletRequest req, HttpServletResponse res) {
+   /* public ModelAndView retrieveDatacenters(HttpServletRequest req, HttpServletResponse res) {
         //log.info("ManagementConsoleDataController.retrieveDatacenters >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String vCenterConnection;
@@ -461,7 +487,96 @@ public class ManagementConsoleDataController extends MultiActionController {
         responseView.addObject("result", true);
         //log.info("ManagementConsoleDataController.retrieveDatacenters <<<");
         return responseView;
-    }
+    }*/
+
+private TlsPolicy createTlsPolicyForVcenter(String vCenterConnection, String tlsPolicyDetails) {
+    TlsPolicy vCenterTlsPolicy = null;
+    
+    try {
+            String tlsPolicyId = tlsPolicyDetails.split(";")[0];
+            String tlsPolicyValue = tlsPolicyDetails.split(";")[1];
+            
+            log.debug("TlsPolicy choosen {} - {}", tlsPolicyId, tlsPolicyValue);
+            
+            if (tlsPolicyId.equalsIgnoreCase("private-certificate")) {
+                
+                log.debug("private-certificate policy is choosen");
+                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+                tlsPolicyDescriptor.setPolicyType("certificate");
+                tlsPolicyDescriptor.setData(new ArrayList<String>());
+                tlsPolicyDescriptor.getData().add(tlsPolicyValue);
+                CertificateTlsPolicyCreator creator = new CertificateTlsPolicyCreator();
+                vCenterTlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+
+            } else if (tlsPolicyId.equalsIgnoreCase("private-certificate-digest")) {
+
+                log.debug("private-certificate-digest policy is choosen");
+                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+                tlsPolicyDescriptor.setPolicyType("certificate-digest");
+                tlsPolicyDescriptor.setData(new ArrayList<String>());
+                tlsPolicyDescriptor.getData().add(tlsPolicyValue);
+                CertificateDigestTlsPolicyCreator creator = new CertificateDigestTlsPolicyCreator();
+                vCenterTlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+                
+            } else if (tlsPolicyId.equalsIgnoreCase("private-public-key")) {
+
+                log.debug("private-public-key policy is choosen");
+                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+                tlsPolicyDescriptor.setPolicyType("public-key");
+                tlsPolicyDescriptor.setData(new ArrayList<String>());
+                tlsPolicyDescriptor.getData().add(tlsPolicyValue);
+                PublicKeyTlsPolicyCreator creator = new PublicKeyTlsPolicyCreator();
+                vCenterTlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+                
+            } else if (tlsPolicyId.equalsIgnoreCase("private-public-key-digest")){
+                
+                log.debug("private-public-key-digest policy is choosen");
+                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+                tlsPolicyDescriptor.setPolicyType("public-key-digest");
+                tlsPolicyDescriptor.setData(new ArrayList<String>());
+                tlsPolicyDescriptor.getData().add(tlsPolicyValue);
+                PublicKeyDigestTlsPolicyCreator creator = new PublicKeyDigestTlsPolicyCreator();
+                vCenterTlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+                                
+            } else if (tlsPolicyId.equalsIgnoreCase("INSECURE")){
+                
+                log.debug("INSECURE policy is choosen");
+                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+                tlsPolicyDescriptor.setPolicyType("INSECURE");
+                InsecureTlsPolicyCreator creator = new InsecureTlsPolicyCreator();
+                vCenterTlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+
+            } else if (tlsPolicyId.equalsIgnoreCase("TRUST_FIRST_CERTIFICATE")){
+                
+                log.debug("TRUST_FIRST_CERTIFICATE policy is choosen");
+                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+                tlsPolicyDescriptor.setPolicyType("TRUST_FIRST_CERTIFICATE");
+                InsecureTrustFirstPublicKeyTlsPolicyCreator creator = new InsecureTrustFirstPublicKeyTlsPolicyCreator();
+                vCenterTlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+
+            } else {
+            
+                log.debug("Custom created policy '{}' is choosen.", tlsPolicyValue);
+                
+                TlsPolicyChoice vCenterTlsPolicyChoice = new TlsPolicyChoice();
+                vCenterTlsPolicyChoice.setTlsPolicyId(tlsPolicyId);
+
+                TxtHostRecord host = new TxtHostRecord();
+                host.HostName = "192.168.1.1";
+                host.AddOn_Connection_String = vCenterConnection;
+                host.tlsPolicyChoice = vCenterTlsPolicyChoice;
+
+                TlsPolicyFactory factory = TlsPolicyFactory.createFactory(host);
+                vCenterTlsPolicy = factory.getTlsPolicy();
+            }
+            
+            return vCenterTlsPolicy;
+                
+    } catch (Exception ex) {   
+        log.error("Error during processing of the tlsPolicyChoosen by the user. {}", ex.getMessage());
+        throw ex;
+    }    
+}   
 
     /**
      * This Method is used to retrieve all cluster names within the vSphere
@@ -472,13 +587,16 @@ public class ManagementConsoleDataController extends MultiActionController {
      * @return
      */
     public ModelAndView retrieveAllClusters(HttpServletRequest req, HttpServletResponse res) {
-        //log.info("ManagementConsoleDataController.retrieveAllClusters >>");
+        log.info("ManagementConsoleDataController.retrieveAllClusters >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String vCenterConnection;
         String clusterCombined;
-
+        String tlsPolicyDetails;
+        
         try {
             vCenterConnection = req.getParameter("vCentertConnection");
+            tlsPolicyDetails = req.getParameter("tlsPolicyId");
+            
         } catch (Exception e) {
             //log.warn("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
             responseView.addObject("message", "Input Parameters are NUll.");
@@ -487,9 +605,16 @@ public class ManagementConsoleDataController extends MultiActionController {
         }
 
         try {
-            log.debug("Acquiring vmware client...");
+            log.debug("retrieveAllClusters: Acquiring vmware client...");
             URL url = new URL(vCenterConnection);
-            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
+                        
+            TlsPolicy tlsPolicy = createTlsPolicyForVcenter(vCenterConnection, tlsPolicyDetails);
+            if (tlsPolicy == null) {
+                log.error("Error creating TLS policy");
+                throw new Exception("Error creating TLS Policy");
+            } 
+            
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, tlsPolicy)); 
             List<String> clusters = services.getClusterNamesWithDC(client);
             Collections.sort(clusters);
             StringBuilder clusterBuilder = new StringBuilder();
@@ -525,7 +650,8 @@ public class ManagementConsoleDataController extends MultiActionController {
         ModelAndView responseView = new ModelAndView(new JSONView());
         String clusterName;
         String vCenterConnection;
-
+        String tlsPolicyDetails;
+        
         try {
             clusterName = req.getParameter("clusterName");
             if (clusterName == null) {
@@ -534,6 +660,8 @@ public class ManagementConsoleDataController extends MultiActionController {
             clusterName = clusterName.substring(clusterName.indexOf("] ") + 2);
             
             vCenterConnection = req.getParameter("vCentertConnection");
+            tlsPolicyDetails = req.getParameter("tlsPolicyId");
+            
         } catch (Exception e) {
             //log.warn("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
             responseView.addObject("message", "Input parameters are null.");
@@ -544,7 +672,14 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             log.debug("Acquiring vmware client...");
             URL url = new URL(vCenterConnection);
-            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
+
+            TlsPolicy tlsPolicy = createTlsPolicyForVcenter(vCenterConnection, tlsPolicyDetails);
+            if (tlsPolicy == null) {
+                log.error("Error creating TLS policy");
+                throw new Exception("Error creating TLS Policy");
+            } 
+            
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, tlsPolicy)); 
             List<HostDetails> hosts = services.getHostNamesForCluster(client, clusterName);
 
             for (HostDetails hostDetail : hosts) {

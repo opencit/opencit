@@ -88,6 +88,7 @@
     <module>mtwilson-user-management-ws-v2</module>
     <module>mtwilson-util</module>
     <module>mtwilson-version-ws-v2</module>
+    <module>mtwilson-vm-attestation-client-jaxrs2</module>
     <module>mtwilson-vm-attestation-ws-v2</module>
     <module>mtwilson-vmware-hostagent</module>
     <module>mtwilson-webservice-util</module>

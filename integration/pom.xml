@@ -30,7 +30,6 @@
         <module>mtwilson-manifest-xml</module>
         <module>mtwilson-measurement-xml</module>
         <module>mtwilson-my</module>
-        <module>mtwilson-password-vault</module>
         <module>mtwilson-tag-selection-json</module>
         <module>mtwilson-tag-selection-xml</module>
         <module>mtwilson-test</module>
