@@ -71,7 +71,8 @@
         "asset_tag": "Asset Tag Reference Implementation",
         "tag_management":"Asset Tag Management",
         "tag_selection_management":"Tag Selection",
-        "tag_certificate_management":"Manage Certificates"
+        "tag_certificate_management":"Manage Certificates",
+        "authentication_status":"Authentication Status"
     },
     "header": {
         "about": "",
@@ -115,7 +116,8 @@
         "certificate_creation":"Create New Certificate",
         "certificate_browse":"Browse Certificates",
         "servers_to_provision":"Step 1: Select the servers to provision the tags",
-        "choose_tag_selection":"Step 2: Choose the Tag selection"
+        "choose_tag_selection":"Step 2: Choose the Tag selection",
+        "authentication_header":"View Authentication Status"
     },
     "link": {
         "import": "Import",
@@ -174,7 +176,8 @@
         "encrypted":"Encrypted",
         "deploy":"Deploy",
         "download":"Download",
-        "revoke":"Revoke"
+        "revoke":"Revoke",
+        "authentication":"Authentication"
     },
     "button": {
         "update_trust_status": "Update Trust Status",
@@ -403,7 +406,8 @@
         "upload_xml":"Upload XML",
         "no_pending_api_requests":"No requests are currently pending to be reviewed.",
         "mtw_1x_roles":"Mt Wilson 1.x roles for backward compatibility:",
-        "mtw_2x_roles":"Mt Wilson 2.x roles:"
+        "mtw_2x_roles":"Mt Wilson 2.x roles:",
+        "get_authentication_status":"Get the authentication Status for this IP address"
     },
     "placeholder": {
         "selection_name":"Name of this selection",
