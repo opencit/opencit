@@ -1075,7 +1075,7 @@ call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-c
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_TAG_URL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
 if [ -n "$MTWILSON_TAG_ADMIN_PASSWORD" ]; then
   export MTWILSON_TAG_ADMIN_PASSWORD
-  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificates:* tpm_passwords:retrieve hosts:search host_attestations:*
+  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificate_requests:* tag_certificates:* tag_kv_attributes:* tag_selection_kv_attributes:* tag_selections:* tpm_passwords:retrieve hosts:search host_attestations:*
 else
   echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASSWORD is not set"
 fi
