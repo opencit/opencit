@@ -490,7 +490,7 @@ public class ManagementConsoleDataController extends MultiActionController {
     }*/
 
 private TlsPolicy createTlsPolicyForVcenter(String vCenterConnection, String tlsPolicyDetails) {
-    TlsPolicy vCenterTlsPolicy = null;
+    TlsPolicy vCenterTlsPolicy;
     
     try {
             String tlsPolicyId = tlsPolicyDetails.split(";")[0];
@@ -597,6 +597,11 @@ private TlsPolicy createTlsPolicyForVcenter(String vCenterConnection, String tls
             vCenterConnection = req.getParameter("vCentertConnection");
             tlsPolicyDetails = req.getParameter("tlsPolicyId");
             
+            if (vCenterConnection == null || tlsPolicyDetails == null){
+                log.error("Either the vCenterConnection string or the tlsPolicy details are not specified");
+                throw new IllegalArgumentException("Invalid input specified.");
+            }
+                
         } catch (Exception e) {
             //log.warn("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
             responseView.addObject("message", "Input Parameters are NUll.");
@@ -654,13 +659,13 @@ private TlsPolicy createTlsPolicyForVcenter(String vCenterConnection, String tls
         
         try {
             clusterName = req.getParameter("clusterName");
-            if (clusterName == null) {
-                throw new IllegalArgumentException("Cluster name cannot be null.");
+            vCenterConnection = req.getParameter("vCentertConnection");
+            tlsPolicyDetails = req.getParameter("tlsPolicyId");
+            if (clusterName == null || vCenterConnection == null || tlsPolicyDetails == null) {
+                throw new IllegalArgumentException("Invalid input specified.");
             }
             clusterName = clusterName.substring(clusterName.indexOf("] ") + 2);
             
-            vCenterConnection = req.getParameter("vCentertConnection");
-            tlsPolicyDetails = req.getParameter("tlsPolicyId");
             
         } catch (Exception e) {
             //log.warn("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
