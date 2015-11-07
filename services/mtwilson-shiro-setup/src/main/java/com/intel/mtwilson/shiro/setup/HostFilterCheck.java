@@ -9,8 +9,6 @@ import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.shiro.config.Ini;
 
@@ -40,25 +38,25 @@ public class HostFilterCheck extends LocalSetupTask {
             ShiroFile.load(FileUtils.readFileToString(ShiroIniFile));
         } catch (IOException ex) {
             log.debug("Shiro.ini file not found");
-            return "Whitelisting feature is Disabled";
+            return "Authentication Bipass Disabled";
         }
 
         try {
             String hostfilterCheck = ShiroFile.getSectionProperty("main", "hostAllow");
             log.debug("String value of hostfilter : " + hostfilterCheck);
             if (hostfilterCheck == null) {
-                return "Whitelisting feature is Disabled";
+                return "Authentication Bipass Disabled";
             }
 
             String hostfilterValue = "com.intel.mtwilson.shiro.authc.host.HostAuthenticationFilter";
 
             if (hostfilterValue.equals(hostfilterCheck)) {
-                return "Whitelisting feature is enabled";
+                return "Authentication Bipass Enabled";
             }
 
-            return "Whitelisting feature is Disabled";
+            return "Authentication Bipass Disabled";
         }catch (Exception ex) {
-            return "Whitelisting feature is Disabled";
+            return "Authentication Bipass Disabled";
         }
     }
 

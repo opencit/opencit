@@ -407,7 +407,7 @@
         "no_pending_api_requests":"No requests are currently pending to be reviewed.",
         "mtw_1x_roles":"Mt Wilson 1.x roles for backward compatibility:",
         "mtw_2x_roles":"Mt Wilson 2.x roles:",
-        "get_authentication_status":"Get the authentication Status for this IP address"
+        "get_authentication_status":"Authentication bipass Status"
     },
     "placeholder": {
         "selection_name":"Name of this selection",
