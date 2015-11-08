@@ -193,6 +193,7 @@
                                 <li><a href="javascript:getViewExpiringPage();" data-i18n="link.extend_user">Extend User</a></li> <!-- was "Extend Request" -->
                                 <li><a href="javascript:viewCert();" data-i18n="link.view_certificates">View Certificates</a></li>
                                 <li><a href="javascript:getTlsPolicyManagementPage()" data-i18n="link.tls_policy_management">TLS Policy Management</a></li>
+                                <li><a href="javascript:getAuthenticationPage()" data-i18n="link.alerts">Alerts</a></li>
                             </ul>
                         </li>
 
@@ -269,7 +270,7 @@
             <span id="alert_delete_host" data-i18n="alert.delete_host" style="display: none;">Are you sure you want to delete this host?</span>
         </div>
         <div class="footer">
-            <p>&copy; 2012-2014 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
+            <p>&copy; 2012-2015 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
         </div>
 </body>
 </html>

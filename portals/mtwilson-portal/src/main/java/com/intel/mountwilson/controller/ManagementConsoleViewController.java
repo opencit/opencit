@@ -286,4 +286,10 @@ public class ManagementConsoleViewController extends MultiActionController{
 		log.info("WLMViewController.getAddOEMPage >>");
 		return new ModelAndView("AboutWLM");
 	}    
+        
+        public ModelAndView getAuthenticationPage(HttpServletRequest req,HttpServletResponse res) {
+		log.info("DemoPortalViewController.getAuthenticationPage");
+		return new ModelAndView("Authentication");
+	}   
+        
 }

@@ -6,6 +6,7 @@ package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.Platform;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
@@ -32,7 +33,11 @@ import org.apache.commons.io.FileUtils;
  */
 public class CreateAdminUser extends AbstractSetupTask {
     
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginRegister.class);    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginRegister.class);
+    
+    public static final String USERNAME = "(?:([a-zA-Z0-9_\\\\\\.@-]+))";
+    public static final String PASSWORD = "(?:([a-zA-Z0-9_\\\\.\\\\, @!#$%^+=>?:{}()\\[\\]\\\"|;~`'*-/]+))";
+    
     private File userFile;
     private File permissionFile;
     private String adminUsername;
@@ -57,7 +62,7 @@ public class CreateAdminUser extends AbstractSetupTask {
             return System.getenv("TRUSTAGENT_ADMIN_PASSWORD");
         }
         log.info("CreateAdminUser: Since the password is not specified, generating a random password.");
-        return RandomUtil.randomBase64String(8).replace("=","_"); 
+        return RandomUtil.randomHexString(32);
     }
     
     
@@ -66,6 +71,14 @@ public class CreateAdminUser extends AbstractSetupTask {
         TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         adminUsername = getUsername();
         adminPassword = getPassword();
+        
+        if (!ValidationUtil.isValidWithRegex(adminUsername, USERNAME)) {
+            configuration(String.format("Username specified does not match regex: %s", USERNAME));
+        }
+        if (!ValidationUtil.isValidWithRegex(adminPassword, PASSWORD)) {
+            configuration(String.format("Password specified does not match regex: %s", PASSWORD));
+        }
+                        
         userFile = trustagentConfiguration.getTrustagentUserFile();
         permissionFile = trustagentConfiguration.getTrustagentPermissionsFile();
 
