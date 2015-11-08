@@ -95,7 +95,7 @@ public class VmMeasurementLog extends ObjectModel {
      * @param measurement
      * @return true if the PcrModuleManifest contains the given Measurement value
      */
-    public boolean contains(Measurement m) {
+    public boolean contains(VmMeasurement m) {
         if( m == null ) { return false; }
         return measurements.contains(m); 
     }
@@ -105,7 +105,7 @@ public class VmMeasurementLog extends ObjectModel {
      * @param value
      * @return true if the PcrModuleManifest contains an entry with the specified value, false otherwise
      */
-    public boolean contains(Sha1Digest value) {
+    public boolean contains(Sha256Digest value) {
         if( value == null ) { return false; }
         for(VmMeasurement m : measurements) {
             if( m.getValue().equals(value) ) {
