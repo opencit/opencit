@@ -848,21 +848,22 @@ register_startup_script() {
   fi
 
   # RedHat and SUSE
-  chkconfig=`which chkconfig  2>/dev/null`
+  chkconfig=`which chkconfig 2>/dev/null`
   if [ -n "$chkconfig" ]; then
     $chkconfig --del "${startup_name}"  2>/dev/null
     $chkconfig --add "${startup_name}"  2>/dev/null
   fi
 
   # Ubuntu
-  updatercd=`which update-rc.d  2>/dev/null`
+  updatercd=`which update-rc.d 2>/dev/null`
   if [ -n "$updatercd" ]; then
     $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
 
   # systemd
-  if [ -d "/etc/systemd/system" ]; then
+  systemctlCommand=`which systemctl 2>/dev/null`
+  if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
     # root cannot requiretty; script "sudo -u" command will error out if a tty is required
     rootHasRequireTTY=$(cat /etc/sudoers.d/root 2>/dev/null | grep "requiretty")
     if [ -z "$rootHasRequireTTY" ]; then
@@ -874,8 +875,8 @@ register_startup_script() {
     fi
     echo -e "[Unit]\nDescription=${startup_name}\n\n[Service]\nType=forking\nExecStart=${absolute_filename} start\nExecStop=${absolute_filename} stop\n\n[Install]\nWantedBy=multi-user.target\n" > "/etc/systemd/system/${startup_name}.service"
     chmod 664 "/etc/systemd/system/${startup_name}.service"
-    systemctl enable "${startup_name}.service"
-    systemctl daemon-reload
+    "$systemctlCommand" enable "${startup_name}.service"
+    "$systemctlCommand" daemon-reload
   fi
 
 }
@@ -887,22 +888,25 @@ remove_startup_script() {
   shift;
 
   # RedHat and SUSE
-  chkconfig=`which chkconfig  2>/dev/null`
+  chkconfig=`which chkconfig 2>/dev/null`
   if [ -n "$chkconfig" ]; then
     $chkconfig --del "${startup_name}"  2>/dev/null
   fi
 
   # Ubuntu
-  updatercd=`which update-rc.d  2>/dev/null`
+  updatercd=`which update-rc.d 2>/dev/null`
   if [ -n "$updatercd" ]; then
     $updatercd -f "${startup_name}" remove 2>/dev/null
   fi
 
   # systemd
+  systemctlCommand=`which systemctl 2>/dev/null`
+  if [ -n "$systemctlCommand" ]; then
+    "$systemctlCommand" disable "${startup_name}.service"
+    "$systemctlCommand" daemon-reload
+  fi
   if [ -f "/etc/systemd/system/${startup_name}.service" ]; then
-    systemctl disable "${startup_name}.service"
     rm -f "/etc/systemd/system/${startup_name}.service"
-    systemctl daemon-reload
   fi
 
   # try to remove startup script
