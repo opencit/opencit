@@ -860,6 +860,24 @@ register_startup_script() {
     $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
+
+  # systemd
+  if [ -d "/etc/systemd/system" ]; then
+    # root cannot requiretty; script "sudo -u" command will error out if a tty is required
+    rootHasRequireTTY=$(cat /etc/sudoers.d/root 2>/dev/null | grep "requiretty")
+    if [ -z "$rootHasRequireTTY" ]; then
+      echo -e "Defaults:root "'!'"requiretty\n" >> "/etc/sudoers.d/root"
+    fi
+
+    if [ -f "/etc/systemd/system/${startup_name}.service" ]; then
+      rm -f "/etc/systemd/system/${startup_name}.service"
+    fi
+    echo -e "[Unit]\nDescription=${startup_name}\n\n[Service]\nType=forking\nExecStart=${absolute_filename} start\nExecStop=${absolute_filename} stop\n\n[Install]\nWantedBy=multi-user.target\n" > "/etc/systemd/system/${startup_name}.service"
+    chmod 664 "/etc/systemd/system/${startup_name}.service"
+    systemctl enable "${startup_name}.service"
+    systemctl daemon-reload
+  fi
+
 }
 
 # Parameters:
@@ -879,8 +897,15 @@ remove_startup_script() {
   if [ -n "$updatercd" ]; then
     $updatercd -f "${startup_name}" remove 2>/dev/null
   fi
-  
-  # try to install it as a startup script
+
+  # systemd
+  if [ -f "/etc/systemd/system/${startup_name}.service" ]; then
+    systemctl disable "${startup_name}.service"
+    rm -f "/etc/systemd/system/${startup_name}.service"
+    systemctl daemon-reload
+  fi
+
+  # try to remove startup script
   if [ -d "/etc/init.d" ]; then
     rm -f "/etc/init.d/${startup_name}" 2>/dev/null
   fi
