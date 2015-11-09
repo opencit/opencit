@@ -207,7 +207,8 @@ public class HostTrustBO {
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
-
+            tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
+            
             PcrManifest pcrManifest = agent.getPcrManifest();
             if( pcrManifest == null ) {
                 throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
@@ -748,6 +749,7 @@ public class HostTrustBO {
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
             throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId);
         }
+        tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
         
         long getAgentManifestStart = System.currentTimeMillis(); 
         PcrManifest pcrManifest = agent.getPcrManifest();
@@ -1868,6 +1870,8 @@ public class HostTrustBO {
         if (!agent.isTpmPresent()) {
             throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, hostId);
         }
+        tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
+        
         if(forceVerify != true){
             //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
             TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName()); //hostId);
@@ -2102,6 +2106,7 @@ public class HostTrustBO {
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
+            tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
 
 //            PcrManifest pcrManifest = agent.getPcrManifest();
 //            if( pcrManifest == null ) {

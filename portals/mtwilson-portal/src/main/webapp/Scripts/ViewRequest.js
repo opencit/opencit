@@ -42,15 +42,14 @@ function fnDeleteSelectedRequest(element) {
         $('#successMessage').html('');
         var row = $(element).parent().parent();
         var data="fingerprint="+$(row).find("td:eq(0)").attr('title');
-	$("#dialog-confirm").dialog("open");
-	//$("#dialog-confirm").dialog("option", "title", "Confirm Delete");
-	//$("#dialog-confirm").html($("#alert_delete_request").text());
-	
+	$("#dialog-confirm").remove();
+	var str = '<div id="dialog-confirm" title="Delete User?" style="display:none;"><p>Are you sure you want to delete this request?</p></div>';
+	$('.container').append(str);	
 	// Define the Dialog and its properties.
 	$("#dialog-confirm").dialog({
 		resizable: false,
 		modal: true,
-		height: 250,
+		height: 150,
 		width: 400,
 		buttons: {
 			"Delete": function () {

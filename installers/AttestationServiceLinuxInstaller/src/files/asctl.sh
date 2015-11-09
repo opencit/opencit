@@ -11,6 +11,8 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
+scripts_dir=/opt/mtwilson/share/scripts
+config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
@@ -19,9 +21,11 @@ webservice_application_name=mtwilson
 #webservice_application_name=AttestationService
 #java_required_version=1.7.0_51
 
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f "/usr/local/share/mtwilson/util/functions" ]; then . "/usr/local/share/mtwilson/util/functions"; else echo "Missing file: /usr/local/share/mtwilson/util/functions"; exit 1; fi
-if [ -f "/usr/local/share/mtwilson/util/version" ]; then . "/usr/local/share/mtwilson/util/version"; else echo_warning "Missing file: /usr/local/share/mtwilson/util/version"; fi
+if [ -f "${scripts_dir}/functions" ]; then . "${scripts_dir}/functions"; else echo "Missing file: ${scripts_dir}/functions"; exit 1; fi
+if [ -f "${config_dir}/version" ]; then . "${config_dir}/version"; else echo_warning "Missing file: ${config_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null
@@ -84,6 +88,7 @@ create_saml_key() {
   $keytool -export -alias ${SAML_KEY_ALIAS} -keystore ${SAML_KEYSTORE_FILE}  -storepass ${SAML_KEYSTORE_PASSWORD} -file ${intel_conf_dir}/saml.crt
   openssl x509 -in ${intel_conf_dir}/saml.crt -inform der -out ${intel_conf_dir}/saml.crt.pem -outform pem
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME $SAML_KEYSTORE_FILE ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem 
 
   #saml.issuer=https://localhost:8181
   local saml_issuer=""
@@ -125,8 +130,11 @@ bootstrap_first_user() {
   prompt_with_default_password MC_FIRST_PASSWORD
   export MC_FIRST_USERNAME
   export MC_FIRST_PASSWORD
+  echo "asctl setup create-certificate-authority-key..." >>$INSTALL_LOG_FILE
   mtwilson setup V2 create-certificate-authority-key
   cat /etc/intel/cloudsecurity/cacerts.pem >> /etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME /etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem
+  echo "asctl setup create-admin-user..." >>$INSTALL_LOG_FILE
   mtwilson setup V2 create-admin-user
 }
 
@@ -136,8 +144,9 @@ configure_privacyca_user() {
   echo "You need to set a username and password for administrators installing Trust Agents to access the Privacy CA service."
   prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "PrivacyCA Administrator Username:" admin
   prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "PrivacyCA Administrator Password:"
-  export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
-  export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
+  export PRIVACYCA_DOWNLOAD_USERNAME PRIVACYCA_DOWNLOAD_PASSWORD
+  #export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
+  #export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
   #PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
   #update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
   #update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD_HASH}"
@@ -174,14 +183,13 @@ setup_interactive_install() {
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
       mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
-      mysql_create_database
       # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
       #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
     fi
   elif using_postgres; then
     if [ -n "$psql" ]; then
-      echo "inside psql: $psql"
+      #echo "inside psql: $psql"
       postgres_configure_connection "${package_config_filename}" mountwilson.as.db
       postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
       postgres_create_database
@@ -206,12 +214,14 @@ setup_interactive_install() {
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
-      glassfish_start_report
+      #glassfish_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   elif [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
-      tomcat_start_report
+      #tomcat_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   fi
   
@@ -316,7 +326,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-  rm /usr/local/bin/${script_name}
+        rm /opt/mtwilson/bin/${script_name} 2>/dev/null
         ;;
   saml-createkey)
         create_saml_key

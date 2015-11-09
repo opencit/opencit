@@ -4,6 +4,13 @@
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
 TXTSTAT=$(which txt-stat 2>/dev/null)
 TXTSTAT=${TXTSTAT:-"/usr/sbin/txt-stat"}
+
+if [ ! -f "$TXTSTAT" ]; then
+  echo "Cannot find txt-stat binary"
+  exit 1
+fi
+TXTSTAT="sudo -n $TXTSTAT"
+
 if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="$TXTSTAT"; fi
 INFILE_TCB_MEASUREMENT_SHA1=${INFILE_TCB_MEASUREMENT_SHA1:-/var/log/trustagent/measurement.sha1}
 # 2.0 outputs to /opt/trustagent/var/measureLog.xml

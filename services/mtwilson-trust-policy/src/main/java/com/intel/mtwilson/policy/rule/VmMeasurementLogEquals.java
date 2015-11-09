@@ -6,7 +6,7 @@ package com.intel.mtwilson.policy.rule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.intel.mtwilson.model.Measurement;
+import com.intel.mtwilson.model.VmMeasurement;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.RuleResult;
@@ -40,14 +40,14 @@ public class VmMeasurementLogEquals extends BaseRule {
      * @param whitelistModules
      * @return 
      */
-    public RuleResult apply2(List<Measurement> actualModules, List<Measurement> whitelistModules) {
+    public RuleResult apply2(List<VmMeasurement> actualModules, List<VmMeasurement> whitelistModules) {
         log.debug("VmMeasurementLogEquals: About to apply the VmMeasurementLogEquals policy");
         RuleResult report = new RuleResult(this);
 
-        ArrayList<Measurement> vmActualUnexpected = new ArrayList<>(actualModules);
+        ArrayList<VmMeasurement> vmActualUnexpected = new ArrayList<>(actualModules);
         vmActualUnexpected.removeAll(whitelistModules); 
 
-        ArrayList<Measurement> vmActualMissing = new ArrayList<>(whitelistModules);
+        ArrayList<VmMeasurement> vmActualMissing = new ArrayList<>(whitelistModules);
 
         log.debug("VmMeasurementLogEquals: About to check VM entries {} against the whitelist which has {} entries.", 
                 actualModules.size(), vmActualMissing.size());
@@ -80,14 +80,14 @@ public class VmMeasurementLogEquals extends BaseRule {
      * @param vmActualMissing
      * @param report 
      */
-    private void raiseFaultForModifiedEntries(ArrayList<Measurement> vmActualUnexpected, ArrayList<Measurement> vmActualMissing, RuleResult report) {
-        ArrayList<Measurement> vmModifiedModules = new ArrayList<>();
-        ArrayList<Measurement> tempVMActualUnexpected = new ArrayList<>(vmActualUnexpected);
-        ArrayList<Measurement> tempVMActualMissing = new ArrayList<>(vmActualMissing);
+    private void raiseFaultForModifiedEntries(ArrayList<VmMeasurement> vmActualUnexpected, ArrayList<VmMeasurement> vmActualMissing, RuleResult report) {
+        ArrayList<VmMeasurement> vmModifiedModules = new ArrayList<>();
+        ArrayList<VmMeasurement> tempVMActualUnexpected = new ArrayList<>(vmActualUnexpected);
+        ArrayList<VmMeasurement> tempVMActualMissing = new ArrayList<>(vmActualMissing);
         
         try {
-            for (Measurement tempUnexpected : tempVMActualUnexpected) {
-                for (Measurement tempMissing : tempVMActualMissing) {
+            for (VmMeasurement tempUnexpected : tempVMActualUnexpected) {
+                for (VmMeasurement tempMissing : tempVMActualMissing) {
                     log.debug("RaiseFaultForModifiedEntries: Comparing module {} with hash {} to module {} with hash {}.", tempUnexpected.getLabel(), 
                             tempUnexpected.getValue().toString(), tempMissing.getLabel(), tempMissing.getValue().toString());
                     if (tempUnexpected.getLabel().equalsIgnoreCase(tempMissing.getLabel())) {

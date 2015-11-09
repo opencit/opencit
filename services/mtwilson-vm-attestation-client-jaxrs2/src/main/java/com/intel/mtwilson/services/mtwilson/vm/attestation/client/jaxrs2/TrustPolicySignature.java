@@ -31,10 +31,16 @@ public class TrustPolicySignature extends MtWilsonClient {
         super(url);
     }
     
-    public TrustPolicy signTrustPolicy(TrustPolicy trustPolicy) throws IOException, JAXBException, XMLStreamException {
+//    public TrustPolicy signTrustPolicy(TrustPolicy trustPolicy) throws IOException, JAXBException, XMLStreamException {
+//        log.debug("target: {}", getTarget().getUri().toString());
+//        JAXB jaxb = new JAXB();
+//        String signedPolicy = getTarget().path("trustpolicy-signature").request().accept(MediaType.APPLICATION_XML).post(Entity.xml(jaxb.write(trustPolicy)), String.class);
+//        return jaxb.read(signedPolicy, TrustPolicy.class);        
+//    }
+    
+    public String signTrustPolicy(String trustPolicy) throws IOException, JAXBException, XMLStreamException {
         log.debug("target: {}", getTarget().getUri().toString());
-        JAXB jaxb = new JAXB();
-        String signedPolicy = getTarget().path("trustpolicy-signature").request().accept(MediaType.APPLICATION_XML).post(Entity.xml(jaxb.write(trustPolicy)), String.class);
-        return jaxb.read(signedPolicy, TrustPolicy.class);        
+        String signedPolicy = getTarget().path("trustpolicy-signature").request().accept(MediaType.APPLICATION_XML).post(Entity.xml(trustPolicy), String.class);
+        return signedPolicy;        
     }
 }

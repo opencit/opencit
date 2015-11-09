@@ -28,12 +28,16 @@ monit_install() {
   MONIT_APT_PACKAGES="monit"
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
-  auto_install "Monit" "MONIT"
+  if [ "$(whoami)" == "root" ]; then
+    auto_install "Monit" "MONIT"
+    if [ $? -ne 0 ]; then echo_failure "Failed to install monit"; exit -1; fi
+  fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
-      echo_failure "Unable to auto-install Monit"
+      echo_failure "monit is not installed"
       echo "  Monit download URL:"
       echo "  http://www.mmonit.com"
+      exit -1
     else
       echo_success "Monit installed in $monit"
     fi
@@ -45,7 +49,10 @@ monit_src_install() {
 #  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
   DEVELOPER_YUM_PACKAGES="make gcc"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
-  auto_install "Developer tools" "DEVELOPER"
+  if [ "$(whoami)" == "root" ]; then
+    auto_install "Developer tools" "DEVELOPER"
+    if [ $? -ne 0 ]; then echo_failure "Failed to install monit prerequisites"; exit -1; fi
+  fi
   monit_clear; monit_detect;
   if [[ -z "$monit" ]]; then
     if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then
@@ -98,10 +105,17 @@ monit_install $MONIT_PACKAGE
 
 monitrc=`cat /etc/init.d/monit | grep CONFIG= | cut -d= -f2 | sed 's/\"//g'`
 
-mkdir -p /etc/monit/conf.d
+mkdir -p /opt/mtwilson/monit/conf.d
 
-if ! grep -q "include /etc/monit/conf.d/*" $monitrc; then 
- echo "include /etc/monit/conf.d/*" >> $monitrc
+if [ -n "$monitrc" ]; then
+  if [ -w "$monitrc" ]; then 
+    if ! grep -q "include /opt/mtwilson/monit/conf.d/*" $monitrc; then
+      echo "include /opt/mtwilson/monit/conf.d/*" >> $monitrc
+    fi
+  else
+    echo_warning "Current user does not have write permission to $monitrc"
+    echo_warning "Append the following line to file $monitrc: include /opt/mtwilson/monit/conf.d/*"
+  fi
 fi
 
 

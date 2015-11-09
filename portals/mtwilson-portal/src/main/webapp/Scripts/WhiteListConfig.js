@@ -142,7 +142,6 @@ $(function() {
 
 
 function fnUploadWhiteListConfigurationData() {
-
 	$('#whiteListMessage').html('');
 	var validation = false;
 	var hostVo = new RegisterHostVo();
@@ -202,7 +201,6 @@ function fnUploadWhiteListConfigurationData() {
                 alert($("#alert_valid_hostname_ip").text());
             }
         } else { // TA
-
             if (fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
 
                 var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
@@ -211,11 +209,12 @@ function fnUploadWhiteListConfigurationData() {
                 if (valid1 && valid2) {
                     validation = true;
                     hostVo.vmWareType = false;
-                    hostVo.vCenterString = "";
                     hostVo.hostType = "intel";
                     hostVo.hostName = $('#whiteListOpenSource_Host').val();
                     hostVo.hostPortNo = $('#whiteListOpenSource_portNO').val();
-
+                    hostVo.vCenterString = "https://" + $('#whiteListOpenSource_Host').val() + ":" + $('#whiteListOpenSource_portNO').val() +
+                            "/;" + $('#whiteListOpenSource_userName').val() + ";" + $('#whiteListOpenSource_password').val();
+                    
                     hostVo.biosWLTarget = null;
                     hostVo.vmmWLtarget = null;
                     hostVo.registered = false;
@@ -284,6 +283,21 @@ function fnUploadWhiteListConfigurationData() {
 //	sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
 //	
 //}
+
+function fnShowLoginCredentials() {
+    str = "<a href=\"#\" onclick=\"fnShowLoginCredentials()\">";
+    if ((document.getElementById('opensource_credentials').innerHTML).indexOf("Show login credentials") > 0) {
+        $('#openSourcesHostType_username').show();
+        $('#openSourcesHostType_password').show();
+        str = str + "Hide login credentials";        
+    } else {
+        $('#openSourcesHostType_username').hide();
+        $('#openSourcesHostType_password').hide();
+        str = str + "Show login credentials";
+    }
+    str = str + "</a>";
+    document.getElementById('opensource_credentials').innerHTML = str;
+}
 
 //called for the response for fnSendWhiteListWithRegisterHostFalse/fnSendWhiteListWithRegisterHostTrue (upload white list button)
 function fnUploadWhiteListSuccess(responseJSON) {

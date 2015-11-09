@@ -17,6 +17,8 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
+scripts_dir=/opt/mtwilson/share/scripts
+config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
@@ -25,8 +27,8 @@ webservice_application_name=WhiteListPortal
 #java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f "/usr/local/share/mtwilson/util/functions" ]; then . "/usr/local/share/mtwilson/util/functions"; else echo "Missing file: /usr/local/share/mtwilson/util/functions"; exit 1; fi
-if [ -f "/usr/local/share/mtwilson/util/version" ]; then . "/usr/local/share/mtwilson/util/version"; else echo_warning "Missing file: /usr/local/share/mtwilson/util/version"; fi
+if [ -f "${scripts_dir}/functions" ]; then . "${scripts_dir}/functions"; else echo "Missing file: ${scripts_dir}/functions"; exit 1; fi
+if [ -f "${config_dir}/version" ]; then . "${config_dir}/version"; else echo_warning "Missing file: ${config_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null
@@ -75,7 +77,6 @@ setup_interactive_install() {
   if using_mysql; then   
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.wlmp.db
-      mysql_create_database
       # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
       #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
@@ -96,12 +97,14 @@ setup_interactive_install() {
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
-      glassfish_start_report
+      #glassfish_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   elif [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
-      tomcat_start_report
+      #tomcat_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   fi  
  
@@ -192,7 +195,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-  rm /usr/local/bin/${script_name}
+  rm -f /usr/local/bin/${script_name}
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"

@@ -3,66 +3,333 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-# equivalent to env_dir in mtwilson.sh
-MTWILSON_ENV_DIR=/opt/mtwilson/env.d
+# default settings; can override by exporting them before running
+# the installer or by including them in mtwilson.env
+export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
 
-currentUser=`whoami`
-if [ ! $currentUser == "root" ]; then
- echo_failure "You must be root user to install Mt Wilson."
- exit -1
+export INSTALLED_MARKER_FILE=${INSTALLED_MARKER_FILE:-/var/opt/intel/.mtwilsonInstalled}
+export LOG_ROTATION_PERIOD=${LOG_ROTATION_PERIOD:-daily}
+export LOG_COMPRESS=${LOG_COMPRESS:-compress}
+export LOG_DELAYCOMPRESS=${LOG_DELAYCOMPRESS:-delaycompress}
+export LOG_COPYTRUNCATE=${LOG_COPYTRUNCATE:-copytruncate}
+export LOG_SIZE=${LOG_SIZE:-100M}
+export LOG_OLD=${LOG_OLD:-7}
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
+# the layout setting is used only by this script
+# and it is not saved or used by the app script
+MTWILSON_LAYOUT=${MTWILSON_LAYOUT:-home}
+
+###########################################################
+
+# ensure we can write to the log file
+touch $INSTALL_LOG_FILE >/dev/null 2>&1
+if [ -f $INSTALL_LOG_FILE ] && [ ! -w $INSTALL_LOG_FILE ]; then
+  echo "Cannot write to install log file: $INSTALL_LOG_FILE"
+  exit 1
 fi
 
-if [ ! -d $MTWILSON_ENV_DIR ]; then
-  mkdir -p $MTWILSON_ENV_DIR
-fi
-
-#load the functions file first so we can use the generatePassword function
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
-#define defaults so that they can be overwriten 
-#if the value appears in mtwilson.env
-export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
-export LOG_ROTATION_PERIOD=daily
-export LOG_COMPRESS=compress
-export LOG_DELAYCOMPRESS=delaycompress
-export LOG_COPYTRUNCATE=copytruncate
-export LOG_SIZE=100M
-export LOG_OLD=7
-export AUTO_UPDATE_ON_UNTRUST=false
-#export WEBSERVICE_USERNAME=mtwilsonAdmin
-export WEBSERVICE_USERNAME=admin
-export WEBSERVICE_PASSWORD=`generate_password 16`
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+# determine if we are installing as root or non-root
+if [ "$(whoami)" == "root" ]; then
+  # create a mtwilson user if there isn't already one created
+  export MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
+  if ! getent passwd $MTWILSON_USERNAME >/dev/null 2>&1; then
+    useradd --comment "Mt Wilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
+    usermod --lock $MTWILSON_USERNAME
+    # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $MTWILSON_USERNAME"
+  fi
+else
+  # already running as mtwilson user
+  export MTWILSON_USERNAME=$(whoami)
+  echo_warning "Running as $MTWILSON_USERNAME; if installation fails try again as root"
+  if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
+    export MTWILSON_HOME=$(cd ~ && pwd)
+  fi
+  echo_warning "Installing as $MTWILSON_USERNAME into $MTWILSON_HOME"  
+fi
+
+chown $MTWILSON_USERNAME:$MTWILSON_USERNAME $INSTALL_LOG_FILE
 date > $INSTALL_LOG_FILE
 
-if [ -f /root/mtwilson.env ]; then
-  . /root/mtwilson.env
-  env_file_exports=$(cat /root/mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  if [ -n "$env_file_exports" ]; then
-    eval export $env_file_exports
-  fi
+# computed values
+export PATH=$MTWILSON_HOME/bin:$PATH
+
+# define application directory layout
+if [ "$MTWILSON_LAYOUT" == "linux" ]; then
+  export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-/etc/mtwilson}
+  export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-/var/opt/mtwilson}
+  export MTWILSON_LOGS=${MTWILSON_LOGS:-/var/log/mtwilson}
+elif [ "$MTWILSON_LAYOUT" == "home" ]; then
+  export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-$MTWILSON_HOME/configuration}
+  export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-$MTWILSON_HOME/repository}
+  export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
 fi
-if [ -f mtwilson.env ]; then
-  . mtwilson.env
-  env_file_exports=$(cat mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  if [ -n "$env_file_exports" ]; then
-    eval export $env_file_exports
+export MTWILSON_BIN=${MTWILSON_BIN:-$MTWILSON_HOME/bin}
+export MTWILSON_JAVA=${MTWILSON_JAVA:-$MTWILSON_HOME/java}
+export MTWILSON_BACKUP=${MTWILSON_BACKUP:-$MTWILSON_REPOSITORY/backup}
+
+# the env directory is not configurable; it is defined as MTWILSON_HOME/env.d
+# and the administrator may use a symlink if necessary to place it anywhere else
+export MTWILSON_ENV=$MTWILSON_HOME/env.d
+
+# load application environment variables if already defined
+if [ -d $MTWILSON_ENV ]; then
+  MTWILSON_ENV_FILES=$(ls -1 $MTWILSON_ENV/*)
+  for env_file in $MTWILSON_ENV_FILES; do
+    . $env_file
+    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+  done
+fi
+
+# load installer environment file, if present
+if [ -f ~/mtwilson.env ]; then
+  echo "Loading environment variables from $(cd ~ && pwd)/mtwilson.env"
+  . ~/mtwilson.env
+  env_file_exports=$(cat ~/mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+  if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+else
+  echo "No environment file"
+fi
+
+
+
+#If user is non root make sure all prereq directories are created and owned by nonroot user
+if [ "$(whoami)" != "root" ]; then
+  if [ ! -d $MTWILSON_HOME ]; then
+   echo_failure "$MTWILSON_HOME is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${home=`stat -c '%U' $MTWILSON_HOME`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "$MTWILSON_HOME is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif [ ! -d /opt/intel ]; then
+   echo_failure "/opt/intel is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${optintel=`stat -c '%U' /opt/intel`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/opt/intel is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif [ ! -d /etc/intel ]; then
+   echo_failure "/etc/intel is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${etcintel=`stat -c '%U' /etc/intel`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/etc/intel is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif [ ! -d /opt/mtwilson ]; then
+   echo_failure "/opt/mtwilson is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${optmtw=`stat -c '%U' /opt/mtwilson`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/opt/mtwilson is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif [ ! -d /var/opt/intel ]; then
+   echo_failure "/var/opt/intel is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${varoptintel=`stat -c '%U' /var/opt/intel`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/var/opt/intel is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif [ ! -d /usr/local/share/mtwilson ]; then
+   echo_failure "/usr/local/share/mtwilson is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${ulsmtw=`stat -c '%U' /usr/local/share/mtwilson`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/usr/local/share/mtwilson is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif ! [[ -d /etc/intel/cloudsecurity || -L /etc/intel/cloudsecurity ]]; then
+   echo_failure "/etc/intel/cloudsecurity is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${eics=`stat -c '%U' /etc/intel/cloudsecurity`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/etc/intel/cloudsecurity is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  elif [ ! -d $MTWILSON_HOME ]; then
+   echo_failure "$MTWILSON_HOME is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${mtwhome=`stat -c '%U' $MTWILSON_HOME`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "$MTWILSON_HOME is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
+  else 
+   echo "Prerequisite check is successful"
   fi
 fi
 
-export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
+# if monit is running and
+# if there's a monit configuration for mtwilson, remove it to prevent
+# monit from trying to restart mtwilson while we are setting up
+echo "Checking for active Monit service..." >>$INSTALL_LOG_FILE
+service monit status >>$INSTALL_LOG_FILE 2>&1
+if [ $? -eq 0 ] && [ "$(whoami)" == "root" ] && [ -d /etc/monit/conf.d ]; then
+  datestr=`date +%Y%m%d.%H%M`
+  backupdir=$MTWILSON_BACKUP/monit.configuration.$datestr
+  echo "Backing up Monit configuration files to $backupdir" >> $INSTALL_LOG_FILE
+  mkdir -p $backupdir 2>>$INSTALL_LOG_FILE
+  mv /etc/monit/conf.d/*.mtwilson $backupdir 2>>$INSTALL_LOG_FILE
+  service monit restart
+fi
 
-mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
-as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
-#pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
-ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
-mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
-hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
-ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+# if an existing mtwilson is already running, stop it while we install
+echo "Checking for previously-installed Mt Wilson..." >>$INSTALL_LOG_FILE
+prev_mtwilson="$(which mtwilson 2>/dev/null)"
+if [ -n "$prev_mtwilson" ] && [ "$(whoami)" == "root" ]; then
+  # stop mtwilson; this sometimes does not work
+  $prev_mtwilson stop
+  echo "After '$prev_mtwilson stop', checking status again..." >>$INSTALL_LOG_FILE
+  $prev_mtwilson status >>$INSTALL_LOG_FILE
+  # remove previous mtwilson script
+  rm -f $prev_mtwilson
+fi
+
+
+# if upgrading as non-root user, admin must grant read/write permission to /etc/intel/clousecurity before running installer
+if [ -L $MTWILSON_CONFIGURATION ]; then rm -f $MTWILSON_CONFIGURATION; fi
+if [ -L /etc/intel/cloudsecurity ]; then rm -f /etc/intel/cloudsecurity; fi
+if [ -d /etc/intel/cloudsecurity ]; then
+  echo "Prior configuration exists:" >>$INSTALL_LOG_FILE
+  ls -l /etc/intel >>$INSTALL_LOG_FILE
+  if [ -w /etc/intel/cloudsecurity ]; then
+    echo "Migrating configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION" >>$INSTALL_LOG_FILE
+    mkdir -p $MTWILSON_CONFIGURATION
+    cp -r /etc/intel/cloudsecurity/* $MTWILSON_CONFIGURATION
+    chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_CONFIGURATION
+    rm -rf /etc/intel/cloudsecurity
+    ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+  else
+    echo_failure "Cannot migrate configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
+    exit 1
+  fi
+else  
+  mkdir -p $MTWILSON_CONFIGURATION
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $MTWILSON_CONFIGURATION"
+    exit 1
+  fi
+  mkdir -p /etc/intel
+  ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot link configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
+    exit 1
+  fi
+fi
+
+
+export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
+export MTWILSON_OPT_INTEL=/opt/intel
+# If configuration is already in /etc/intel/cloudsecurity (upgrade or reinstall)
+# then symlink /opt/mtwilson/configuration -> /etc/intel/cloudsecurity 
+
+# If configuration is in /opt/mtwilson/configuration and there is no symlink
+# in /etc/intel/cloudsecurity then we create one now
+if [ -d "$MTWILSON_CONFIGURATION" ] && [ ! -L "$MTWILSON_CONFIGURATION" ] && [ "/etc/intel/clousecurity" != "$MTWILSON_CONFIGURATION" ] && [ ! -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/cloudsecurity ]; then
+  ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+fi
+
+# Check for incorrect link and remove it 
+if [ -L "$MTWILSON_CONFIGURATION/cloudsecurity" ]; then
+  rm "$MTWILSON_CONFIGURATION/cloudsecurity"
+fi
+
+# ensure application directories exist (chown will be repeated near end of this script, after setup)
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA; do
+  # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
+  mkdir -p $directory
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $directory"
+    exit 1
+  fi
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
+  chmod 700 $directory
+done
+
+# make aikverify directories, set ownership and permissions
+if [ "$(whoami)" == "root" ]; then
+  mkdir -p "/var/opt/intel"
+fi
+if [ -w "/var/opt/intel" ]; then
+  mkdir -p "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
+  chown -R ${MTWILSON_USERNAME}:${MTWILSON_USERNAME} "/var/opt/intel"
+  chmod 700 "/var/opt/intel" "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
+fi
+
+mtwilson_backup_configuration() {
+  if [ -n "$MTWILSON_CONFIGURATION" ] && [ -d "$MTWILSON_CONFIGURATION" ]; then
+    datestr=`date +%Y%m%d.%H%M`
+    backupdir="$MTWILSON_HOME/backup/mtwilson.configuration.$datestr"
+    mkdir -p "$backupdir"
+    cp -r $MTWILSON_CONFIGURATION $backupdir
+  fi
+}
+
+mtwilson_backup_repository() {
+  if [ -n "$MTWILSON_REPOSITORY" ] && [ -d "$MTWILSON_REPOSITORY" ]; then
+    datestr=`date +%Y%m%d.%H%M`
+    backupdir="$MTWILSON_HOME/backup/mtwilson.repository.$datestr"
+    mkdir -p "$backupdir"
+    cp -r $MTWILSON_REPOSITORY $backupdir
+  fi
+}
+
+# backup current configuration and data, if they exist
+mtwilson_backup_configuration
+mtwilson_backup_repository
+
+# create application directories (chown will be repeated near end of this script, after setup)
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES  $MTWILSON_OPT_INTEL; do
+  mkdir -p $directory
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
+  chmod 700 $directory
+done
+
+# store directory layout in env file
+echo "# $(date)" > $MTWILSON_ENV/mtwilson-layout
+echo "export MTWILSON_HOME=$MTWILSON_HOME" >> $MTWILSON_ENV/mtwilson-layout
+echo "export MTWILSON_CONFIGURATION=$MTWILSON_CONFIGURATION" >> $MTWILSON_ENV/mtwilson-layout
+echo "export MTWILSON_JAVA=$MTWILSON_JAVA" >> $MTWILSON_ENV/mtwilson-layout
+echo "export MTWILSON_BIN=$MTWILSON_BIN" >> $MTWILSON_ENV/mtwilson-layout
+echo "export MTWILSON_REPOSITORY=$MTWILSON_REPOSITORY" >> $MTWILSON_ENV/mtwilson-layout
+echo "export MTWILSON_LOGS=$MTWILSON_LOGS" >> $MTWILSON_ENV/mtwilson-layout
+
+# store mtwilson username in env file
+echo "# $(date)" > $MTWILSON_ENV/mtwilson-username
+echo "export MTWILSON_USERNAME=$MTWILSON_USERNAME" >> $MTWILSON_ENV/mtwilson-username
+
+# store log level in env file, if it's set
+if [ -n "$MTWILSON_LOG_LEVEL" ]; then
+  echo "# $(date)" > $MTWILSON_ENV/mtwilson-logging
+  echo "export MTWILSON_LOG_LEVEL=$MTWILSON_LOG_LEVEL" >> $MTWILSON_ENV/mtwilson-logging
+fi
+
+# store the auto-exported environment variables in env file
+# to make them available after the script uses sudo to switch users;
+# we delete that file later
+echo "# $(date)" > $MTWILSON_ENV/mtwilson-setup
+for env_file_var_name in $env_file_exports
+do
+  eval env_file_var_value="\$$env_file_var_name"
+  echo "writing $env_file_var_name to mtwilson-setup with value: $env_file_var_value" >> $INSTALL_LOG_FILE
+  echo "export $env_file_var_name=$env_file_var_value" >> $MTWILSON_ENV/mtwilson-setup
+done
+
+profile_dir=$HOME
+if [ "$(whoami)" == "root" ] && [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ]; then
+  profile_dir=$MTWILSON_HOME
+fi
+profile_name=$profile_dir/$(basename $(getUserProfileFile))
+
+echo "Updating profile: $profile_name" >> $INSTALL_LOG_FILE
+appendToUserProfileFile "export PATH=$MTWILSON_BIN:\$PATH" $profile_name
+appendToUserProfileFile "export MTWILSON_HOME=$MTWILSON_HOME" $profile_name
+
+
+mtw_props_path="$MTWILSON_CONFIGURATION/mtwilson.properties"
+as_props_path="$MTWILSON_CONFIGURATION/attestation-service.properties"
+#pca_props_path="$MTWILSON_CONFIGURATION/PrivacyCA.properties"
+ms_props_path="$MTWILSON_CONFIGURATION/management-service.properties"
+mp_props_path="$MTWILSON_CONFIGURATION/mtwilson-portal.properties"
+hp_props_path="$MTWILSON_CONFIGURATION/clientfiles/hisprovisioner.properties"
+ta_props_path="$MTWILSON_CONFIGURATION/trustagent.properties"
 file_paths=("$mtw_props_path" "$as_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
 
 # disable upgrade if properties files are encrypted from a previous installation
 for file in ${file_paths[*]}; do
+  echo "Checking for encrypted configuration file: $file" >> $INSTALL_LOG_FILE
   if [ -f $file ]; then
     if file_encrypted $file; then
       echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
@@ -71,47 +338,83 @@ for file in ${file_paths[*]}; do
   fi
 done
 
+echo "Loading configuration settings and defaults" >> $INSTALL_LOG_FILE
 load_conf
 load_defaults
 
-if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
- echo_warning "Program files are writable by the web service container, this is a possible security issue"
+# mtwilson requires java 1.7 or later
+# detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
+# in 3.0, java home is now under trustagent home by default
+JAVA_HOME=${JAVA_HOME:-$MTWILSON_HOME/share/jdk1.7.0_51}
+JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+echo "Installing Java ($JAVA_PACKAGE) into $JAVA_HOME..." >> $INSTALL_LOG_FILE
+mkdir -p $JAVA_HOME
+#java_install $JAVA_PACKAGE
+java_install_in_home $JAVA_PACKAGE
+# store java location in env file
+echo "# $(date)" > $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_HOME=$JAVA_HOME" >> $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $MTWILSON_ENV/mtwilson-java
+
+if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
+  echo "Replacing java.security file, existing file will be backed up"
+  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
+  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
+fi
+
+# install prerequisites
+if [ "$(whoami)" == "root" ]; then
+  MTWILSON_YUM_PACKAGES="zip unzip authbind openssl xmlstarlet"
+  MTWILSON_APT_PACKAGES="zip unzip authbind openssl xmlstarlet"
+  MTWILSON_YAST_PACKAGES="zip unzip authbind openssl xmlstarlet"
+  MTWILSON_ZYPPER_PACKAGES="zip unzip authbind openssl xmlstarlet"
+  auto_install "Installer requirements" "MTWILSON"
+  if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 else
- getent passwd $MTWILSON_OWNER >/dev/null
- if [ $? != 0 ]; then
-  echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
-  #prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
-  #pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
-  useradd -s /bin/false -d /opt/mtwilson $MTWILSON_OWNER
-  if [ $? != 0 ]; then
-    echo_warning "Failed to create user '$MTWILSON_OWNER'"
+  echo_warning "You must be root to install prerequisites through package manager"
+fi
+
+# setup authbind to allow non-root mtwilson to listen on ports 80 and 443
+if [ ! -f /etc/authbind/byport/80 ] || [ ! -f /etc/authbind/byport/443 ]; then
+  if [ "$(whoami)" == "root" ]; then
+    if [ -n "$MTWILSON_USERNAME" ] && [ -d /etc/authbind/byport ]; then
+      touch /etc/authbind/byport/80 /etc/authbind/byport/443
+      chmod 500 /etc/authbind/byport/80 /etc/authbind/byport/443
+      chown $MTWILSON_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
+    fi
+  else
+    echo_warning "You must be root to setup authbind configuration"
   fi
- fi
+fi
+
+# delete existing java files, to prevent a situation where the installer copies
+# a newer file but the older file is also there
+if [ -d $MTWILSON_JAVA ]; then
+  rm $MTWILSON_JAVA/*.jar 2>/dev/null
 fi
 
 if [ -z "$INSTALL_PKGS" ]; then
-              #opt_postgres|opt_mysql opt_java opt_tomcat|opt_glassfish opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
- INSTALL_PKGS="postgres java glassfish privacyca SERVICES PORTALS"
+  #opt_postgres|opt_mysql opt_java opt_tomcat|opt_glassfish opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
+ INSTALL_PKGS="postgres tomcat privacyca SERVICES PORTALS"
 fi
 
 FIRST=0
 #loop through INSTALL_PKG and set each entry to true
 for i in $INSTALL_PKGS; do
- pkg=`echo $i | tr '[A-Z]' '[a-z]'`
- eval opt_$pkg="true"
- if [ $FIRST == 0 ]; then
-  FIRST=1;
-  LIST=$pkg
- else
-  LIST=$LIST", "$pkg
- fi
+  pkg=`echo $i | tr '[A-Z]' '[a-z]'`
+  eval opt_$pkg="true"
+  if [ $FIRST == 0 ]; then
+    FIRST=1;
+    LIST=$pkg
+  else
+    LIST=$LIST", "$pkg
+  fi
 done
 
 # if a group is defined, then make all sub parts == true
 if [ ! -z "$opt_portals" ]; then
-  #eval mangportal="true"
-  #eval trustportal="true"
-  #eval wlmportal="true"
   eval opt_mtwportal="true"
 fi
 # if a group is defined, then make all sub parts == true
@@ -121,43 +424,17 @@ if [ ! -z "$opt_services" ]; then
   eval opt_wlmservice="true"
 fi
 
-
-
-# ask about mysql vs postgres
-#echo "Supported database systems are:"
-#echo "postgres"
-#echo "mysql"
-#prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
-#if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
-#  DATABASE_VENDOR=postgres
-#  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
-#fi
-
-#ask about glassfish vs tomcat
-#echo "Supported web servers are:"
-#echo "tomcat"
-#echo "glassfish"
-#prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
-#if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
-#  WEBSERVER_VENDOR=tomcat
-#  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
-#fi
-
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-if [ ! -z "$opt_glassfish" ]; then
-  WEBSERVER_VENDOR=glassfish
-elif [ ! -z "$opt_tomcat" ]; then
-  WEBSERVER_VENDOR=tomcat
+if [ -n "$opt_glassfish" ]; then
+  WEBSERVICE_VENDOR=glassfish
+elif [ -n "$opt_tomcat" ]; then
+  WEBSERVICE_VENDOR=tomcat
 fi
-
-if [ ! -z "$opt_postgres" ]; then
+if [ -n "$opt_postgres" ]; then
   DATABASE_VENDOR=postgres
-elif [ ! -z "$opt_mysql" ]; then
+elif [ -n "$opt_mysql" ]; then
   DATABASE_VENDOR=mysql
 fi
-
-#export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
@@ -183,162 +460,156 @@ if using_mysql ; then
   fi
 fi
 
-if using_mysql; then
-    export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
-elif using_postgres; then
-    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
-fi
-if using_glassfish; then
-    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
-elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
-fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
-export java_required_version=${JAVA_REQUIRED_VERSION}
+export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
+export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
+export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
+export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 
-
-echo "Installing packages: $LIST"
-
-APICLIENT_YUM_PACKAGES="zip unzip openssl xmlstarlet"
-APICLIENT_APT_PACKAGES="zip unzip openssl xmlstarlet"
-APICLIENT_YAST_PACKAGES="zip unzip openssl xmlstarlet"
-APICLIENT_ZYPPER_PACKAGES="zip unzip openssl xmlstarlet"
-auto_install "Installer requirements" "APICLIENT"
-
-
-# api client: ensure destination exists and clean it before copying
-#mkdir -p /usr/local/share/mtwilson/apiclient/java
-#rm -rf /usr/local/share/mtwilson/apiclient/java/*
-#unzip mtwilson-client-java6*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
-
-# setup console: create folder and copy the executable jar
-#mkdir -p /opt/intel/cloudsecurity/setup-console
-#rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
-#cp mtwilson-console*.jar /opt/intel/cloudsecurity/setup-console
-
-# create or update mtwilson.properties
-mkdir -p /etc/intel/cloudsecurity
-chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
-if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
+# configure mtwilson TLS policies
+echo "Configuring TLS policies..." >>$INSTALL_LOG_FILE
+if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
+  #default_mtwilson_tls_policy_id="$MTWILSON_DEFAULT_TLS_POLICY_ID"
   default_mtwilson_tls_policy_id="${MTWILSON_DEFAULT_TLS_POLICY_ID:-$MTW_DEFAULT_TLS_POLICY_ID}"   #`read_property_from_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ "$default_mtwilson_tls_policy_id" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_id" == "TRUST_FIRST_CERTIFICATE" ]; then
-    #update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default TLS policy is insecure; the product guide contains information on enabling secure TLS policies"
   fi
-  export MTWILSON_TLS_KEYSTORE_PASSWORD="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
-  #if [ -z "$MTWILSON_TLS_KEYSTORE_PASSWORD" ]; then
-    # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
-    #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
-    # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
-    # in a future release we will have a UI mechanism to manage this.
   #fi
+  export MTWILSON_TLS_KEYSTORE_PASSWORD="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
 else
-    touch /etc/intel/cloudsecurity/mtwilson.properties
-    chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
-    export MTWILSON_TLS_KEYSTORE_PASSWORD=`generate_password 32`
-#    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
-    echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
-    echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_TLS_KEYSTORE_PASSWORD"
-    # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
-    # in a future release we will have a UI mechanism to manage this.
+  touch "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  chmod 600 "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  chown $MTWILSON_USERNAME:$MTWILSON_USRENAME "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  export MTWILSON_TLS_KEYSTORE_PASSWORD=`generate_password 32`
+  echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
+  # in a future release we will have a UI mechanism to manage this.
 fi
 
-#MTW_TLS_POLICY_ALLOW
+#MTWILSON_TLS_POLICY_ALLOW
 echo "Available TLS policies: certificate, certificate-digest, public-key, public-key-digest, TRUST_FIRST_CERTIFICATE, INSECURE"
 prompt_with_default MTWILSON_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "${MTWILSON_TLS_POLICY_ALLOW:-$MTW_TLS_POLICY_ALLOW}"
 MTWILSON_TLS_POLICY_ALLOW=`echo $MTWILSON_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
 OIFS=$IFS
 IFS=',' read -ra POLICIES <<< "$MTWILSON_TLS_POLICY_ALLOW"
 IFS=$OIFS
-TMP_MTW_TLS_POLICY_ALLOW=
+TMP_MTWILSON_TLS_POLICY_ALLOW=
 for i in "${POLICIES[@]}"; do
   if [ "$i" == "certificate" ] || [ "$i" == "certificate-digest" ] || [ "$i" == "public-key" ] || [ "$i" == "public-key-digest" ] || [ "$i" == "TRUST_FIRST_CERTIFICATE" ] || [ "$i" == "INSECURE" ]; then
-    TMP_MTW_TLS_POLICY_ALLOW+="$i,"
+    TMP_MTWILSON_TLS_POLICY_ALLOW+="$i,"
   fi
 done
-MTWILSON_TLS_POLICY_ALLOW=`echo "$TMP_MTW_TLS_POLICY_ALLOW" | sed 's/\(.*\),/\1/'`
+MTWILSON_TLS_POLICY_ALLOW=`echo "$TMP_MTWILSON_TLS_POLICY_ALLOW" | sed 's/\(.*\),/\1/'`
 
 if [ -n "$MTWILSON_TLS_POLICY_ALLOW" ]; then
-  update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_TLS_POLICY_ALLOW"
+  update_property_in_file "mtwilson.tls.policy.allow" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_TLS_POLICY_ALLOW"
 else
   echo_failure "An allowed TLS policy must be defined."
   exit -1
 fi
 
-#MTW_DEFAULT_TLS_POLICY_ID
+#MTWILSON_DEFAULT_TLS_POLICY_ID
 prompt_with_default MTWILSON_DEFAULT_TLS_POLICY_ID "Mt Wilson Default TLS Policy ID: " "${MTWILSON_DEFAULT_TLS_POLICY_ID:-$MTW_DEFAULT_TLS_POLICY_ID}"
 MTWILSON_DEFAULT_TLS_POLICY_ID=`echo $MTWILSON_DEFAULT_TLS_POLICY_ID | tr -d ' '`   # trim whitespace
 OIFS=$IFS
 IFS=',' read -ra POLICIES <<< "$MTWILSON_TLS_POLICY_ALLOW"
 IFS=$OIFS
-TMP_MTW_DEFAULT_TLS_POLICY_ID=
+TMP_MTWILSON_DEFAULT_TLS_POLICY_ID=
 for i in "${POLICIES[@]}"; do
   if [ "$i" == "$MTWILSON_DEFAULT_TLS_POLICY_ID" ]; then
-    TMP_MTW_DEFAULT_TLS_POLICY_ID="$i"
+    TMP_MTWILSON_DEFAULT_TLS_POLICY_ID="$i"
   fi
 done
-MTWILSON_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTW_DEFAULT_TLS_POLICY_ID"`
+MTWILSON_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTWILSON_DEFAULT_TLS_POLICY_ID"`
 
 if [[ "$MTWILSON_DEFAULT_TLS_POLICY_ID" == "INSECURE" || "$MTWILSON_DEFAULT_TLS_POLICY_ID" == "TRUST_FIRST_CERTIFICATE" ]]; then
-  update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_DEFAULT_TLS_POLICY_ID"
+  update_property_in_file "mtwilson.default.tls.policy.id" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_DEFAULT_TLS_POLICY_ID"
 else
   echo_warning "Unable to determine default TLS policy."
 #  exit -1
 fi
 
-update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
-update_property_in_file "mtwilson.locales" /etc/intel/cloudsecurity/mtwilson.properties "en-US"
+export AUTO_UPDATE_ON_UNTRUST=${AUTO_UPDATE_ON_UNTRUST:-false}
+update_property_in_file "mtwilson.as.autoUpdateHost" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$AUTO_UPDATE_ON_UNTRUST"
+update_property_in_file "mtwilson.locales" "$MTWILSON_CONFIGURATION/mtwilson.properties" "en-US"
 
 #Save variables to properties file
 if using_mysql; then   
-  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+  mysql_write_connection_properties "$MTWILSON_CONFIGURATION/mtwilson.properties" mtwilson.db
 elif using_postgres; then
-  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+  postgres_write_connection_properties "$MTWILSON_CONFIGURATION/mtwilson.properties" mtwilson.db
 fi
 
 # default connection pool settings
-update_property_in_file "dbcp.validation.query" /etc/intel/cloudsecurity/mtwilson.properties "select 1"
-update_property_in_file "dbcp.validation.on.borrow" /etc/intel/cloudsecurity/mtwilson.properties "true"
-update_property_in_file "dbcp.validation.on.return" /etc/intel/cloudsecurity/mtwilson.properties "false"
+update_property_in_file "dbcp.validation.query" "$MTWILSON_CONFIGURATION/mtwilson.properties" "select 1"
+update_property_in_file "dbcp.validation.on.borrow" "$MTWILSON_CONFIGURATION/mtwilson.properties" "true"
+update_property_in_file "dbcp.validation.on.return" "$MTWILSON_CONFIGURATION/mtwilson.properties" "false"
 
 
+echo "Copying logback.xml to $MTWILSON_CONFIGURATION" >> $INSTALL_LOG_FILE
 # copy default logging settings to /etc
-chmod 600 logback.xml
-cp logback.xml /etc/intel/cloudsecurity
-chmod 600 logback-stderr.xml
-cp logback-stderr.xml /etc/intel/cloudsecurity
+chmod 600 logback.xml logback-stderr.xml
+chown $MTWILSON_USERNAME:$MTWILSON_USERNAME logback.xml logback-stderr.xml
+cp logback.xml logback-stderr.xml "$MTWILSON_CONFIGURATION"
 
 # copy shiro.ini api security file
-if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
+if [ ! -f "$MTWILSON_CONFIGURATION/shiro.ini" ]; then
+  echo "Copying shiro.ini to $MTWILSON_CONFIGURATION" >> $INSTALL_LOG_FILE
   chmod 600 shiro.ini shiro-localhost.ini
-  cp shiro.ini shiro-localhost.ini /etc/intel/cloudsecurity
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME shiro.ini shiro-localhost.ini
+  cp shiro.ini shiro-localhost.ini "$MTWILSON_CONFIGURATION"
 fi
 
+echo "Adding $MTWILSON_SERVER to shiro.ini..." >>$INSTALL_LOG_FILE
 # add MTWILSON_SERVER to shiro trust file
 # use "hostFilter.allow" when using the access-denying filter (any clients not from that list of ip's will be denied)
 # use "iniHostRealm.allow" when using the access-allowing filter (any clients from that list of ip's will be allowed access but clients from other ip's can still try password or x509 authentication) - this is the current default
 hostAllowPropertyName=iniHostRealm.allow
-sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' /etc/intel/cloudsecurity/shiro.ini
-hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
+sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' "$MTWILSON_CONFIGURATION/shiro.ini"
+hostAllow=`read_property_from_file $hostAllowPropertyName "$MTWILSON_CONFIGURATION/shiro.ini"`
 if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
-  update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
+  update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_SERVER";
 fi
-hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
+hostAllow=`read_property_from_file $hostAllowPropertyName "$MTWILSON_CONFIGURATION/shiro.ini"`
 if [[ $hostAllow != *$MTWILSON_IP* ]]; then
-  update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
+  update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_IP";
 fi
-sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' /etc/intel/cloudsecurity/shiro.ini
+sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION/shiro.ini"
 
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
- update_property_in_file "mtwilson.api.url" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_API_BASEURL"
+ update_property_in_file "mtwilson.api.url" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_API_BASEURL"
 
-echo "Adding symlink for /opt/mtwilson/configuration..."
-# temp symlink -- SAVY added 2014-02-26
-if [[ ! -h "/opt/mtwilson/configuration" ]]; then
-  mkdir -p /opt/mtwilson
-  ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
+# extract mtwilson
+echo "Extracting application..."
+MTWILSON_ZIPFILE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
+unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
+
+# copy utilities script file to application folder
+mkdir -p $MTWILSON_HOME/share/scripts
+
+#this is now done in LinuxUtil setup.sh
+#cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+
+# deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
+cp functions "$MTWILSON_BIN/functions.sh"
+
+# set permissions
+echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL_LOG_FILE
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
+chmod 755 $MTWILSON_BIN/*
+
+# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
+# with a symlink to /opt/mtwilson/bin/mtwilson
+if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
+  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
+  rm -f /usr/local/bin/mtwilson
 fi
+
+## link /usr/local/bin/mtwilson -> /opt/mtwilson/bin/mtwilson
+#EXISTING_MTWILSON_COMMAND=`which mtwilson`
+#if [ -z "$EXISTING_MTWILSON_COMMAND" ]; then
+#  ln -s $MTWILSON_HOME/bin/mtwilson.sh /usr/local/bin/mtwilson
+#fi
 
 find_installer() {
   local installer="${1}"
@@ -346,7 +617,6 @@ find_installer() {
   echo $binfile
 }
 
-java_installer=`find_installer java`
 monit_installer=`find_installer monit`
 logrotate_installer=`find_installer logrotate`
 mtwilson_util=`find_installer mtwilson-linux-util` #MtWilsonLinuxUtil`
@@ -358,67 +628,37 @@ glassfish_installer=`find_installer glassfish`
 tomcat_installer=`find_installer tomcat`
 
 # Verify the installers we need are present before we start installing
-if [ ! -z "$opt_java" ]; then
-  if [ ! -e $java_installer ]; then
-    echo_warning "Java installer marked for install but missing. Please verify you are using the right installer";
-    exit -1;
-  fi
-fi
-
-if [ ! -e $mtwilson_util ]; then
+if [ ! -e "$mtwilson_util" ]; then
   echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
   exit -1;
 fi
-
-if [ ! -z "$opt_glassfish" ]; then
-  if [ ! -e $glassfish_installer ]; then
-    echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_glassfish" ] && [ ! -e "$glassfish_installer" ]; then
+  echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
-
-if [ ! -z "$opt_tomcat" ]; then
-  if [ ! -e $tomcat_installer ]; then
-    echo_warning "Tomcat installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_tomcat" ] && [ ! -e "$tomcat_installer" ]; then
+  echo_warning "Tomcat installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
-
-
-if [ ! -z "$opt_attservice" ]; then
-  if [ ! -e $attestation_service ]; then
-    echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_attservice" ] && [ ! -e "$attestation_service" ]; then
+  echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
-
-
-if [ ! -z "$opt_mangservice" ]; then
-  if [ ! -e $management_service ]; then
-    echo_warning "Management Service installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_mangservice" ] && [ ! -e "$management_service" ]; then
+  echo_warning "Management Service installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
-
-if [ ! -z "$opt_wlmservice" ]; then
-  if [ ! -e $whitelist_service ]; then
-    echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_wlmservice" ] && [ ! -e "$whitelist_service" ]; then
+  echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
-
-if [ ! -z "$opt_mtwportal" ]; then
-  if [ ! -e $mtw_portal ]; then
-    echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_mtwportal" ] && [ ! -e "$mtw_portal" ]; then
+  echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
-
-if [ ! -z "$opt_monit" ]; then
-  if [ ! -e $monit_installer ]; then
-    echo_warning "Monit installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
+if [ -n "$opt_monit" ] && [ ! -e "$monit_installer" ]; then
+  echo_warning "Monit installer marked for install but missing. Please verify you are using the right installer"
+  exit -1;
 fi
 
 # Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
@@ -438,122 +678,214 @@ Detected the following options on this server:"
 for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
 prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
 export MTWILSON_SERVER
-
 echo
-
 
 if [[ -z "$opt_postgres" && -z "$opt_mysql" ]]; then
  echo_warning "Relying on an existing database installation"
 fi
 
+# before database root portion of executed code
 if using_mysql; then
   mysql_userinput_connection_properties
   export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
-
-  # Install MySQL server (if user selected localhost)
-  if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
-  if [ ! -z "$opt_mysql" ]; then
-      # Place mysql server install code here
-    echo "Installing mysql server..."
-    aptget_detect; dpkg_detect;
-    if [[ -n "$aptget" ]]; then
-      echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
-      echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
-    fi 
-    mysql_server_install 
-    mysql_start >> $INSTALL_LOG_FILE
-      echo "Installation of mysql server complete..."
-    # End mysql server install code here
-  else
-    echo_warning "Using existing mysql install"
-  fi
-  fi
-  # mysql client install here
-  echo "Installing mysql client..."
-  mysql_install  
-  echo "Installation of mysql client complete..."
-  # mysql client end 
-  
-  if [ -z "$SKIP_DATABASE_INIT" ]; then
-    # mysql db init here
-    if ! mysql_create_database; then
-      mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
-      mysqladmin -u "$MYSQL_USERNAME" password "$MYSQL_PASSWORD"
-      mysql_create_database
-    fi
-    # mysql db init end
-  else
-    echo_warning "Skipping init of database"
-  fi 
-  
-  export is_mysql_available mysql_connection_error
-  if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
-  
 elif using_postgres; then
   postgres_installed=1
-  # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
-  if [ -d "/etc/apt" ]; then
-    mkdir -p /etc/apt/trusted.gpg.d
-    chmod 755 /etc/apt/trusted.gpg.d
-    cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
-    POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
-    add_postgresql_install_packages "POSTGRES_SERVER"
-  fi
-
-  postgres_userinput_connection_properties
-  touch ~/.pgpass
-  chmod 0600 ~/.pgpass
+  touch ${MTWILSON_HOME}/.pgpass
+  chmod 0600 ${MTWILSON_HOME}/.pgpass
+  chown ${MTWILSON_USERNAME}:${MTWILSON_USERNAME} ${MTWILSON_HOME}/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
     PGPASS_HOSTNAME=localhost
   else
     PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
   fi
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
-  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ${MTWILSON_HOME}/.pgpass
+  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ${MTWILSON_HOME}/.pgpass
+  if [ $(whoami) == "root" ]; then cp ${MTWILSON_HOME}/.pgpass ~/.pgpass; fi
+fi
 
-  if [ ! -z "$opt_postgres" ]; then
-    # postgres server install 
+# database root portion of executed code
+if [ "$(whoami)" == "root" ]; then
+  if using_mysql; then
+    # Install MySQL server (if user selected localhost)
+    if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
+      if [ ! -z "$opt_mysql" ]; then
+        # Place mysql server install code here
+        echo "Installing mysql server..."
+        aptget_detect; dpkg_detect;
+        if [[ -n "$aptget" ]]; then
+          echo "mysql-server-5.1 mysql-server/root_password password $DATABASE_ROOT_PASSWORD" | debconf-set-selections
+          echo "mysql-server-5.1 mysql-server/root_password_again password $DATABASE_ROOT_PASSWORD" | debconf-set-selections
+        fi
+        mysql_server_install
+		mysql_start >> $INSTALL_LOG_FILE
+        echo "Installation of mysql server complete..."
+        # End mysql server install code here
+      else
+        echo_warning "Using existing mysql install"
+      fi
+      # mysql client install here
+      echo "Installing mysql client..."
+      mysql_install  
+      echo "Installation of mysql client complete"
+      # mysql client end
 
-    # Install Postgres server (if user selected localhost)
-    if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
-      echo "Installing postgres server..."
-      # when we install postgres server on ubuntu it prompts us for root pw
-      # we preset it so we can send all output to the log
-      aptget_detect; dpkg_detect; yum_detect;
-      if [[ -n "$aptget" ]]; then
-       echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
-      fi
-      postgres_installed=0 #postgres is being installed
-      # don't need to restart postgres server unless the install script says we need to (by returning zero)
-      if postgres_server_install; then
-        postgres_restart >> $INSTALL_LOG_FILE
-        sleep 10
-      fi
-      # postgres server end
-    fi 
-    # postgres client install here
+    fi
+  elif using_postgres; then
+    # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
+    if [ -d "/etc/apt" ]; then
+      mkdir -p /etc/apt/trusted.gpg.d
+      chmod 755 /etc/apt/trusted.gpg.d
+      cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+      POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
+      add_postgresql_install_packages "POSTGRES_SERVER"
+    fi
+    postgres_userinput_connection_properties
+    if [ -n "$opt_postgres" ]; then
+      # Install Postgres server (if user selected localhost)
+      if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
+        echo "Installing postgres server..."
+        # when we install postgres server on ubuntu it prompts us for root pw
+        # we preset it so we can send all output to the log
+        aptget_detect; dpkg_detect; yum_detect;
+        if [[ -n "$aptget" ]]; then
+          echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
+        fi
+        postgres_installed=0 #postgres is being installed
+        # don't need to restart postgres server unless the install script says we need to (by returning zero)
+        if postgres_server_install; then
+          postgres_restart >> $INSTALL_LOG_FILE
+          sleep 10
+        fi
+        # postgres server end
+      fi 
+      # postgres client install here
       echo "Installing postgres client..."
       postgres_install
       # do not need to restart postgres server after installing the client.
       #postgres_restart >> $INSTALL_LOG_FILE
       #sleep 10
-      echo "Installation of postgres client complete..." 
+      echo "Installation of postgres client complete" 
       # postgres client install end
+    else
+      echo_warning "Relying on an existing Postgres installation"
+    fi
+  fi
+fi
+
+# Environment:
+# - MYSQL_REQUIRED_VERSION
+mysql_root_connection() {
+  mysql_require
+  mysql_root_connect="$mysql --batch --host=${MYSQL_HOSTNAME:-$DEFAULT_MYSQL_HOSTNAME} --port=${MYSQL_PORTNUM:-$DEFAULT_MYSQL_PORTNUM} --user=${MYSQL_ROOT_USERNAME:-$DEFAULT_MYSQL_ROOT_USERNAME} --password=${MYSQL_ROOT_PASSWORD:-$DEFAULT_MYSQL_ROOT_PASSWORD}"
+}
+
+# Environment:
+# - MYSQL_REQUIRED_VERSION
+# sets the is_mysql_available variable to "yes" or ""
+# sets the is_MYSQL_DATABASE_created variable to "yes" or ""
+mysql_test_root_connection() {
+  mysql_root_connection
+  is_mysql_available=""
+  local mysql_test_result=`$mysql_root_connect -e "show databases" 2>/tmp/intel.mysql.err | grep "^${MYSQL_DATABASE}\$" | wc -l`
+  if [ $mysql_test_result -gt 0 ]; then
+    is_mysql_available="yes"
+  fi
+  mysql_connection_error=`cat /tmp/intel.mysql.err`
+  rm -f /tmp/intel.mysql.err
+}
+
+# requires a mysql connection that can access the existing database, OR (if it doesn't exist)
+# requires a mysql connection that can create databases and grant privileges
+# call mysql_configure_connection before calling this function
+mysql_create_database_and_user() {
+
+  #we first need to find if the user has specified a different port than the once currently configured for mysql
+  # find the my.conf location
+  mysql_cnf=`find / -name my.cnf 2>/dev/null | head -n 1`
+  #echo "MySQL configuration file is located at $mysql_cnf"
+  # check the current port that is configured. There should be 2 instances, one for server and one for client. Both of them should be updated
+  if [ -f "$mysql_cnf" ]; then
+    current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
+    #echo "MySQL is currently configured with port $current_port"
+    # if the required port is already configured. If not, we need to reconfigure
+    has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
+    if [ -z "$has_correct_port" ]; then
+      echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
+      sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
+      echo "Restarting MySQL for port change update to take effect."
+      service mysql restart >> $INSTALL_LOG_FILE
+    fi
   else
-    echo_warning "Relying on an existing Postgres installation"
-  fi 
- 
- if [ -z "$SKIP_DATABASE_INIT" ]; then
+    echo "warning: my.cnf not found" >> $INSTALL_LOG_FILE
+  fi
+	
+  mysql_test_root_connection
+  local create_db="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
+  local find_user="SELECT user FROM mysql.user WHERE user='${MYSQL_USERNAME}';"
+  local create_user="CREATE USER \`$MYSQL_USERNAME\`@\`$MYSQL_HOSTNAME\` identified by '$MYSQL_PASSWORD';"
+  local grant_db="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\`@\`$MYSQL_HOSTNAME\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
+  if [ -z "$mysql_connection_error" ]; then
+    if [ -n "$is_mysql_available" ]; then
+      echo_success "Database \`${MYSQL_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
+      return 0
+    else
+      echo "Creating database..."    >> $INSTALL_LOG_FILE
+      $mysql_root_connect -e "${create_db}"
+	  user=`$mysql_root_connect -e "${find_user}"`
+      if [[ -n "$user" && ${user}=${MYSQL_USERNAME} ]]; then
+	    echo "Mysql user '$MYSQL_USERNAME' already exist"
+	  else
+	    echo "Creating new Mysql user $MYSQL_USERNAME..."
+	    $mysql_root_connect -e "${create_user}"
+	  fi
+	  $mysql_root_connect -e "${grant_db}"
+      mysql_test_root_connection
+      if [ -z "$is_mysql_available" ]; then
+        echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
+        return 1
+      fi
+    fi
+  else
+    echo_failure "Cannot connect to database."  | tee -a $INSTALL_LOG_FILE
+    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
+    echo "${create_sql}" >> $INSTALL_LOG_FILE
+	echo "${create_user}" >> $INSTALL_LOG_FILE
+    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+    return 1
+  fi
+}
+
+# after database root portion of executed code
+if using_mysql; then
+  if [ -z "$SKIP_DATABASE_INIT" ]; then
+    # mysql db init here
+    if ! mysql_create_database_and_user; then
+      mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
+      mysqladmin -u "root" password "$MYSQL_ROOT_PASSWORD"
+      mysql_create_database_and_user
+    fi
+    # mysql db init end
+  else
+    echo_warning "Skipping init of database" 
+  fi
+  export is_mysql_available mysql_connection_error
+  if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
+elif using_postgres; then
+  if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
-  postgres_create_database
+    postgres_create_database
+    if [ $? -ne 0 ]; then
+      echo_failure "Cannot create database"
+      exit 1
+    fi
     #postgres_restart >> $INSTALL_LOG_FILE
     #sleep 10
     #export is_postgres_available postgres_connection_error
-    if [ -z "$is_postgres_available" ]; then 
+    if [ -z "$is_postgres_available" ]; then
       echo_warning "Run 'mtwilson setup' after a database is available"; 
     fi
-  # postgress db init end
+    # postgress db init end
   else
     echo_warning "Skipping init of database"
   fi
@@ -566,73 +898,30 @@ elif using_postgres; then
     fi
     #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
     if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
-      if [ -f /root/.pgpass ]; then
+      if [ -f ${MTWILSON_HOME}/.pgpass ]; then
         echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
-        rm /root/.pgpass
+        rm -f ${MTWILSON_HOME}/.pgpass
+        if [ $(whoami) == "root" ]; then rm -f ~/.pgpass; fi
       fi
     fi
   fi
 fi
 
+
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 chmod +x *.bin
-if [ ! -z "$opt_java" ] && [ -n "$java_installer" ]; then
-  echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
-  ./$java_installer
-  echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
-else
-    echo "Using existing java installation" | tee -a  $INSTALL_LOG_FILE
-fi
-
-java_detect
-
-echo "JAVA_HOME=$JAVA_HOME" > $MTWILSON_ENV_DIR/java
-echo "java=$java" >> $MTWILSON_ENV_DIR/java
-
-# Post java install setup and configuration
-if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
-  echo "Replacing java.security file, existing file will be backed up"
-  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
-  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
-fi
-
-# following code causes the current JAVA_HOME value to be appended to
-# whatever PATH is there (if it's not already there), which means that
-# if one time we detect openjdk, and add it, then next time detect oracle jdk,
-# it will always be added after any previously found jdk, so when using
-# that PATH and running "java" it will never start the most recently found jdk
-# unless we actually delete the other ones. 
-#if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
-#  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
-#    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
-#    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
-#  fi
-#  if ! grep -q "JAVA_HOME" /etc/environment; then
-#    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
-#  fi
-#  
-#  . /etc/environment
-#fi
 
 echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
-echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
+echo "Mt Wilson linux utility installation done" | tee -a  $INSTALL_LOG_FILE
 
-echo "Installing Mt Wilson application code..." | tee -a $INSTALL_LOG_FILE
-ZIP_PACKAGE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
-unzip -DD -o $ZIP_PACKAGE -d /opt/mtwilson >> $INSTALL_LOG_FILE  2>&1
-mkdir -p /opt/mtwilson/var
-#chown -R $MTWILSON_OWNER:$MTWILSON_OWNER /opt/mtwilson
-#chown -R root /opt/mtwilson/bin
-#chown -R root /opt/mtwilson/java
-#chown -R root /opt/mtwilson/configuration
-#mkdir -p /var/log/mtwilson
-#chown $MTWILSON_OWNER:$MTWILSON_OWNER /var/log/mtwilson
-chmod -R 770 /opt/mtwilson/bin
-mkdir -p /opt/mtwilson/env.d
-#chown -R root /opt/mtwilson/env.d
+mkdir -p /opt/mtwilson/logs
+touch /opt/mtwilson/logs/mtwilson.log
+chown mtwilson:mtwilson /opt/mtwilson/logs/mtwilson.log
+touch /opt/mtwilson/logs/mtwilson-audit.log
+chown mtwilson:mtwilson /opt/mtwilson/logs/mtwilson-audit.log
 
 # use of "mtwilson config" method will be required when mtwilson setup is 
 # revised to use the "mtwilson" command itself for java setup tasks and
@@ -645,7 +934,6 @@ call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
-
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
     if [ ! glassfish_detect >/dev/null ]; then
@@ -656,10 +944,14 @@ if using_glassfish; then
         exit 1
       fi
     fi
-	
+    
     echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
     # glassfish install here
-    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    ./$glassfish_installer
+    if [ $? -ne 0 ]; then
+      echo_failure "Glassfish installation failed"
+      exit 1
+    fi
     glassfish_create_ssl_cert_prompt
     echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
     # end glassfish installer
@@ -669,9 +961,9 @@ if using_glassfish; then
 
   glassfish_detect
 
-  echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV_DIR/glassfish
-  echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV_DIR/glassfish
-  echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV_DIR/glassfish
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV/glassfish
+  echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV/glassfish
+  echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV/glassfish
 
   
   if [ -e $glassfish_bin ]; then
@@ -683,93 +975,49 @@ if using_glassfish; then
     echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
     echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
   fi
-
-  #if [ -e $glassfish_bin ]; then
-  #  echo "Increasing glassfish max thread pool size to 200..."
-  #    $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
-  #else
-  #  echo_warning "Unable to locate asadmin, please run the following command on your system to increase HTTP-max-thread-size: "
-  #  echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
-  #fi
-  
-  ### WHAT IS THIS USED FOR???
-  #if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
-  #  # glassfish init code here
-  #  mtwilson glassfish-sslcert
-  #  # glassfish init end
-  #else
-  #  echo_warning "Skipping webservice init"
-  #fi
-  # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
-    if [ ! tomcat_detect >/dev/null ]; then
-      portInUse=`netstat -lnput | grep -E "8080|8443"`
-      if [ -n "$portInUse" ]; then 
-        #tomcat ports in use. exit install
-        echo_failure "Tomcat ports in use. Aborting install."
-        exit 1
-      fi
+    ./$tomcat_installer
+    if [ $? -ne 0 ]; then
+      echo_failure "Tomcat installation failed"
+      exit 1
     fi
-
-    # tomcat install here
-    echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    ./$tomcat_installer  >> $INSTALL_LOG_FILE
     tomcat_create_ssl_cert_prompt
-    echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
-  # end tomcat install
   else
     echo_warning "Relying on an existing Tomcat installation"
   fi
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${MTWILSON_HOME}
  
   tomcat_detect
 
-  echo "TOMCAT_HOME=$TOMCAT_HOME" > $MTWILSON_ENV_DIR/tomcat
-  echo "TOMCAT_CONF=$TOMCAT_CONF" >> $MTWILSON_ENV_DIR/tomcat
-  echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV_DIR/tomcat
-  echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV_DIR/tomcat
-  
-  ### WHAT IS THIS USED FOR???
-  #if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
-  #  # tomcat init code here
-  #  #mtwilson tomcat-sslcert
-  #  if tomcat_running; then 
-  #    echo "Restarting Tomcat ..."
-  #    tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-  #  else
-  #    echo "Starting Tomcat ..."
-  #    tomcat_start >> $INSTALL_LOG_FILE 2>&1
-  #  fi
-  ## opt_tomcat init end
-  #else
-  #  echo_warning "Skipping webservice init"
-  #fi
- 
+  echo "TOMCAT_HOME=$TOMCAT_HOME" > $MTWILSON_ENV/tomcat
+  echo "TOMCAT_CONF=$TOMCAT_CONF" >> $MTWILSON_ENV/tomcat
+  echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV/tomcat
+  echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV/tomcat
 fi
-
 
 if [[ -n "opt_attservice"  && -f "$attestation_service" ]]; then
   echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
-  echo "mtwilson service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "mtwilson service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_mangservice" && -f "$management_service"  ]]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
-  echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Management Service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_wlmservice" && -f "$whitelist_service" ]]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
-  echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Whitelist Service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_mtwportal" && "$mtw_portal" ]]; then
-  echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
+  echo "Installing Mtw Combined Portal..." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
-  echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Mtw Combined Portal installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 ##############################################################################################################################################################################
@@ -786,21 +1034,16 @@ update_property_in_file "mtwilson.atag.mtwilson.baseurl" $CONFIG_DIR/mtwilson.pr
 prompt_with_default MTWILSON_TAG_ADMIN_USERNAME "Mt Wilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin}
 prompt_with_default_password MTWILSON_TAG_ADMIN_PASSWORD "Mt Wilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASSWORD
 
-MTWILSON_TAG_API_USERNAME=tagservice
-MTWILSON_TAG_API_PASSWORD=$(generate_password 16)
+MTWILSON_TAG_API_USERNAME=${MTWILSON_TAG_API_USERNAME:-"tagservice"}
+MTWILSON_TAG_API_PASSWORD=${MTWILSON_TAG_API_PASSWORD:-$(generate_password 16)}
 update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USERNAME"
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
-#prompt_with_default MTWILSON_TAG_KEYSTORE "Mt Wilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
-#prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASSWORD "Mt Wilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASSWORD
-#prompt_with_default_password MTWILSON_TAG_KEY_PASSWORD "Mt Wilson Tag Key Password: " $MTWILSON_TAG_KEY_PASSWORD
-#update_property_in_file "mtwilson.atag.keystore" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
-#update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASSWORD"
-#update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASSWORD"
-
 if [ ! -z "$opt_portals" ]; then
-  MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
-  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson -name tag`
+  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$DEFAULT_MTWILSON_TAG_HTML5_DIR}
+  echo "MTWILSON_TAG_HTML5_DIR: $MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
+  echo "DEFAULT_MTWILSON_TAG_HTML5_DIR: $DEFAULT_MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
   if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
 fi
 
@@ -822,14 +1065,6 @@ update_property_in_file "tag.provision.xml.encryption.password" $CONFIG_DIR/mtwi
 update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "$TAG_VALIDITY_SECONDS"
 update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_ISSUER_DN"
 
-#if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
-#  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-#  keytool=${JAVA_HOME}/bin/keytool
-#  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASSWORD -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASSWORD -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
-#  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASSWORD
-#  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -outform pem >> $CONFIG_DIR/tag-cacerts.pem
-#fi
-
 #call_setupcommand create-database
 call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 call_tag_setupcommand setup-manager initialize-db --force
@@ -837,17 +1072,13 @@ call_tag_setupcommand setup-manager initialize-db --force
 call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
-call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
+call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_TAG_URL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
 if [ -n "$MTWILSON_TAG_ADMIN_PASSWORD" ]; then
   export MTWILSON_TAG_ADMIN_PASSWORD
-  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificates:create tag_certificates:deploy tag_certificates:import tag_certificates:search tpm_passwords:retrieve hosts:search
+  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificate_requests:* tag_certificates:* tag_kv_attributes:* tag_selection_kv_attributes:* tag_selections:* tpm_passwords:retrieve hosts:search host_attestations:*
 else
   echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASSWORD is not set"
 fi
-
-#user is approved directly in TagCreateMtWilsonClient now
-#fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
-#call_tag_setupcommand ApproveMtWilsonClient --fingerprint="$fingerprint"
 
 #for tag encryption
 mkdir -p /opt/mtwilson/features/tag/var
@@ -861,26 +1092,26 @@ chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
 
 
 if [ ! -z "$opt_logrotate" ]; then
-  echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
+  echo "Installing Log Rotate..." | tee -a  $INSTALL_LOG_FILE
   ./$logrotate_installer
-  echo "Log Rotate installed..." | tee -a  $INSTALL_LOG_FILE
+  #echo "Log Rotate installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
- echo "/usr/share/glassfish4/glassfish/domains/domain1/logs/server.log {
-	missingok
-	notifempty
-	rotate $LOG_OLD
-	size $LOG_SIZE
-	$LOG_ROTATION_PERIOD
-	$LOG_COMPRESS
-	$LOG_DELAYCOMPRESS
-	$LOG_COPYTRUNCATE
+ echo "/opt/mtwilson/glassfish4/glassfish/domains/domain1/logs/server.log {
+    missingok
+    notifempty
+    rotate $LOG_OLD
+    size $LOG_SIZE
+    $LOG_ROTATION_PERIOD
+    $LOG_COMPRESS
+    $LOG_DELAYCOMPRESS
+    $LOG_COPYTRUNCATE
 }
 
-/usr/share/apache-tomcat-7.0.34/logs/catalina.out {
+/opt/mtwilson/share/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
 	notifempty
 	rotate $LOG_OLD
@@ -894,58 +1125,58 @@ fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
-  ./$monit_installer  >> $INSTALL_LOG_FILE 
-  echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
+  ./$monit_installer  #>> $INSTALL_LOG_FILE
+  #echo "Monit installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
-mkdir -p /etc/monit/conf.d
+mkdir -p /opt/mtwilson/monit/conf.d
 
 # create the monit rc files
 
 #glassfish.mtwilson
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
+  if [ ! -a /opt/mtwilson/monit/conf.d/glassfish.mtwilson ]; then
     echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-      check file gf_installed with path "/usr/share/glassfish4/bin/asadmin"
+      check file gf_installed with path "/opt/mtwilson/glassfish4/bin/asadmin"
       group gf_server
       if does not exist then unmonitor
 
       # MtWilson Glassfish services
       check host mtwilson-version-glassfish with address 127.0.0.1
       group gf_server
-      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
       if 3 restarts within 10 cycles then timeout
-      depends on gf_installed" > /etc/monit/conf.d/glassfish.mtwilson
+      depends on gf_installed" > /opt/mtwilson/monit/conf.d/glassfish.mtwilson
   fi
 fi
 
 #tomcat.mtwilson
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
+  if [ ! -a /opt/mtwilson/monit/conf.d/tomcat.mtwilson ]; then
     echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-      check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
+      check file tc_installed with path \"/opt/mtwilson/share/apache-tomcat-7.0.34/bin/catalina.sh\"
       group tc_server
       if does not exist then unmonitor
     
       # MtWilson Tomcat services
       check host mtwilson-version-tomcat with address 127.0.0.1
       group tc_server
-      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
       if 3 restarts within 10 cycles then timeout
-      depends on tc_installed" > /etc/monit/conf.d/tomcat.mtwilson
+      depends on tc_installed" > /opt/mtwilson/monit/conf.d/tomcat.mtwilson
   fi
 fi
 
 if [ -z "$NO_POSTGRES_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
+  if [ ! -a /opt/mtwilson/monit/conf.d/postgres.mtwilson ]; then 
     echo "check process postgres matching \"postgresql\"
       group pg-db
       start program = \"/usr/sbin/service postgresql start\"
@@ -958,12 +1189,12 @@ if [ -z "$NO_POSTGRES_MONIT" ]; then
   
       check file pg_bin with path \"/usr/bin/psql\"
       group pg-db
-      if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
+      if does not exist then unmonitor" > /opt/mtwilson/monit/conf.d/postgres.mtwilson
   fi
 fi
 
 if [ -z "$NO_MYSQL_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+  if [ ! -a /opt/mtwilson/monit/conf.d/mysql.mtwilson ]; then 
     echo "check process mysql matching \"mysql\"
       group mysql_db
       start program = \"/usr/sbin/service mysql start\"
@@ -979,7 +1210,7 @@ if [ -z "$NO_MYSQL_MONIT" ]; then
 
       check file mysql_rc with path /etc/init.d/mysql
       group mysql_db
-      if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
+      if does not exist then unmonitor" > /opt/mtwilson/monit/conf.d/mysql.mtwilson
   fi
 fi
 
@@ -991,43 +1222,87 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
-#Register mtwilson as a startup script, remove previous service startup scripts if they exist
-register_startup_script /usr/local/bin/mtwilson mtwilson >> $INSTALL_LOG_FILE
-remove_startup_script "asctl" >> $INSTALL_LOG_FILE
-remove_startup_script "msctl" >> $INSTALL_LOG_FILE
-remove_startup_script "mtwilson-portal" >> $INSTALL_LOG_FILE
-remove_startup_script "tdctl" >> $INSTALL_LOG_FILE
-remove_startup_script "wlmctl" >> $INSTALL_LOG_FILE
-
-#Save variables to properties file
-#if using_mysql; then   
-#  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-#elif using_postgres; then
-#  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+## setup mtwilson, unless the NOSETUP variable is defined
+#if [ -z "$MTWILSON_NOSETUP" ]; then
+#
+#  # the master password is required
+#  if [ -z "$MTWILSON_PASSWORD" ]; then
+#    echo_failure "Master password required in environment variable MTWILSON_PASSWORD"
+#    echo 'To generate a new master password, run the following command:
+#
+#  MTWILSON_PASSWORD=$(mtwilson generate-password) && echo MTWILSON_PASSWORD=$MTWILSON_PASSWORD
+#
+#The master password must be stored in a safe place, and it must
+#be exported in the environment for all other mtwilson commands to work.
+#
+#LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
+#
+#After you set MTWILSON_PASSWORD, run the following command to complete installation:
+#
+#  mtwilson setup
+#
+#'
+#    exit 1
+#  fi
+#
+#  mtwilson config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson}" >/dev/null
+#  mtwilson setup
 #fi
 
+# delete the temporary setup environment variables file
+rm -f $MTWILSON_ENV/mtwilson-setup
+
+# ensure the mtwilson owns all the content created during setup
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_SERVICE_PROPERTY_FILES; do
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
+done
+
+## start the server, unless the NOSETUP variable is defined
+#if [ -z "$MTWILSON_NOSETUP" ]; then mtwilson start; fi
+
+#Register mtwilson as a startup script
+if [ ! $(/sbin/initctl list | grep mtwilson) ]; then
+  if [ "$(whoami)" == "root" ]; then
+    register_startup_script /usr/local/bin/mtwilson mtwilson
+  else
+    echo_warning "You must be root to register mtwilson startup script"
+  fi
+fi
+
+if [ "$(whoami)" == "root" ]; then     
+  #remove previous service startup scripts if they exist
+  remove_startup_script "asctl" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "msctl" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "mtwilson-portal" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "tdctl" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "wlmctl" >>$INSTALL_LOG_FILE 2>&1
+fi
+
 # last chance to set permissions
-chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
+chmod 600 "$MTWILSON_CONFIGURATION/*.properties" 2>/dev/null
+chmod 700 "/var/opt/intel" "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
 
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
-  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
-  update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
-  update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+  update_property_in_file "mtwilson.webserver.vendor" "$MTWILSON_CONFIGURATION/mtwilson.properties" "glassfish"
+  update_property_in_file "glassfish.admin.username" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_USERNAME"
+  update_property_in_file "glassfish.admin.password" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_PASSWORD"
   glassfish_admin_user
-  glassfish_restart
+  #glassfish_restart
+  /opt/mtwilson/bin/mtwilson restart
 elif using_tomcat; then
-  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
-  update_property_in_file "tomcat.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
-  update_property_in_file "tomcat.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
-  tomcat_restart
+  update_property_in_file "mtwilson.webserver.vendor" "$MTWILSON_CONFIGURATION/mtwilson.properties" "tomcat"
+  update_property_in_file "tomcat.admin.username" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_USERNAME"
+  update_property_in_file "tomcat.admin.password" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_PASSWORD"
+  #tomcat_restart
+  /opt/mtwilson/bin/mtwilson restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
 if [ -n "$INSTALLED_MARKER_FILE" ]; then
  touch $INSTALLED_MARKER_FILE
 fi
-
-
-
+if [ "$(whoami)" != "root" ]; then 
+  echo_warning "Please relogin to use mtwilson utilities"
+fi
