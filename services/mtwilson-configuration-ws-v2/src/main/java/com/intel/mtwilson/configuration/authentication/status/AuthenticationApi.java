@@ -20,15 +20,12 @@ import javax.ws.rs.core.MediaType;
 
 @V2
 @Path("/authentication-status")
-public class AuthenticationApi{
-    
+public class AuthenticationApi {
+
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    
-    public String Authentication_status() throws Exception{
-            
-    HostFilterCheck authentication_status = new HostFilterCheck();
-    return authentication_status.authentication_check();
+    public String authenticationStatus() throws Exception {
+        HostFilterCheck authenticationStatus = new HostFilterCheck();
+        return authenticationStatus.authentication_check();
     }
-    
 }
