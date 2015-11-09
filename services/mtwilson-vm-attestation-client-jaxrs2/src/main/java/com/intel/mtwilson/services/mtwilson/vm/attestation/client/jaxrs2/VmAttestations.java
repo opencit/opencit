@@ -289,11 +289,14 @@ public class VmAttestations extends MtWilsonClient {
      * </pre>
      */        
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
-        if (properties == null || properties.getProperty("mtwilson.api.keystore") == null || properties.getProperty("mtwilson.api.keystore").isEmpty()
-                || properties.getProperty("mtwilson.api.keystore.password") == null || properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
+        String mtwilsonApiKeystore = properties.getProperty("mtwilson.api.keystore");
+        String mtwilsonApiKeystorePassword = properties.getProperty("mtwilson.api.keystore.password");
+        
+        if (properties == null || mtwilsonApiKeystore == null || mtwilsonApiKeystore.isEmpty()
+                || mtwilsonApiKeystorePassword == null || mtwilsonApiKeystorePassword.isEmpty()) {
             return null;
         }
-        SimpleKeystore keystore = new SimpleKeystore(new File(properties.getProperty("mtwilson.api.keystore")), properties.getProperty("mtwilson.api.keystore.password"));
+        SimpleKeystore keystore = new SimpleKeystore(new File(mtwilsonApiKeystore), mtwilsonApiKeystorePassword);
         X509Certificate[] trustedSamlCertificates;
         try {
             trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
