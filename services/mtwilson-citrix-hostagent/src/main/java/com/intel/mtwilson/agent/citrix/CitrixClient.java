@@ -18,6 +18,7 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
@@ -440,10 +441,11 @@ public class CitrixClient {
     private HashMap<String, Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
         HashMap<String, Pcr> pcrMp = new HashMap<String, Pcr>();
         log.debug("verifyQuoteAndGetPcr for session " + sessionId);
-        String command = String.format("%s -c %s %s %s", aikverifyCmd, aikverifyhomeData + File.separator + getNonceFileName(sessionId),
-                aikverifyhomeData + File.separator + getCertFileName(sessionId),
-                aikverifyhomeData + File.separator + getQuoteFileName(sessionId));
-
+        String command = String.format("%s -c %s %s %s",
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getCertFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
         log.debug("Command: " + command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
 
