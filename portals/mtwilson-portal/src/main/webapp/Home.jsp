@@ -270,7 +270,7 @@
             <span id="alert_delete_host" data-i18n="alert.delete_host" style="display: none;">Are you sure you want to delete this host?</span>
         </div>
         <div class="footer">
-            <p>&copy; 2012-2014 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
+            <p>&copy; 2012-2015 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
         </div>
 </body>
 </html>
