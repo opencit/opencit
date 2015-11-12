@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <configuration>
-    <property name="USER_HOME" value="/var/log" />
+    <property name="USER_HOME" value="/opt/mtwilson/logs" />
 
     <appender name="AuditFile" class="ch.qos.logback.core.FileAppender">        
         <!-- the filter element -->

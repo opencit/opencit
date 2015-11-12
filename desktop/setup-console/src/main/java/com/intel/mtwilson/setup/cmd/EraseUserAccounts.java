@@ -19,6 +19,9 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.tag.dao.TagJdbi;
+import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
+import com.intel.mtwilson.tag.model.File;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
@@ -40,6 +43,7 @@ public class EraseUserAccounts implements Command {
 
     private Configuration options = null;
     private HashSet<String> keepUsers = new HashSet<>();
+    private String MTWILSON_CLIENT_NAME="mtwilson-client-keystore";
 
     @Override
     public void setOptions(Configuration options) {
@@ -85,6 +89,7 @@ public class EraseUserAccounts implements Command {
             deletePortalUsers();
             deleteApiClients();
             deleteUsers();
+            deleteClientKeystore("tagservice", MTWILSON_CLIENT_NAME);
         }
     }
     
@@ -260,6 +265,17 @@ public class EraseUserAccounts implements Command {
             }
         } catch (Exception ex) {
             System.err.println("Exception occured: \r\n\r\n" + ex.toString());
+        }
+    }
+    
+    private void deleteClientKeystore(String username, String keystorename) throws Exception {
+        try (FileDAO fileDao = TagJdbi.fileDao()) {
+            File keystoreFile = fileDao.findByName(keystorename);
+            if (keystoreFile != null) {
+                if (isDeleteAll() || (!isDeleteAll() && !keepUserName(username))) {
+                    fileDao.delete(keystoreFile.getId());
+                }
+            }
         }
     }
 }

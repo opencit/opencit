@@ -3,6 +3,26 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
+
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
+echo "ATTESTATION SERVICE setup.sh" >>$INSTALL_LOG_FILE
+
+# this script is only run as part of the larger installation, so
+# the following variables must be defined. exit early if there is
+# a problem.
+if [ -z "$MTWILSON_HOME" ]; then
+  echo_failure "Missing environment variable: MTWILSON_HOME"
+  exit 1
+fi
+if [ -z "$MTWILSON_USERNAME" ]; then
+  echo_failure "Missing environment variable: MTWILSON_USERNAME"
+  exit 1
+fi
+
 # SCRIPT CONFIGURATION:
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=wlm-service
@@ -11,9 +31,6 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 #package_install_filename=${package_name}.install
 
-# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
 wlmctl=`which wlmctl 2>/dev/null`
@@ -37,6 +54,7 @@ cp functions "${package_dir}"
 #cp sql/*.sql "${package_dir}"/database/
 chmod 600 "${package_name}.properties"
 cp "${package_name}.properties" "${package_dir}/${package_name}.properties.example"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "${package_dir}"
 
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
@@ -47,7 +65,7 @@ if [ -f "${package_config_filename}" ]; then
 else
   cp "${package_name}.properties" "${package_config_filename}"
 fi
-
+chown $MTWILSON_USERNAME:$MTWILSON_USERNAME "${package_config_filename}"
 
 
 # SCRIPT EXECUTION
@@ -72,11 +90,16 @@ fi
 
 
 # copy control script to /usr/local/bin and finish setup
-mkdir -p /usr/local/bin
-cp wlmctl.sh /usr/local/bin/wlmctl
-chmod +x /usr/local/bin/wlmctl
-/usr/local/bin/wlmctl setup
-#register_startup_script /usr/local/bin/wlmctl wlmctl
+mkdir -p /opt/mtwilson/bin
+cp wlmctl.sh /opt/mtwilson/bin/wlmctl
+chmod +x /opt/mtwilson/bin/wlmctl
+
+#while changing owner of ${intel_conf_dir} need to put '/' at the end as ${intel_conf_dir} is a symbolic link
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}/
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
+
+/opt/mtwilson/bin/wlmctl setup
+#register_startup_script /opt/mtwilson/bin/wlmctl wlmctl
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

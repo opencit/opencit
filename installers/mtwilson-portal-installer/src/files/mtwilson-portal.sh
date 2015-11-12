@@ -12,6 +12,8 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 package_keystore_users_dir=/var/opt/intel/${package_name}/users
+scripts_dir=/opt/mtwilson/share/scripts
+config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
@@ -20,8 +22,8 @@ webservice_application_name=mtwilson-portal
 #java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f "/usr/local/share/mtwilson/util/functions" ]; then . "/usr/local/share/mtwilson/util/functions"; else echo "Missing file: /usr/local/share/mtwilson/util/functions"; exit 1; fi
-if [ -f "/usr/local/share/mtwilson/util/version" ]; then . "/usr/local/share/mtwilson/util/version"; else echo_warning "Missing file: /usr/local/share/mtwilson/util/version"; fi
+if [ -f "${scripts_dir}/functions" ]; then . "${scripts_dir}/functions"; else echo "Missing file: ${scripts_dir}/functions"; exit 1; fi
+if [ -f "${config_dir}/version" ]; then . "${config_dir}/version"; else echo_warning "Missing file: ${config_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null
@@ -58,11 +60,11 @@ bootstrap_first_user() {
   fi
   local datestr=`date +%Y-%m-%d.%H%M`
 
-#  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
   prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
-  export MC_FIRST_USERNAME="$MC_FIRST_USERNAME"
   prompt_with_default_password MC_FIRST_PASSWORD
-  export MC_FIRST_PASSWORD="$MC_FIRST_PASSWORD"
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
+
   $mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${MTWILSON_API_BASEURL}" "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
@@ -76,6 +78,7 @@ configure_keystore_dir() {
   #  update_property_in_file mtwilson.tdbp.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
   #fi
   mkdir -p ${package_keystore_users_dir}
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_keystore_users_dir}
 }
 
 
@@ -109,7 +112,6 @@ setup_interactive_install() {
       mysql_configure_connection "${package_config_filename}" mountwilson.mc.db
       mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-      mysql_create_database
       # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
       #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
@@ -135,12 +137,14 @@ setup_interactive_install() {
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
-      glassfish_start_report
+      #glassfish_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   elif [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
-      tomcat_start_report
+      #tomcat_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   fi  
  
@@ -250,7 +254,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-        rm /usr/local/bin/${script_name}
+        rm -f /usr/local/bin/${script_name} 2>/dev/null
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"

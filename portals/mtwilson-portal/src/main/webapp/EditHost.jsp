@@ -39,9 +39,6 @@
 		</div>
 			<div id="mleMessage" class="errorDiv"></div>
 		</div>
-		<div id="dialog-confirm" title="Delete Host?" style="display:none;">
-                	<p>Are you sure you want to delete this host?</p>
-        	</div>
 	</div>
 	<script type="text/javascript" src="Scripts/editHost.js"></script>
 </body>

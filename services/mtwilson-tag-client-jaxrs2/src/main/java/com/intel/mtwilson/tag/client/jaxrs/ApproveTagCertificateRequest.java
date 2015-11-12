@@ -43,7 +43,7 @@ public class ApproveTagCertificateRequest extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://192.168.1.101:8181/mtwilson/v2/approve-tag-certificate-request
+     * https://192.168.1.101:8181/mtwilson/v2/rpc/approve-tag-certificate-request
      * Input: {"certificate_request_id":"187ec902-c6c6-4dfb-adb4-f240099aa4b0","certificate":"MIIO....ic="}
      * </pre>
      * @mtwSampleApiCall
