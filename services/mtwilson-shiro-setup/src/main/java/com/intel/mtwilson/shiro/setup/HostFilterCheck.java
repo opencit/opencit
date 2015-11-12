@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.shiro.config.Ini;
+import org.apache.shiro.config.Ini.Section;
 
 /**
  *
@@ -42,22 +43,49 @@ public class HostFilterCheck extends LocalSetupTask {
         }
 
         try {
-            String hostfilterCheck = ShiroFile.getSectionProperty("main", "hostAllow");
-            log.debug("String value of hostfilter : " + hostfilterCheck);
-            if (hostfilterCheck == null) {
+
+            boolean checkValue = getKeyforValue(ShiroFile);
+            if (checkValue) {
+                return "Authentication Bipass Enabled";
+            } else {
                 return "Authentication Bipass Disabled";
             }
 
-            String hostfilterValue = "com.intel.mtwilson.shiro.authc.host.HostAuthenticationFilter";
-
-            if (hostfilterValue.equals(hostfilterCheck)) {
-                return "Authentication Bipass Enabled";
-            }
-
-            return "Authentication Bipass Disabled";
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             return "Authentication Bipass Disabled";
         }
+    }
+
+    public boolean getKeyforValue(Ini ShiroFile) {
+
+        try {
+
+            for (String sectionName : ShiroFile.keySet()) {
+                Section section = ShiroFile.get(sectionName);
+                String HostfilterValue = "com.intel.mtwilson.shiro.authc.host.IniHostRealm";
+
+                for (String KeyValue : section.keySet()) {
+                    log.debug("\t" + KeyValue + "=" + section.get(KeyValue));
+                    String ValueSet = section.get(KeyValue);
+                    if (ValueSet.equals(HostfilterValue)) {
+                        String AllowValue = KeyValue + ".allow";
+                        String CheckAllowed = ShiroFile.getSectionProperty(sectionName, AllowValue);
+
+                        if (CheckAllowed != null) {
+                            return true;
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+                return false;
+
+            }
+        } catch (Exception ex) {
+            log.debug("Error during reading the INI file");
+            return false;
+        }
+        return false;
     }
 
     @Override
