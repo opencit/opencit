@@ -15,7 +15,6 @@
     </parent>
   
     <modules>
-        <module>java-backport-1.6-to-1.5</module>
         <module>mtwilson-api</module>
         <module>mtwilson-client-java6</module>
         <module>mtwilson-client-java7</module>
