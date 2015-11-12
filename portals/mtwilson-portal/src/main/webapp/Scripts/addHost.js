@@ -152,7 +152,8 @@ function SetRequired(element) {
 //                $('#openSourceStringElement').find('input').each(function() {
 //                    $(this).parent().append(reqStr);
 //                });
-                $('#openSourceStringElement').show();
+                $('#opensource_credentials').show();
+                $('#openSourceStringElement').hide();
 		$('#citrixStringElement').hide();
                 $('#MainContent_tbHostPort').val("1443");
 	}else if(isVmware == 1){  // VMWARE
@@ -167,7 +168,8 @@ function SetRequired(element) {
 		//$('#MainContent_tbHostIP').parent().find('.validationErrorDiv').remove();
 		$('#MainContent_tbHostPort').parent().find('.validationErrorDiv').remove();
 		$('#hostPortDisplayDiv').hide();
-                $('#openSourceStringElement').hide();      
+                $('#openSourceStringElement').hide();
+                $('#opensource_credentials').hide();
 		$('#citrixStringElement').hide();
 	}else { //CITRIX
                 $('#hostPortDisplayDiv').show();
@@ -182,7 +184,8 @@ function SetRequired(element) {
                     $(this).parent().append(reqStr);
                 });
                 $('#citrixStringElement').show();
-                $('#openSourceStringElement').hide();                      
+                $('#openSourceStringElement').hide(); 
+                $('#opensource_credentials').hide();
                 $('#MainContent_tbHostPort').val("443");
     }
 }
@@ -202,6 +205,19 @@ function hostDataVoObbject(hostId,hostName,hostIPAddress,hostPort,hostDescriptio
 	this.location =location;
 	this.oemName =oemName;
 	this.vCenterDetails =vCenterDetails;
+}
+
+function fnShowLoginCredentials() {
+    str = "<a href=\"#\" onclick=\"fnShowLoginCredentials()\">";
+    if ((document.getElementById('opensource_credentials').innerHTML).indexOf("Show login credentials") > 0) {
+        $('#openSourceStringElement').show();
+        str = str + "Hide login credentials";        
+    } else {
+        $('#openSourceStringElement').hide();
+        str = str + "Show login credentials";
+    }
+    str = str + "</a>";
+    document.getElementById('opensource_credentials').innerHTML = str;
 }
 
 function chechAddHostValidation() {

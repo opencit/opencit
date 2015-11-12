@@ -38,9 +38,6 @@
 			<div id="messageSpace"></div>
 			<div id="errorEditOEM" class="errorMessage"></div>
 		</div>
-                <div id="dialog-confirm" title="Delete OEM?" style="display:none;">
-                        <p>Are you sure you want to delete this OEM?</p>
-                </div>
 	</div>
 	<script type="text/javascript" src="Scripts/EditOEM.js"></script>
 </body>

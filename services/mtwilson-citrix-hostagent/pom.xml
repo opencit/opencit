@@ -71,6 +71,10 @@
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-exec</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trustagent-model</artifactId>
             <version>${project.version}</version>

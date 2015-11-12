@@ -106,6 +106,69 @@ sed_escape() {
  echo $(echo $1 | sed -e 's/[()&#%$+]/\\&/g' -e 's/[/]/\\&/g')
 }
 
+# FUNCTION LIBRARY: This function returns either rhel fedora ubuntu suse
+function getFlavour()
+{
+    flavour=""
+    grep -c -i ubuntu /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="ubuntu"
+    fi
+    grep -c -i "red hat" /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="rhel"
+    fi
+    grep -c -i fedora /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="fedora"
+    fi
+    grep -c -i suse /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="suse"
+    fi
+    if [ "$flavour" == "" ] ; then
+            echo "Unsupported linux flavor, Supported versions are ubuntu, rhel, fedora"
+            exit
+    else
+            echo $flavour
+    fi
+}
+
+function getUserProfileFile()
+{
+    flavor=$(getFlavour)
+    case $flavor in
+    "ubuntu" )
+        file=~/.profile ;;
+    "rhel" )
+        file=~/.bash_profile ;;
+    "fedora" )
+        file=~/.bash_profile ;;
+    "suse" )
+        file=~/.bash_profile ;;    
+    esac
+	#if [ ! -f $file ]; then
+	#   touch $file
+	#fi
+	echo $file
+}
+
+#FUNCTION LIBRARY: appends data to a file
+#requires two arguments first argument is data that needs to be appended and second argument is file path
+function appendToUserProfileFile()
+{
+    if [ "$#" == 2 ]; then
+	 file=$2
+	else
+	 file=$(getUserProfileFile)
+	fi
+    if [ ! -f $file ] || ! grep -q  "$1" $file; then
+       echo "$1" >> $file
+	else
+	   echo "$1 Already there in user profile"
+    fi
+}
+
 ### FUNCTION LIBRARY: terminal display functions
 
 # move to column 60:    term_cursor_movex $TERM_STATUS_COLUMN
@@ -153,35 +216,38 @@ echo_warning() {
 
 function validate_path_configuration() {
   local file_path="${1}"
-  if [[ "$file_path" == *..* ]]; then
-    echo_warning "Path specified is not absolute: $file_path"
+  if [ -z "$file_path" ]; then
+    echo_failure "Path is missing"
+    return 1
   fi
-  file_path=`readlink -f "$file_path"` #make file path absolute
+  file_path=`readlink -m "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/etc/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
-  if [[ -f "$file_path" ]]; then
-    chmod 600 "${file_path}"
+  if [ -f "$file_path" ] || [ -d "$file_path" ]; then
+    echo "validate_path_configuration: chmod 600 $file_path" >>$INSTALL_LOG_FILE
+    chmod 600 "${file_path}" >>$INSTALL_LOG_FILE 2>&1
   fi
   return 0
 }
 
 function validate_path_data() {
   local file_path="${1}"
-  if [[ "$file_path" == *..* ]]; then
-    echo_warning "Path specified is not absolute: $file_path"
+  if [ -z "$file_path" ]; then
+    echo_failure "Path is missing"
+    return 1
   fi
-  file_path=`readlink -f "$file_path"` #make file path absolute
+  file_path=`readlink -m "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/var/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Data path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
-  if [[ -f "$file_path" ]]; then
+  if [ -f "$file_path" ] || [ -d "$file_path" ]; then
     chmod 600 "${file_path}"
   fi
   return 0
@@ -189,17 +255,18 @@ function validate_path_data() {
 
 function validate_path_executable() {
   local file_path="${1}"
-  if [[ "$file_path" == *..* ]]; then
-    echo_warning "Path specified is not absolute: $file_path"
+  if [ -z "$file_path" ]; then
+    echo_failure "Path is missing"
+    return 1
   fi
-  file_path=`readlink -f "$file_path"` #make file path absolute
+  file_path=`readlink -m "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/usr/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Executable path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
-  if [[ -f "$file_path" ]]; then
+  if [ -f "$file_path" ] || [ -d "$file_path" ]; then
     chmod 755 "${file_path}"
   fi
   return 0
@@ -377,9 +444,9 @@ prompt_with_default() {
   eval current_value="\$$resultvarname"
   eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
-  if [ -n "${!resultvarname}" ]; then
+  if [ -n "$current_value" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
-    echo "$userprompt [$default_value] ${!resultvarname:-$default_value}"
+    echo "$userprompt [$default_value] ${current_value:-$default_value}"
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
@@ -457,8 +524,8 @@ wait_until_file_exists() {
 
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
 using_glassfish() {
-  if [[ -n "$WEBSERVER_VENDOR" ]]; then
-    if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
+  if [[ -n "$WEBSERVICE_VENDOR" ]]; then
+    if [[ "${WEBSERVICE_VENDOR}" == "glassfish" ]]; then
       return 0
     else
       return 1
@@ -474,8 +541,8 @@ using_glassfish() {
   fi
 }
 using_tomcat() {
-  if [[ -n "$WEBSERVER_VENDOR" ]]; then
-    if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then
+  if [[ -n "$WEBSERVICE_VENDOR" ]]; then
+    if [[ "${WEBSERVICE_VENDOR}" == "tomcat" ]]; then
       return 0
     else
       return 1
@@ -617,6 +684,7 @@ backup_file() {
 read_property_from_file() {
   local property="${1}"
   local filename="${2}"
+  echo "Reading $property from $filename..." >>$INSTALL_LOG_FILE
   if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     local found=`cat "$filename" | grep "^$property"`
@@ -636,6 +704,7 @@ update_property_in_file() {
   local value="${3}"
   local encrypted="false"
 
+  echo "Updating $property in $filename to $value..." >>$INSTALL_LOG_FILE
   if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     # Decrypt if needed
@@ -771,26 +840,45 @@ register_startup_script() {
   
   # try to install it as a startup script
   if [ -d /etc/init.d ]; then
-    local prevdir=`pwd`
-    cd /etc/init.d
-    if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
-    ln -s "${absolute_filename}" "${startup_name}"
-    cd "$prevdir"
+    (
+      cd /etc/init.d
+      if [ -f "${startup_name}" ] || [ -L "${startup_name}" ]; then rm -f "${startup_name}"; fi
+      ln -s "${absolute_filename}" "${startup_name}"
+    )
   fi
 
   # RedHat and SUSE
-  chkconfig=`which chkconfig  2>/dev/null`
+  chkconfig=`which chkconfig 2>/dev/null`
   if [ -n "$chkconfig" ]; then
     $chkconfig --del "${startup_name}"  2>/dev/null
     $chkconfig --add "${startup_name}"  2>/dev/null
   fi
 
   # Ubuntu
-  updatercd=`which update-rc.d  2>/dev/null`
+  updatercd=`which update-rc.d 2>/dev/null`
   if [ -n "$updatercd" ]; then
     $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
+
+  # systemd
+  systemctlCommand=`which systemctl 2>/dev/null`
+  if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
+    # root cannot requiretty; script "sudo -u" command will error out if a tty is required
+    rootHasRequireTTY=$(cat /etc/sudoers.d/root 2>/dev/null | grep "requiretty")
+    if [ -z "$rootHasRequireTTY" ]; then
+      echo -e "Defaults:root "'!'"requiretty\n" >> "/etc/sudoers.d/root"
+    fi
+
+    if [ -f "/etc/systemd/system/${startup_name}.service" ]; then
+      rm -f "/etc/systemd/system/${startup_name}.service"
+    fi
+    echo -e "[Unit]\nDescription=${startup_name}\n\n[Service]\nType=forking\nExecStart=${absolute_filename} start\nExecStop=${absolute_filename} stop\n\n[Install]\nWantedBy=multi-user.target\n" > "/etc/systemd/system/${startup_name}.service"
+    chmod 664 "/etc/systemd/system/${startup_name}.service"
+    "$systemctlCommand" enable "${startup_name}.service"
+    "$systemctlCommand" daemon-reload
+  fi
+
 }
 
 # Parameters:
@@ -800,20 +888,30 @@ remove_startup_script() {
   shift;
 
   # RedHat and SUSE
-  chkconfig=`which chkconfig  2>/dev/null`
+  chkconfig=`which chkconfig 2>/dev/null`
   if [ -n "$chkconfig" ]; then
     $chkconfig --del "${startup_name}"  2>/dev/null
   fi
 
   # Ubuntu
-  updatercd=`which update-rc.d  2>/dev/null`
+  updatercd=`which update-rc.d 2>/dev/null`
   if [ -n "$updatercd" ]; then
     $updatercd -f "${startup_name}" remove 2>/dev/null
   fi
-  
-  # try to install it as a startup script
+
+  # systemd
+  systemctlCommand=`which systemctl 2>/dev/null`
+  if [ -n "$systemctlCommand" ]; then
+    "$systemctlCommand" disable "${startup_name}.service"
+    "$systemctlCommand" daemon-reload
+  fi
+  if [ -f "/etc/systemd/system/${startup_name}.service" ]; then
+    rm -f "/etc/systemd/system/${startup_name}.service"
+  fi
+
+  # try to remove startup script
   if [ -d "/etc/init.d" ]; then
-    rm "/etc/init.d/${startup_name}" 2>/dev/null
+    rm -f "/etc/init.d/${startup_name}" 2>/dev/null
   fi
 }
 
@@ -836,6 +934,27 @@ auto_install() {
         yum -y install $yum_packages
   elif [[ -n "$aptget" && -n "$apt_packages" ]]; then
         apt-get -y install $apt_packages
+  fi
+}
+
+# echo the package names but don't do anything
+auto_install_preview() {
+  local component=${1}
+  local cprefix=${2}
+  local yum_packages=$(eval "echo \$${cprefix}_YUM_PACKAGES")
+  local apt_packages=$(eval "echo \$${cprefix}_APT_PACKAGES")
+  local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
+  local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  if [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+        echo zypper install $zypper_packages
+  elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+        echo yast -i $yast_packages
+  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+        echo yum -y install $yum_packages
+  elif [[ -n "$aptget" && -n "$apt_packages" ]]; then
+        echo apt-get -y install $apt_packages
   fi
 }
 
@@ -894,15 +1013,19 @@ my_service_install() {
 # Output:
 #   The output of "ifconfig" will be scanned for any non-loopback address and all results will be echoed
 hostaddress_list() {
-  # if you want to exclude certain categories, such as 192.168, add this after the 127.0.0.1 exclusion:  grep -v "^192.168." 
-  ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | grep -v "127.0.0.1"
+  # if you want to exclude certain categories, such as 192.168, add this after the 127.0.0.1 exclusion:  grep -v "^192.168."
+  ifconfig=$(which ifconfig 2>/dev/null)
+  ifconfig=${ifconfig:-"/sbin/ifconfig"}
+  "$ifconfig" | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | grep -v "127.0.0.1"
 }
 
 # Echo all the localhost's addresses including loopback IP address
 # Parameters: none
 # output:  10.1.71.56,127.0.0.1
 hostaddress_list_csv() {
-  ifconfig | grep -E "^\s*inet addr:" | awk '{ print $2 }' | awk -F : '{ print $2 }' | paste -d',' -s
+  ifconfig=$(which ifconfig 2>/dev/null)
+  ifconfig=${ifconfig:-"/sbin/ifconfig"}
+  "$ifconfig" | grep -E "^\s*inet addr:" | awk '{ print $2 }' | awk -F : '{ print $2 }' | paste -d',' -s
 }
 
 
@@ -932,7 +1055,7 @@ hostaddress() {
 ssh_fingerprints() {
   local has_ssh_keygen=`which ssh-keygen 2>/dev/null`
   if [ -z "$has_ssh_keygen" ]; then echo_warning "missing program: ssh-keygen"; return; fi
-  local ssh_pubkeys=`find /etc -name ssh_host_*.pub`
+  local ssh_pubkeys=`find /etc -name ssh_host_*.pub 2>/dev/null`
   for file in $ssh_pubkeys
   do
     local keybits=`ssh-keygen -lf "$file" | awk '{ print $1 }'`
@@ -1221,57 +1344,6 @@ mysql_configure_connection() {
 #      if [[ "yes" == "${should_save}" ]]; then
       mysql_write_connection_properties "${config_file}" "${prefix}"
 #      fi
-}
-
-# requires a mysql connection that can access the existing database, OR (if it doesn't exist)
-# requires a mysql connection that can create databases and grant privileges
-# call mysql_configure_connection before calling this function
-mysql_create_database() {
-
-  #we first need to find if the user has specified a different port than the once currently configured for mysql
-  # find the my.conf location
-  mysql_cnf=`find / -name my.cnf 2>/dev/null | head -n 1`
-  #echo "MySQL configuration file is located at $mysql_cnf"
-  # check the current port that is configured. There should be 2 instances, one for server and one for client. Both of them should be updated
-  if [ -f "$mysql_cnf" ]; then
-    current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
-    #echo "MySQL is currently configured with port $current_port"
-    # if the required port is already configured. If not, we need to reconfigure
-    has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
-    if [ -z "$has_correct_port" ]; then
-      echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
-      sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
-      echo "Restarting MySQL for port change update to take effect."
-      service mysql restart >> $INSTALL_LOG_FILE
-    fi
-  else
-    echo "warning: my.cnf not found" >> $INSTALL_LOG_FILE
-  fi
-	
-  mysql_test_connection
-  local create_sql="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
-  local grant_sql="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
-  if [ -z "$mysql_connection_error" ]; then
-    if [ -n "$is_mysql_available" ]; then
-      echo_success "Database \`${MYSQL_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
-      return 0
-    else
-      echo "Creating database..."    >> $INSTALL_LOG_FILE
-      $mysql_connect -e "${create_sql}"
-      $mysql_connect -e "${grant_sql}"
-      mysql_test_connection
-      if [ -z "$is_mysql_available" ]; then
-        echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
-        return 1
-      fi
-    fi
-  else
-    echo_failure "Cannot connect to database."  | tee -a $INSTALL_LOG_FILE
-    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
-    echo "${create_sql}" >> $INSTALL_LOG_FILE
-    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
-    return 1
-  fi
 }
 
 # before using this function, you must first set the connection variables mysql_*
@@ -1575,12 +1647,12 @@ postgres_server_detect() {
   # best_version_bin is the complete path to the binary like /usr/lib/postgresql/9.1/bin/postgres
 
   # find candidates like /usr/lib/postgresql/9.1/bin/postgres
-  postgres_candidates=`find / -name postgres 2>/dev/null | grep bin`
+  postgres_candidates=$(find / -name postgres 2>/dev/null | grep bin)
   for c in $postgres_candidates
   do
-    local version_name=`$c --version 2>/dev/null | head -n 1 | awk '{ print $3 }'`
-    local bin_dir=`dirname "$c"`
-    local version_dir=`dirname "$bin_dir"`
+    local version_name=$($c --version 2>/dev/null | head -n 1 | awk '{ print $3 }')
+    local bin_dir=$(dirname $c)
+    local version_dir=$(dirname $bin_dir)
     echo "postgres candidate version=$version_name" >> $INSTALL_LOG_FILE
 
     if is_version_at_least "$version_name" "$min_version"; then
@@ -1589,12 +1661,12 @@ postgres_server_detect() {
         echo "setting best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
-        best_version_short=`basename $version_dir`
+        best_version_short=$(echo $version_name | sed 's/\.[0-9]*//2') #$(basename $version_dir)
       elif is_version_at_least "$version_name" "$best_version"; then
         echo "current best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
-        best_version_short=`basename $version_dir`
+        best_version_short=$(echo $version_name | sed 's/\.[0-9]*//2') #$(basename $version_dir)
       fi
     fi
   done
@@ -1615,9 +1687,11 @@ postgres_server_detect() {
   if [ -n "$postgresql_installed" ]; then
     postgres_com="service postgresql"
   fi
+  postgres_pghb_conf=$(find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1)
+  postgres_conf=$(find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1)
+  if [ -z "$postgres_pghb_conf" ]; then postgres_pghb_conf=$(find / -name pg_hba.conf 2>/dev/null | head -n 1); fi
+  if [ -z "$postgres_conf" ]; then postgres_conf=$(find / -name postgresql.conf 2>/dev/null | head -n 1); fi
 
-  postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
-  postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
   # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
   echo "postgres_pghb_conf=$postgres_pghb_conf" >> $INSTALL_LOG_FILE
   echo "postgres_conf=$postgres_conf" >> $INSTALL_LOG_FILE
@@ -1630,7 +1704,7 @@ postgres_version(){
   POSTGRES_CLIENT_VERSION_OK=""
 
   if [ -n "$psql" ]; then
-    POSTGRES_CLIENT_VERSION=`$psql --version |  head -n1 | awk '{print $3}'`
+    POSTGRES_CLIENT_VERSION=`(cd /tmp && $psql --version |  head -n1 | awk '{print $3}')`
     echo "POSTGRES_CLIENT_VERSION: $POSTGRES_CLIENT_VERSION" >> $INSTALL_LOG_FILE
     if is_version_at_least "$POSTGRES_CLIENT_VERSION" "${min_version}"; then
       POSTGRES_CLIENT_VERSION_OK=yes
@@ -1677,13 +1751,16 @@ postgres_test_connection() {
   is_postgres_available=""
 
   #check if postgres is installed and we can connect with provided credencials
-
-  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>/tmp/intel.postgres.err >/dev/nulll
+  POSTGRESS_LOG="/opt/mtwilson/logs/intel.postgres.err"
+  if [ ! -f $POSTGRESS_LOG ]; then
+     touch $POSTGRESS_LOG
+  fi
+  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>$POSTGRESS_LOG >/dev/null
    if [ $? -eq 0 ]; then
     is_postgres_available="yes"
     return 0
   fi
-  postgres_connection_error=`cat /tmp/intel.postgres.err`
+  postgres_connection_error=`cat $POSTGRESS_LOG`
   
   #echo "postgres_connection_error: $postgres_connection_error"
   #rm -f /tmp/intel.postgres.err
@@ -1765,54 +1842,76 @@ if postgres_server_detect ; then
 	
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
-    #echo_success "Database [${POSTGRES_DATABASE}] already exists"
-    echo_success "Database [${POSTGRES_DATABASE}] already exists"   >> $INSTALL_LOG_FILE
+    echo_success "Database [${POSTGRES_DATABASE}] already exists"
     return 0
   else
     echo "Creating database..."
-    echo "Creating database..."    >> $INSTALL_LOG_FILE
-    local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
-    sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
-    sudo -u postgres psql postgres -c "${superuser_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
-    local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
-    sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    postgres_connection_error=`cat /tmp/intel.postgres.err`
-    echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
-    sudo -u postgres psql postgres -c "${grant_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    postgres_connection_error=`cat /tmp/intel.postgres.err`
-    echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
-
-	if [ -n "$postgres_pghb_conf" ]; then 
-      has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
-      if [ -z "$has_host" ]; then
-        echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
-      fi
-	else
-	  echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
-    fi
-	
-	if [ -n "$postgres_conf" ]; then
-      has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
-      if [ -z "$has_listen_addresses" ]; then
-         echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
+    local detect_superuser="select rolcreatedb from pg_authid where rolname = '$POSTGRES_USERNAME'"
+    if [ "$(whoami)" == "root" ]; then
+      user_is_superuser=$(sudo -u postgres psql postgres -c "$detect_superuser" 2>&1 | grep "(1 row)")
+      if [ -z "$user_is_superuser" ]; then
+        local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
+        sudo -u postgres psql postgres -c "${create_user_sql}" 1>/dev/null
+        local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
+        sudo -u postgres psql postgres -c "${superuser_sql}" 1>/dev/null
+        local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
+        sudo -u postgres psql postgres -c "${create_sql}" 1>/dev/null
+        local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
+        sudo -u postgres psql postgres -c "${grant_sql}" 1>/dev/null
       fi
     else
-	  echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
-	fi
-	
-    postgres_restart >> $INSTALL_LOG_FILE
-    sleep 10
-    postgres_test_connection
-
-    if [ -z "$is_postgres_available" ]; then
-      echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
-      echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
-      echo "${create_sql}" >> $INSTALL_LOG_FILE
-      echo "${grant_sql}"  >> $INSTALL_LOG_FILE
-      return 1
+      user_is_superuser=$(psql postgres -U "${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}" -c "$detect_superuser" 2>&1 | grep "(1 row)")
+      if [ -z "$user_is_superuser" ]; then
+        echo_failure "You must make '$POSTGRES_USERNAME' postgres user a superuser as root"
+        return 1
+      fi
+      # add additional checks here? is db created? does user have privilege for db?
     fi
+  fi
+
+  if [ "$(whoami)" == "root" ]; then
+    postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
+    if [ -z "$postgres_pghb_conf_has_entry" ]; then
+    
+      if [ -n "$postgres_pghb_conf" ]; then 
+        has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
+        if [ -z "$has_host" ]; then
+          echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
+        fi
+      else
+        echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
+      fi
+    fi
+  else
+    echo_warning "Following line must be in $postgres_pghb_conf: host  all  all  127.0.0.1/32  password"
+  fi
+
+  postgres_conf_has_entry=$(cat $postgres_conf | grep '^listen_addresses' | grep '127.0.0.1')
+  if [ -z "$postgres_conf_has_entry" ]; then
+    if [ "$(whoami)" == "root" ]; then
+      if [ -n "$postgres_conf" ]; then
+        has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
+        if [ -z "$has_listen_addresses" ]; then
+          echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
+        fi
+      else
+        echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
+      fi
+    else
+      echo_warning "Following line must be in $postgres_conf: listen_addresses='127.0.0.1'"
+    fi
+  fi
+
+  postgres_restart >> $INSTALL_LOG_FILE
+  sleep 10
+  postgres_test_connection
+
+  if [ -z "$is_postgres_available" ]; then
+    echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
+    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
+    echo "${create_sql}" >> $INSTALL_LOG_FILE
+    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+    return 1
   fi
 fi
 }
@@ -2032,49 +2131,53 @@ glassfish_detect() {
   local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
-
-      if [[ -n "$java" ]]; then    
-        local java_bindir=`dirname "$java"`
-      fi
-  # start with GLASSFISH_HOME if it is already configured
-  if [[ -n "$GLASSFISH_HOME" ]]; then
-    if [[ -z "$glassfish_bin" ]]; then
-      glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
-    fi
-    if [[ -z "$glassfish" ]]; then
-      if [[ -n "$java" ]]; then    
-        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-        glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
-          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          if [ -n "$gfuser" ]; then
-            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
-          fi
-        fi
-      else
-        glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
-          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          if [ -n "$gfuser" ]; then
-            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
-          fi
-        fi
-      fi
-    fi
-    if [[ -n "$glassfish" ]]; then
-      GLASSFISH_VERSION=`glassfish_version`
-      if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
-        return 0
-      fi
-    fi
+  if [[ -n "$java" ]]; then    
+    local java_bindir=`dirname "$java"`
   fi
 
-  GLASSFISH_CANDIDATES=`find / -name domains 2>/dev/null | grep glassfish/domains`
-#  echo "Candidates: $GLASSFISH_CANDIDATES"
-  for c in $GLASSFISH_CANDIDATES
-  do
+  # start with GLASSFISH_HOME if it is already configured
+  if [ "$(whoami)" == "root" ]; then
+    if [ -n "$GLASSFISH_HOME" ] && [[ "$GLASSFISH_HOME" == /opt/mtwilson* ]]; then
+      glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
+      if [ -z "$glassfish" ] || [[ "$glassfish" != *"$glassfish_bin"* ]]; then
+        if [ -n "$java" ]; then    
+          # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+          glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+          if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
+            gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+            if [ -n "$gfuser" ]; then
+              glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+            fi
+          fi
+        else
+          glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+          if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
+            gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+            if [ -n "$gfuser" ]; then
+              glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+            fi
+          fi
+        fi
+      fi
+      if [ -n "$glassfish" ]; then
+        GLASSFISH_VERSION=`glassfish_version`
+        if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
+          return 0
+        fi
+      fi
+    fi
+    searchdir=/
+  else
+    searchdir=/opt/mtwilson
+  fi
+
+  GLASSFISH_CANDIDATES=`find /opt/mtwilson -name domains 2>/dev/null | grep glassfish/domains`
+  if [ -z "$GLASSFISH_CANDIDATES" ]; then
+    GLASSFISH_CANDIDATES=`find $searchdir -name domains 2>/dev/null | grep glassfish/domains`
+  fi
+  glassfish_clear
+  for c in $GLASSFISH_CANDIDATES; do
       local parent=`dirname "$c"`
- #     echo "Checking Glassfish: $parent"
       if [ -f "$parent/bin/asadmin" ]; then
         GLASSFISH_HOME="$parent"
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
@@ -2086,15 +2189,13 @@ glassfish_detect() {
             glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
           fi
         fi
-        echo "Found Glassfish: $GLASSFISH_HOME"
-#        echo "Found Glassfish: $glassfish"
         GLASSFISH_VERSION=`glassfish_version`
         if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
           return 0
         fi
       fi
   done
-  echo_failure "Cannot find Glassfish"
+  #echo_failure "Cannot find Glassfish"
   glassfish_clear
   return 1
   # read the admin username and pasword, if present. format of both files is shell  VARIABLE=VALUE
@@ -2141,16 +2242,24 @@ no_glassfish() {
 # Optional arguments:  one or more directories for glassfish user to own
 glassfish_permissions() {
   local chown_locations="$@"
-  local username=${glassfish_username:-glassfish}
+  local username=${MTWILSON_USERNAME:-mtwilson}
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then
-    useradd -c "Glassfish" -d "${GLASSFISH_HOME:-/usr/share/glassfish4}" -r -s /bin/bash "$username"
+    echo_failure "User [$username] does not exists"
+    return 1
   fi
   local file
-  for file in $chown_locations
-  do
+  for file in $(find "${chown_locations}" 2>/dev/null); do
     if [[ -n "$file" && -e "$file" ]]; then
-      chown -R "${username}:${username}" "$file"
+      owner=`stat -c '%U' $file`
+      if [ $owner != ${username} ]; then
+        if [ -w "$file" ]; then
+          chown -R "${username}:${username}" "$file"
+        else
+          echo_failure "Current user [$(whoami)] does not have permission to change file [$file]"
+          return 1
+        fi
+      fi
     fi
   done
 }
@@ -2210,110 +2319,19 @@ glassfish_enable_logging() {
   $glassfish set-log-levels com.sun.enterprise.server.logging.GFFileHandler=ALL
 }
 
-# must restart glassfish for enable-secure-admin and memory options to take effect, so call these after calling this function:
-#  glassfish_stop
-#  glassfish_start
-# (they are not done automatically in case the caller has other glassfish setup that would also require a restart)
-# Environment:
-# - glassfish_required_version
-glassfish_install() {
-  GLASSFISH_HOME=""
-  glassfish=""
-  local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
-  GLASSFISH_YUM_PACKAGES="unzip"
-  GLASSFISH_APT_PACKAGES="unzip"
-  GLASSFISH_YAST_PACKAGES="unzip"
-  GLASSFISH_ZYPPER_PACKAGES="unzip"
-  glassfish_detect
-
-  if glassfish_running; then glassfish_stop; fi
-
-  if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
-    if [ -d /usr/share/glassfish4 ]; then
-      # we do not remove it automatically in case there are applications or data in there that the user wants to save!!
-      echo_warning "Glassfish not detected but /usr/share/glassfish4 exists"
-      echo "Remove /usr/share/glassfish4 and try again"
-      return 1
-    fi
-    if [[ -z "$GLASSFISH_PACKAGE" || ! -f "$GLASSFISH_PACKAGE" ]]; then
-      echo_failure "Missing Glassfish installer: $GLASSFISH_PACKAGE"
-      return 1
-    fi
-    auto_install "Glassfish requirements" "GLASSFISH"
-    echo "Installing $GLASSFISH_PACKAGE"
-    unzip $GLASSFISH_PACKAGE 2>&1  >/dev/null
-    if [ -d "glassfish4" ]; then
-      if [ -d "/usr/share/glassfish4" ]; then
-        echo "Glassfish already installed at /usr/share/glassfish4"
-        export GLASSFISH_HOME="/usr/share/glassfish4"
-      else
-        mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4"
-      fi
-    fi
-
-
-    # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
-    if [ -f "/etc/hosts" ]; then
-        local hostname=`hostname`
-        local found=`cat "/etc/hosts" | grep "^127.0.0.1" | grep "$hostname"`
-        if [ -z "$found" ]; then
-          local datestr=`date +%Y-%m-%d.%H%M`
-          cp /etc/hosts /etc/hosts.${datestr}
-          local updated=`sed -re "s/^(127.0.0.1\s.*)$/\1 ${hostname}/" /etc/hosts`
-          echo "$updated" > /etc/hosts
-        fi
-    fi
-    glassfish_detect
-    if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
-      echo_failure "Unable to auto-install Glassfish"
-      echo "Glassfish download URL:"
-      echo "http://glassfish.java.net/"
-      return 1
-    fi
-  else
-    echo "Glassfish is already installed in $GLASSFISH_HOME"
-  fi
-
-  #if [ -n "${MTWILSON_SERVER}" ]; then
-  #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-  #else
-  #  glassfish_create_ssl_cert_prompt
-  #fi
-
-  glassfish_permissions "${GLASSFISH_HOME}"
-  sleep 5
-  glassfish_start
-  #glassfish_admin_user
-  glassfish_memory 2048 512
-  glassfish_logback
-  
-  # set JAVA_HOME for glassfish
-  asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
-  if [ -n "$asenvFile" ]; then
-    if [ -f "$asenvFile" ] && ! grep -q "AS_JAVA=" "$asenvFile"; then
-      echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
-    fi
-  else
-    echo "warning: asenv.conf not found" >> $INSTALL_LOG_FILE
-  fi
-  
-  echo "Increasing glassfish max thread pool size to 200..."
-  $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
-}
-
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
 glassfish_admin_user() {  
   #echo "You must choose an administrator username and password for Glassfish"
   echo "The Glassfish control panel is at https://${MTWILSON_SERVER:-127.0.0.1}:4848"
-  #prompt_with_default AS_ADMIN_USER "Glassfish admin username:" ${WEBSERVICE_USERNAME}
-  #prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:" ${WEBSERVICE_PASSWORD}
+  #prompt_with_default AS_ADMIN_USER "Glassfish admin username:" ${WEBSERVICE_MANAGER_USERNAME}
+  #prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:" ${WEBSERVICE_MANAGER_PASSWORD}
 
   expect=`which expect`  
   glassfish_detect
 
   GF_CONFIG_PATH="$GLASSFISH_HOME/config"
-  export AS_ADMIN_USER=$WEBSERVICE_USERNAME
-  export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
+  export AS_ADMIN_USER=$WEBSERVICE_MANAGER_USERNAME
+  export AS_ADMIN_PASSWORD=$WEBSERVICE_MANAGER_PASSWORD
   export AS_ADMIN_PASSWORD_OLD=`cat $GF_CONFIG_PATH/admin.passwd 2>/dev/null | head -n 1 | cut -d'=' -f2`
   export AS_ADMIN_PASSWORDFILE=$GF_CONFIG_PATH/admin.passwd
   
@@ -2331,6 +2349,7 @@ glassfish_admin_user() {
 #  fi
 
   chmod 600 $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
+  glassfish_permissions "${GLASSFISH_HOME}"
   #echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
 
   #echo "Glassfish will now ask you for the same information:"
@@ -2338,11 +2357,11 @@ glassfish_admin_user() {
   
 #(
 #$expect << EOD
-#spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+#spawn $glassfish --user=$WEBSERVICE_MANAGER_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
 #expect "Enter the new admin password>"
-#send "$WEBSERVICE_PASSWORD\r"
+#send "$WEBSERVICE_MANAGER_PASSWORD\r"
 #expect "Enter the new admin password again>"
-#send "$WEBSERVICE_PASSWORD\r"
+#send "$WEBSERVICE_MANAGER_PASSWORD\r"
 #interact
 #expect eof
 #EOD
@@ -2502,6 +2521,8 @@ glassfish_delete_domain() {
 }
 
 glassfish_create_ssl_cert_prompt() {
+    ifconfig=$(which ifconfig 2>/dev/null)
+    ifconfig=${ifconfig:-"/sbin/ifconfig"}
     #echo_warning "This feature has been disabled: glassfish_create_ssl_cert_prompt"
     #return
     # SSL Certificate setup
@@ -2511,7 +2532,7 @@ glassfish_create_ssl_cert_prompt() {
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       glassfish_require
-      DEFAULT_GLASSFISH_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      DEFAULT_GLASSFISH_SSL_CERT_CN=`"$ifconfig" | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
       prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_GLASSFISH_SSL_CERT_CN:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     fi
@@ -2535,78 +2556,150 @@ function valid_ip() {
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 glassfish_create_ssl_cert() {
-#  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
-#  return
-  if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
-    if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-    glassfish_require
-    local serverName="${1}"
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  glassfish_require
+  local serverName="${1}"
+  serverName=$(echo "$serverName" | sed -e 's/ //g' | sed -e 's/,$//')
 
-    # Create an array of host ips and dns names from csv list passed into function
-    serverName=`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//'`
-    OIFS="$IFS"
-    IFS=','
-    read -a hostArray <<< "${serverName}"
-    IFS="$OIFS"
-  
-    # create common names and sans strings by parsing array
-    local cert_cns=""
-    local cert_sans=""
-    for i in "${hostArray[@]}"; do
-      cert_cns+="CN=$i,"
-      tmpCN=""
-      if valid_ip "$i"; then 
-        tmpCN="ip:$i"
-      else
-        tmpCN="dns:$i"
-      fi
-      cert_sans+="$tmpCN,"
-    done
-    cert_cns=`echo $cert_cns | sed -e 's/,$//'`
-    cert_sans=`echo $cert_sans | sed -e 's/,$//'`
-    cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
+  local domain_found=$($glassfish list-domains | head -n 1 | awk '{ print $1 }')
+  local GF_CONFIG_PATH="${GLASSFISH_HOME}/domains/${domain_found}/config"
+  local keystore="${GF_CONFIG_PATH}/keystore.jks"
+  local cacerts="${GF_CONFIG_PATH}/cacerts.jks"
+  local configDir="/opt/mtwilson/configuration"
+  local mtwilsonPropertiesFile="${configDir}/mtwilson.properties"
+  local keytool="${JAVA_HOME}/bin/keytool"
+  local mtwilson=$(which mtwilson 2>/dev/null)
+  local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
 
-    local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
-    local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
-    local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
-    local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
-    local configDir="/opt/mtwilson/configuration"
-    local keytool=${JAVA_HOME}/bin/keytool
-    local mtwilson=`which mtwilson 2>/dev/null`
-    local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
+    local keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
+  if [ -z "$MTWILSON_TLS_KEYSTORE_PASS" ] || [ "$MTWILSON_TLS_KEYSTORE_PASS" == "changeit" ]; then MTWILSON_TLS_KEYSTORE_PASS=$(generate_password 32); fi
+  keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
+  keystorePasswordOld=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+  keystorePasswordOld=${keystorePasswordOld:-"changeit"}
 
-    # Check if there is already a certificate for this serverName in the Glassfish keystore
-    local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
-    if [ -n "$has_cert" ]; then
-      echo "SSL Certificate for ${serverName} already exists"
+  # Create an array of host ips and dns names from csv list passed into function
+  OIFS="$IFS"
+  IFS=','
+  read -a hostArray <<< "${serverName}"
+  IFS="$OIFS"
+
+  # create common names and sans strings by parsing array
+  local cert_cns=""
+  local cert_sans=""
+  for i in "${hostArray[@]}"; do
+    cert_cns+="CN=$i,"
+    tmpCN=""
+    if valid_ip "$i"; then 
+      tmpCN="ip:$i"
     else
-      echo "Creating SSL Certificate for ${serverName}..."
-      # Delete public insecure certs within keystore.jks and cacerts.jks
-      $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-      $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-      $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
-      $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
-
-      # Update keystore.jks
-      $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
-      $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+      tmpCN="dns:$i"
     fi
+    cert_sans+="$tmpCN,"
+  done
+  cert_cns=$(echo "$cert_cns" | sed -e 's/,$//')
+  cert_sans=$(echo "$cert_sans" | sed -e 's/,$//')
+  cert_cns='CN='$(echo "$serverName" | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g')
 
+  # fix for if old version of mtwilson was saving incorrect password; reverts current password to "changeit"
+  has_incorrect_password=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+  if [ -n "$has_incorrect_password" ]; then
+    keystorePasswordOld="changeit"
+    has_incorrect_password=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+    if [ -n "$has_incorrect_password" ]; then
+      echo_failure "Current SSL keystore password is incorrect"
+      exit -1
+    fi
+  fi
+  
+  if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
+    if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
+      echo "Updating Glassfish master password..."
+      #change glassfish master password which is the keystore password
+      glassfish_stop >/dev/null
+      glassfishMaster=$(echo "$glassfish" | sed -e 's/--user=.*\b//g' | sed -e 's/--passwordfile=.*\b//g')
+      mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup" 2>/dev/null
+      touch "${GF_CONFIG_PATH}/master.passwd"
+      echo "AS_ADMIN_MASTERPASSWORD=$keystorePasswordOld" > "${GF_CONFIG_PATH}/master.passwd"
+      echo "AS_ADMIN_NEWMASTERPASSWORD=$keystorePassword" >> "${GF_CONFIG_PATH}/master.passwd"
+      $glassfishMaster change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
+      rm -f "${GF_CONFIG_PATH}/master.passwd"
+      glassfish_start >/dev/null
+      update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
+    fi
+    
+    echo "Creating SSL Certificate for ${serverName}..."
+    # Delete public insecure certs within keystore.jks and cacerts.jks
+    $keytool -delete -alias s1as  -keystore "$keystore" -storepass "$keystorePassword" 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore "$keystore" -storepass "$keystorePassword" 2>&1 >/dev/null
+    $keytool -delete -alias s1as -keystore "$cacerts" -storepass "$keystorePassword" 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore "$cacerts" -storepass "$keystorePassword" 2>&1 >/dev/null
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
+    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
+
+    echo "Restarting Glassfish as a new SSL certificate was generated..."
+    glassfish_restart >/dev/null
+  fi
+
+  has_cert=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
+  if [ -n "$has_cert" ]; then
     # Export certificates from keystore.jks
-    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
-    $keytool -export -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
+    $keytool -export -alias s1as -file "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" -keystore "$keystore" -storepass "$keystorePassword"
+    $keytool -export -alias glassfish-instance -file "${GF_CONFIG_PATH}/ssl.gi.${tmpHost}.crt" -keystore "$keystore" -storepass "$keystorePassword"
 
     # Update cacerts.jks
-    $keytool -importcert -noprompt -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
-    $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
+    $keytool -importcert -noprompt -alias s1as -file "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" -keystore "$cacerts" -storepass "$keystorePassword"
+    $keytool -importcert -noprompt -alias glassfish-instance -file "${GF_CONFIG_PATH}/ssl.gi.${tmpHost}.crt" -keystore "$cacerts" -storepass "$keystorePassword"
 
-    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" "$configDir/ssl.crt"
+    openssl x509 -in "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
+    cp "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" "$configDir/ssl.crt"
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
-    echo "Restarting Glassfish domain..."
-    glassfish_restart
+  else
+    echo_warning "No SSL certificate found in Glassfish keystore"
+  fi
+}
+
+glassfish_no_additional_webapps_exist() {
+  if [ -z "$GLASSFISH_HOME" ]; then glassfish_detect; fi
+  if [ -z "$GLASSFISH_HOME" ]; then return 1; fi
+  glassfishApplicationDirectories=($(find "$GLASSFISH_HOME/domains" -name "applications"))
+  for i in "${glassfishApplicationDirectories[@]}"; do
+    GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED=$(ls "${i}" | sed '/^__internal$\|^$/d')
+  done
+  glassfishInternalApplicationDirectories=($(find "$GLASSFISH_HOME/domains" -name "__internal"))
+  for i in "${glassfishInternalApplicationDirectories[@]}"; do
+    GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED+=" "$(ls "${i}" | sed '/^$/d')
+  done
+  GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED=$(echo "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+  if [ -n "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    return 1
+  fi
+  return 0
+}
+
+glassfish_no_additional_webapps_exist_wait() {
+  glassfish_no_additional_webapps_exist
+  if [[ "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" == *".war"* ]]; then
+    echo_warning "Additional glassfish webapps exist: $GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  fi
+  echo -n "Checking if additional glassfish webapps exist..."
+  for (( c=1; c<=10; c++ )); do
+    if ! glassfish_no_additional_webapps_exist; then
+      echo -n "."
+      sleep 3
+    fi
+  done
+  if [ -n "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    echo
+    echo_warning "Additional glassfish webapps exist: $GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  else
+    echo
+    return 0
   fi
 }
 
@@ -2705,29 +2798,24 @@ tomcat_version_report() {
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
   local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
-  echo "min_version for tomcat_detect is $min_version" >>  $INSTALL_LOG_FILE
-
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
-
-      if [[ -n "$java" ]]; then    
-        local java_bindir=`dirname "$java"`
-      fi
+  if [[ -n "$java" ]]; then    
+    local java_bindir=`dirname "$java"`
+  fi
 
   # start with TOMCAT_HOME if it is already configured
-  if [[ -n "$TOMCAT_HOME" ]]; then
-    if [[ -z "$tomcat_bin" ]]; then
+  if [ "$(whoami)" == "root" ]; then
+    if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" == /opt/mtwilson* ]]; then
       tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
-    fi
-    if [[ -z "$tomcat" ]]; then
-      if [[ -n "$java" ]]; then    
-        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-        tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
-      else
-        tomcat="$tomcat_bin"
+      if [ -z "$tomcat" ]; then
+        if [ -n "$java" ]; then    
+          # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+          tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
+        else
+          tomcat="$tomcat_bin"
+        fi
       fi
-    fi
-    if [ -z "$TOMCAT_CONF" ]; then
       if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
         export TOMCAT_CONF="$TOMCAT_HOME/conf"
       else
@@ -2735,29 +2823,29 @@ tomcat_detect() {
         # reset the "tomcat" variable to force a new detection below
         tomcat=""
       fi
-    fi
-    if [[ -n "$tomcat" ]]; then
-      #TOMCAT_VERSION=`tomcat_version`
-      tomcat_version
-      if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
-        return 0
+      if [ -n "$tomcat" ]; then
+        #TOMCAT_VERSION=`tomcat_version`
+        tomcat_version
+        if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+          return 0
+        fi
       fi
     fi
+    searchdir=/
+  else
+    #TODO update it to $MTWILSON_HOME
+    searchdir=/opt/mtwilson
   fi
-  #echo "tomcat variable is $tomcat"
-  #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
-  # if we get here, then there was NOT already a tomcat configured
-  # that meets our minimum version requirement
-
-  TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
+  TOMCAT_CANDIDATES=`find /opt/mtwilson -name tomcat-users.xml 2>/dev/null`
+  if [ -z "$TOMCAT_CANDIDATES" ]; then
+    TOMCAT_CANDIDATES=`find $searchdir -name tomcat-users.xml 2>/dev/null`
+  fi
   tomcat_clear
-  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
-  for c in $TOMCAT_CANDIDATES
-  do
-      #echo "debug tomcat candidate: $c"
-      local conf_dir=`dirname "$c"`
-      local parent=`dirname "$conf_dir"`
+  for c in $TOMCAT_CANDIDATES; do
+    if [ -z "$TOMCAT_HOME" ]; then
+      local conf_dir=`dirname $c`
+      local parent=`dirname $conf_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
         export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
@@ -2771,49 +2859,14 @@ tomcat_detect() {
           return 0
         fi
       fi
+    fi
   done
-  echo_failure "Cannot find Tomcat"
+  #echo_failure "Cannot find Tomcat"
   tomcat_clear
   return 1
 }
 
-tomcat_install() {
-  TOMCAT_HOME=""
-  tomcat=""
-  tomcat_detect
-  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
-    if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
-      echo "Installing $TOMCAT_PACKAGE"
-      #if [ -d "${tomcat_parent_dir}/${tomcat_name}" ]; then
-      #    local datestr=`date +%Y-%m-%d.%H%M`
-      #    echo "Renaming existing incomplete ${tomcat_parent_dir}/${tomcat_name} to ${tomcat_parent_dir}/${tomcat_name}.${datestr}"
-      #    mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
-      #fi
-      gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
-      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
-      if [ -d "$tomcat_folder" ]; then
-        if [ -d "/usr/share/$tomcat_folder" ]; then
-          echo "Tomcat already installed at /usr/share/$tomcat_folder"
-          export TOMCAT_HOME="/usr/share/$tomcat_folder"
-        else
-          mv $tomcat_folder /usr/share && export TOMCAT_HOME="/usr/share/$tomcat_folder"
-        fi
-      fi
-      tomcat_detect
-    else
-      TOMCAT_YUM_PACKAGES="tomcat7"
-      TOMCAT_APT_PACKAGES="tomcat7"
-      auto_install "Tomcat via package manager" "TOMCAT"
-      tomcat_detect
-    fi
-  fi
-  
-  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
-    echo "Unable to auto-install Tomcat"
-    echo "  Tomcat download URL:"
-    echo "  http://tomcat.apache.org/"
-  fi
-}
+
 
 # Run this AFTER tomcat_install
 # optional global variables:  
@@ -2824,16 +2877,24 @@ tomcat_install() {
 # Optional arguments:  one or more directories for tomcat user to own
 tomcat_permissions() {
   local chown_locations="$@"
-  local username=${TOMCAT_USERNAME:-tomcat}
+  local username=${MTWILSON_USERNAME:-mtwilson}
   local user_exists=`cat /etc/passwd | grep "^${username}"`
-  if [ -z "$user_exists" ]; then
-    useradd -c "tomcat" -d "${TOMCAT_HOME:-/var}" -r -s /bin/bash "$username"
+  if [ -z "$user_exists" ]; then    
+	echo_failure "User [$username] does not exists"
+	return 1	
   fi
   local file
-  for file in $chown_locations
-  do
+  for file in $(find "${chown_locations}" 2>/dev/null); do
     if [[ -n "$file" && -e "$file" ]]; then
-      chown -R "${username}:${username}" "$file"
+      owner=`stat -c '%U' $file`
+      if [ $owner != ${username} ]; then
+        if [ -w "$file" ]; then
+          chown -R "${username}:${username}" "$file"
+        else
+          echo_failure "Current user [$(whoami)] does not have permission to change file [$file]"
+          return 1
+        fi
+      fi
     fi
   done
 }
@@ -2844,11 +2905,9 @@ tomcat_running() {
     tomcat_detect 2>&1 > /dev/null
   fi
   if [ -n "$TOMCAT_HOME" ]; then
-    TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
-    echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
+    TOMCAT_PID=$(ps gauwxx | grep java | grep "$TOMCAT_HOME" | awk '{ print $2 }')
     if [ -n "$TOMCAT_PID" ]; then
       TOMCAT_RUNNING=yes
-      echo TOMCAT_RUNNING: $TOMCAT_RUNNING >> $INSTALL_LOG_FILE
       return 0
     fi
   fi
@@ -2879,7 +2938,7 @@ tomcat_start() {
 tomcat_shutdown() {
   if tomcat_running; then
     if [ -n "$TOMCAT_PID" ]; then
-      kill -9 $TOMCAT_PID
+      kill -9 $TOMCAT_PID 2>/dev/null
     fi
   fi
 }
@@ -2925,12 +2984,14 @@ tomcat_uninstall() {
 }
 
 tomcat_create_ssl_cert_prompt() {
+    ifconfig=$(which ifconfig 2>/dev/null)
+    ifconfig=${ifconfig:-"/sbin/ifconfig"}
     prompt_yes_no TOMCAT_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Tomcat?"
     echo
     if [ "${TOMCAT_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       tomcat_require
-      DEFAULT_TOMCAT_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      DEFAULT_TOMCAT_SSL_CERT_CN=`"$ifconfig" | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
       prompt_with_default TOMCAT_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_TOMCAT_SSL_CERT_CN:-127.0.0.1}
       tomcat_create_ssl_cert "${TOMCAT_SSL_CERT_CN}"
     fi
@@ -2939,71 +3000,103 @@ tomcat_create_ssl_cert_prompt() {
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 tomcat_create_ssl_cert() {
-#  echo_warning "This feature has been disabled: tomcat_create_ssl_cert"
-#  return
-  if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
-    if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-    tomcat_require
-    local serverName="${1}"
-  
-    # Create an array of host ips and dns names from csv list passed into function
-    serverName=`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//'`
-    OIFS="$IFS"
-    IFS=','
-    read -a hostArray <<< "${serverName}"
-    IFS="$OIFS"
-  
-    # create common names and sans strings by parsing array
-    local cert_cns=""
-    local cert_sans=""
-    for i in "${hostArray[@]}"; do
-      cert_cns+="CN=$i,"
-   
-      tmpCN=""
-      if valid_ip "$i"; then 
-       tmpCN="ip:$i"
-      else
-       tmpCN="dns:$i"
-      fi
-      cert_sans+="$tmpCN,"
-    done
-    cert_cns=`echo $cert_cns | sed -e 's/,$//'`
-    cert_sans=`echo $cert_sans | sed -e 's/,$//'`
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  tomcat_require
+  local serverName="${1}"
+  serverName=$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//')
 
-    local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
-    local keystore=${TOMCAT_HOME}/ssl/.keystore
-    local configDir="/opt/mtwilson/configuration"
-    local keytool=${JAVA_HOME}/bin/keytool
-    local mtwilson=`which mtwilson 2>/dev/null`
+    local keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
+  local keystore="${TOMCAT_HOME}/ssl/.keystore"
+  local tomcatServerXml="${TOMCAT_HOME}/conf/server.xml"
+  local configDir="/opt/mtwilson/configuration"
+  local mtwilsonPropertiesFile="${configDir}/mtwilson.properties"
+  local keytool="${JAVA_HOME}/bin/keytool"
+  local mtwilson=$(which mtwilson 2>/dev/null)
+  local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
+
+  if [ -z "$MTWILSON_TLS_KEYSTORE_PASS" ] || [ "$MTWILSON_TLS_KEYSTORE_PASS" == "changeit" ]; then MTWILSON_TLS_KEYSTORE_PASS=$(generate_password 32); fi
+  keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
+  keystorePasswordOld=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+  keystorePasswordOld=${keystorePasswordOld:-"changeit"}
+
+  # Create an array of host ips and dns names from csv list passed into function
+  OIFS="$IFS"
+  IFS=','
+  read -a hostArray <<< "${serverName}"
+  IFS="$OIFS"
   
-    mkdir -p ${TOMCAT_HOME}/ssl
-    # Check if there is already a certificate for this serverName in the Tomcat keystore
-    local has_cert=`$keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
-  
-    if [ -n "$has_cert" ]; then
-      echo "SSL Certificate for ${serverName} already exists"
+  # create common names and sans strings by parsing array
+  local cert_cns=""
+  local cert_sans=""
+  for i in "${hostArray[@]}"; do
+    cert_cns+="CN=$i,"
+    tmpCN=""
+    if valid_ip "$i"; then 
+      tmpCN="ip:$i"
     else
-      echo "Creating SSL Certificate for ${serverName}..."
-      local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
-    
-      # Delete public insecure certs within keystore.jks and cacerts.jks
-      $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-
-      # Update keystore.jks
-      $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+      tmpCN="dns:$i"
     fi
+    cert_sans+="$tmpCN,"
+  done
+  cert_cns=$(echo $cert_cns | sed -e 's/,$//')
+  cert_sans=$(echo $cert_sans | sed -e 's/,$//')
+  
+  mkdir -p ${TOMCAT_HOME}/ssl
 
-    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
-    $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
-    #$keytool -import -trustcacerts -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass ${keystorePassword}
+  # fix for if old version of mtwilson was saving incorrect password; reverts current password to "changeit"
+  has_incorrect_password=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+  if [ -n "$has_incorrect_password" ]; then
+    keystorePasswordOld="changeit"
+    has_incorrect_password=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+    if [ -n "$has_incorrect_password" ]; then
+      echo_failure "Current SSL keystore password is incorrect"
+      exit -1
+    fi
+  fi
+
+  if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
+    if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
+      echo "Changing keystore password and updating in Tomcat server.xml..."
+      if [ -f "$keystore" ]; then
+        $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
+      fi
+      #sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
+      #sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
+      xmlstarlet ed --inplace --delete '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@sslProtocol' "$tomcatServerXml"
+      xmlstarlet ed --inplace --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@sslEnabledProtocols)]' --type attr -n sslEnabledProtocols -v 'TLSv1,TLSv1.1,TLSv1.2' "$tomcatServerXml"
+      xmlstarlet ed --inplace --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@keystoreFile)]' --type attr -n keystoreFile -v "$keystore" "$tomcatServerXml"
+      xmlstarlet ed --inplace --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@keystorePass)]' --type attr -n keystorePass -v "$keystorePassword" "$tomcatServerXml"
+      #update for upgrades; attribute already exists
+      xmlstarlet ed --inplace --update '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@sslEnabledProtocols' -v 'TLSv1,TLSv1.1,TLSv1.2' "$tomcatServerXml"
+      xmlstarlet ed --inplace --update '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@keystoreFile' -v "$keystore" "$tomcatServerXml"
+      xmlstarlet ed --inplace --update '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@keystorePass' -v "$keystorePassword" "$tomcatServerXml"
+
+      echo "Restarting Tomcat as a new Tomcat keystore password was set..."
+      tomcat_restart >/dev/null
+      update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
+    fi
+    
+    echo "Creating SSL Certificate for ${serverName}..."
+    # Delete public insecure certs within keystore.jks and cacerts.jks
+    $keytool -delete -alias tomcat -keystore "$keystore" -storepass "$keystorePassword" 2>&1 >/dev/null
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
+    
+    echo "Restarting Tomcat as a new SSL certificate was generated..."
+    tomcat_restart >/dev/null
+  fi
+  
+  has_cert=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
+  if [ -n "$has_cert" ]; then
+    $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass "$keystorePassword"
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
     cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" "$configDir/ssl.crt"
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
-    #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
-    #cp ${keystore} /root/
-    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem "$configDir/ssl.crt.pem"
+  else
+    echo_warning "No SSL certificate found in Tomcat keystore"
   fi
 }
 tomcat_env_report(){
@@ -3027,12 +3120,12 @@ tomcat_init_manager() {
   TOMCAT_MANAGER_USER=""
   TOMCAT_MANAGER_PASS=""
   TOMCAT_MANAGER_PORT=""
-  if [ -z "$WEBSERVICE_USERNAME" ]; then WEBSERVICE_USERNAME=admin; fi
+  if [ -z "$WEBSERVICE_MANAGER_USERNAME" ]; then WEBSERVICE_MANAGER_USERNAME=admin; fi
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
   TOMCAT_MANAGER_USER=`read_property_from_file tomcat.admin.username "${config_file}"`
   TOMCAT_MANAGER_PASS=`read_property_from_file tomcat.admin.password "${config_file}"`
   if [[ -z "$TOMCAT_MANAGER_USER" ]]; then
-    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_USERNAME\"" $TOMCAT_HOME/conf/tomcat-users.xml | head -n 1`
+    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_MANAGER_USERNAME\"" $TOMCAT_HOME/conf/tomcat-users.xml | head -n 1`
     
     OIFS="$IFS"
     IFS=' '
@@ -3076,6 +3169,39 @@ tomcat_init_manager() {
     echo_success "Tomcat manger connection success."
   else
     echo_failure "Tomcat manager connection failed. Incorrect credentials."
+  fi
+}
+
+tomcat_no_additional_webapps_exist() {
+  if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+  if [ -z "$TOMCAT_HOME" ]; then return 1; fi
+  TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED=$(ls "$TOMCAT_HOME/webapps" | sed '/^docs$\|^examples$\|^host-manager$\|^manager$\|^ROOT$\|^$/d')
+  if [ -n "$TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    return 1
+  fi
+  return 0
+}
+
+tomcat_no_additional_webapps_exist_wait() {
+  tomcat_no_additional_webapps_exist
+  if [[ "$TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED" == *".war"* ]]; then
+    echo_warning "Additional tomcat webapps exist: $TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  fi
+  echo -n "Checking if additional tomcat webapps exist..."
+  for (( c=1; c<=10; c++ )); do
+    if ! tomcat_no_additional_webapps_exist; then
+      echo -n "."
+      sleep 3
+    fi
+  done
+  if [ -n "$TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    echo
+    echo_warning "Additional tomcat webapps exist: $TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  else
+    echo
+    return 0
   fi
 }
 
@@ -3232,81 +3358,104 @@ java_version_report() {
 java_detect() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   # start with JAVA_HOME if it is already configured
-  if [[ -n "$JAVA_HOME" ]]; then
-    if [[ -z "$java" ]]; then
-      java=${JAVA_HOME}/bin/java
+  if [ "$(whoami)" == "root" ]; then
+    if [[ -n "$JAVA_HOME" ]]; then
+      if [[ -z "$java" ]]; then
+        java=${JAVA_HOME}/bin/java
+      fi
+      JAVA_VERSION=`java_version`
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
     fi
-    JAVA_VERSION=`java_version`
-    if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-      return 0
+    searchdir=/
+  else
+    #TODO update it to $MTWILSON_HOME
+    if [ -d "/opt/mtwilson" ]; then
+      searchdir="/opt/mtwilson"
+    elif [ -d "/opt/trustagent" ]; then
+      searchdir="/opt/trustagent"
+    else
+      searchdir="/opt/mtwilson"
     fi
   fi
 
-    JAVA_JDK_CANDIDATES=`find / -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
-    for c in $JAVA_JDK_CANDIDATES
-    do
-        local java_bindir=`dirname "$c"`
-        if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname "$java_bindir"`
-          java=$c
-          JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
-          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-            return 0
-          fi
+  if [ -d "/opt/mtwilson" ]; then
+    javaDefaultSearchDir="/opt/mtwilson"
+  elif [ -d "/opt/trustagent" ]; then
+    javaDefaultSearchDir="/opt/trustagent"
+  else
+    javaDefaultSearchDir="/opt/mtwilson"
+  fi
+
+  JAVA_JDK_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  #if [ -z "$JAVA_JDK_CANDIDATES" ]; then
+  #  JAVA_JDK_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  #fi
+  for c in $JAVA_JDK_CANDIDATES; do
+    local java_bindir=`dirname $c`
+    if [ -f "$java_bindir/java" ]; then
+      export JAVA_HOME=`dirname $java_bindir`
+      java=$c
+      JAVA_VERSION=`java_version`
+      echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
+  done
+  echo "Cannot find JDK"
+
+  JAVA_JRE_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jre | grep bin/java)
+  #if [ -z "$JAVA_JRE_CANDIDATES" ]; then
+  #  JAVA_JRE_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jre | grep bin/java)
+  #fi
+  for c in $JAVA_JRE_CANDIDATES; do
+    java_bindir=`dirname $c`
+    if [ -f "$java_bindir/java" ]; then
+      export JAVA_HOME=`dirname $java_bindir`
+      java=$c
+      JAVA_VERSION=`java_version`
+      echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
+  done
+  echo "Cannot find JRE"
+
+  JAVA_BIN_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep bin/java)
+  #if [ -z "$JAVA_BIN_CANDIDATES" ]; then
+  #  JAVA_BIN_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep bin/java)
+  #fi
+  for c in $JAVA_BIN_CANDIDATES; do
+    java_bindir=`dirname $c`
+    # in non-JDK and non-JRE folders the "java" command may be a symlink:
+    if [ -f "$java_bindir/java" ]; then
+      export JAVA_HOME=`dirname $java_bindir`
+      java=$c
+      JAVA_VERSION=`java_version`
+      echo "Found Java: $c" >> $INSTALL_LOG_FILE
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    elif [ -h "$java_bindir/java" ]; then
+      local javatarget=`readlink $c`
+      if [ -f "$javatarget" ]; then
+        java_bindir=`dirname $javatarget`
+        export JAVA_HOME=`dirname $java_bindir`
+        java=$javatarget
+        JAVA_VERSION=`java_version`
+        echo "Found Java: $java" >> $INSTALL_LOG_FILE
+        if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+          return 0
         fi
-    done
-    
-    echo "Cannot find JDK"
-
-    JAVA_JRE_CANDIDATES=`find / -name java 2>/dev/null | grep jre | grep bin/java`
-    for c in $JAVA_JRE_CANDIDATES
-    do
-        java_bindir=`dirname "$c"`
-        if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname "$java_bindir"`
-          java=$c
-          JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
-          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-            return 0
-          fi
-        fi
-    done
-
-    echo "Cannot find JRE"
-
-    JAVA_BIN_CANDIDATES=`find / -name java 2>/dev/null | grep bin/java`
-    for c in $JAVA_BIN_CANDIDATES
-    do
-        java_bindir=`dirname "$c"`
-        # in non-JDK and non-JRE folders the "java" command may be a symlink:
-        if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname "$java_bindir"`
-          java=$c
-          JAVA_VERSION=`java_version`
-          echo "Found Java: $c" >> $INSTALL_LOG_FILE
-          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-            return 0
-          fi
-        elif [ -h "$java_bindir/java" ]; then
-          local javatarget=`readlink $c`
-          if [ -f "$javatarget" ]; then
-            java_bindir=`dirname "$javatarget"`
-            export JAVA_HOME=`dirname "$java_bindir"`
-            java=$javatarget
-            JAVA_VERSION=`java_version`
-            echo "Found Java: $java" >> $INSTALL_LOG_FILE
-            if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-              return 0
-            fi
-          else
-            echo_warning "Broken link $c -> $javatarget"
-          fi
-        fi
-    done
-
-    echo "Cannot find system Java"
+      else
+        echo_warning "Broken link $c -> $javatarget"
+      fi
+    fi
+  done
+  echo "Cannot find system Java"
 
   echo_failure "Cannot find Java"
   java_clear
@@ -3398,11 +3547,10 @@ java_install() {
     do
       #echo "$f"
       if [ -d "$f" ]; then
-        if [ -d "/usr/share/$f" ]; then
-          echo "Java already installed at /usr/share/$f"
-          export JAVA_HOME="/usr/share/$f"
-        else
-          mv "$f" /usr/share && export JAVA_HOME="/usr/share/$f"
+        if [ -d "/opt/mtwilson/share" ]; then
+          mv "$f" "/opt/mtwilson/share"
+        elif [ -d "/opt/trustagent/share" ]; then
+          mv "$f" "/opt/trustagent/share"
         fi
       fi
     done
@@ -3415,6 +3563,73 @@ java_install() {
   else
     echo "Java is already installed"              >> $INSTALL_LOG_FILE
   fi
+}
+
+# the JAVA_HOME variable must be set as the destination to which we will
+# install java;  if java is already there we skip installation - upgrade
+# is not supported by this function
+java_install_in_home() {
+  local java_package=$1
+  # validate inputs
+  if [ -z "$java_package" ]; then
+    echo_failure "Cannot install Java: missing package name"
+    return 2
+  elif [ ! -f "$java_package" ]; then
+    echo_failure "Cannot install Java: missing file: $java_package"
+    return 3
+  elif [ -z "$JAVA_HOME" ]; then
+    echo_failure "Cannot install Java: variable JAVA_HOME not set"
+    return 4
+  elif [ -d "$JAVA_HOME" ] && [ ! -w "$JAVA_HOME" ]; then
+    echo_failure "Cannot install Java: directory $JAVA_HOME not writable"
+    return 5
+  elif [ -d "$JAVA_HOME" ] && [ $(ls -1 $JAVA_HOME | wc -l) -gt 0 ]; then
+    echo_warning "Java already installed at $JAVA_HOME"
+    java_bindir=$JAVA_HOME/bin
+    java=$java_bindir/java
+    JAVA_CMD=$java
+    return 6
+  fi
+
+  mkdir -p $JAVA_HOME
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot install Java: parent directory $(dirname $JAVA_HOME) not writable"
+    return 7
+  fi
+  rmdir $JAVA_HOME
+
+  # unpack the java archive
+    is_targz=`echo $java_package | grep "\.tar.gz$"`
+    is_gzip=`echo $java_package | grep "\.gz$"`
+    is_bin=`echo $java_package | grep "\.bin$"`
+    javaname=`echo $java_package | awk -F . '{ print $1 }'`
+    if [ -n "$is_targz" ]; then
+      tar xzvf $java_package 2>&1 >> $INSTALL_LOG_FILE
+    elif [ -n "$is_gzip" ]; then
+      gunzip $java_package 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
+      chmod +x $javaname
+      ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"
+    elif [ -n "$is_bin" ]; then
+      chmod +x $java_package
+      ./$java_package | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"
+      return
+    fi
+    # java gets unpacked in current directory but they cleverly
+    # named the folder differently than the archive, so search for it:
+    local java_unpacked=`ls -1d jdk* jre* 2>/dev/null`
+    for f in $java_unpacked
+    do
+      if [ -d "$f" ]; then
+        mv "$f" $(dirname $JAVA_HOME)
+        echo "Installed Java in $JAVA_HOME"
+        java_bindir=$JAVA_HOME/bin
+        java=$java_bindir/java
+        JAVA_CMD=$java
+        return 0
+      fi
+    done
+    echo_failure "Cannot install Java: error after unpacking"
+    return 1
 }
 
 java_keystore_cert_report() {
@@ -3524,7 +3739,6 @@ mtwilson_running_report_wait() {
 
 # parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
-  local path=`pwd`
   local webservice_application_name="$1"
 
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
@@ -3535,23 +3749,28 @@ webservice_running() {
   if using_glassfish; then
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
+      WEBSERVICE_DEPLOYED=$($glassfish list-applications | grep "${webservice_application_name} " | awk '{ print $1 }')
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`$glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
+        WEBSERVICE_RUNNING=$($glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled)
       fi
+    else
+      if [ -z "$GLASSFISH_HOME" ]; then glassfish_detect; fi
+      WEBSERVICE_DEPLOYED=$(ls -R "$GLASSFISH_HOME" | grep "${webservice_application_name}.war")
     fi
   elif using_tomcat; then
     tomcat_running
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
     if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}"`
+      WEBSERVICE_DEPLOYED=$(wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}:" | sed -e 's/:/\n/g' | grep "^${webservice_application_name}$")
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
+        WEBSERVICE_RUNNING=$(wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}:" | sed -e 's/:/\n/g' | grep "running")
       fi
+    else
+      if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+      WEBSERVICE_DEPLOYED=$(ls "$TOMCAT_HOME/webapps" | grep "${webservice_application_name}.war")
     fi
   fi
-  cd $path
 }
 webservice_running_report() {
   local webservice_application_name="$1"
@@ -3717,11 +3936,37 @@ webservice_uninstall() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
-      $glassfish undeploy ${WEBSERVICE_DEPLOYED}
+      glassfish_detect
+      if [ -n "$WEBSERVICE_RUNNING" ]; then
+        $glassfish undeploy ${WEBSERVICE_DEPLOYED}
+      else
+        applicationDirectoryPath=($(find "$GLASSFISH_HOME" -name "${webservice_application_name}"))
+        for i in "${applicationDirectoryPath[@]}"; do
+          if [ ! -w "$i" ]; then
+            echo_failure "Current user does not have permission to remove ${i} from glassfish installation"
+            return 1
+          fi
+        done
+        for i in "${applicationDirectoryPath[@]}"; do
+          rm -rf "$i"
+        done
+        glassfishDomainXmlFile=$(find "$GLASSFISH_HOME" -name domain.xml | head -1)
+        perl -0777 -p -i -e 's|(<application-ref .*?</application-ref>)|$1 =~ /'"${webservice_application_name}"'/?"":$1|gse' "$glassfishDomainXmlFile"
+        perl -0777 -p -i -e 's|(<application .*?</application>)|$1 =~ /'"${webservice_application_name}"'/?"":$1|gse' "$glassfishDomainXmlFile"
+      fi
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
-      rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
+      if [ -f "$TOMCAT_HOME/webapps/$WAR_NAME" ] && [ ! -w "$TOMCAT_HOME/webapps/$WAR_NAME" ]; then
+        echo_failure "Current user does not have permission to remove ${WAR_NAME} from tomcat installation"
+        return 1
+      fi
+      if [ -d "$TOMCAT_HOME/webapps/${webservice_application_name}" ] && [ ! -w "$TOMCAT_HOME/webapps/${webservice_application_name}" ]; then
+        echo_failure "Current user does not have permission to remove ${webservice_application_name} from tomcat installation"
+        return 1
+      fi
+      rm -rf "$TOMCAT_HOME/webapps/$WAR_NAME"
+      rm -rf "$TOMCAT_HOME/webapps/${webservice_application_name}"
     fi
   else
     if using_glassfish; then
@@ -3735,7 +3980,7 @@ webservice_require(){
   if using_glassfish; then
     glassfish_require
   elif using_tomcat; then
-      tomcat_require
+    tomcat_require
   fi
 }
 
@@ -3790,14 +4035,14 @@ The supported servers are g=Glassfish | t=Tomcat"
       WEBSERVER_CHOICE=
     else
       if [ "$WEBSERVER_CHOICE" = 't' ]; then 
-        export WEBSERVER_VENDOR="tomcat"
+        export WEBSERVICE_VENDOR="tomcat"
       else
-        export WEBSERVER_VENDOR="glassfish"
+        export WEBSERVICE_VENDOR="glassfish"
       fi
       break
     fi
   done
-  echo "Web Server Choice: $WEBSERVER_VENDOR" >> $INSTALL_LOG_FILE
+  echo "Web Server Choice: $WEBSERVICE_VENDOR" >> $INSTALL_LOG_FILE
 }
 # parameters:
 # 1. path to properties file
@@ -3872,7 +4117,7 @@ call_setupcommand() {
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/logs/mtwilson.log
   return $?
 }
 
@@ -3884,13 +4129,13 @@ call_tag_setupcommand() {
   mainclass=com.intel.mtwilson.launcher.console.Main
   local jvm_memory=2048m
   local jvm_maxperm=512m
-  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/logs/mtwilson.log
   return $?
 }
 
 file_encrypted() {
   local filename="${1}"
-  if [ -n "$filename" ]; then
+  if [ -n "$filename" ] && [ -f "$filename" ]; then
     if grep -q "ENCRYPTED DATA" "$filename"; then
       return 0 #"File encrypted: $filename"
     else
@@ -3966,10 +4211,19 @@ load_conf() {
       export CONF_DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTWILSON_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTWILSON_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTWILSON_TLS_KEYSTORE_PASSWORD=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TAG_API_USERNAME=`echo $temp | awk -F'mtwilson.tag.api.username=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TAG_API_PASSWORD=`echo $temp | awk -F'mtwilson.tag.api.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_WEBSERVICE_VENDOR=$(echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}')
+      if [ "CONF_WEBSERVICE_VENDOR == glassfish" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(echo $temp | awk -F'glassfish.admin.username=' '{print $2}' | awk -F' ' '{print $1}')
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(echo $temp | awk -F'glassfish.admin.password=' '{print $2}' | awk -F' ' '{print $1}')
+      elif [ "CONF_WEBSERVICE_VENDOR == tomcat" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(echo $temp | awk -F'tomcat.admin.username=' '{print $2}' | awk -F' ' '{print $1}')
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(echo $temp | awk -F'tomcat.admin.password=' '{print $2}' | awk -F' ' '{print $1}')
+      fi
     else
       echo -n "file [$mtw_props_path]....."
       export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host "$mtw_props_path"`
@@ -3978,10 +4232,19 @@ load_conf() {
       export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password "$mtw_props_path"`
       export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
-      export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
       export CONF_MTWILSON_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
       export CONF_MTWILSON_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
       export CONF_MTWILSON_TLS_KEYSTORE_PASSWORD=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
+      export CONF_MTWILSON_TAG_API_USERNAME=`read_property_from_file mtwilson.tag.api.username "$mtw_props_path"`
+      export CONF_MTWILSON_TAG_API_PASSWORD=`read_property_from_file mtwilson.tag.api.password "$mtw_props_path"`
+      export CONF_WEBSERVICE_VENDOR=$(read_property_from_file mtwilson.webserver.vendor "$mtw_props_path")
+      if [ "$CONF_WEBSERVICE_VENDOR" == "glassfish" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(read_property_from_file glassfish.admin.username "$mtw_props_path")
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(read_property_from_file glassfish.admin.password "$mtw_props_path")
+      elif [ "$CONF_WEBSERVICE_VENDOR" == "tomcat" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(read_property_from_file tomcat.admin.username "$mtw_props_path")
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(read_property_from_file tomcat.admin.password "$mtw_props_path")
+      fi
     fi
     echo_success "Done"
   fi
@@ -4112,7 +4375,9 @@ load_defaults() {
   export DEFAULT_DATABASE_PASSWORD=""
   export DEFAULT_DATABASE_PORTNUM=""
   export DEFAULT_DATABASE_DRIVER=""
-  export DEFAULT_WEBSERVER_VENDOR=""
+  export DEFAULT_WEBSERVICE_VENDOR=""
+  export DEFAULT_WEBSERVICE_MANAGER_USERNAME="admin"
+  export DEFAULT_WEBSERVICE_MANAGER_PASSWORD=$(generate_password 16)
   export DEFAULT_DATABASE_VENDOR=""
   export DEFAULT_PRIVACYCA_SERVER=""
   export DEFAULT_SAML_KEYSTORE_FILE="SAML.jks"
@@ -4131,6 +4396,8 @@ load_defaults() {
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
   export DEFAULT_TRUSTAGENT_KEYSTORE_PASS=""
+  export DEFAULT_MTWILSON_TAG_API_USERNAME="tagservice"
+  export DEFAULT_MTWILSON_TAG_API_PASSWORD=$(generate_password 16)
   
   export MTWILSON_SERVER=${MTWILSON_SERVER:-${CONF_MTWILSON_SERVER:-$DEFAULT_MTWILSON_SERVER}}
   export DATABASE_HOSTNAME=${DATABASE_HOSTNAME:-${CONF_DATABASE_HOSTNAME:-$DEFAULT_DATABASE_HOSTNAME}}
@@ -4139,8 +4406,10 @@ load_defaults() {
   export DATABASE_PASSWORD=${DATABASE_PASSWORD:-${CONF_DATABASE_PASSWORD:-$DEFAULT_DATABASE_PASSWORD}}
   export DATABASE_PORTNUM=${DATABASE_PORTNUM:-${CONF_DATABASE_PORTNUM:-$DEFAULT_DATABASE_PORTNUM}}
   export DATABASE_DRIVER=${DATABASE_DRIVER:-${CONF_DATABASE_DRIVER:-$DEFAULT_DATABASE_DRIVER}}
-  export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-${CONF_WEBSERVER_VENDOR:-$DEFAULT_WEBSERVER_VENDOR}}
   export DATABASE_VENDOR=${DATABASE_VENDOR:-${CONF_DATABASE_VENDOR:-$DEFAULT_DATABASE_VENDOR}}
+  export WEBSERVICE_VENDOR=${WEBSERVICE_VENDOR:-${WEBSERVER_VENDOR:-${CONF_WEBSERVICE_VENDOR:-$DEFAULT_WEBSERVICE_VENDOR}}}
+  export WEBSERVICE_MANAGER_USERNAME=${WEBSERVICE_MANAGER_USERNAME:-${CONF_WEBSERVICE_MANAGER_USERNAME:-$DEFAULT_WEBSERVICE_MANAGER_USERNAME}}
+  export WEBSERVICE_MANAGER_PASSWORD=${WEBSERVICE_MANAGER_PASSWORD:-${CONF_WEBSERVICE_MANAGER_PASSWORD:-$DEFAULT_WEBSERVICE_MANAGER_PASSWORD}}
   export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
   export SAML_KEYSTORE_FILE=${SAML_KEYSTORE_FILE:-${CONF_SAML_KEYSTORE_FILE:-$DEFAULT_SAML_KEYSTORE_FILE}}
   export SAML_KEYSTORE_PASSWORD=${SAML_KEYSTORE_PASSWORD:-${CONF_SAML_KEYSTORE_PASSWORD:-$DEFAULT_SAML_KEYSTORE_PASSWORD}}
@@ -4157,7 +4426,8 @@ load_defaults() {
   export MTWILSON_TLS_KEYSTORE_PASSWORD=${MTWILSON_TLS_KEYSTORE_PASSWORD:-${CONF_MTWILSON_TLS_KEYSTORE_PASSWORD:-$DEFAULT_MTWILSON_TLS_KEYSTORE_PASSWORD}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
-  export TRUSTAGENT_KEYSTORE_PASS=${TRUSTAGENT_KEYSTORE_PASS:-${CONF_TRUSTAGENT_KEYSTORE_PASS:-$DEFAULT_TRUSTAGENT_KEYSTORE_PASS}}
+  export MTWILSON_TAG_API_USERNAME=${MTWILSON_TAG_API_USERNAME:-${CONF_MTWILSON_TAG_API_USERNAME:-$DEFAULT_MTWILSON_TAG_API_USERNAME}}
+  export MTWILSON_TAG_API_PASSWORD=${MTWILSON_TAG_API_PASSWORD:-${CONF_MTWILSON_TAG_API_PASSWORD:-$DEFAULT_MTWILSON_TAG_API_PASSWORD}}
 
   if using_mysql; then
     export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}
@@ -4227,16 +4497,16 @@ change_db_pass() {
     postgres_version
     postgres_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-    temp=$(sudo "$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
+    temp=$("$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
     echo ""
     if [ $? -ne 0 ]; then echo_failure "Issue building postgres or expect command."; exit; fi
     # Edit postgres password file if it exists
-    if [ -f /root/.pgpass ]; then
+    if [ -f ~/.pgpass ]; then
       echo -n "Updating database password value in .pgpass file...."
-      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' /root/.pgpass
-      #temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
+      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' ~/.pgpass
+      #temp=`cat ~/.pgpass | cut -f1,2,3,4 -d":"`
       #temp="$temp:$new_db_pass"
-      #echo $temp > /root/.pgpass;
+      #echo $temp > ~/.pgpass;
     fi
     echo_success "Done"
   fi
@@ -4319,15 +4589,15 @@ function erase_data() {
     postgres_detect
     postgres_version
     postgres_test_connection_report
-    if [ $? -ne 0 ]; 
-     then exit; 
+    if [ $? -ne 0 ];
+     then exit;
     fi
+    postgres_password=${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}
     for table in ${arr[*]}
     do
-     
-     temp=$(sudo "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")
+     temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
     done
-  fi 
+  fi
 }
 
 key_backup() {
@@ -4350,7 +4620,11 @@ key_backup() {
   if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
 
   configDir="/opt/mtwilson/configuration"
-  keyBackupDir="/var/mtwilson/key-backup"
+  if [ -w "/var/" ]; then
+     keyBackupDir="/var/mtwilson/key-backup"
+  else
+     keyBackupDir="/opt/mtwilson/var/mtwilson/key-backup"
+  fi
   datestr=`date +%Y-%m-%d.%H%M%S`
   keyBackupFile="$keyBackupDir/mtwilson-keys_$datestr.enc"
   mkdir -p "$keyBackupDir" 2>/dev/null
@@ -4391,7 +4665,8 @@ key_restore() {
   /opt/mtwilson/bin/decrypt.sh -p MTWILSON_PASSWORD "$keyBackupFile" > /dev/null
   find "$keyBackupDir/" -name "*.sig" -type f -delete
   cp -R "$keyBackupDir"/* "$configDir"/
-  find "$keyBackupDir" -type f -exec shred -uzn 3 {} \;
+  # cd to make sure in readable directory to prevent find utility error on "sudo -u mtwilson ..."
+  (cd "$keyBackupDir" && find "$keyBackupDir" -type f -exec shred -uzn 3 {} \;)
   rm -rf "$keyBackupDir"
   shred -uzn 3 "$keyBackupFile.zip"
 

@@ -28,6 +28,7 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblSamlAssertion.findByErrorCode", query = "SELECT t FROM TblSamlAssertion t WHERE t.errorCode = :errorCode"),
     @NamedQuery(name = "TblSamlAssertion.findByErrorMessage", query = "SELECT t FROM TblSamlAssertion t WHERE t.errorMessage = :errorMessage"),
     @NamedQuery(name = "TblSamlAssertion.findByCreatedTs", query = "SELECT t FROM TblSamlAssertion t WHERE t.createdTs = :createdTs"),
+    @NamedQuery(name = "TblSamlAssertion.findByRangeOfCreatedTs", query = "SELECT t FROM TblSamlAssertion t WHERE t.hostId.name = :hostName and t.createdTs >= :fromCreatedTs and t.createdTs < :toCreatedTs ORDER BY t.createdTs ASC"),
     @NamedQuery(name = "TblSamlAssertion.findByHostAndExpiry", query = "SELECT t FROM TblSamlAssertion t WHERE t.expiryTs > :now and t.hostId.name = :hostName ORDER BY t.expiryTs DESC"),
     @NamedQuery(name = "TblSamlAssertion.findByHostID", query = "SELECT t FROM TblSamlAssertion t WHERE t.hostId = :hostId"),
     @NamedQuery(name = "TblSamlAssertion.findByAssertionUuid", query = "SELECT t FROM TblSamlAssertion t WHERE t.assertionUuid = :assertionUuid ORDER BY t.expiryTs DESC")})

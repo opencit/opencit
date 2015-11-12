@@ -14,7 +14,7 @@ import com.intel.mountwilson.trustagent.commands.ReadIdentityCmd;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.trustagent.commands.RetrieveTcbMeasurement;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import javax.ws.rs.Consumes;
@@ -25,12 +25,15 @@ import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.TpmQuoteRequest;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.exec.CommandLine;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -104,8 +107,16 @@ public class Tpm {
 //            return context.getResponseXML();
             TpmQuoteResponse response = context.getTpmQuoteResponse();
             // delete temporary session directory
-            CommandUtil.runCommand(String.format("rm -rf %s",
-                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
+            CommandLine command = new CommandLine("rm");
+            command.addArgument("-rf");
+            command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder()));
+            Result result = ExecUtil.execute(command);
+            if (result.getExitCode() != 0) {
+                log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+                throw new TAException(ErrorCode.ERROR, result.getStderr());
+            }
+            log.debug("command stdout: {}", result.getStdout());
+            
             return response;
     }
     

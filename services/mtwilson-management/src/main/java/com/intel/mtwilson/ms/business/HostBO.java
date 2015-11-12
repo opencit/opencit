@@ -888,13 +888,17 @@ public class HostBO {
                 log.debug("TIMETAKEN: for uploading to DB: {}", (System.currentTimeMillis() - configWLStart));
                 
                 // For hosts that have support for attesting application and data on OS, we would get this measurementXml from the host.
-                // We will store it as it in the mw_measurementXml table and use it during attestation for verification.                
-                String measurementXmlLog = hostAttReportObj.getMeasurementXmlLog();
-                if (measurementXmlLog == null || measurementXmlLog.isEmpty())
-                    log.info("ConfigureWhiteListFromCustomData: No measurement xml log found on the host.");
-                else {
-                    configureMeasurementXmlLog(hostConfigObj, measurementXmlLog);
-                    log.debug("ConfigureWhiteListFromCustomData: Found the following measurement xml log on the host. {}");
+                // We will store it as it in the mw_measurementXml table and use it during attestation for verification.   
+                // We need to store the measurement log only if the VMM MLE is also being created since the final value of the measurement
+                // log would be extended to PCR 19
+                if (hostConfigObj.addVmmWhiteList()) {
+                    String measurementXmlLog = hostAttReportObj.getMeasurementXmlLog();
+                    if (measurementXmlLog == null || measurementXmlLog.isEmpty())
+                        log.info("ConfigureWhiteListFromCustomData: No measurement xml log found on the host.");
+                    else {
+                        configureMeasurementXmlLog(hostConfigObj, measurementXmlLog);
+                        log.debug("ConfigureWhiteListFromCustomData: Found the following measurement xml log on the host. {}");
+                    }
                 }
                 // Register host only if required.
                 /*if (hostConfigObj.isRegisterHost() == true) {

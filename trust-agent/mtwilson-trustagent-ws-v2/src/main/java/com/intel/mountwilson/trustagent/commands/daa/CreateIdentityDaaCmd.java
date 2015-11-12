@@ -1,13 +1,17 @@
 package com.intel.mountwilson.trustagent.commands.daa;
 
-
-
-import com.intel.mountwilson.common.CommandUtil;
+import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
+import java.io.File;
+import java.io.InputStream;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.io.IOUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,17 +38,34 @@ public class CreateIdentityDaaCmd implements ICommand {
             
             // extract the EK
             String ekCertFileName = EscapeUtil.doubleQuoteEscapeShellArgument(context.getEKCertFileName());
-            CommandUtil.runCommand(String.format("getcert %s", ekCertFileName)); // safe; no arguments involved in this command line
+            CommandLine command1 = new CommandLine("/opt/trustagent/bin/getcert");  // safe; no arguments involved in this command line
+            command1.addArgument(ekCertFileName);
+            Result result1 = ExecUtil.execute(command1);
+            if (result1.getExitCode() != 0) {
+                log.error("Error running command [{}]: {}", command1.getExecutable(), result1.getStderr());
+                throw new TAException(ErrorCode.ERROR, result1.getStderr());
+            }
+            log.debug("command stdout: {}", result1.getStdout());
             log.info( "Extracted EK Certificate");
 	
             // prepare the AIK for the DAA challenge
-            CommandUtil.runCommand(String.format("aikpublish %s %s", ekCertFileName,
-                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikCertFileName()),
-                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()))); // safe; no arguments involved in this command line
+            CommandLine command2 = new CommandLine("/opt/trustagent/bin/aikpublish"); // safe; no arguments involved in this command line
+            command2.addArgument(ekCertFileName);
+            command2.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikCertFileName()));
+            //command2.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()));
+            Result result2 = ExecUtil.execute(command2);
+            if (result2.getExitCode() != 0) {
+                log.error("Error running command [{}]: {}", command2.getExecutable(), result2.getStderr());
+                throw new TAException(ErrorCode.ERROR, result2.getStderr());
+            }
+            log.debug("command stdout: {}", result2.getStdout());
+            
             log.info( "Created AIK Blob and AIK Certificate for DAA");
 
             // read the AIK certificate
-            context.setAIKCertificate(CommandUtil.readCertificate(context.getAikCertFileName()));
+            try (InputStream in = new FileResource(new File(context.getAikCertFileName())).getInputStream()) {
+                context.setAIKCertificate(IOUtils.toString(in));
+            }
             log.debug("AIK Certificate Read to memory - {}", context.getAikCertFileName());
 
         } catch (Exception e) {

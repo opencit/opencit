@@ -537,8 +537,8 @@ public class ConnectionString {
     public static ConnectionString forIntel(String hostname, Integer port, String username, String password) {
         ConnectionString conn = new ConnectionString();
         conn.vendor = Vendor.INTEL;
-        conn.hostname = new InternetAddress(hostname.toString());
-        conn.managementServerName = hostname.toString();
+        conn.hostname = new InternetAddress(hostname);
+        conn.managementServerName = hostname;
         conn.port = port;
         conn.userName = username;
         conn.password = password;

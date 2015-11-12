@@ -49,7 +49,6 @@ if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n
   mysql_start
 fi
 mysql_install
-mysql_create_database
 export is_mysql_available mysql_connection_error
 if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
 
