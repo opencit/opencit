@@ -17,9 +17,9 @@
         <div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.authentication_status">Authentication Status</span></div>
 	<div id="nameOfPage" class="NameHeader" data-i18n="header.authentication_header">View Authentication Status</div>		
 	</div>
-        <div id="mainLoadingDiv" class="mainContainer">                
-            	<div  id ="authenticationstatus"><a href="#" onclick="getAuthenticationStatus()"><span data-i18n="label.get_authentication_status"></span></a></div>
-        </div>
+        <div class="container">
+        		<div class="mainHeader"><span class="authStatus" id="AuthePage" data-i18n="label.get_authentication_status">Get Authentication Status</span></div> <!-- was: "Trust Status Dash Board" -->
+			<a id="refreshAuth" href="#" onclick="getAuthenticationStatus(this)" data-toggle="tooltip" title="Refresh to get Authentication Status" style="display: none; float: right"><span class="glyphicon glyphicon-refresh"></span>RefreshAuth</a><br>
 
 <script type="text/javascript" src="Scripts/Authentication.js"></script>
 </body>
