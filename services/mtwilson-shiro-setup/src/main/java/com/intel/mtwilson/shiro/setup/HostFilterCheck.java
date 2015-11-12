@@ -74,12 +74,6 @@ public class HostFilterCheck extends LocalSetupTask {
                         if (CheckAllowed != null) {
                             return true;
                         }
-
-                           // log.debug("DEBUGGING...........................................");
-                        // log.debug(AllowValue);
-                        // log.debug(KeyValue);
-                        // log.debug(ValueSet);
-                        // return true;
                     } else {
                         continue;
                     }
