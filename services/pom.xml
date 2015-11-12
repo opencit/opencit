@@ -36,9 +36,9 @@
     <module>mtwilson-file-model</module>
     <module>mtwilson-file-ws-v2</module>
     <module>mtwilson-hostagent-ext</module>
-    <module>mtwilson-http-security</module>
+    <!--<module>mtwilson-http-security</module>-->
     <module>mtwilson-http-security-server</module>
-    <module>mtwilson-http-servlets</module>
+    <!--<module>mtwilson-http-servlets</module>-->
     <module>mtwilson-intel-hostagent</module>
     <module>mtwilson-jersey2-util</module>
     <module>mtwilson-jersey2-util-v1</module>
@@ -50,19 +50,19 @@
     <module>mtwilson-privacyca-niarl</module>
     <module>mtwilson-privacyca-setup</module>
     <module>mtwilson-privacyca-ws-v2</module>
-    <module>mtwilson-repository-api</module>
-    <module>mtwilson-rpc</module>
-    <module>mtwilson-rpc-jdbi</module>
-    <module>mtwilson-rpc-model</module>
+    <!--<module>mtwilson-repository-api</module>-->
+    <!--<module>mtwilson-rpc</module>-->
+    <!--<module>mtwilson-rpc-jdbi</module>-->
+    <!--<module>mtwilson-rpc-model</module>-->
     <module>mtwilson-saml</module>
     <module>mtwilson-saml-verifier</module>
     <module>mtwilson-setup</module>
-    <module>mtwilson-setup-ext</module>
+    <!--<module>mtwilson-setup-ext</module>-->
     <module>mtwilson-setup-ws-v2</module>
-    <module>mtwilson-shiro-file</module>
+    <!--<module>mtwilson-shiro-file</module>-->
     <module>mtwilson-shiro-jdbi</module>
     <module>mtwilson-shiro-setup</module>
-    <module>mtwilson-shiro-util</module>
+    <!--<module>mtwilson-shiro-util</module>-->
     <module>mtwilson-shiro-ws-v2</module>
     <module>mtwilson-tag-client-jaxrs2</module>
     <module>mtwilson-tag-dao-jooq</module>
@@ -86,12 +86,12 @@
     <module>mtwilson-user-management-client-jaxrs2</module>
     <module>mtwilson-user-management-model</module>
     <module>mtwilson-user-management-ws-v2</module>
-    <module>mtwilson-util</module>
-    <module>mtwilson-version-ws-v2</module>
+    <!--<module>mtwilson-util</module>-->
+    <!--<module>mtwilson-version-ws-v2</module>-->
     <module>mtwilson-vm-attestation-client-jaxrs2</module>
     <module>mtwilson-vm-attestation-ws-v2</module>
     <module>mtwilson-vmware-hostagent</module>
-    <module>mtwilson-webservice-util</module>
+    <!--<module>mtwilson-webservice-util</module>-->
     <module>mtwilson-whitelist</module>
     <module>mtwilson-whitelist-ws-v1</module>
   </modules>
