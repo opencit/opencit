@@ -14,12 +14,13 @@
     <module>AttestationServiceLinuxInstaller</module>
     <module>ManagementServiceLinuxInstaller</module>
     <module>WLMServiceLinuxInstaller</module>
-    <module>TrustAgentLinuxInstaller</module>
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-client-java6</module>
     <module>mtwilson-client-java7</module>
     <module>mtwilson-portal-installer</module>
     <module>mtwilson-server</module>
+    <module>mtwilson-trustagent-rhel</module>
+    <module>mtwilson-trustagent-ubuntu</module>
     <module>TomcatLinuxInstaller</module>
 	<module>LogRotateLinuxInstaller</module>
   </modules>
