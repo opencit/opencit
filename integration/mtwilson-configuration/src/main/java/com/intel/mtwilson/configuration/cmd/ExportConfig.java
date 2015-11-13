@@ -36,20 +36,25 @@ public class ExportConfig extends InteractiveCommand {
             }
         }
         
+        // Bug:4793 - Since we were already opening the file output stream and then making the call to the decryption function,
+        // the decryption function was not able to read the contents of the encrypted file if the same file was used to write 
+        // back the decrytped contents. So, we are decrypting the contents first and writing to the file.
+        String decryptedContent = export(password);
+        
         if( options != null && options.containsKey("out") ) {
             String filename = options.getString("out");
             try(FileOutputStream out = new FileOutputStream(new File(filename))) {
-                export(out, password);
+                IOUtils.write(decryptedContent, out);
             }
         }
         else if( options != null && options.getBoolean("stdout", false) ) {
             log.debug("Output filename not provided; exporting to stdout");
-            export(System.out, password);
+            IOUtils.write(decryptedContent, System.out);
         }
         else if( args.length == 1 ) {
             String filename = args[0];
             try(FileOutputStream out = new FileOutputStream(new File(filename))) {
-                export(out, password);
+                IOUtils.write(decryptedContent, out);
             }
         }
         else {
@@ -58,13 +63,13 @@ public class ExportConfig extends InteractiveCommand {
         
     }
 
-    public void export(OutputStream out, String password) throws IOException {
+    public String export(String password) throws IOException {
         MyConfiguration config = new MyConfiguration();
         FileResource resource = new FileResource(config.getConfigurationFile());
         PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
         
         String content = encryptedFile.loadString();
-        IOUtils.write(content, out);
+        return content;
     }
 
 }
