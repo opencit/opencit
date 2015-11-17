@@ -238,6 +238,27 @@ trustagent_stop() {
   fi
 }
 
+vrtm_uninstall() {
+  VRTM_UNINSTALL_SCRIPT="/opt/vrtm/bin/vrtm-uninstall.sh"
+  if [ -f "$VRTM_UNINSTALL_SCRIPT" ]; then
+    "$VRTM_UNINSTALL_SCRIPT"
+  fi
+}
+
+policyagent_uninstall() {
+  POLICYAGENT_UNINSTALL_SCRIPT="/opt/policyagent/bin/policyagent.py"
+  if [ -f "$POLICYAGENT_UNINSTALL_SCRIPT" ]; then
+    "$POLICYAGENT_UNINSTALL_SCRIPT" uninstall
+  fi
+}
+
+openstack_extensions_uninstall() {
+  OPENSTACK_EXTENSIONS_UNINSTALL_SCRIPT="/opt/openstack-ext/bin/mtwilson-openstack-node-uninstall.sh"
+  if [ -f "$OPENSTACK_EXTENSIONS_UNINSTALL_SCRIPT" ]; then
+    "$OPENSTACK_EXTENSIONS_UNINSTALL_SCRIPT"
+  fi
+}
+
 # backs up the configuration directory and removes all trustagent files,
 # except for configuration files which are saved and restored
 trustagent_uninstall() {
@@ -409,6 +430,9 @@ case "$1" in
     ;;
   uninstall)
     trustagent_stop
+    vrtm_uninstall
+    policyagent_uninstall
+    openstack_extensions_uninstall
     trustagent_uninstall
     groupdel trustagent > /dev/null 2>&1
     userdel trustagent > /dev/null 2>&1
