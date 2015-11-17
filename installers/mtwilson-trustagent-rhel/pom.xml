@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>mtwilson-trustagent-installer</artifactId>
+    <artifactId>mtwilson-trustagent-rhel</artifactId>
 
     <packaging>pom</packaging>
-    <name>Trust Agent Linux Installer</name>
+    <name>Trust Agent Linux Installer RHEL</name>
     <description>Self-extracting executable that installs Trust Agent and its bundled requirements</description>
 
     <parent>
@@ -75,6 +75,7 @@
                     <artifactId>tbootxm</artifactId>
                     <version>0.1-SNAPSHOT</version>
                     <type>bin</type>
+                    <classifier>rhel</classifier>
                 </dependency>
             </dependencies>
             
@@ -134,6 +135,7 @@
                                             <artifactId>tbootxm</artifactId>
                                             <version>0.1-SNAPSHOT</version>
                                             <type>bin</type>
+                                            <classifier>rhel</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>

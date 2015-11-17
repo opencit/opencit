@@ -915,6 +915,46 @@ remove_startup_script() {
   fi
 }
 
+function disable_tcp_timestamps() {
+  local property="net.ipv4.tcp_timestamps"
+  local filename="/etc/sysctl.conf"
+  local value="0"
+
+  if [ -f "$filename" ]; then
+    local ispresent=$(grep "^${property}" "$filename")
+    if [ -n "$ispresent" ]; then
+      # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
+      local escaped_value=$(echo "${value}" | sed 's/|/\\|/g')
+      local sed_escaped_value=$(sed_escape "$escaped_value")
+      # replace just that line in the file and save the file
+      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${sed_escaped_value}|" "${filename}"`
+      # protect against an error
+      if [ -n "$updatedcontent" ]; then
+        echo "$updatedcontent" > "${filename}"
+      else
+        echo_warning "Cannot write $property to $filename with value: $value"
+        echo -n 'sed -re "s|^('
+        echo -n "${property}"
+        echo -n ')=(.*)|\1='
+        echo -n "${escaped_value}"
+        echo -n '|" "'
+        echo -n "${filename}"
+        echo -n '"'
+        echo
+      fi
+    else
+      # property is not already in file so add it. extra newline in case the last line in the file does not have a newline
+      echo "" >> "${filename}"
+      echo "${property}=${value}" >> "${filename}"
+    fi
+  else
+    # file does not exist so create it
+    echo "${property}=${value}" > "${filename}"
+  fi
+  
+  echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+}
+
 # Ensure the package actually needs to be installed before calling this function.
 # takes arguments: component name (string), package list prefix (string)
 auto_install() {
