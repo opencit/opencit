@@ -259,6 +259,7 @@ public class HostAttestations extends MtWilsonClient {
      * Along with specifying the Host UUID or Host AIK or Host Name, the user can additionally specify the below criteria to retrieve the attestations.
      * - numberOfDays - Specifies the number of days back from the current date for which the attestations are needed. Ex:nameEqualTo=192.168.0.2&numberOfDays=5
      * - fromDate & toDate - Specifies the date range for which the attestations are needed. Currently the following ISO 8601 date formats are supported
+	 *     -- date. Ex: nameEqualTo=192.168.0.2&fromDate=2015-05-01&toDate=2015-06-01
      *     -- date+time. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T00:00Z&toDate=2015-06-05T00:00Z
      *     -- date+time+zone. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T12:30-02:00&toDate=2015-06-05T12:30-02:00
      * 
