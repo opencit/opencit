@@ -23,49 +23,82 @@ public class HostFilterCheck extends LocalSetupTask {
 
     private File ShiroIniFile;
 
-    public String authentication_check() {
+    public boolean authentication_check() {
 
         //check if the shiro.ini file exists
-        //if it does not exist, display an appropriate error message
         ShiroIniFile = new File(Folders.configuration() + File.separator + "shiro.ini");
         if (!ShiroIniFile.exists()) {
             configuration("File not found: shiro.ini");
         }
 
-        //read the shiro.ini file and check for hostfilter
+        //Read the Shiro.ini file to check for hostFilter and IniHostRealm         
         Ini ShiroFile = new Ini();
 
         try {
             ShiroFile.load(FileUtils.readFileToString(ShiroIniFile));
         } catch (IOException ex) {
             log.debug("Shiro.ini file not found");
-            return "Authentication Bipass Disabled";
+            return false;
         }
 
         try {
 
-            boolean checkValue = getKeyforValue(ShiroFile);
-            if (checkValue) {
-                return "Authentication Bipass Enabled";
+            boolean checkHostRealm = getHostRealmValue(ShiroFile);
+            boolean checkHostFilter = getHostFilterValue(ShiroFile);
+            if (checkHostRealm || checkHostFilter) {
+                return true;
             } else {
-                return "Authentication Bipass Disabled";
+                return false;
             }
 
         } catch (Exception ex) {
-            return "Authentication Bipass Disabled";
+            return false;
         }
     }
 
-    public boolean getKeyforValue(Ini ShiroFile) {
+    //Function to check if the IniHostRealm is the Shiro.ini file
+    public boolean getHostRealmValue(Ini ShiroFile) {
 
         try {
 
             for (String sectionName : ShiroFile.keySet()) {
                 Section section = ShiroFile.get(sectionName);
-                String HostfilterValue = "com.intel.mtwilson.shiro.authc.host.IniHostRealm";
+                String IniHostRealmValue = "com.intel.mtwilson.shiro.authc.host.IniHostRealm";
+                log.debug("Checking for IniHostRealm property in Shiro.ini file");
 
                 for (String KeyValue : section.keySet()) {
-                    log.debug("\t" + KeyValue + "=" + section.get(KeyValue));
+                    //log.debug("\t" + KeyValue + "=" + section.get(KeyValue));
+                    String ValueSet = section.get(KeyValue);
+                    if (ValueSet.equals(IniHostRealmValue)) {
+                        String AllowValue = KeyValue + ".allow";
+                        String CheckAllowed = ShiroFile.getSectionProperty(sectionName, AllowValue);
+
+                        if (CheckAllowed != null) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        } catch (Exception ex) {
+            log.debug("Error during reading the INI file");
+            return false;
+        }
+        return false;
+    }
+
+    //Function to check if the HostAuthenticationFilter is the Shiro.ini file
+    public boolean getHostFilterValue(Ini ShiroFile) {
+
+        try {
+
+            for (String sectionName : ShiroFile.keySet()) {
+                Section section = ShiroFile.get(sectionName);
+                String HostfilterValue = "com.intel.mtwilson.shiro.authc.host.HostAuthenticationFilter";
+                log.debug("Checking for HostAuthenticationFilter property in Shiro.ini file");
+
+                for (String KeyValue : section.keySet()) {
+                    //log.debug("\t" + KeyValue + "=" + section.get(KeyValue));
                     String ValueSet = section.get(KeyValue);
                     if (ValueSet.equals(HostfilterValue)) {
                         String AllowValue = KeyValue + ".allow";
@@ -74,8 +107,6 @@ public class HostFilterCheck extends LocalSetupTask {
                         if (CheckAllowed != null) {
                             return true;
                         }
-                    } else {
-                        continue;
                     }
                 }
                 return false;

@@ -1,13 +1,20 @@
-function open_in_same_tab(url )
-{
-  var win=window.open(url, '_blank');
-  win.focus();
-}
 
-function getAuthenticationStatus(){
-    
-    var l = window.location;
-    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
-    base_url = base_url.replace("mtwilson-portal","");
-    open_in_same_tab(base_url + "mtwilson/v2/authentication-status");
-}
+$(function() {
+    $.ajax({url: "v2proxy/authentication-status.json", success: function(data){
+           // alert(JSON.stringify(result));
+        //$("#authentication-Status").html(result);
+        
+        var result = JSON.stringify(data);
+        document.getElementById('authentication_Status').value = getEscapesmessage(result);
+    }});
+});
+  
+ function getEscapesmessage(result){
+     var str = result;
+	str =str.replace(/\{/g, " ");
+	str =str.replace(/\}/g, " ");
+	str =str.replace(/\"/g, " ");
+	
+	return str;
+ }
+
