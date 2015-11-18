@@ -3045,4 +3045,9 @@ private TlsPolicy createTlsPolicyForVcenter(String vCenterConnection, String tls
     public void setOemClientService(IOEMClientService oemClientService) {
         this.oemClientService = oemClientService;
     }
+    
+    public ModelAndView getAuthenticationPage(HttpServletRequest req,HttpServletResponse res) {
+		log.info("DemoPortalDataController.getAuthenticationPage");
+		return new ModelAndView("Authentication");
+	} 
 }
