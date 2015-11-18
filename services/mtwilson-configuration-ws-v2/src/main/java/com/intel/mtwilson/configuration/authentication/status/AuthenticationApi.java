@@ -22,10 +22,16 @@ import javax.ws.rs.core.MediaType;
 @Path("/authentication-status")
 public class AuthenticationApi {
 
+        
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public String authenticationStatus() throws Exception {
-        HostFilterCheck authenticationStatus = new HostFilterCheck();
-        return authenticationStatus.authentication_check();
+    public AuthenticationApiResponse authenticationStatus() throws Exception {
+        
+        AuthenticationApiResponse response = new AuthenticationApiResponse();
+        HostFilterCheck HostFilterEnabled = new HostFilterCheck();
+        response.setHostBasedAuthenticationBypassEnabled(HostFilterEnabled.authentication_check());
+        
+        return response;
+        
     }
 }

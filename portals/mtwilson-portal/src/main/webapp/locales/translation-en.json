@@ -72,7 +72,7 @@
         "tag_management":"Asset Tag Management",
         "tag_selection_management":"Tag Selection",
         "tag_certificate_management":"Manage Certificates",
-        "authentication_status":"Authentication Status"
+        "alerts":"Alerts"
     },
     "header": {
         "about": "",
@@ -117,7 +117,7 @@
         "certificate_browse":"Browse Certificates",
         "servers_to_provision":"Step 1: Select the servers to provision the tags",
         "choose_tag_selection":"Step 2: Choose the Tag selection",
-        "authentication_header":"View Authentication Status"
+        "alerts_header":"Alerts"
     },
     "link": {
         "import": "Import",
@@ -407,7 +407,7 @@
         "no_pending_api_requests":"No requests are currently pending to be reviewed.",
         "mtw_1x_roles":"Mt Wilson 1.x roles for backward compatibility:",
         "mtw_2x_roles":"Mt Wilson 2.x roles:",
-        "get_authentication_status":"Authentication Bipass Status"
+        "get_authentication_status":"Authentication Status"
     },
     "placeholder": {
         "selection_name":"Name of this selection",
