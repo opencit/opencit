@@ -10,12 +10,12 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title data-i18n="title.authentication_status">Authentication Status</title>
+        <title data-i18n="title.alerts">Alerts</title>
     </head>
     <body>
         <div class="container">
-            <div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.authentication_status">Authentication Status</span></div>
-            <div id="nameOfPage" class="NameHeader" data-i18n="header.authentication_header">View Authentication Status</div>	
+            <div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.alerts">Alerts</span></div>
+            <div id="nameOfPage" class="NameHeader" data-i18n="header.alerts_header">Alerts</div>	
              <div class="singleDiv">
                  <b><div class="labelDiv" data-i18n="label.get_authentication_status">Authentication Status:</div></b>
                                     <div class="valueDiv">
