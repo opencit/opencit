@@ -275,16 +275,6 @@ else
   auto_install_preview "TrustAgent requirements" "TRUSTAGENT"
 fi
 
-# update logback.xml with configured trustagent log directory
-if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
-  sed -e "s|<file>.*/trustagent.log</file>|<file>$TRUSTAGENT_LOGS/trustagent.log</file>|" $TRUSTAGENT_CONFIGURATION/logback.xml > $TRUSTAGENT_CONFIGURATION/logback.xml.edited
-  if [ $? -eq 0 ]; then
-    mv $TRUSTAGENT_CONFIGURATION/logback.xml.edited $TRUSTAGENT_CONFIGURATION/logback.xml
-  fi
-else
-  echo_warning "Logback configuration not found: $TRUSTAGENT_CONFIGURATION/logback.xml"
-fi
-
 # store trustagent username in env file
 echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-username
 echo "export TRUSTAGENT_USERNAME=$TRUSTAGENT_USERNAME" >> $TRUSTAGENT_ENV/trustagent-username
@@ -333,6 +323,16 @@ mkdir -p "$TRUSTAGENT_HOME"/share/scripts
 cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
 cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
 chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
+
+# update logback.xml with configured trustagent log directory
+if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
+  sed -e "s|<file>.*/trustagent.log</file>|<file>$TRUSTAGENT_LOGS/trustagent.log</file>|" $TRUSTAGENT_CONFIGURATION/logback.xml > $TRUSTAGENT_CONFIGURATION/logback.xml.edited
+  if [ $? -eq 0 ]; then
+    mv $TRUSTAGENT_CONFIGURATION/logback.xml.edited $TRUSTAGENT_CONFIGURATION/logback.xml
+  fi
+else
+  echo_warning "Logback configuration not found: $TRUSTAGENT_CONFIGURATION/logback.xml"
+fi
 
 # set permissions
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_HOME
