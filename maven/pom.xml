@@ -18,7 +18,7 @@
 	<module>mtwilson-feature-zip</module>
     <module>mtwilson-maven-java</module>
     <module>mtwilson-maven-package</module>
-	<module>mtwilson-maven-package-makeself</module>
+	<!--<module>mtwilson-maven-package-makeself</module> -->
 	<module>mtwilson-maven-package-bin-zip</module>
 	<module>mtwilson-maven-package-java-zip</module>
     <module>mtwilson-maven-root</module>
