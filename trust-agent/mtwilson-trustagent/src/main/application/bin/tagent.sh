@@ -245,6 +245,13 @@ vrtm_uninstall() {
   fi
 }
 
+tbootxm_uninstall() {
+  TBOOTXM_UNINSTALL_SCRIPT="/opt/tbootxm/bin/tboot-xm-uninstall.sh"
+  if [ -f "$TBOOTXM_UNINSTALL_SCRIPT" ]; then
+    "$TBOOTXM_UNINSTALL_SCRIPT"
+  fi
+}
+
 policyagent_uninstall() {
   POLICYAGENT_UNINSTALL_SCRIPT="/opt/policyagent/bin/policyagent.py"
   if [ -f "$POLICYAGENT_UNINSTALL_SCRIPT" ]; then
@@ -431,6 +438,7 @@ case "$1" in
   uninstall)
     trustagent_stop
     vrtm_uninstall
+	tbootxm_uninstall
     policyagent_uninstall
     openstack_extensions_uninstall
     trustagent_uninstall
