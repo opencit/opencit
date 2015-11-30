@@ -49,7 +49,7 @@ fi
 
 # if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
-if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
+if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ] && [ "$1" != "erase-data" ]; then
   export MTWILSON_SUDO=true
   sudo -u $MTWILSON_USERNAME -H -E "$MTWILSON_BIN/mtwilson" $*
   exit $?
@@ -553,6 +553,7 @@ case "$1" in
   erase-data)
         #load_default_env 1>/dev/null
         erase_data
+        if [ $? -ne 0 ]; then exit 1; fi
         #call_setupcommand EraseLogs
         #call_setupcommand EraseHostRegistrationData
         #call_setupcommand EraseWhitelistData        
