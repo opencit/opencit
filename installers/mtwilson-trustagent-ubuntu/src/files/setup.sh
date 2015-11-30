@@ -786,6 +786,7 @@ tagent setup update-extensions-cache-file --force 2>/dev/null
 if [ "$(whoami)" == "root" ]; then
   echo "Updating system information"
   tagent update-system-info 2>/dev/null
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_VAR
 else
   echo_warning "Skipping updating system information"
 fi
