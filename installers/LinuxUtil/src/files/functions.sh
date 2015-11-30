@@ -875,6 +875,7 @@ register_startup_script() {
     fi
     echo -e "[Unit]\nDescription=${startup_name}\n\n[Service]\nType=forking\nExecStart=${absolute_filename} start\nExecStop=${absolute_filename} stop\n\n[Install]\nWantedBy=multi-user.target\n" > "/etc/systemd/system/${startup_name}.service"
     chmod 664 "/etc/systemd/system/${startup_name}.service"
+    "$systemctlCommand" daemon-reload
     "$systemctlCommand" enable "${startup_name}.service"
     "$systemctlCommand" daemon-reload
   fi
