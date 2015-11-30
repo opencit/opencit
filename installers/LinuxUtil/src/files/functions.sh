@@ -4630,7 +4630,7 @@ function erase_data() {
     if [ $? -ne 0 ]; then return 1; fi
     postgres_password=${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}
     for table in ${arr[*]}; do
-      temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
+      temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -U "$DATABASE_USERNAME" -c "DELETE from $table;")`
     done
   fi
 }
