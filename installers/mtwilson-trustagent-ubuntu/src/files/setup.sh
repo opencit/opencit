@@ -348,10 +348,6 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
   ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
 fi
 
-# register linux startup script
-register_startup_script $TRUSTAGENT_BIN/tagent.sh tagent 21
-# trousers has N=20 startup number, need to lookup and do a N+1
-
 ### INSTALL MEASUREMENT AGENT
 echo "Installing measurement agent..."
 TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
@@ -636,6 +632,13 @@ return_dir=`pwd`
 cd $return_dir
 
 if [ "$(whoami)" == "root" ]; then
+  echo "Registering trousers in start up"
+  tcsdBinary=$(which tcsd)
+  if [ -z "$tcsdBinary" ]; then
+    echo_failure "Not able to resolve trousers binary location"
+    exit 1
+  fi
+  register_startup_script "$tcsdBinary" trousers 20 >>$logfile 2>&1
   echo "Registering tagent in start up"
   register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
   # trousers has N=20 startup number, need to lookup and do a N+1
