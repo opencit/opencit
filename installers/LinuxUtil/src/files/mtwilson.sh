@@ -553,6 +553,7 @@ case "$1" in
   erase-data)
         #load_default_env 1>/dev/null
         erase_data
+        if [ $? -ne 0 ]; then exit 1; fi
         #call_setupcommand EraseLogs
         #call_setupcommand EraseHostRegistrationData
         #call_setupcommand EraseWhitelistData        

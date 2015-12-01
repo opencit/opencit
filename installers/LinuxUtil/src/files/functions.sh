@@ -4594,12 +4594,10 @@ change_db_pass() {
 #echoerr() { echo_failure "$@" 1>&2; }
 
 function erase_data() {
- mysql=`which mysql 2>/dev/null`
- psql=`which psql 2>/dev/null`
-
- #load_default_env 1>/dev/null
+  mysql=`which mysql 2>/dev/null`
+  psql=`which psql 2>/dev/null`
   
-   encrypted_files=()
+  encrypted_files=()
   count=0
   for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
     if file_encrypted "$i"; then
@@ -4620,23 +4618,19 @@ function erase_data() {
     mysql_detect
     mysql_version
     mysql_test_connection_report
-    if [ $? -ne 0 ]; then exit; fi
-    for table in ${arr[*]}
-    do    
-        $mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
+    if [ $? -ne 0 ]; then return 1; fi
+    for table in ${arr[*]}; do
+      $mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
     done 
   elif using_postgres; then #POSTGRES
     echo_success "using postgres"
     postgres_detect
     postgres_version
     postgres_test_connection_report
-    if [ $? -ne 0 ];
-     then exit;
-    fi
+    if [ $? -ne 0 ]; then return 1; fi
     postgres_password=${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}
-    for table in ${arr[*]}
-    do
-     temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
+    for table in ${arr[*]}; do
+      temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -U "$DATABASE_USERNAME" -c "DELETE from $table;")`
     done
   fi
 }

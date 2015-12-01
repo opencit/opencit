@@ -316,6 +316,7 @@ trustagent_update_system_info() {
     dmidecode --type processor > $TRUSTAGENT_VAR/system-info/dmidecode.processor
     lsb_release -a > $TRUSTAGENT_VAR/system-info/lsb_release
     virsh version > $TRUSTAGENT_VAR/system-info/virsh.version
+    chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_VAR
   else
     echo_failure "Must run 'tagent update-system-info' as root"
   fi
