@@ -783,15 +783,15 @@ for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRU
   chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory 2>>$logfile
 done
 
-# before running any tagent commands update the extensions cache file
-tagent setup update-extensions-cache-file --force 2>/dev/null
-
 if [ "$(whoami)" == "root" ]; then
   echo "Updating system information"
   tagent update-system-info 2>/dev/null
 else
   echo_warning "Skipping updating system information"
 fi
+
+# before running any tagent commands update the extensions cache file
+tagent setup update-extensions-cache-file --force 2>/dev/null
 
   # create a trustagent username "mtwilson" with no password and all privileges
   # which allows mtwilson to access it until mtwilson UI is updated to allow
