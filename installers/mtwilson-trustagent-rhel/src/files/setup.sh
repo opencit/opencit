@@ -632,13 +632,17 @@ return_dir=`pwd`
 cd $return_dir
 
 if [ "$(whoami)" == "root" ]; then
-  echo "Registering trousers in start up"
   tcsdBinary=$(which tcsd)
   if [ -z "$tcsdBinary" ]; then
-    echo_failure "Not able to resolve trousers binary location"
+    echo_failure "Not able to resolve trousers binary location. trousers installed?"
     exit 1
   fi
-  register_startup_script "$tcsdBinary" trousers 20 >>$logfile 2>&1
+  # systemd enable trousers for RHEL 7.2 startup
+  systemctlCommand=`which systemctl 2>/dev/null`
+  if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
+    echo "systemctl enabling trousers service..."
+    "$systemctlCommand" enable tcsd.service 2>/dev/null
+  fi
   echo "Registering tagent in start up"
   register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
   # trousers has N=20 startup number, need to lookup and do a N+1
