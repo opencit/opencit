@@ -43,13 +43,13 @@ public class VmMeasurement extends ObjectModel {
 //    @JsonValue
     @Override
     public String toString() {
-        return String.format("%s %s", digest.toString(), label);
+        return String.format("%s %s", (digest != null ? digest.toString() : ""), label);
     }
     
 
     @Override
     public int hashCode() {
-        return digest.hashCode(); // two measurements are equal if their digests are equal...  the labels are arbitrary; this property facilitates very convenient management of measurement using java's collections, such as contains(measurement) and removeAll(list of measurements) where one side comes from the host and may have a different label than what got saved in the database 
+        return (digest != null ? digest.hashCode() : 0); // two measurements are equal if their digests are equal...  the labels are arbitrary; this property facilitates very convenient management of measurement using java's collections, such as contains(measurement) and removeAll(list of measurements) where one side comes from the host and may have a different label than what got saved in the database 
     }
 
     /**
