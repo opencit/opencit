@@ -642,6 +642,7 @@ if [ "$(whoami)" == "root" ]; then
   if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
     echo "systemctl enabling trousers service..."
     "$systemctlCommand" enable tcsd.service 2>/dev/null
+    "$systemctlCommand" start tcsd.service 2>/dev/null
   fi
   echo "Registering tagent in start up"
   register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
