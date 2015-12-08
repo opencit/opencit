@@ -125,8 +125,8 @@ public class VmMeasurementLog extends ObjectModel {
     @Override
     public String toString() {
         String result = "";
-        for(VmMeasurement m : measurements) {
-            result = result.concat(m.getValue().toString()+" "+m.getLabel()+"\n");
+        for(VmMeasurement m : measurements) {            
+            result = result.concat((m.getValue() != null ? m.getValue().toString() : "") + " " + m.getLabel()+"\n");
         }
         return result;
     }
