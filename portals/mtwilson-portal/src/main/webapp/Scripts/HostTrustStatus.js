@@ -611,9 +611,11 @@ function processAllHostDetails(responseJSON) {
 
 function fnGetUpdateForAllHosts() {
         var data = "selectedHost=";
-        for ( var host in selectedHost) {
+    	for ( var host in selectedHost) {
             data+=selectedHost[host].hostName+";";
         }
+        $('#mainContainer').html('<div id="DashBoardPage"></div>');
+        setLoadImage('DashBoardPage', '40px', '500px');
         data=data.substring(0,data.length-1);
         sendJSONAjaxRequest(false, 'getData/updateTrustForSelected.html', data, fnUpdateTrustForSelectedSuccess, null);
 }
