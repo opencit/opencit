@@ -123,9 +123,9 @@ public class MyPersistenceManager extends PersistenceManager {
     // copies some properties described in http://commons.apache.org/proper/commons-dbcp/configuration.html
     // using same defaults as shown on that page
     public static void copyDbcpProperties(Configuration myConfig, Properties prop) {
-        prop.setProperty("dbcp.max.active", myConfig.getInteger("dbcp.max.active", 8).toString());
-        prop.setProperty("dbcp.max.idle", myConfig.getInteger("dbcp.max.idle", 8).toString());
-        prop.setProperty("dbcp.min.idle", myConfig.getInteger("dbcp.min.idle", 0).toString()); // can be used instead of initial size
+        prop.setProperty("dbcp.max.active", myConfig.getInteger("dbcp.max.active", 100).toString());
+        prop.setProperty("dbcp.max.idle", myConfig.getInteger("dbcp.max.idle", 64).toString());
+        prop.setProperty("dbcp.min.idle", myConfig.getInteger("dbcp.min.idle", 32).toString()); // can be used instead of initial size
         prop.setProperty("dbcp.validation.query", myConfig.getString("dbcp.validation.query","")); // for example SELECT 1 ; we provide empty string default because Properties would throw NullPointerException for a null value
         prop.setProperty("dbcp.validation.on.borrow",String.valueOf( myConfig.getBoolean("dbcp.validation.on.borrow", true))); 
         prop.setProperty("dbcp.validation.on.return", String.valueOf(myConfig.getBoolean("dbcp.validation.on.return", false))); 
