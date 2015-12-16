@@ -40,7 +40,7 @@ public class AutoRefreshTrust implements ServletContextListener, Runnable, Plugi
     private long maxCacheDuration = 5; // hour
     private TimeUnit maxCacheDurationUnits = TimeUnit.MINUTES;
     private int refreshTimeBeforeSamlExpiry = 300; // seconds
-    private long timeout = 60; // seconds
+    private long timeout = 120; // seconds
     private TimeUnit timeoutUnits = TimeUnit.SECONDS;
     private BulkHostTrustBO bulkHostTrustBO = null;
     private TblSamlAssertionJpaController samlJpa = null;
