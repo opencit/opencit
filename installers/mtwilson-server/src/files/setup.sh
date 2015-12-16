@@ -1088,9 +1088,6 @@ cp decrypt.sh /opt/mtwilson/features/tag/bin
 chmod 755 /opt/mtwilson/features/tag/bin/encrypt.sh
 chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
 
-#setup the property for the auto refresh of the host SAML attestations
-update_property_in_file "mtwilson.auto.refresh.trust.interval.seconds" $CONFIG_DIR/mtwilson.properties "120"
-
 ##############################################################################################################################################################################
 
 
