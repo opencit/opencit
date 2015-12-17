@@ -9,7 +9,7 @@ set package_bin=%~dp0
 for %%a in ("%package_bin:~0,-1%") do set package_dir=%%~dpa
 
 REM echo. %package_bin%
-echo. Trust Agent located at: %package_dir%
+echo. ==Trust Agent located at: %package_dir%
 
 REM ==set PATH for the current cmd 
 set PATH=%PATH%;%package_bin%
@@ -30,23 +30,23 @@ REM # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 ECHO. ==Configure trust agent version and environment variables==
 cd %package_dir%
 IF EXIST "%package_dir%\version" (
-  echo. "Version file found"
+  REM echo. "Version file found"
   for /f  "tokens=*" %%a in (version) do (
     set %%a
   )
 ) ELSE (
-  echo. "Missing file: version"
+  echo. Version file not found
 )
 
 ECHO. ==Configure trust agent environment variables from trustagent.env
 IF EXIST "%package_dir%\trustagent.env" (
-  echo. "trustagent.env found"
+  REM echo. trustagent.env found
   for /f  "USEBACKQ tokens=*" %%a in ("%package_dir%\trustagent.env") do (
-    echo. %%a
+    echo.   %%a
     set %%a
   )
 ) ELSE (
-  echo. "Missing file: trustagent.env"
+  echo. Missing file: trustagent.env
 )
 
 REM # this is a list of all the variables we expect to find in trustagent.env
@@ -58,7 +58,7 @@ REM  ECHO. %%a
 )
 
 REM # before we start, clear the install log
-ECHO. ==Before start, clear the installation log file %logfile%==
+REM ECHO. ==Before start, clear the installation log file %logfile%==
 > "%logfile%" echo. %date%
 >> "%logfile%" echo. %time%
 
@@ -80,7 +80,7 @@ REM ##### backup old files
 REM # backup configuration directory before unzipping our package
 ECHO. ==Backup configuration directory==
 IF EXIST "%intel_conf_dir%\" (
-  xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y /Q
+  xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y /Q > nul
 )
 
 REM FIXIT ##### stop existing trust agent if running
@@ -113,16 +113,16 @@ REM fi
 REM ##Private Java install $JAVA_PACKAGE
 ECHO. ==Unpack JAVA JRE==
   cd "%package_dir%\jre"
-  jre.exe -qo
+  jre.exe -qo > nul
   set JAVA_HOME=%package_dir%\jre
   cd "%package_bin%" 
 
 REM patch java.security file
 ECHO. ==Patch java.security file==
 if exist "%JAVA_HOME%\lib\security\java.security" (
-  echo. "Replacing java.security file, existing file will be backed up"
-  copy "%JAVA_HOME%\lib\security\java.security" "%JAVA_HOME%\lib\security\java.security.old"
-  copy "%package_dir%\java.security" "%JAVA_HOME%\lib\security\java.security"
+  REM echo. ==Replacing java.security file, existing file will be backed up==
+  copy "%JAVA_HOME%\lib\security\java.security" "%JAVA_HOME%\lib\security\java.security.old" > nul
+  copy "%package_dir%\java.security" "%JAVA_HOME%\lib\security\java.security" > nul
 )
 
 REM  # create trustagent.version file
@@ -163,7 +163,7 @@ for /f "tokens=14 delims= " %%a in ('ipconfig ^| findstr "IPv4"') do (
 IF "%TRUSTAGENT_TLS_CERT_IP%"=="" (
   set TRUSTAGENT_TLS_CERT_IP=%DEFAULT_TRUSTAGENT_TLS_CERT_IP%
 )
-echo.   TA IP Address: %TRUSTAGENT_TLS_CERT_IP%
+REM echo.   TA IP Address: %TRUSTAGENT_TLS_CERT_IP%
 
 REM # before running any tagent commands update the extensions cache file
 ECHO. ==Update the extensions cache file before running any tagent commands 
@@ -177,16 +177,16 @@ ECHO. ==Create a trustagent username "mtwilson" with no password
 
 REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
 ECHO. ==Copy shiro-win.ini to shiro.ini
-copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini"
+copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini" > nul
 
 REM # INSTALL the citbootdriver to support geotag
-  cd "%bootdriver_dir%"
+REM  cd "%bootdriver_dir%"
   REM #Remove the old driver first in case it is still there
-  start /d "%bootdriver_dir%\" /b citbootdriversetup.exe uninstall
-  del /F /Q "C:\Windows\System32\Drivers\citbootdriver.sys"
-  REM #install the new one
-  start /d "%bootdriver_dir%\" /b citbootdriversetup.exe install
-  cd "%package_bin%"
+REM  start /d "%bootdriver_dir%\" /b citbootdriversetup.exe uninstall
+REM  del /F /Q "C:\Windows\System32\Drivers\citbootdriver.sys"
+REM  REM #install the new one
+REM  start /d "%bootdriver_dir%\" /b citbootdriversetup.exe install
+REM  cd "%package_bin%"
 
 REM # give tagent a chance to do any other setup (such as the .env file and pcakey)
 REM # and make sure it's successful before trying to start the trust agent
