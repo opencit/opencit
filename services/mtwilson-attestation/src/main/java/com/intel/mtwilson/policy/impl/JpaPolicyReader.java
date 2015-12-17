@@ -30,6 +30,7 @@ import com.intel.mtwilson.as.data.MwMeasurementXml;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.Rule;
+import com.intel.mtwilson.policy.rule.AssetTagMatches;
 import com.intel.mtwilson.policy.rule.PcrEventLogEqualsExcluding;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
@@ -198,16 +199,55 @@ public class JpaPolicyReader {
         /* set asset tag PCR to 23 if it is Windows */
         int assetTagPCR = 22;
         if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
-            assetTagPCR = 23;
-        }           
-        PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(assetTagPCR, Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
-
-        tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
-        rules.add(tagPcrRule);   
+            assetTagPCR = 23;          
+            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+            tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
+            rules.add(tagRule);   
+        } else {          
+            PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(assetTagPCR, Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+        
+            tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
+            rules.add(tagPcrRule); 
+        }   
         
         return rules;
     }
+    
+    // rules for AssetTag without using PCR macthing
+    public Set<Rule> loadMatchesRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts tblHosts) {
+        HashSet<Rule> rules = new HashSet<Rule>();
+        // load the tag cacerts and create the tag trust rule  
+        try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
+            String text = IOUtils.toString(in);
+            List<X509Certificate> tagAuthorities = X509Util.decodePemCertificates(text);
+            TagCertificateTrusted tagTrustedRule = new TagCertificateTrusted(tagAuthorities.toArray(new X509Certificate[0]));
+            tagTrustedRule.setMarkers(TrustMarker.ASSET_TAG.name());
+            rules.add(tagTrustedRule);
+        }
+        catch(Exception e) {
+            throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage());
+        }
 
+        log.debug("Adding the asset tag rule for host {} with asset tag ID {}", tblHosts.getName(), atagCert.getId());
+        //log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", Sha1Digest.valueOf(atagCert.getPCREvent()).toString());
+        // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
+        // Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
+        //PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
+        
+        //PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR23.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+        /* set asset tag PCR to 23 if it is Windows */
+        //int assetTagPCR = 22;
+        //if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
+        //    assetTagPCR = 23;
+        //}           
+        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+
+        tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
+        rules.add(tagRule);   
+        
+        return rules;
+    }
+    
     public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo, TblHosts host) {
         HashMap<String,String> info = new HashMap<String,String>();
         // info.put("EventType", manifest.getEventType()); 

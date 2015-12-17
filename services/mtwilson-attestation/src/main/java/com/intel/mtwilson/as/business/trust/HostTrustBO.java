@@ -751,6 +751,7 @@ public class HostTrustBO {
         hostReport.pcrManifest = pcrManifest;
         hostReport.tpmQuote = null; 
         hostReport.variables = new HashMap<String,String>(); 
+        hostReport.assetTagReported = pcrManifest.getProvisionedTag(); //asset tag received from the host
         if( agent.isAikAvailable() ) {
             if( agent.isAikCaAvailable() ) {
                 hostReport.aik = new Aik(agent.getAikCertificate());                

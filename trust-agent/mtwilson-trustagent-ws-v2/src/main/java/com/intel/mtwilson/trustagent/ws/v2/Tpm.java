@@ -15,6 +15,7 @@ import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.trustagent.commands.ReadAssetTag;
 import com.intel.mountwilson.trustagent.commands.RetrieveTcbMeasurement;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import javax.ws.rs.Consumes;
@@ -31,7 +32,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,44 +88,81 @@ public class Tpm {
                 throw new WebApplicationException(Response.serverError().header("Error", "tpm.quote.ipv4 enabled but local address not IPv4").build());
             }
         }
-        
-        
-        
-            TADataContext context = new TADataContext(); // when we call getSessionId it will create a new random one
+          
+        TADataContext context = new TADataContext(); // when we call getSessionId it will create a new random one
+        String osName = System.getProperty("os.name");
+        context.setOsName(osName);
 
-            context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
-            
-            context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
-            
-            new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
-            new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
-
-            // Get the module information
-            String osName = System.getProperty("os.name");
-            context.setOsName(osName);
-            if (!osName.toLowerCase().contains("windows")) {
-                new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
-                new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
+        /* If it is Windows host, Here we read Geotag from nvram index 0x40000010 and do sha1(nonce | geotag) and use the result as the nonce for TPM quote
+           As of now, we still keep the same geotag provisioning mechanism by writing it to TPM. there are other approaches as well, but not in implementation.
+        */  
+        boolean isTagProvisioned = false;
+        byte[] assetTagHash = null; 
+        if (osName.toLowerCase().contains("windows")) {
+            // 1. Trying to read AssetTag from TPM NVRAM 0x40000010
+            new ReadAssetTag(context).execute();
+            // 2. if provisioned, generate and set the new nonce
+            String assetTag = context.getAssetTagHash();
+            if (assetTag != null) {
+                log.debug("Assetag is: {}", assetTag);
+                try {
+                    assetTagHash = Hex.decodeHex(assetTag.toCharArray());
+                    if (assetTagHash.length == 20) { 
+                        // sha1(nonce | assetTagHash)
+                        log.debug("AssetTagHash is 20 bytes");
+                        byte[] extendedNonceWithAssetTag = Sha1Digest.digestOf(tpmQuoteRequest.getNonce()).extend(assetTagHash).toByteArray();
+                        tpmQuoteRequest.setNonce(extendedNonceWithAssetTag);
+                        isTagProvisioned = true;
+                    }
+                    else {
+                        log.debug("The asset tag read from NVRAM is not 20 bytes!");                  
+                    }
+                } catch (DecoderException ex) {
+                    log.error("Decoding assettag hash error: {}", ex.getMessage());
+                }
             }
-            new GenerateQuoteCmd(context).execute();
-            new BuildQuoteXMLCmd(context).execute();
+            else {
+                log.debug("AssetTag is not provisioned");
+            }
+        }
+
+        context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
+
+        context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
+
+        new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
+        new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
+
+        // Get the module information
+        if (!osName.toLowerCase().contains("windows")) {
+            new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
+            new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
+        }
+        new GenerateQuoteCmd(context).execute();
+        new BuildQuoteXMLCmd(context).execute();
 
 //            return context.getResponseXML();
-            TpmQuoteResponse response = context.getTpmQuoteResponse();
-            // delete temporary session directory
-            
-            // we should use more neutral ways to delete the folder
-            FileUtils.forceDelete(new File(context.getDataFolder()));
-            
-            /*
-            CommandUtil.runCommand(String.format("rm -rf %s",
-                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
-            
-            
-            CommandUtil.runCommand(String.format("rmdir /s /q %s",
-                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
-            */
-            return response;
+        TpmQuoteResponse response = context.getTpmQuoteResponse();
+        // delete temporary session directory
+
+        //assetTag 
+        response.isTagProvisioned = isTagProvisioned;
+        if (isTagProvisioned) {
+            response.assetTag = assetTagHash;
+        }
+
+        // we should use more neutral ways to delete the folder
+        FileUtils.forceDelete(new File(context.getDataFolder()));
+
+        /*
+        CommandUtil.runCommand(String.format("rm -rf %s",
+                EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
+
+
+        CommandUtil.runCommand(String.format("rmdir /s /q %s",
+                EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
+        */
+        return response;
     }
     
     private String joinIntegers(int[] pcrs, char separator) {

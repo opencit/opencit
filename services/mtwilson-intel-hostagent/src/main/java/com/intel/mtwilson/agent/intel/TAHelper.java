@@ -105,6 +105,7 @@ public class TAHelper {
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
     private String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
     private TxtHostRecord host = null;
+    boolean isHostWindows = false;
 
     
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
@@ -161,7 +162,9 @@ public class TAHelper {
         this.host = hostBeingVerified;
         
         log.debug("TA Helper getOsName: " + host.VMM_OSName);
-        boolean isHostWindows = host.VMM_OSName.toLowerCase().contains("windows");
+        
+        //check if the host is Windows
+        isHostWindows = host.VMM_OSName.toLowerCase().contains("windows");
         
         // check mtwilson 2.0 configuration first
         String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
@@ -518,6 +521,12 @@ public class TAHelper {
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
+        // for Windows host, we generate a new nonce by sha1(nonce | tag)
+        if (tpmQuoteResponse.isTagProvisioned) {
+            log.debug("tpmQuoteResponse.isTagProvisioned is true");
+            verifyNonce = Sha1Digest.digestOf(verifyNonce).extend(tpmQuoteResponse.assetTag).toByteArray();
+        }
+        
         n = saveNonce(verifyNonce, sessionId);
 
         log.debug("saved nonce with session id: " + sessionId);
@@ -549,6 +558,7 @@ public class TAHelper {
                 c.delete();
                 r.delete();
             }
+            pcrManifest.setProvisionedTag(tpmQuoteResponse.assetTag);
             return pcrManifest;
         } else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
@@ -563,6 +573,7 @@ public class TAHelper {
                 c.delete();
                 r.delete();
             }
+            pcrManifest.setProvisionedTag(tpmQuoteResponse.assetTag);
             return pcrManifest;
         }
 

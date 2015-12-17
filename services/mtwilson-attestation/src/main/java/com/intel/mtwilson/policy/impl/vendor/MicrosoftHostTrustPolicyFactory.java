@@ -122,7 +122,7 @@ public class MicrosoftHostTrustPolicyFactory implements VendorHostTrustPolicyFac
     
     @Override
     public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
-        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
+        return reader.loadMatchesRulesForAssetTag(atagCert, host);
     }
 
 }
