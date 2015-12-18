@@ -137,31 +137,45 @@ Section "install"
         SetOutPath $INSTDIR\
 
         # Copy Program Files to installation directory
-        File /r "bin"
-        File /r "bootdriver"
-        File /r "configuration"
-        File /r "env.d"
-        File /r "hypertext"
-        File /r "java"
-        File /r "jre"
-        File "feature.xml"
-        File "java.security"
-        File "version"
+        # bin
+        CreateDirectory $INSTDIR\bin
+        SetOutPath $INSTDIR\bin
+        File /r "..\bin\tagent.cmd"
+        File /r "..\bin\tasetup.cmd"
+        File /r "..\bin\tpm_bindaeskey"
+        File /r "..\bin\tpm_createkey"
+        File /r "..\bin\tpm_signdata"
+        File /r "..\bin\tpm_unbindaeskey"
+        File /r "..\tpmtool\TpmAtt.dll"
+        File /r "..\tpmtool\TPMTool.exe"
+        
+        SetOutPath $INSTDIR\
+        
+        File /r "..\bootdriver"
+        File /r "..\configuration"
+        File /r "..\env.d"
+        File /r "..\hypertext"
+        File /r "..\java"
+        File /r "..\jre"
+        File "..\feature.xml"
+        File "..\java.security"
+        File "..\version"
         File "readme.txt"
         File "TAicon.ico"
-        File "vcredist_x64.exe"
+        File "..\tpmtool\vcredist_x64.exe"
         File "TrustAgent.exe"
         File "TrustAgentTray.exe"
         File "nocmd.vbs"
-        File "ServiceTrayInstaller.bat"
+        File "initsvcsetup.cmd"
+        File "inittraysetup.cmd"
 
-        
+        ;
         # If trustagent.env file is not already created by Installer UI, copy from extracted files
         IfFileExists "$INSTDIR\trustagent.env" exists doesnotexist
         exists:
                 goto end_of_check
         doesnotexist:
-                File "trustagent.env"
+                File "..\trustagent.env"
         end_of_check:
         # If silent installation, check if trustagent.env file is passed as argument '/E'
         ${GetOptions} $cmdLineParams "/E=" $R0
@@ -199,7 +213,20 @@ Section "install"
         nsExec::Exec 'cmd /k netsh advfirewall firewall add rule name="trustagent" protocol=TCP dir=in localport=1443 action=allow'
 
         # Run tasetup.cmd
-        ExecShell "open" '$INSTDIR\bin\tasetup.cmd'
+        
+        ExecWait '$INSTDIR\bin\tasetup.cmd'
+        ExecWait '$INSTDIR\initsvcsetup.cmd'
+        ReadRegStr $0 HKLM "Software\Microsoft\Windows NT\CurrentVersion" "ProductName"
+        StrCpy $6 "Hyper-V Server 2012 R2"
+        StrCmp $0 $6 hypercheck
+                ExecWait '$INSTDIR\inittraysetup.cmd'
+                Goto hyperdone
+        hypercheck:
+                 Goto hyperdone
+        hyperdone:
+                  Delete $INSTDIR\initsvcsetup.cmd
+                  Delete $INSTDIR\inittraysetup.cmd
+        
 
 SectionEnd
 

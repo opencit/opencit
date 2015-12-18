@@ -1,16 +1,11 @@
-cd "%TRUSTAGENT_HOME%"
-set tacmdstr="wscript '%TRUSTAGENT_HOME%\nocmd.vbs' '%TRUSTAGENT_HOME%\bin\tagent.cmd' start"
-schtasks /create /sc ONSTART /tn TrustAgent /tr %tacmdstr%
-
-sc create TrustAgent binPath= "%TRUSTAGENT_HOME%\TrustAgent.exe" start= auto DisplayName= "Intel TrustAgent"
-
-set tacmdstr1="%TRUSTAGENT_HOME%\TrustAgentTray.exe"
-schtasks /create /sc ONSTART /tn TrustAgentTray /tr %tacmdstr1%
-
+echo. "%CD%"
+set ta_dir=%CD%
+echo. "%ta_dir%"
+set tacmdstr="wscript '%ta_dir%\nocmd.vbs' '%ta_dir%\bin\tagent.cmd' start"
+schtasks /create /sc ONSTART /tn TrustAgent /tr %tacmdstr% /f
+sc create TrustAgent binPath= "%ta_dir%\TrustAgent.exe" start= auto DisplayName= "Intel TrustAgent"
+sc description TrustAgent "Runs Intel CIT TrustAgent"
 sc failure TrustAgent reset= 0 actions= restart/60000
+net start TrustAgent /y
+echo. "%tacmdstr%"
 
-ECHO. ==Start trustagent service
-REM call "%trustagent_cmd%" start
-
-schtasks /run /tn TrustAgentTray
-sc start TrustAgent
