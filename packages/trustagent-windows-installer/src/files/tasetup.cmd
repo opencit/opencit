@@ -194,8 +194,8 @@ REM # NOTE: only the output from start-http-server is redirected to the logfile;
 REM #       the stdout from the setup command will be displayed
 ECHO. ==Call trustagent setup
 >>"%logfile%" call "%trustagent_cmd%" setup
-ECHO. ==Start trustagent service
-call "%trustagent_cmd%" start
+REM ECHO. ==Start trustagent service
+REM call "%trustagent_cmd%" start
 
 REM # optional: register tpm password with mtwilson so pull provisioning can
 REM #           be accomplished with less reboots (no ownership transfer)
