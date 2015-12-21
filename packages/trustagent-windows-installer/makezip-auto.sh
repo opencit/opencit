@@ -41,5 +41,17 @@ rm -rf ${trustagentZip}
 mv tasetup.cmd bin/
 
 export TMPDIR=~/.tmp
+
+# instead of making a zip file, we run makesis to generate the trustagent windows installer
+MAKENSIS=`which makensis`
+if [ -z "$MAKENSIS" ]; then
+    echo "Missing makensis tool"
+    exit 1
+fi
+
 cd $targetDir
+$MAKENSIS "${projectNameVersion}/nsis/trustagentinstallscript.nsi"
+mv "${projectNameVersion}/nsis/cit_trustagentsetup.exe" "${projectNameVersion}.exe"
+
+# This is not necessary, but to zip it
 $makezip -r "${projectNameVersion}.zip" "${projectNameVersion}"

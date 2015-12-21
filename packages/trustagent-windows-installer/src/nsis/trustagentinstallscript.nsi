@@ -11,7 +11,7 @@
 Name "Intel CIT TrustAgent"
 
 # Create Setup(installer) file
-OutFile "Setup_TrustAgent.exe"
+OutFile "cit_trustagentsetup.exe"
 
 # Set the default Installation Directory
 InstallDir "$PROGRAMFILES\Intel\TrustAgent"

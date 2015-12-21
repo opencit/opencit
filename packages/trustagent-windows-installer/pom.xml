@@ -192,10 +192,10 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${makeself.directory}/nsisinstaller</outputDirectory>
+                                    <outputDirectory>${makeself.directory}/nsis</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>src/nsisinstaller</directory>
+                                            <directory>src/nsis</directory>
                                             <includes>
                                                 <include>**/*</include>
                                             </includes>
@@ -290,8 +290,8 @@
                                     <configuration>
                                         <artifacts>
                                             <artifact>
-                                                <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
-                                                <type>zip</type>
+                                                <file>${project.build.directory}/${project.artifactId}-${project.version}.exe</file>
+                                                <type>exe</type>
                                                 <!-- this is the single self-extracting installer -->
                                             </artifact>
                                         </artifacts>
