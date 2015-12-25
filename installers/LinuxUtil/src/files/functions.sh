@@ -4195,7 +4195,7 @@ decrypt_file() {
     return 1
   fi
   if [ -f "$filename" ]; then
-    call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
+    call_tag_setupcommand export-config --in="$filename" --out="$filename" --env-password="PASSWORD"
     if file_encrypted "$filename"; then
       echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       return 2
@@ -4214,7 +4214,7 @@ encrypt_file() {
     return 1
   fi
   if [ -f "$filename" ]; then
-    call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"
+    call_tag_setupcommand import-config --in="$filename" --out="$filename" --env-password="PASSWORD"
     if ! file_encrypted "$filename"; then
       echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       return 2
@@ -4241,7 +4241,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$mtw_props_path"; then
       echo -n "encrypted file [$mtw_props_path]....."
-      temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$mtw_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4295,7 +4295,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$as_props_path"; then
       echo -n "encrypted file [$as_props_path]....."
-      temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$as_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4323,7 +4323,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$ms_props_path"; then
       echo -n "encrypted file [$ms_props_path]....."
-      temp=`call_setupcommand ExportConfig "$ms_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$ms_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4348,7 +4348,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$mp_props_path"; then
       echo -n "encrypted file [$mp_props_path]....."
-      temp=`call_setupcommand ExportConfig "$mp_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$mp_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4366,7 +4366,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$hp_props_path"; then
       echo -n "encrypted file [$hp_props_path]....."
-      temp=`call_setupcommand ExportConfig "$hp_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$hp_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4384,7 +4384,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$ta_props_path"; then
       echo -n "encrypted file [$ta_props_path]....."
-      temp=`call_setupcommand ExportConfig "$ta_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$ta_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4597,18 +4597,18 @@ function erase_data() {
   mysql=`which mysql 2>/dev/null`
   psql=`which psql 2>/dev/null`
   
-  encrypted_files=()
-  count=0
-  for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
-    if file_encrypted "$i"; then
-      encrypted_files[count]="$i"
-    fi
-    let count++
-  done
-  
-  for i in ${encrypted_files[@]}; do
-    decrypt_file "$i" "$MTWILSON_PASSWORD"
-  done
+  #encrypted_files=()
+  #count=0
+  #for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
+  #  if file_encrypted "$i"; then
+  #    encrypted_files[count]="$i"
+  #  fi
+  #  let count++
+  #done
+  #
+  #for i in ${encrypted_files[@]}; do
+  #  decrypt_file "$i" "$MTWILSON_PASSWORD"
+  #done
   
   arr=(mw_measurement_xml mw_tag_certificate mw_tag_certificate_request mw_tag_selection_kvattribute mw_tag_selection mw_tag_kvattribute mw_host_tpm_password mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem mw_tls_policy)
 
@@ -4630,7 +4630,7 @@ function erase_data() {
     if [ $? -ne 0 ]; then return 1; fi
     postgres_password=${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}
     for table in ${arr[*]}; do
-      temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -U "$DATABASE_USERNAME" -c "DELETE from $table;")`
+      temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -U "$DATABASE_USERNAME" -h "$DATABASE_HOSTNAME" -c "DELETE from $table;")`
     done
   fi
 }
