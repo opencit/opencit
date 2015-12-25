@@ -87,6 +87,11 @@ if [ -f "$TRUSTAGENT_HOME/share/scripts/functions.sh" ]; then
   . $TRUSTAGENT_HOME/share/scripts/functions.sh
 fi
 
+# stored master password
+if [ -z "$TRUSTAGENT_PASSWORD" ] && [ -f $TRUSTAGENT_CONFIGURATION/.trustagent_password ]; then
+  export TRUSTAGENT_PASSWORD=$(cat $TRUSTAGENT_CONFIGURATION/.trustagent_password)
+fi
+
 ###################################################################################################
 
 # all other variables with defaults

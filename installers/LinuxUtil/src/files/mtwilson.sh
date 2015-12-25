@@ -64,6 +64,10 @@ export MTWILSON_BIN=${MTWILSON_BIN:-$MTWILSON_HOME/bin}
 export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-$MTWILSON_HOME/repository}
 export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
 
+# stored master password
+if [ -z "$MTWILSON_PASSWORD" ] && [ -f $MTWILSON_CONFIGURATION/.mtwilson_password ]; then
+  export MTWILSON_PASSWORD=$(cat $MTWILSON_CONFIGURATION/.mtwilson_password)
+fi
 
 # SCRIPT CONFIGURATION:
 #share_dir=/usr/local/share/mtwilson/util

@@ -832,7 +832,28 @@ for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_JAVA $TR
 done
 
 # start the server, unless the NOSETUP variable is defined
-if [ -z "$TRUSTAGENT_NOSETUP" ]; then tagent start; fi
+if [ -z "$TRUSTAGENT_NOSETUP" ]; then
+  # the master password is required
+  # if already user provided we assume user will also provide later for restarts
+  # otherwise, we generate and store the password
+  if [ -z "$TRUSTAGENT_PASSWORD" ] && [ ! -f $TRUSTAGENT_CONFIGURATION/.trustagent_password ]; then
+    tagent generate-password > $TRUSTAGENT_CONFIGURATION/.trustagent_password
+  fi
+
+  tagent import-config --in="${TRUSTAGENT_CONFIGURATION}/trustagent.properties" --out="${TRUSTAGENT_CONFIGURATION}/trustagent.properties"
+  #tagent config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,trustagent,jersey-media-multipart}" >/dev/null
+  #tagent config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
+
+  ## dashboard
+  #tagent config mtwilson.navbar.buttons trustagent-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
+  #tagent config mtwilson.navbar.hometab keys >/dev/null
+
+  #tagent config jetty.port ${JETTY_PORT:-80} >/dev/null
+  #tagent config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
+
+  #tagent setup
+  tagent start
+fi
 
 # NOTE:  monit should only be restarted AFTER trustagent is up and running
 #        so that it doesn't try to start it before we're done with our setup

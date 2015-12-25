@@ -352,7 +352,11 @@
       <artifactId>mtwilson-auto-refresh-trust</artifactId>
       <version>${project.version}</version>
     </dependency>
- 			
+    <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-password-vault</artifactId>
+        <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
