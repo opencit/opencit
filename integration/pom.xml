@@ -18,7 +18,6 @@
         <module>mtwilson-api</module>
         <module>mtwilson-client-java6</module>
         <module>mtwilson-client-java7</module>
-        <module>mtwilson-configuration</module>
         <module>mtwilson-env</module>
         <!--<module>mtwilson-feature-xml</module>
         <module>mtwilson-launcher</module>

@@ -87,6 +87,11 @@ if [ -f "$TRUSTAGENT_HOME/share/scripts/functions.sh" ]; then
   . $TRUSTAGENT_HOME/share/scripts/functions.sh
 fi
 
+# stored master password
+if [ -z "$TRUSTAGENT_PASSWORD" ] && [ -f $TRUSTAGENT_CONFIGURATION/.trustagent_password ]; then
+  export TRUSTAGENT_PASSWORD=$(cat $TRUSTAGENT_CONFIGURATION/.trustagent_password)
+fi
+
 ###################################################################################################
 
 # all other variables with defaults
@@ -238,6 +243,34 @@ trustagent_stop() {
   fi
 }
 
+vrtm_uninstall() {
+  VRTM_UNINSTALL_SCRIPT="/opt/vrtm/bin/vrtm-uninstall.sh"
+  if [ -f "$VRTM_UNINSTALL_SCRIPT" ]; then
+    "$VRTM_UNINSTALL_SCRIPT"
+  fi
+}
+
+tbootxm_uninstall() {
+  TBOOTXM_UNINSTALL_SCRIPT="/opt/tbootxm/bin/tboot-xm-uninstall.sh"
+  if [ -f "$TBOOTXM_UNINSTALL_SCRIPT" ]; then
+    "$TBOOTXM_UNINSTALL_SCRIPT"
+  fi
+}
+
+policyagent_uninstall() {
+  POLICYAGENT_UNINSTALL_SCRIPT="/opt/policyagent/bin/policyagent.py"
+  if [ -f "$POLICYAGENT_UNINSTALL_SCRIPT" ]; then
+    "$POLICYAGENT_UNINSTALL_SCRIPT" uninstall
+  fi
+}
+
+openstack_extensions_uninstall() {
+  OPENSTACK_EXTENSIONS_UNINSTALL_SCRIPT="/opt/openstack-ext/bin/mtwilson-openstack-node-uninstall.sh"
+  if [ -f "$OPENSTACK_EXTENSIONS_UNINSTALL_SCRIPT" ]; then
+    "$OPENSTACK_EXTENSIONS_UNINSTALL_SCRIPT"
+  fi
+}
+
 # backs up the configuration directory and removes all trustagent files,
 # except for configuration files which are saved and restored
 trustagent_uninstall() {
@@ -288,6 +321,7 @@ trustagent_update_system_info() {
     dmidecode --type processor > $TRUSTAGENT_VAR/system-info/dmidecode.processor
     lsb_release -a > $TRUSTAGENT_VAR/system-info/lsb_release
     virsh version > $TRUSTAGENT_VAR/system-info/virsh.version
+    chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_VAR
   else
     echo_failure "Must run 'tagent update-system-info' as root"
   fi
@@ -409,6 +443,10 @@ case "$1" in
     ;;
   uninstall)
     trustagent_stop
+    vrtm_uninstall
+	tbootxm_uninstall
+    policyagent_uninstall
+    openstack_extensions_uninstall
     trustagent_uninstall
     groupdel trustagent > /dev/null 2>&1
     userdel trustagent > /dev/null 2>&1

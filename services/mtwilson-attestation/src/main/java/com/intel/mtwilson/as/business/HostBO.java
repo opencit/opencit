@@ -870,11 +870,13 @@ public class HostBO {
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                                     m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                            //					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                            tblHostSpecificManifests.add(tblHostSpecificManifest);
+                            if (tblModuleManifest != null) {
+                                TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                                tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                                tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                                tblHostSpecificManifests.add(tblHostSpecificManifest);
+                            }
                         } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null
                                 && ArrayUtils.contains(openSourceHostSpecificModules, m.getInfo().get("ComponentName"))) {
 
@@ -887,10 +889,12 @@ public class HostBO {
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                                     m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                            tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                            if (tblModuleManifest != null) {
+                                TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                                tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                                tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                            }
                         }
                     }
                 }

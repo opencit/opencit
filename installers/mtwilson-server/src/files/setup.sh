@@ -1222,32 +1222,34 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
-## setup mtwilson, unless the NOSETUP variable is defined
-#if [ -z "$MTWILSON_NOSETUP" ]; then
-#
-#  # the master password is required
-#  if [ -z "$MTWILSON_PASSWORD" ]; then
-#    echo_failure "Master password required in environment variable MTWILSON_PASSWORD"
-#    echo 'To generate a new master password, run the following command:
-#
-#  MTWILSON_PASSWORD=$(mtwilson generate-password) && echo MTWILSON_PASSWORD=$MTWILSON_PASSWORD
-#
-#The master password must be stored in a safe place, and it must
-#be exported in the environment for all other mtwilson commands to work.
-#
-#LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
-#
-#After you set MTWILSON_PASSWORD, run the following command to complete installation:
-#
-#  mtwilson setup
-#
-#'
-#    exit 1
-#  fi
-#
-#  mtwilson config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson}" >/dev/null
-#  mtwilson setup
-#fi
+# setup mtwilson, unless the NOSETUP variable is defined
+if [ -z "$MTWILSON_NOSETUP" ]; then
+  # the master password is required
+  # if already user provided we assume user will also provide later for restarts
+  # otherwise, we generate and store the password
+  if [ -z "$MTWILSON_PASSWORD" ] && [ ! -f $MTWILSON_CONFIGURATION/.mtwilson_password ]; then
+    mtwilson generate-password > $MTWILSON_CONFIGURATION/.mtwilson_password
+  fi
+
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/mtwilson.properties" --out="${MTWILSON_CONFIGURATION}/mtwilson.properties"
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/attestation-service.properties" --out="${MTWILSON_CONFIGURATION}/attestation-service.properties"
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/management-service.properties" --out="${MTWILSON_CONFIGURATION}/management-service.properties"
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/audit-handler.properties" --out="${MTWILSON_CONFIGURATION}/audit-handler.properties"
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/mtwilson-portal.properties" --out="${MTWILSON_CONFIGURATION}/mtwilson-portal.properties"
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/wlm-service.properties" --out="${MTWILSON_CONFIGURATION}/wlm-service.properties"
+
+  #mtwilson config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,jersey-media-multipart}" >/dev/null
+  #mtwilson config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
+
+  ## dashboard
+  #mtwilson config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
+  #mtwilson config mtwilson.navbar.hometab keys >/dev/null
+
+  #mtwilson config jetty.port ${JETTY_PORT:-80} >/dev/null
+  #mtwilson config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
+
+  #mtwilson setup
+fi
 
 # delete the temporary setup environment variables file
 rm -f $MTWILSON_ENV/mtwilson-setup
@@ -1285,16 +1287,16 @@ chmod 700 "/var/opt/intel" "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/ai
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
-  update_property_in_file "mtwilson.webserver.vendor" "$MTWILSON_CONFIGURATION/mtwilson.properties" "glassfish"
-  update_property_in_file "glassfish.admin.username" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_USERNAME"
-  update_property_in_file "glassfish.admin.password" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_PASSWORD"
+  mtwilson config "mtwilson.webserver.vendor" "glassfish" >/dev/null
+  mtwilson config "glassfish.admin.username" "$WEBSERVICE_MANAGER_USERNAME" >/dev/null
+  mtwilson config "glassfish.admin.password" "$WEBSERVICE_MANAGER_PASSWORD" >/dev/null
   glassfish_admin_user
   #glassfish_restart
   /opt/mtwilson/bin/mtwilson restart
 elif using_tomcat; then
-  update_property_in_file "mtwilson.webserver.vendor" "$MTWILSON_CONFIGURATION/mtwilson.properties" "tomcat"
-  update_property_in_file "tomcat.admin.username" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_USERNAME"
-  update_property_in_file "tomcat.admin.password" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_PASSWORD"
+  mtwilson config "mtwilson.webserver.vendor" "tomcat" >/dev/null
+  mtwilson config "tomcat.admin.username" "$WEBSERVICE_MANAGER_USERNAME" >/dev/null
+  mtwilson config "tomcat.admin.password" "$WEBSERVICE_MANAGER_PASSWORD" >/dev/null
   #tomcat_restart
   /opt/mtwilson/bin/mtwilson restart
 fi

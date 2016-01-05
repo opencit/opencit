@@ -718,6 +718,6 @@ function getAuthenticationPage() {
 	//isAddHostPage = true;
 	$('#mainContainer').html('<div id="AuthenticationPage"></div>');
 	//setLoadImage('AuthenticationPage', '40px', '500px');
-	sendHTMLAjaxRequest(false, 'getView/getAuthenticationPage.html', null, fnDisplayContent, null,'AuthenticationPage');
+	sendHTMLAjaxRequest(false, 'getData/getAuthenticationPage.html', null, fnDisplayContent, null,'AuthenticationPage');
 }
 

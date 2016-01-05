@@ -158,7 +158,7 @@ mv server_temp.xml server.xml
 
 # alternative is to use xsltproc:  xsltproc -o server.xml tomcat-https.xsl server.xml.bak
 
-xmlstarlet ed --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@ciphers)]' --type attr -n ciphers -v 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,SSL_RSA_WITH_RC4_128_SHA' server.xml > server_temp.xml
+xmlstarlet ed --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@ciphers)]' --type attr -n ciphers -v 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA' server.xml > server_temp.xml
 mv server_temp.xml server.xml
 
 tomcat_permissions ${TOMCAT_HOME}

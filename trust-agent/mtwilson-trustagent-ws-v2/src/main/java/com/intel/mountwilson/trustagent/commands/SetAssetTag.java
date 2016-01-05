@@ -111,7 +111,6 @@ public class SetAssetTag implements ICommand{
             command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(filename));
             Result result = ExecUtil.execute(command, variables);
             if (result.getExitCode() != 0) {
-                log.error("SAVY001: {}", NvramPassword);
                 log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
                 throw new TAException(ErrorCode.ERROR, result.getStderr());
             }

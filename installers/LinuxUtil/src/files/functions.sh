@@ -875,6 +875,7 @@ register_startup_script() {
     fi
     echo -e "[Unit]\nDescription=${startup_name}\n\n[Service]\nType=forking\nExecStart=${absolute_filename} start\nExecStop=${absolute_filename} stop\n\n[Install]\nWantedBy=multi-user.target\n" > "/etc/systemd/system/${startup_name}.service"
     chmod 664 "/etc/systemd/system/${startup_name}.service"
+    "$systemctlCommand" daemon-reload
     "$systemctlCommand" enable "${startup_name}.service"
     "$systemctlCommand" daemon-reload
   fi
@@ -913,6 +914,46 @@ remove_startup_script() {
   if [ -d "/etc/init.d" ]; then
     rm -f "/etc/init.d/${startup_name}" 2>/dev/null
   fi
+}
+
+function disable_tcp_timestamps() {
+  local property="net.ipv4.tcp_timestamps"
+  local filename="/etc/sysctl.conf"
+  local value="0"
+
+  if [ -f "$filename" ]; then
+    local ispresent=$(grep "^${property}" "$filename")
+    if [ -n "$ispresent" ]; then
+      # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
+      local escaped_value=$(echo "${value}" | sed 's/|/\\|/g')
+      local sed_escaped_value=$(sed_escape "$escaped_value")
+      # replace just that line in the file and save the file
+      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${sed_escaped_value}|" "${filename}"`
+      # protect against an error
+      if [ -n "$updatedcontent" ]; then
+        echo "$updatedcontent" > "${filename}"
+      else
+        echo_warning "Cannot write $property to $filename with value: $value"
+        echo -n 'sed -re "s|^('
+        echo -n "${property}"
+        echo -n ')=(.*)|\1='
+        echo -n "${escaped_value}"
+        echo -n '|" "'
+        echo -n "${filename}"
+        echo -n '"'
+        echo
+      fi
+    else
+      # property is not already in file so add it. extra newline in case the last line in the file does not have a newline
+      echo "" >> "${filename}"
+      echo "${property}=${value}" >> "${filename}"
+    fi
+  else
+    # file does not exist so create it
+    echo "${property}=${value}" > "${filename}"
+  fi
+  
+  echo 0 > /proc/sys/net/ipv4/tcp_timestamps
 }
 
 # Ensure the package actually needs to be installed before calling this function.
@@ -4154,7 +4195,7 @@ decrypt_file() {
     return 1
   fi
   if [ -f "$filename" ]; then
-    call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
+    call_tag_setupcommand export-config --in="$filename" --out="$filename" --env-password="PASSWORD"
     if file_encrypted "$filename"; then
       echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       return 2
@@ -4173,7 +4214,7 @@ encrypt_file() {
     return 1
   fi
   if [ -f "$filename" ]; then
-    call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"
+    call_tag_setupcommand import-config --in="$filename" --out="$filename" --env-password="PASSWORD"
     if ! file_encrypted "$filename"; then
       echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       return 2
@@ -4200,7 +4241,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$mtw_props_path"; then
       echo -n "encrypted file [$mtw_props_path]....."
-      temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$mtw_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4254,7 +4295,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$as_props_path"; then
       echo -n "encrypted file [$as_props_path]....."
-      temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$as_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4282,7 +4323,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$ms_props_path"; then
       echo -n "encrypted file [$ms_props_path]....."
-      temp=`call_setupcommand ExportConfig "$ms_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$ms_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4307,7 +4348,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$mp_props_path"; then
       echo -n "encrypted file [$mp_props_path]....."
-      temp=`call_setupcommand ExportConfig "$mp_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$mp_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4325,7 +4366,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$hp_props_path"; then
       echo -n "encrypted file [$hp_props_path]....."
-      temp=`call_setupcommand ExportConfig "$hp_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$hp_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4343,7 +4384,7 @@ load_conf() {
     echo -n "Reading properties from "
     if file_encrypted "$ta_props_path"; then
       echo -n "encrypted file [$ta_props_path]....."
-      temp=`call_setupcommand ExportConfig "$ta_props_path" --stdout 2>&1`
+      temp=$(call_tag_setupcommand export-config --in="$ta_props_path" --stdout 2>&1)
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         return 2
@@ -4553,23 +4594,21 @@ change_db_pass() {
 #echoerr() { echo_failure "$@" 1>&2; }
 
 function erase_data() {
- mysql=`which mysql 2>/dev/null`
- psql=`which psql 2>/dev/null`
-
- #load_default_env 1>/dev/null
+  mysql=`which mysql 2>/dev/null`
+  psql=`which psql 2>/dev/null`
   
-   encrypted_files=()
-  count=0
-  for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
-    if file_encrypted "$i"; then
-      encrypted_files[count]="$i"
-    fi
-    let count++
-  done
-  
-  for i in ${encrypted_files[@]}; do
-    decrypt_file "$i" "$MTWILSON_PASSWORD"
-  done
+  #encrypted_files=()
+  #count=0
+  #for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
+  #  if file_encrypted "$i"; then
+  #    encrypted_files[count]="$i"
+  #  fi
+  #  let count++
+  #done
+  #
+  #for i in ${encrypted_files[@]}; do
+  #  decrypt_file "$i" "$MTWILSON_PASSWORD"
+  #done
   
   arr=(mw_measurement_xml mw_tag_certificate mw_tag_certificate_request mw_tag_selection_kvattribute mw_tag_selection mw_tag_kvattribute mw_host_tpm_password mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem mw_tls_policy)
 
@@ -4579,23 +4618,19 @@ function erase_data() {
     mysql_detect
     mysql_version
     mysql_test_connection_report
-    if [ $? -ne 0 ]; then exit; fi
-    for table in ${arr[*]}
-    do    
-        $mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
+    if [ $? -ne 0 ]; then return 1; fi
+    for table in ${arr[*]}; do
+      $mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
     done 
   elif using_postgres; then #POSTGRES
     echo_success "using postgres"
     postgres_detect
     postgres_version
     postgres_test_connection_report
-    if [ $? -ne 0 ];
-     then exit;
-    fi
+    if [ $? -ne 0 ]; then return 1; fi
     postgres_password=${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}
-    for table in ${arr[*]}
-    do
-     temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
+    for table in ${arr[*]}; do
+      temp=`(cd /tmp && PGPASSWORD=$postgres_password "$psql" -d "$DATABASE_SCHEMA" -U "$DATABASE_USERNAME" -h "$DATABASE_HOSTNAME" -c "DELETE from $table;")`
     done
   fi
 }
