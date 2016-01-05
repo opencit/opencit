@@ -150,7 +150,7 @@ configure_privacyca_user() {
   #PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
   #update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
   #update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD_HASH}"
-  mtwilson login-password $PRIVACYCA_DOWNLOAD_USERNAME env:PRIVACYCA_DOWNLOAD_PASSWORD tpms:endorse host_aiks:certify tpm_passwords:store tpm_passwords:search tpm_endorsements:create tpm_endorsements:search
+  mtwilson login-password $PRIVACYCA_DOWNLOAD_USERNAME env:PRIVACYCA_DOWNLOAD_PASSWORD host_aiks:certify tpm_endorsements:create tpm_endorsements:search tpm_passwords:create tpm_passwords:retrieve tpm_passwords:search tpm_passwords:store tpms:endorse host_signing_key_certificates:create store_host_pre_registration_details:create vm_attestations:create
 }
 
 

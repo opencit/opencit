@@ -348,12 +348,4 @@ public class HostBOTest {
         SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
         
     }
-    @Test
-    public void SavyTest() throws IOException, CryptographyException, KeyManagementException {
-        My.initDataEncryptionKey();
-        String hostName = "10.1.71.169";
-        HostTrustBO hbo = ASComponentFactory.getHostTrustBO();
-        hbo.getTrustStatus(new Hostname(hostName));
-        
-    }
 }

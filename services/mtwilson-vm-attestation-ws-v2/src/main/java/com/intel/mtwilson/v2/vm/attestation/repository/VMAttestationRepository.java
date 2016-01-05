@@ -357,7 +357,9 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     whitelistModules = new VmMeasurementLog(whiteListXml).getMeasurements();
                                     VmMeasurementLogEquals vmMeasurementLogEqualsRule = new VmMeasurementLogEquals();                                        
                                     vmRuleResult = vmMeasurementLogEqualsRule.apply2(actualModules, whitelistModules);
-
+                                    if (vmRuleResult.getFaults() != null && vmRuleResult.getFaults().size() > 0)
+                                        isVMTrusted = false;
+                                    
                                     vmTrustReport.addResult(vmRuleResult);
 
                                     // Create a map of the VM attributes that needs to be added to the SAML assertion.

@@ -60,7 +60,7 @@ public class BulkHostTrustBO {
                     status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
                 } catch (Exception ex) {
                     // we will log the exception and ignore the error.
-                    log.error("Exception while retrieving the status of the tasks. {}", ex.getMessage());
+                    log.error("Exception while retrieving the status of the tasks", ex);
                 }
             }
 //            scheduler.shutdown(); //  bug #503 remove this and replace with calls to Future.get() to get all our results

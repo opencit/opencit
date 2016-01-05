@@ -62,7 +62,6 @@
     <module>mtwilson-shiro-file</module>
     <module>mtwilson-shiro-jdbi</module>
     <module>mtwilson-shiro-setup</module>
-    <module>mtwilson-shiro-util</module>
     <module>mtwilson-shiro-ws-v2</module>
     <module>mtwilson-tag-client-jaxrs2</module>
     <module>mtwilson-tag-dao-jooq</module>

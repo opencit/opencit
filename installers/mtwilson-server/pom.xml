@@ -144,7 +144,7 @@
                     <artifactId>mtwilson-linux-util</artifactId>
                     <version>${project.version}</version>
                     <type>sh</type>
-                </dependency>    
+                </dependency>
             </dependencies>
            
             <build>

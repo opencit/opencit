@@ -73,7 +73,7 @@ public class TrustPolicySignature {
     @POST
     @Consumes({MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_XML})
-    @RequiresPermissions("vm_manifests:certify")
+    @RequiresPermissions("trust_policies:certify")
     public String signImageTrustPolicy(String xml) {
         try {
         JAXB jaxb = new JAXB();

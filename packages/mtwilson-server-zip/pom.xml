@@ -347,7 +347,16 @@
     <artifactId>mtwilson-export-data-bundle</artifactId>
       <version>${project.version}</version>
     </dependency>
- 			
+    <dependency>
+      <groupId>com.intel.mtwilson.plugins</groupId>
+      <artifactId>mtwilson-auto-refresh-trust</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-password-vault</artifactId>
+        <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
