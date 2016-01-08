@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup;
 
+import com.intel.mtwilson.util.ssh.RemoteHostKeyDeferredVerifier;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.Pkcs12;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
@@ -47,6 +48,8 @@ import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 import net.schmizz.sshj.xfer.InMemoryDestFile;
 import net.schmizz.sshj.xfer.InMemorySourceFile;
 import net.schmizz.sshj.xfer.scp.SCPException;
+import com.intel.mtwilson.util.ssh.RemoteHostKey;
+import com.intel.mtwilson.util.ssh.RemoteHostKeyDeferredVerifier;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -134,41 +137,13 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         ssh.disconnect();        
     }
     
+    /*
     public static class RemoteHostKey {
         public String server;
         public int port;
         public PublicKey publicKey;
     }
-    
-    
-    /**
-     * This verifier always succeeds, so the connection is made, but it saves
-     * the remote key information so the user can verify it later and then
-     * (hopefully) terminate the connection if the key did not check out.
-     * This is useful in conjunction with a UI which displays the remote host
-     * key and asks the user to verify. We need to save that key for the UI
-     * to display, without driving the UI from here.
-     * You can either provide a reference to your own RemoteHostKey object which
-     * will be populated, or you can use the non-arg constructor and then call
-     * getRemoteHostKey() to get a new populated object.
-     */
-    public static class RemoteHostKeyDeferredVerifier implements HostKeyVerifier {
-        private RemoteHostKey remoteHostKey;
-        public RemoteHostKeyDeferredVerifier() {
-            this.remoteHostKey = new RemoteHostKey();
-        }
-        public RemoteHostKeyDeferredVerifier(RemoteHostKey remoteHostKey) {
-            this.remoteHostKey = remoteHostKey;
-        }
-        @Override
-        public boolean verify(String string, int i, PublicKey pk) {
-            remoteHostKey.server = string;
-            remoteHostKey.port = i;
-            remoteHostKey.publicKey = pk;
-            return true;
-        }
-        public RemoteHostKey getRemoteHostKey() { return remoteHostKey; }
-    }
+    */
     
     /**
      * 
