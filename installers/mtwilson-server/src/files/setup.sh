@@ -344,13 +344,26 @@ load_defaults
 
 # mtwilson requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+echo "Installing Java..."
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 # in 3.0, java home is now under trustagent home by default
-JAVA_HOME=${JAVA_HOME:-$MTWILSON_HOME/share/jdk1.7.0_51}
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+# check if java is readable to the non-root user
+if [ -z "$JAVA_HOME" ]; then
+  java_detect >> $INSTALL_LOG_FILE
+fi
+if [ -n "$JAVA_HOME" ]; then
+  if [ $(whoami) == "root" ]; then
+    JAVA_USER_READABLE=$(sudo -u $MTWILSON_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
+  else
+    JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
+  fi
+fi
+if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
+  JAVA_HOME=$MTWILSON_HOME/share/jdk1.7.0_51
+fi
 echo "Installing Java ($JAVA_PACKAGE) into $JAVA_HOME..." >> $INSTALL_LOG_FILE
 mkdir -p $JAVA_HOME
-#java_install $JAVA_PACKAGE
 java_install_in_home $JAVA_PACKAGE
 # store java location in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-java
