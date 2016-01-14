@@ -4,41 +4,31 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
-import com.intel.mtwilson.datatypes.HostTrustResponse;
-import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
-import com.intel.mtwilson.policy.TrustReport;
-import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import java.util.Date;
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.joda.time.DateTime;
 
 
 /**

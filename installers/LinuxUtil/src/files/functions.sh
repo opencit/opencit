@@ -3432,7 +3432,7 @@ java_detect() {
   JAVA_JDK_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
   #if [ -z "$JAVA_JDK_CANDIDATES" ]; then
   #  JAVA_JDK_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
-  #fi
+  #fi 
   for c in $JAVA_JDK_CANDIDATES; do
     local java_bindir=`dirname $c`
     if [ -f "$java_bindir/java" ]; then
