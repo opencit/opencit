@@ -4,18 +4,16 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.UserId;
 import com.intel.mtwilson.shiro.Username;
 import com.intel.mtwilson.shiro.UsernameWithPermissions;
-import com.intel.mtwilson.shiro.authc.password.HashedPassword;
+import com.intel.mtwilson.crypto.password.HashedPassword;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
