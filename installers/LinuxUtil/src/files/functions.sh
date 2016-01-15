@@ -216,32 +216,43 @@ echo_warning() {
 
 function validate_path_configuration() {
   local file_path="${1}"
+  
+  #if [[ "$file_path" == *..* ]]; then
+  #  echo_warning "Path specified is not absolute: $file_path"
+  #fi
+  #file_path=`readlink -f "$file_path"` #make file path absolute
+  
   if [ -z "$file_path" ]; then
     echo_failure "Path is missing"
     return 1
   fi
   file_path=`readlink -m "$file_path"` #make file path absolute
-
+  
   if [[ "$file_path" != '/etc/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
   if [ -f "$file_path" ] || [ -d "$file_path" ]; then
-    echo "validate_path_configuration: chmod 600 $file_path" >>$INSTALL_LOG_FILE
-    chmod 600 "${file_path}" >>$INSTALL_LOG_FILE 2>&1
+    chmod 600 "${file_path}"
   fi
   return 0
 }
 
 function validate_path_data() {
   local file_path="${1}"
+  
+  #if [[ "$file_path" == *..* ]]; then
+  #  echo_warning "Path specified is not absolute: $file_path"
+  #fi
+  #file_path=`readlink -f "$file_path"` #make file path absolute
+  
   if [ -z "$file_path" ]; then
     echo_failure "Path is missing"
     return 1
   fi
   file_path=`readlink -m "$file_path"` #make file path absolute
-
+  
   if [[ "$file_path" != '/var/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Data path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
@@ -255,12 +266,18 @@ function validate_path_data() {
 
 function validate_path_executable() {
   local file_path="${1}"
+  
+  #if [[ "$file_path" == *..* ]]; then
+  #  echo_warning "Path specified is not absolute: $file_path"
+  #fi
+  #file_path=`readlink -f "$file_path"` #make file path absolute
+  
   if [ -z "$file_path" ]; then
     echo_failure "Path is missing"
     return 1
   fi
   file_path=`readlink -m "$file_path"` #make file path absolute
-
+  
   if [[ "$file_path" != '/usr/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Executable path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
@@ -444,9 +461,9 @@ prompt_with_default() {
   eval current_value="\$$resultvarname"
   eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
-  if [ -n "$current_value" ]; then
+  if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
-    echo "$userprompt [$default_value] ${current_value:-$default_value}"
+    echo "$userprompt [$default_value] ${!resultvarname:-$default_value}"
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
@@ -684,7 +701,6 @@ backup_file() {
 read_property_from_file() {
   local property="${1}"
   local filename="${2}"
-  echo "Reading $property from $filename..." >>$INSTALL_LOG_FILE
   if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     local found=`cat "$filename" | grep "^$property"`
@@ -704,7 +720,6 @@ update_property_in_file() {
   local value="${3}"
   local encrypted="false"
 
-  echo "Updating $property in $filename to $value..." >>$INSTALL_LOG_FILE
   if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     # Decrypt if needed
@@ -3398,105 +3413,84 @@ java_version_report() {
 # Postcondition:  on success, JAVA_HOME, java, and JAVA_VERSION are set;  on failure to find java they are cleared
 java_detect() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
+  local searchDirectory="${2:-/}"
   # start with JAVA_HOME if it is already configured
-  if [ "$(whoami)" == "root" ]; then
-    if [[ -n "$JAVA_HOME" ]]; then
-      if [[ -z "$java" ]]; then
-        java=${JAVA_HOME}/bin/java
-      fi
-      JAVA_VERSION=`java_version`
-      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-        return 0
-      fi
+  if [[ -n "$JAVA_HOME" ]]; then
+    if [[ -z "$java" ]]; then
+      java=${JAVA_HOME}/bin/java
     fi
-    searchdir=/
-  else
-    #TODO update it to $MTWILSON_HOME
-    if [ -d "/opt/mtwilson" ]; then
-      searchdir="/opt/mtwilson"
-    elif [ -d "/opt/trustagent" ]; then
-      searchdir="/opt/trustagent"
-    else
-      searchdir="/opt/mtwilson"
+    JAVA_VERSION=`java_version`
+    if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+      return 0
     fi
   fi
 
-  if [ -d "/opt/mtwilson" ]; then
-    javaDefaultSearchDir="/opt/mtwilson"
-  elif [ -d "/opt/trustagent" ]; then
-    javaDefaultSearchDir="/opt/trustagent"
-  else
-    javaDefaultSearchDir="/opt/mtwilson"
-  fi
-
-  JAVA_JDK_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
-  #if [ -z "$JAVA_JDK_CANDIDATES" ]; then
-  #  JAVA_JDK_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
-  #fi 
-  for c in $JAVA_JDK_CANDIDATES; do
-    local java_bindir=`dirname $c`
-    if [ -f "$java_bindir/java" ]; then
-      export JAVA_HOME=`dirname $java_bindir`
-      java=$c
-      JAVA_VERSION=`java_version`
-      echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
-      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-        return 0
-      fi
-    fi
-  done
-  echo "Cannot find JDK"
-
-  JAVA_JRE_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jre | grep bin/java)
-  #if [ -z "$JAVA_JRE_CANDIDATES" ]; then
-  #  JAVA_JRE_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jre | grep bin/java)
-  #fi
-  for c in $JAVA_JRE_CANDIDATES; do
-    java_bindir=`dirname $c`
-    if [ -f "$java_bindir/java" ]; then
-      export JAVA_HOME=`dirname $java_bindir`
-      java=$c
-      JAVA_VERSION=`java_version`
-      echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
-      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-        return 0
-      fi
-    fi
-  done
-  echo "Cannot find JRE"
-
-  JAVA_BIN_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep bin/java)
-  #if [ -z "$JAVA_BIN_CANDIDATES" ]; then
-  #  JAVA_BIN_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep bin/java)
-  #fi
-  for c in $JAVA_BIN_CANDIDATES; do
-    java_bindir=`dirname $c`
-    # in non-JDK and non-JRE folders the "java" command may be a symlink:
-    if [ -f "$java_bindir/java" ]; then
-      export JAVA_HOME=`dirname $java_bindir`
-      java=$c
-      JAVA_VERSION=`java_version`
-      echo "Found Java: $c" >> $INSTALL_LOG_FILE
-      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-        return 0
-      fi
-    elif [ -h "$java_bindir/java" ]; then
-      local javatarget=`readlink $c`
-      if [ -f "$javatarget" ]; then
-        java_bindir=`dirname $javatarget`
-        export JAVA_HOME=`dirname $java_bindir`
-        java=$javatarget
-        JAVA_VERSION=`java_version`
-        echo "Found Java: $java" >> $INSTALL_LOG_FILE
-        if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-          return 0
+    JAVA_JDK_CANDIDATES=`find "$searchDirectory" -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
+    for c in $JAVA_JDK_CANDIDATES
+    do
+        local java_bindir=`dirname "$c"`
+        if [ -f "$java_bindir/java" ]; then
+          export JAVA_HOME=`dirname "$java_bindir"`
+          java=$c
+          JAVA_VERSION=`java_version`
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
+          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+            return 0
+          fi
         fi
-      else
-        echo_warning "Broken link $c -> $javatarget"
-      fi
-    fi
-  done
-  echo "Cannot find system Java"
+    done
+    
+    echo "Cannot find JDK"
+
+    JAVA_JRE_CANDIDATES=`find "$searchDirectory" -name java 2>/dev/null | grep jre | grep bin/java`
+    for c in $JAVA_JRE_CANDIDATES
+    do
+        java_bindir=`dirname "$c"`
+        if [ -f "$java_bindir/java" ]; then
+          export JAVA_HOME=`dirname "$java_bindir"`
+          java=$c
+          JAVA_VERSION=`java_version`
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
+          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+            return 0
+          fi
+        fi
+    done
+
+
+    echo "Cannot find JRE"
+
+    JAVA_BIN_CANDIDATES=`find "$searchDirectory" -name java 2>/dev/null | grep bin/java`
+    for c in $JAVA_BIN_CANDIDATES
+    do
+        java_bindir=`dirname "$c"`
+        # in non-JDK and non-JRE folders the "java" command may be a symlink:
+        if [ -f "$java_bindir/java" ]; then
+          export JAVA_HOME=`dirname "$java_bindir"`
+          java=$c
+          JAVA_VERSION=`java_version`
+          echo "Found Java: $c" >> $INSTALL_LOG_FILE
+          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+            return 0
+          fi
+        elif [ -h "$java_bindir/java" ]; then
+          local javatarget=`readlink $c`
+          if [ -f "$javatarget" ]; then
+            java_bindir=`dirname "$javatarget"`
+            export JAVA_HOME=`dirname "$java_bindir"`
+            java=$javatarget
+            JAVA_VERSION=`java_version`
+            echo "Found Java: $java" >> $INSTALL_LOG_FILE
+            if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+              return 0
+            fi
+          else
+            echo_warning "Broken link $c -> $javatarget"
+          fi
+        fi
+    done
+
+    echo "Cannot find system Java"
 
   echo_failure "Cannot find Java"
   java_clear
@@ -3588,10 +3582,11 @@ java_install() {
     do
       #echo "$f"
       if [ -d "$f" ]; then
-        if [ -d "/opt/mtwilson/share" ]; then
-          mv "$f" "/opt/mtwilson/share"
-        elif [ -d "/opt/trustagent/share" ]; then
-          mv "$f" "/opt/trustagent/share"
+        if [ -d "/usr/share/$f" ]; then
+          echo "Java already installed at /usr/share/$f"
+          export JAVA_HOME="/usr/share/$f"
+        else
+          mv "$f" /usr/share && export JAVA_HOME="/usr/share/$f"
         fi
       fi
     done
@@ -4158,7 +4153,7 @@ call_setupcommand() {
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/logs/mtwilson.log
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /dev/null
   return $?
 }
 
@@ -4170,7 +4165,7 @@ call_tag_setupcommand() {
   mainclass=com.intel.mtwilson.launcher.console.Main
   local jvm_memory=2048m
   local jvm_maxperm=512m
-  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/logs/mtwilson.log
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /dev/null
   return $?
 }
 
@@ -4469,6 +4464,7 @@ load_defaults() {
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
   export MTWILSON_TAG_API_USERNAME=${MTWILSON_TAG_API_USERNAME:-${CONF_MTWILSON_TAG_API_USERNAME:-$DEFAULT_MTWILSON_TAG_API_USERNAME}}
   export MTWILSON_TAG_API_PASSWORD=${MTWILSON_TAG_API_PASSWORD:-${CONF_MTWILSON_TAG_API_PASSWORD:-$DEFAULT_MTWILSON_TAG_API_PASSWORD}}
+  export TRUSTAGENT_KEYSTORE_PASS=${TRUSTAGENT_KEYSTORE_PASS:-${CONF_TRUSTAGENT_KEYSTORE_PASS:-$DEFAULT_TRUSTAGENT_KEYSTORE_PASS}}
 
   if using_mysql; then
     export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}
