@@ -809,6 +809,8 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
   # if already user provided we assume user will also provide later for restarts
   # otherwise, we generate and store the password
   if [ -z "$TRUSTAGENT_PASSWORD" ] && [ ! -f $TRUSTAGENT_CONFIGURATION/.trustagent_password ]; then
+    touch $TRUSTAGENT_CONFIGURATION/.trustagent_password
+    chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_CONFIGURATION/.trustagent_password
     tagent generate-password > $TRUSTAGENT_CONFIGURATION/.trustagent_password
   fi
 
