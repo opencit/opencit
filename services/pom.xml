@@ -42,7 +42,6 @@
     <module>mtwilson-intel-hostagent</module>
     <module>mtwilson-jersey2-util</module>
     <module>mtwilson-jersey2-util-v1</module>
-    <module>mtwilson-localization</module>
     <module>mtwilson-management</module>
     <module>mtwilson-management-jpa</module>
     <module>mtwilson-management-ws-v1</module>

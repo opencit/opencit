@@ -226,17 +226,23 @@ if [ -L "$MTWILSON_CONFIGURATION/cloudsecurity" ]; then
   rm "$MTWILSON_CONFIGURATION/cloudsecurity"
 fi
 
+set_owner_for_mtwilson_directories() {
+  for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_OPT_INTEL; do
+    chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
+  done
+}
+
 # ensure application directories exist (chown will be repeated near end of this script, after setup)
-for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA; do
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_OPT_INTEL; do
   # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
   mkdir -p $directory
   if [ $? -ne 0 ]; then
     echo_failure "Cannot create directory: $directory"
     exit 1
   fi
-  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
   chmod 700 $directory
 done
+set_owner_for_mtwilson_directories
 
 # make aikverify directories, set ownership and permissions
 if [ "$(whoami)" == "root" ]; then
@@ -269,13 +275,6 @@ mtwilson_backup_repository() {
 # backup current configuration and data, if they exist
 mtwilson_backup_configuration
 mtwilson_backup_repository
-
-# create application directories (chown will be repeated near end of this script, after setup)
-for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES  $MTWILSON_OPT_INTEL; do
-  mkdir -p $directory
-  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
-  chmod 700 $directory
-done
 
 # store directory layout in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-layout
@@ -999,8 +998,6 @@ elif using_tomcat; then
   else
     echo_warning "Relying on an existing Tomcat installation"
   fi
-  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${MTWILSON_HOME}
- 
   tomcat_detect
 
   echo "TOMCAT_HOME=$TOMCAT_HOME" > $MTWILSON_ENV/tomcat
@@ -1008,6 +1005,8 @@ elif using_tomcat; then
   echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV/tomcat
   echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV/tomcat
 fi
+
+set_owner_for_mtwilson_directories
 
 if [[ -n "opt_attservice"  && -f "$attestation_service" ]]; then
   echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
@@ -1231,9 +1230,7 @@ echo  -n "Restarting monit service so new configs take effect... "
 service monit restart > /dev/null 2>&1
 echo "Done"
 
-if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
-  mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
-fi
+set_owner_for_mtwilson_directories
 
 # setup mtwilson, unless the NOSETUP variable is defined
 if [ -z "$MTWILSON_NOSETUP" ]; then
@@ -1241,15 +1238,21 @@ if [ -z "$MTWILSON_NOSETUP" ]; then
   # if already user provided we assume user will also provide later for restarts
   # otherwise, we generate and store the password
   if [ -z "$MTWILSON_PASSWORD" ] && [ ! -f $MTWILSON_CONFIGURATION/.mtwilson_password ]; then
+    touch $MTWILSON_CONFIGURATION/.mtwilson_password
+    chown $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_CONFIGURATION/.mtwilson_password
     mtwilson generate-password > $MTWILSON_CONFIGURATION/.mtwilson_password
   fi
 
-  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/mtwilson.properties" --out="${MTWILSON_CONFIGURATION}/mtwilson.properties"
-  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/attestation-service.properties" --out="${MTWILSON_CONFIGURATION}/attestation-service.properties"
-  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/management-service.properties" --out="${MTWILSON_CONFIGURATION}/management-service.properties"
-  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/audit-handler.properties" --out="${MTWILSON_CONFIGURATION}/audit-handler.properties"
-  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/mtwilson-portal.properties" --out="${MTWILSON_CONFIGURATION}/mtwilson-portal.properties"
-  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/wlm-service.properties" --out="${MTWILSON_CONFIGURATION}/wlm-service.properties"
+  if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
+    mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
+  fi
+
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/mtwilson.properties" --out="${MTWILSON_CONFIGURATION}/mtwilson.properties" 2>/dev/null
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/attestation-service.properties" --out="${MTWILSON_CONFIGURATION}/attestation-service.properties" 2>/dev/null
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/management-service.properties" --out="${MTWILSON_CONFIGURATION}/management-service.properties" 2>/dev/null
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/audit-handler.properties" --out="${MTWILSON_CONFIGURATION}/audit-handler.properties" 2>/dev/null
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/mtwilson-portal.properties" --out="${MTWILSON_CONFIGURATION}/mtwilson-portal.properties" 2>/dev/null
+  mtwilson import-config --in="${MTWILSON_CONFIGURATION}/wlm-service.properties" --out="${MTWILSON_CONFIGURATION}/wlm-service.properties" 2>/dev/null
 
   #mtwilson config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,jersey-media-multipart}" >/dev/null
   #mtwilson config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
@@ -1266,11 +1269,6 @@ fi
 
 # delete the temporary setup environment variables file
 rm -f $MTWILSON_ENV/mtwilson-setup
-
-# ensure the mtwilson owns all the content created during setup
-for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_SERVICE_PROPERTY_FILES; do
-  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
-done
 
 ## start the server, unless the NOSETUP variable is defined
 #if [ -z "$MTWILSON_NOSETUP" ]; then mtwilson start; fi

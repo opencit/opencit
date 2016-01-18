@@ -1910,11 +1910,11 @@ if postgres_server_detect ; then
         sudo -u postgres psql postgres -c "${create_user_sql}" 1>/dev/null
         local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
         sudo -u postgres psql postgres -c "${superuser_sql}" 1>/dev/null
-        local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
-        sudo -u postgres psql postgres -c "${create_sql}" 1>/dev/null
-        local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
-        sudo -u postgres psql postgres -c "${grant_sql}" 1>/dev/null
       fi
+      local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
+      sudo -u postgres psql postgres -c "${create_sql}" 2>/dev/null 1>/dev/null
+      local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
+      sudo -u postgres psql postgres -c "${grant_sql}" 2>/dev/null 1>/dev/null
     else
       user_is_superuser=$(psql postgres -U "${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}" -c "$detect_superuser" 2>&1 | grep "(1 row)")
       if [ -z "$user_is_superuser" ]; then
@@ -3553,7 +3553,13 @@ java_install() {
 #  JAVA_YUM_PACKAGES="java-1.7.0-openjdk java-1.7.0-openjdk-devel"
 #  JAVA_APT_PACKAGES="openjdk-7-jre openjdk-7-jdk"
 #  auto_install "Java" "JAVA"
-  java_clear; java_detect >> $INSTALL_LOG_FILE
+  if [ -n "$FORCE_JAVA_HOME" ]; then
+    JAVA_HOME=$FORCE_JAVA_HOME
+    java_install_in_home $JAVA_PACKAGE
+    return $?
+  else
+    java_clear; java_detect >> $INSTALL_LOG_FILE
+  fi
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} >> $INSTALL_LOG_FILE; then
     if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
       echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
@@ -3647,6 +3653,7 @@ java_install_in_home() {
       ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"
     elif [ -n "$is_bin" ]; then
       chmod +x $java_package
+      export FORCE_JAVA_HOME=$JAVA_HOME
       ./$java_package | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"
       return
     fi
