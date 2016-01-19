@@ -61,5 +61,10 @@
     <logger name="com.intel.dcsg.cpg.console" level="INFO"/>
     <logger name="com.intel.dcsg.cpg.configuration" level="INFO"/>
 
+    <!-- INFO:  Enabling session validation scheduler...  -->
+    <logger name="org.apache.shiro.session.mgt" level="ERROR"/>
+    <!-- INFO:  Logged in cit as superuser -->
+    <logger name="com.intel.dcsg.cpg.util.shiro" level="ERROR"/>
+
 </configuration>
 
