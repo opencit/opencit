@@ -54,6 +54,12 @@
         <appender-ref ref="ConsoleInfo"/>
     </root>
     
+    <logger name="org.apache.shiro.session.mgt" level="ERROR"/>
+    <!-- INFO:  Enabling session validation scheduler...  -->
+    
+    <logger name="com.intel.dcsg.cpg.util.shiro" level="ERROR"/>
+    <!-- INFO:  Logged in cit as superuser -->
+    
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="org.apache.shiro" level="INFO"/>
     <logger name="org.apache.commons" level="INFO"/>
