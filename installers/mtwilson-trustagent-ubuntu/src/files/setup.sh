@@ -310,11 +310,15 @@ fi
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_HOME
 chmod 755 $TRUSTAGENT_BIN/*
 
-# link /usr/local/bin/tagent -> /opt/trustagent/bin/tagent
+# if prior version had control script in /usr/local/bin, delete it
+if [ "$(whoami)" == "root" ] && [ -f /usr/local/bin/tagent ]; then
+  rm /usr/local/bin/tagent
+fi
 EXISTING_TAGENT_COMMAND=`which tagent 2>/dev/null`
 if [ -n "$EXISTING_TAGENT_COMMAND" ]; then
   rm -f "$EXISTING_TAGENT_COMMAND"
 fi
+# link /usr/local/bin/tagent -> /opt/trustagent/bin/tagent
 ln -s $TRUSTAGENT_BIN/tagent.sh /usr/local/bin/tagent
 if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
   ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
@@ -494,14 +498,6 @@ cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
 cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
 chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"/share/scripts
-
-# if prior version had control script in /usr/local/bin, delete it
-if [ "$(whoami)" == "root" ] && [ -f /usr/local/bin/tagent ]; then
-  rm /usr/local/bin/tagent
-fi
-if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
-  ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
-fi
 chmod +x $TRUSTAGENT_BIN/*
 
 # in 3.0, java home is now under trustagent home by default
@@ -809,6 +805,8 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
   # if already user provided we assume user will also provide later for restarts
   # otherwise, we generate and store the password
   if [ -z "$TRUSTAGENT_PASSWORD" ] && [ ! -f $TRUSTAGENT_CONFIGURATION/.trustagent_password ]; then
+    touch $TRUSTAGENT_CONFIGURATION/.trustagent_password
+    chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_CONFIGURATION/.trustagent_password
     tagent generate-password > $TRUSTAGENT_CONFIGURATION/.trustagent_password
   fi
 

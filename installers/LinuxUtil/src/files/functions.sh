@@ -1910,11 +1910,11 @@ if postgres_server_detect ; then
         sudo -u postgres psql postgres -c "${create_user_sql}" 1>/dev/null
         local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
         sudo -u postgres psql postgres -c "${superuser_sql}" 1>/dev/null
-        local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
-        sudo -u postgres psql postgres -c "${create_sql}" 1>/dev/null
-        local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
-        sudo -u postgres psql postgres -c "${grant_sql}" 1>/dev/null
       fi
+      local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
+      sudo -u postgres psql postgres -c "${create_sql}" 2>/dev/null 1>/dev/null
+      local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
+      sudo -u postgres psql postgres -c "${grant_sql}" 2>/dev/null 1>/dev/null
     else
       user_is_superuser=$(psql postgres -U "${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}" -c "$detect_superuser" 2>&1 | grep "(1 row)")
       if [ -z "$user_is_superuser" ]; then
