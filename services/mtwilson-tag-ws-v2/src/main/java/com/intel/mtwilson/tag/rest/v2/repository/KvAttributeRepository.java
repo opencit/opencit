@@ -22,8 +22,6 @@ import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
 import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
 import com.intel.mtwilson.tag.model.KvAttributeLocator;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
