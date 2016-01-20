@@ -8,12 +8,8 @@ import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SamlUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.xml.ClasspathResourceResolver;
 import com.intel.mtwilson.xml.XML;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -21,23 +17,20 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.XMLConstants;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
+import org.joda.time.DateTime;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.saml2.core.Statement;
+import org.opensaml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.io.Unmarshaller;
@@ -49,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * This class extracts trust information from a SAML assertion.
@@ -148,6 +140,31 @@ public class TrustAssertion {
      */
     public Date getDate() {
         return assertion.getIssueInstant().toDate();
+    }
+
+    /**
+     *
+     * @return the earliest "not after" date of any subject confirmation
+     * included in the saml report, OR null if no such date was found
+     */
+    public Date getNotAfter() {
+        List<SubjectConfirmation> subjectConfirmations = assertion.getSubject().getSubjectConfirmations();
+        Date notAfter = null;
+        if (subjectConfirmations != null) {
+            for (SubjectConfirmation subjectConfirmation : subjectConfirmations) {
+                SubjectConfirmationData subjectConfirmationData = subjectConfirmation.getSubjectConfirmationData();
+                if (subjectConfirmationData != null) {
+                    DateTime subjectNotOnOrAfterDateTime = subjectConfirmationData.getNotOnOrAfter();
+                    if (subjectNotOnOrAfterDateTime != null) {
+                        Date subjectNotOnOrAfter = subjectNotOnOrAfterDateTime.toDate();
+                        if (notAfter == null || notAfter.after(subjectNotOnOrAfter)) {
+                            notAfter = subjectNotOnOrAfter;
+                        }
+                    }
+                }
+            }
+        }
+        return notAfter;
     }
 
     public Set<String> getHosts() {
@@ -263,7 +280,7 @@ public class TrustAssertion {
             PublicKey publicKey = RsaUtil.decodePemPublicKey(pem);
             return publicKey;
         }
-        
+
         public X509Certificate getBindingKeyCertificate() throws CertificateException {
             String pem = assertionMap.get("Binding_Key_Certificate");
             if (pem == null || pem.isEmpty()) {
@@ -271,7 +288,7 @@ public class TrustAssertion {
             }
             X509Certificate cert = X509Util.decodePemCertificate(pem);
             return cert;
-        }        
+        }
 
         public boolean isHostTrusted() {
             String trusted = assertionMap.get("Trusted");
