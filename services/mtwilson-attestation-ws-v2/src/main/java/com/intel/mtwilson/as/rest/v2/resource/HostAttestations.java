@@ -81,6 +81,12 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                     log.error("Host specified with aik sha1 {} is not valid.", criteria.aikSha1);
                     throw new RepositoryInvalidInputException();
                 }
+            } else if (criteria.aikPublicKeySha1 != null && !criteria.aikPublicKeySha1.isEmpty()) {
+                obj = jpaController.findByAikPublicKeySha1(criteria.aikPublicKeySha1);
+                if (obj == null) {
+                    log.error("Host specified with aik pub key sha1 {} is not valid.", criteria.aikSha1);
+                    throw new RepositoryInvalidInputException();
+                }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                 obj = jpaController.findByName(criteria.nameEqualTo);
                 if (obj == null) {
