@@ -212,6 +212,7 @@ fi
 
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
 export MTWILSON_OPT_INTEL=/opt/intel
+export MTWILSON_ETC_INTEL=/etc/intel
 # If configuration is already in /etc/intel/cloudsecurity (upgrade or reinstall)
 # then symlink /opt/mtwilson/configuration -> /etc/intel/cloudsecurity 
 
@@ -227,13 +228,13 @@ if [ -L "$MTWILSON_CONFIGURATION/cloudsecurity" ]; then
 fi
 
 set_owner_for_mtwilson_directories() {
-  for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_OPT_INTEL; do
+  for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_OPT_INTEL $MTWILSON_ETC_INTEL; do
     chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
   done
 }
 
 # ensure application directories exist (chown will be repeated near end of this script, after setup)
-for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_OPT_INTEL; do
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_OPT_INTEL $MTWILSON_ETC_INTEL; do
   # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
   mkdir -p $directory
   if [ $? -ne 0 ]; then
@@ -326,16 +327,21 @@ hp_props_path="$MTWILSON_CONFIGURATION/clientfiles/hisprovisioner.properties"
 ta_props_path="$MTWILSON_CONFIGURATION/trustagent.properties"
 file_paths=("$mtw_props_path" "$as_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
 
-# disable upgrade if properties files are encrypted from a previous installation
-for file in ${file_paths[*]}; do
-  echo "Checking for encrypted configuration file: $file" >> $INSTALL_LOG_FILE
-  if [ -f $file ]; then
-    if file_encrypted $file; then
-      echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
-      exit -1
-    fi
-  fi
-done
+mtwilson_password_file="$MTWILSON_CONFIGURATION/.mtwilson_password"
+if [ -f "$mtwilson_password_file" ]; then
+  export MTWILSON_PASSWORD=$(cat $mtwilson_password_file)
+fi
+
+## disable upgrade if properties files are encrypted from a previous installation
+#for file in ${file_paths[*]}; do
+#  echo "Checking for encrypted configuration file: $file" >> $INSTALL_LOG_FILE
+#  if [ -f $file ]; then
+#    if file_encrypted $file; then
+#      echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
+#      exit -1
+#    fi
+#  fi
+#done
 
 echo "Loading configuration settings and defaults" >> $INSTALL_LOG_FILE
 load_conf
@@ -348,9 +354,9 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 # in 3.0, java home is now under trustagent home by default
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 # check if java is readable to the non-root user
-if [ -z "$JAVA_HOME" ]; then
-  java_detect >> $INSTALL_LOG_FILE
-fi
+#if [ -z "$JAVA_HOME" ]; then
+#  java_detect >> $INSTALL_LOG_FILE
+#fi
 if [ -n "$JAVA_HOME" ]; then
   if [ $(whoami) == "root" ]; then
     JAVA_USER_READABLE=$(sudo -u $MTWILSON_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
@@ -477,6 +483,32 @@ export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
 export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 
+# extract mtwilson
+echo "Extracting application..."
+MTWILSON_ZIPFILE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
+unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
+
+# copy utilities script file to application folder
+mkdir -p $MTWILSON_HOME/share/scripts
+
+#this is now done in LinuxUtil setup.sh
+#cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+
+# deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
+cp functions "$MTWILSON_BIN/functions.sh"
+
+# set permissions
+echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL_LOG_FILE
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
+chmod 755 $MTWILSON_BIN/*
+
+# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
+# with a symlink to /opt/mtwilson/bin/mtwilson
+if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
+  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
+  rm -f /usr/local/bin/mtwilson
+fi
+
 # configure mtwilson TLS policies
 echo "Configuring TLS policies..." >>$INSTALL_LOG_FILE
 if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
@@ -590,38 +622,6 @@ sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION
 
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
  update_property_in_file "mtwilson.api.url" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_API_BASEURL"
-
-# extract mtwilson
-echo "Extracting application..."
-MTWILSON_ZIPFILE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
-unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
-
-# copy utilities script file to application folder
-mkdir -p $MTWILSON_HOME/share/scripts
-
-#this is now done in LinuxUtil setup.sh
-#cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
-
-# deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
-cp functions "$MTWILSON_BIN/functions.sh"
-
-# set permissions
-echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL_LOG_FILE
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
-chmod 755 $MTWILSON_BIN/*
-
-# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
-# with a symlink to /opt/mtwilson/bin/mtwilson
-if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
-  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
-  rm -f /usr/local/bin/mtwilson
-fi
-
-## link /usr/local/bin/mtwilson -> /opt/mtwilson/bin/mtwilson
-#EXISTING_MTWILSON_COMMAND=`which mtwilson`
-#if [ -z "$EXISTING_MTWILSON_COMMAND" ]; then
-#  ln -s $MTWILSON_HOME/bin/mtwilson.sh /usr/local/bin/mtwilson
-#fi
 
 find_installer() {
   local installer="${1}"
