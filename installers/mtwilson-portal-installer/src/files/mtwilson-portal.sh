@@ -138,13 +138,13 @@ setup_interactive_install() {
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       #glassfish_start_report
-      /opt/mtwilson/bin/mtwilson start
+      mtwilson start
     fi
   elif [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
       #tomcat_start_report
-      /opt/mtwilson/bin/mtwilson start
+      mtwilson start
     fi
   fi  
  
@@ -170,7 +170,7 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  java_detect
+  #java_detect
 #  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
 #      echo_warning "Missing one or more required packages"
 #      setup_print_summary

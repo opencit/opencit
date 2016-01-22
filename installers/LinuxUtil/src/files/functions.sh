@@ -756,7 +756,7 @@ update_property_in_file() {
     fi
 
   # Return the file to encrypted state, if it was before
-  if [ encrypted == "true" ]; then
+  if [ "$encrypted" == "true" ]; then
     encrypt_file "$filename" "$MTWILSON_PASSWORD"
   fi
   # test
@@ -2803,8 +2803,8 @@ tomcat_ready() {
 tomcat_version() {
   # Either the JAVA_HOME or the JRE_HOME environment variable must be defined
   # At least one of these environment variable is needed to run this program
-  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
-  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+  if [ -z $JAVA_HOME ]; then java_detect; fi
+  if [ -z $JAVA_HOME ]; then return 1; fi
 
   if [[ -n "$tomcat" ]]; then
     # extract the version number from a string like: glassfish version "3.0"
@@ -2854,8 +2854,9 @@ tomcat_version_report() {
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
   local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
-  if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
-  if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
+  java=$JAVA_CMD
+  if [[ -z $JAVA_HOME || -z $java ]]; then java_detect; fi
+  if [[ -z $JAVA_HOME || -z $java ]]; then return 1; fi
   if [[ -n "$java" ]]; then    
     local java_bindir=`dirname "$java"`
   fi
