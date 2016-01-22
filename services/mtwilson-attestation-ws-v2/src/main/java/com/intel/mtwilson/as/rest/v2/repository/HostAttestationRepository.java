@@ -60,6 +60,8 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                     tblHosts = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
                 } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
                     tblHosts = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
+                } else if ( criteria.aikPublicKeySha1 != null && !criteria.aikPublicKeySha1.isEmpty()) {
+                    tblHosts = My.jpa().mwHosts().findByAikPublicKeySha1(criteria.aikPublicKeySha1);
                 } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                     tblHosts = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
                 } else {
