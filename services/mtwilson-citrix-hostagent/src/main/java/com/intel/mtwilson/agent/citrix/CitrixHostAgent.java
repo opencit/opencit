@@ -145,6 +145,11 @@ public class CitrixHostAgent implements HostAgent{
         return record;
     }
     
+    @Override
+    public String getHostAttestationReport(String pcrList) throws IOException {
+        return getHostAttestationReport(pcrList, null);
+    }
+    
     /*
      * Format should look something like this
      * <?xml version='1.0' encoding='UTF-8'?>
@@ -155,7 +160,7 @@ public class CitrixHostAgent implements HostAgent{
      * </Host_Attestation_Report>
      */
     @Override
-    public String getHostAttestationReport(String pcrList) throws IOException {
+    public String getHostAttestationReport(String pcrList, Nonce challenge) throws IOException {
         long getAttReportStart1 = System.currentTimeMillis();
        String attestationReport = "";
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
@@ -173,7 +178,7 @@ public class CitrixHostAgent implements HostAgent{
         
             long getAttReportStart2 = System.currentTimeMillis();
             log.debug("CitrixClient: before calling to get quote info - " + (getAttReportStart2 - getAttReportStart1) + " milliseconds");
-            HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
+            HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList, challenge);
             long getAttReportStart3 = System.currentTimeMillis();
             log.debug("CitrixClient: Time taken to get quote info - " + (getAttReportStart3 - getAttReportStart2) + " milliseconds");
             
@@ -252,6 +257,12 @@ BwIDAQAB
         }  
         return pk;
     }
+    
+    @Override
+    public PcrManifest getPcrManifest(Nonce challenge) throws IOException {
+        log.error("citrix does not support client-specified nonce; ignoring challenge nonce: {}", challenge);
+        return getPcrManifest();
+    }    
 
     @Override
     public PcrManifest getPcrManifest() throws IOException {
@@ -314,4 +325,6 @@ BwIDAQAB
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+
 }

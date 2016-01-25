@@ -27,6 +27,7 @@ import com.intel.mtwilson.as.data.MwApiClientHttpBasic;
 import com.intel.mtwilson.as.data.MwMeasurementXml;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.model.Measurement;
+import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import java.util.*;
@@ -174,6 +175,9 @@ public class ReportsBO {
     }
 
     public String getHostAttestationReport(Hostname hostName) {
+        return getHostAttestationReport(hostName, null);
+    }
+    public String getHostAttestationReport(Hostname hostName, Nonce challenge) {
         TblHosts tblHosts;
 
         try {
@@ -192,7 +196,7 @@ public class ReportsBO {
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
 //            PcrManifest pcrManifest = agent.getPcrManifest();
-            return agent.getHostAttestationReport("0,17,18,19,20"); // maybe  just 17,18,19,20  // "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
+            return agent.getHostAttestationReport("0,17,18,19,20", challenge); // maybe  just 17,18,19,20  // "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
 
         } catch (ASException aex) {
 

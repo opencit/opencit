@@ -21,7 +21,7 @@ public class HostAttestation extends Document {
     private String hostName;
     private String aikSha1;
     private String aikPublicKeySha1;
-    private String challenge;
+    private String challengeHex;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
     private String saml;
@@ -59,11 +59,11 @@ public class HostAttestation extends Document {
     }
     
     public String getChallenge() {
-        return challenge;
+        return challengeHex;
     }
 
     public void setChallenge(String challenge) {
-        this.challenge = challenge;
+        this.challengeHex = challenge;
     }
 
     public TrustReport getTrustReport() {

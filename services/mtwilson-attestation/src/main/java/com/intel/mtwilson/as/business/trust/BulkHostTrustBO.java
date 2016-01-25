@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostTrust;
+import com.intel.mtwilson.model.Nonce;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +38,11 @@ public class BulkHostTrustBO {
 //        this.maxThreads = maxThreads;
         this.timeout = timeout;
     }
-    
     public String getBulkTrustSaml(Set<String> hosts, boolean forceVerify) {
+        return getBulkTrustSaml(hosts, forceVerify, null);
+    }
+    
+    public String getBulkTrustSaml(Set<String> hosts, boolean forceVerify, Nonce challenge) {
         try {
             Set<HostQuoteSaml> tasks = new HashSet<HostQuoteSaml>();
             ArrayList<Future<?>> taskStatus = new ArrayList<Future<?>>();
@@ -47,7 +51,7 @@ public class BulkHostTrustBO {
             List<String> results = new ArrayList<String>();
             
             for(String host : hosts) {
-                HostQuoteSaml task = new HostQuoteSaml(hostTrustBO, host, forceVerify);
+                HostQuoteSaml task = new HostQuoteSaml(hostTrustBO, host, forceVerify, challenge);
                 tasks.add(task);
                 Future<?> status = scheduler.submit(task);
                 taskStatus.add(status);
@@ -94,8 +98,11 @@ public class BulkHostTrustBO {
             throw new ASException(ErrorCode.AS_BULK_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
-    
     public BulkHostTrustResponse getBulkTrustJson(Set<String> hosts, boolean forceVerify) {
+        return getBulkTrustJson(hosts, forceVerify, null);
+    }
+    
+    public BulkHostTrustResponse getBulkTrustJson(Set<String> hosts, boolean forceVerify, Nonce challenge) {
         try {
                         
             Set<HostQuoteJson> tasks = new HashSet<HostQuoteJson>();
@@ -105,7 +112,7 @@ public class BulkHostTrustBO {
             List<HostTrust> results = new ArrayList<HostTrust>();
             
             for(String host : hosts) {
-                HostQuoteJson task = new HostQuoteJson(hostTrustBO, host, forceVerify);
+                HostQuoteJson task = new HostQuoteJson(hostTrustBO, host, forceVerify, challenge);
                 tasks.add(task);
                 Future<?> status = scheduler.submit(task);
                 taskStatus.add(status);
@@ -162,18 +169,20 @@ public class BulkHostTrustBO {
         private boolean forceVerify;
         private String result = null;
         private boolean isError = false;
+        private Nonce challenge = null;
         
-        public HostQuoteSaml(HostTrustBO dao, String hostname, boolean forceVerify) {
+        public HostQuoteSaml(HostTrustBO dao, String hostname, boolean forceVerify, Nonce challenge) {
             this.dao = dao;
             this.hostname = hostname;
             this.forceVerify = forceVerify;
+            this.challenge = challenge;
         }
         
         @Override
         public void run() {
             if( isError() ) { return; } // avoid clobbering previous error
             try {
-                String saml = dao.getTrustWithSaml(hostname, forceVerify);
+                String saml = dao.getTrustWithSaml(hostname, forceVerify, challenge);
                 result = String.format("<Host><Name>%s</Name><ErrorCode>%s</ErrorCode><Assertion><![CDATA[%s]]></Assertion></Host>", hostname, ErrorCode.OK.toString(), saml);
             } 
             catch(ASException e) {
@@ -201,18 +210,20 @@ public class BulkHostTrustBO {
         private boolean forceVerify;
         private HostTrust result = null;
         private boolean isError = false;
+        private Nonce challenge = null;
         
-        public HostQuoteJson(HostTrustBO dao, String hostname, boolean forceVerify) {
+        public HostQuoteJson(HostTrustBO dao, String hostname, boolean forceVerify, Nonce challenge) {
             this.dao = dao;
             this.hostname = hostname;
             this.forceVerify = forceVerify;
+            this.challenge = challenge;
         }
         
         @Override
         public void run() {
             if( isError() ) { return; } // avoid clobbering previous error
             try {
-                result = dao.getTrustWithCache(hostname, forceVerify);
+                result = dao.getTrustWithCache(hostname, forceVerify, challenge);
             }
             catch(ASException e) {
                 isError = true;

@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.business;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
@@ -95,12 +96,20 @@ public class HostBO {
         private boolean isError = false;
         private String errorMessage = "";
         private String measurementXmlLog;
+        private Nonce challenge;
         
         public HostAttReport(HostAgent agent, String requiredPCRs) {
             this.agent = agent;
             this.requiredPCRs = requiredPCRs;
+            this.challenge = null;
         }
 
+        public HostAttReport(HostAgent agent, String requiredPCRs, Nonce challenge) {
+            this.agent = agent;
+            this.requiredPCRs = requiredPCRs;
+            this.challenge = challenge;
+        }
+        
         @Override
         public void run() {
             if (isError()) {
@@ -108,8 +117,8 @@ public class HostBO {
             }
             try {
                 long threadStart = System.currentTimeMillis();
-                 attestationReport = agent.getHostAttestationReport(requiredPCRs);
-                 measurementXmlLog = agent.getPcrManifest().getMeasurementXml();
+                 attestationReport = agent.getHostAttestationReport(requiredPCRs, challenge);
+                 measurementXmlLog = agent.getPcrManifest(challenge).getMeasurementXml();
                  log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
             } catch (Throwable te) {
                 isError = true;
@@ -654,6 +663,22 @@ public class HostBO {
         }
     }
 
+    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
+        if(hostConfigObj.getChallengeHex() == null || hostConfigObj.getChallengeHex().isEmpty() ) {
+            return configureWhiteListFromCustomData(hostConfigObj, null);
+        }
+        else {
+            if( Digest.sha1().isValidHex(hostConfigObj.getChallengeHex()) ) {
+                Nonce challenge = new Nonce(Digest.sha1().valueHex(hostConfigObj.getChallengeHex()).getBytes());
+                return configureWhiteListFromCustomData(hostConfigObj, challenge);
+            }
+            else {
+                log.error("Invalid challenge: {}", hostConfigObj.getChallengeHex());
+                throw new IllegalArgumentException("Invalid challenge");
+            }
+        }
+        
+    }
     /**
      * This function using the white list configuration settings including pcr details, whether the whitelist is for an
      * individual host/for OEM specific host/global white list, etc, configures the DB with the whitelist from the
@@ -662,7 +687,7 @@ public class HostBO {
      * @param hostConfigObj : White List configuration object having all the details.
      * @return : true on success.
      */
-    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
+    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj, Nonce challenge) {
 //        // debug only
 //        try {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -809,7 +834,7 @@ public class HostBO {
                 
                 // Now we need to spawn 2 threads. One for retriving the attestation report from the host and another one for checking whether MLE with
                 // matching whitelists exists or not.
-                HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList);
+                HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList, challenge);
                 hostAttReportObj.start();
                 
                 MLEVerify mleVerifyObj = new MLEVerify(hostConfigObj);

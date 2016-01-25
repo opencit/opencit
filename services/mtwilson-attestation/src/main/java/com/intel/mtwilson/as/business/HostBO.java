@@ -106,16 +106,6 @@ public class HostBO {
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-//            if( log.isDebugEnabled() ) {
-//                try {
-//                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("addHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
-//                }
-//                catch(IOException e) {
-//                    log.debug("cannot serialize host input to addHost", e);
-//                }
-//            }
             
            log.trace("HOST BO ADD HOST STARTING");
             
