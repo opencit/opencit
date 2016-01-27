@@ -1,29 +1,26 @@
 package com.intel.mtwilson.as.rest;
 
+import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
+import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
-import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
-import com.intel.mtwilson.datatypes.HostResponse;
-import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.TxtHostRecordList;
-import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.model.Nonce;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+//import com.intel.mtwilson.threads.OrderDispatcher;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 //import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -96,22 +93,46 @@ public class BulkHostTrust {
                         hostSet.add(host.trim());
                     }
                 }
+                
+                // issue 4978 alternate bulk host trust implementation can be enabled via configuration
+                boolean useAlternateRequestProcessor = ASConfig.getConfiguration().getBoolean("mtwilson.performance.taskmanager.enabled", false);
+                if(useAlternateRequestProcessor) {
+                    // NEW CODE HERE -- SYNCH/WAIT FOR RESULTS, because only new API would support ASYNC mode
+//                    OrderDispatcher.submit(order);
+                    // alternative behavior
+                    BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(timeout);
 
-                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */timeout);
+                    if( challengeHex == null || challengeHex.isEmpty() ) {
+                        return bulkHostTrustBO.getBulkTrustSamlAlternate(hostSet, forceVerify, null);
+                    }
+                    else {
+                        if( !Digest.sha1().isValidHex(challengeHex) ) {
+                            throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
+                        }
+                        Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
 
-                if( challengeHex == null || challengeHex.isEmpty() ) {
-                    return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
+                        return bulkHostTrustBO.getBulkTrustSamlAlternate(hostSet, forceVerify, challenge);
+                    }
                 }
                 else {
-                    if( !Digest.sha1().isValidHex(challengeHex) ) {
-                        throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
-                    }
-                    Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+                    // original behavior
+                    BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(timeout);
 
-                    return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify, challenge);
+                    if( challengeHex == null || challengeHex.isEmpty() ) {
+                        return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
+                    }
+                    else {
+                        if( !Digest.sha1().isValidHex(challengeHex) ) {
+                            throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
+                        }
+                        Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+
+                        return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify, challenge);
+                    }
                 }
                 
 
+        
 
         }
 

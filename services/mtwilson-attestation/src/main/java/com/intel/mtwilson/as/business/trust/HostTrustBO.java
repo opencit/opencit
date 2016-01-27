@@ -1,6 +1,8 @@
 package com.intel.mtwilson.as.business.trust;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
@@ -57,10 +59,15 @@ import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissingExpectedEntries;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogValueMismatchEntries;
 import com.intel.mtwilson.policy.rule.XmlMeasurementLogEquals;
 import com.intel.mtwilson.policy.rule.XmlMeasurementLogIntegrity;
+import com.intel.mtwilson.saml.IssuerConfiguration;
+import com.intel.mtwilson.saml.SamlConfiguration;
+import com.intel.mtwilson.util.ASDataCipher;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -88,25 +95,32 @@ import org.slf4j.MarkerFactory;
 public class HostTrustBO {
     public static final String SAML_KEYSTORE_NAME = "SAML";
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTrustBO.class);
+    private static Configuration configuration;
     Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.HOST_ATTESTATION.getValue());
     
-    private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
-    private static final int CACHE_VALIDITY_SECS;
-    private Resource samlKeystoreResource = null;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     
-    private HostBO hostBO = new HostBO(); 
-    
-    static{
-        CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-        //log.debug("Config saml.validity.seconds = " + CACHE_VALIDITY_SECS);
-    }
+    private HostBO hostBO;
     
     public HostTrustBO() {
         super();
+        hostBO = new HostBO(); 
         mapper = JacksonObjectMapperProvider.createDefaultMapper();
-        loadSamlSigningKey();
+        configuration = My.configuration().getConfiguration();
+    }
+    
+    private static class IssuerConfigurationHolder {
+        private static final IssuerConfiguration samlIssuerConfiguration = loadIssuerConfiguration();
+        
+        private static IssuerConfiguration loadIssuerConfiguration() {
+            try {
+                return new IssuerConfiguration(new CommonsConfiguration(configuration));
+            }
+            catch(IOException | GeneralSecurityException e) {
+                throw new IllegalStateException("Cannot load SAML issuer configuration", e);
+            }
+        }
     }
     
 //    public HostTrustBO(PersistenceManager pm) {
@@ -116,16 +130,6 @@ public class HostTrustBO {
     
     public void setHostBO(HostBO hostBO) { this.hostBO = hostBO; }
     
-    private void loadSamlSigningKey() {
-        /*
-        MwKeystore mwKeystore = keystoreJpa.findMwKeystoreByName(SAML_KEYSTORE_NAME);
-        if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
-            samlKeystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
-        }
-        */
-        //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); 
-        samlKeystoreResource = new FileResource(My.configuration().getSamlKeystoreFile());
-    }
 
     public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
         return getTrustStatus(hostName, null);
@@ -1838,18 +1842,30 @@ public class HostTrustBO {
         }
     }
 
-    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
-        Configuration conf = My.configuration().getConfiguration();
-        InetAddress localhost = InetAddress.getLocalHost();
-        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; 
-        String issuer = conf.getString("saml.issuer", defaultIssuer);
-        SamlGenerator saml = new SamlGenerator(samlKeystoreResource, conf);
-        saml.setIssuer(issuer);
+    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException, GeneralSecurityException {
+        String issuerName = configuration.getString(SamlConfiguration.SAML_ISSUER);
+        if( issuerName == null ) {
+            issuerName = configuration.getString("mtwilson.api.url");
+            if( issuerName == null ) {
+                InetAddress localhost = InetAddress.getLocalHost();
+                issuerName = "https://" + localhost.getHostAddress() + ":8443/mtwilson";   // was; 8181/AttestationService       
+                configuration.setProperty(SamlConfiguration.SAML_ISSUER, issuerName);
+            }
+            else {
+                configuration.setProperty(SamlConfiguration.SAML_ISSUER, issuerName);
+            }
+        }
+        
+//        String issuer = conf.getString("saml.issuer", defaultIssuer);
+        SamlGenerator saml = new SamlGenerator(IssuerConfigurationHolder.samlIssuerConfiguration);
         return saml;
     }
     
     public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
-        My.initDataEncryptionKey();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
         log.debug("getTrustWithSamlByAik calling getHostByAik for aik {}", aik.toString());
         TblHosts tblHosts = getHostByAik(aik);
         log.debug("getTrustWithSamlByAik calling getTrustWithSaml for host {} aik {}", tblHosts.getName(), aik.toString());
@@ -1861,14 +1877,20 @@ public class HostTrustBO {
     }
     
     public String getTrustWithSaml(String host, boolean forceVerify, Nonce challenge) throws IOException {
-        My.initDataEncryptionKey();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
         TblHosts tblHosts = getHostByName(new Hostname((host)));
         return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify, challenge);
     }
 
     public String getTrustWithSamlForHostnames(Collection<String> hosts) throws IOException {
-        My.initDataEncryptionKey();
-        ArrayList<TblHosts> tblHostsList = new ArrayList<TblHosts>();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
+        ArrayList<TblHosts> tblHostsList = new ArrayList<>();
         for(String host : hosts) {
             TblHosts tblHosts = getHostByName(new Hostname((host)));
             tblHostsList.add(tblHosts);
@@ -2083,7 +2105,7 @@ public class HostTrustBO {
     }
     
     private Date getCacheStaleAfter(){
-        return new DateTime().minusSeconds(CACHE_VALIDITY_SECS).toDate();
+        return new DateTime().minusSeconds(IssuerConfigurationHolder.samlIssuerConfiguration.getValiditySeconds()).toDate();
     }
     private HostTrust getHostTrustObj(TblTaLog tblTaLog) {
         HostTrust hostTrust = new HostTrust(ErrorCode.OK,"");

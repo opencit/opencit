@@ -5,6 +5,7 @@
 package test.saml;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.tag.common.X509AttrBuilder;
@@ -22,6 +23,7 @@ import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.saml.IssuerConfiguration;
 import com.intel.mtwilson.saml.SamlAssertion;
 import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
@@ -64,7 +66,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
 55gw0BInWluHocdkrXzaDmrOYoe9N6nuGbSkJ/TQbW8nX6jo4k4BllugaRY=</X509Certificate></X509Data></KeyInfo></Signature><saml2:Subject><saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">10.1.71.175</saml2:NameID><saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches"><saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">AttestationService-0.5.4</saml2:NameID><saml2:SubjectConfirmationData Address="10.254.36.218" NotBefore="2014-02-23T04:46:05.755Z" NotOnOrAfter="2014-02-23T05:46:05.755Z"/></saml2:SubjectConfirmation></saml2:Subject><saml2:AttributeStatement><saml2:Attribute Name="Trusted"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Trusted_BIOS"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="BIOS_Name"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Intel_Corporation</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="BIOS_Version"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">01.00.0063</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="BIOS_OEM"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Intel Corporation</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Trusted_VMM"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_Name"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">Intel_Thurley_VMware_ESXi</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_Version"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">5.1.0-1065491</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_OSName"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">VMware_ESXi</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="VMM_OSVersion"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">5.1.0</saml2:AttributeValue></saml2:Attribute><saml2:Attribute Name="Asset_Tag"><saml2:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:anyType">false</saml2:AttributeValue></saml2:Attribute></saml2:AttributeStatement></saml2:Assertion>
 * 
      */
-    @Test
+//    @Test
     public void testGenerateAndVerifySaml() throws Exception {
         // generate SAML
 //        Extensions.register(VendorHostAgentFactory.class, IntelHostAgentFactory.class); // because 10.1.70.64 is trust agent
@@ -80,7 +82,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         print(trustAssertion);
     }
     
-    @Test
+//    @Test
     public void testGenerateAndVerifyMultihostSaml() throws Exception {
         // generate SAML
         Extensions.register(VendorHostAgentFactory.class, VmwareHostAgentFactory.class); // because 10.1.71.175 is esxi
@@ -159,8 +161,14 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
     @Test
     public void testGenerateSamlWithAssetTags() throws Exception {
         // equivalent of private SamlGenerator getSamlGenerator() in HostTrustBO:
-        SamlGenerator samlGenerator = new SamlGenerator(new CommonsConfiguration(My.configuration().getConfiguration()));
-        samlGenerator.setIssuer("junit-test"); // String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
+        PropertiesConfiguration configuration = new PropertiesConfiguration();
+        configuration.set("saml.issuer", "junit-test"); // String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
+        
+        KeyPair issuerKey = RsaUtil.generateRsaKeyPair(1024); // weak key for testing only
+        X509Certificate issuerCert = RsaUtil.generateX509Certificate("CN=test", issuerKey, 1); // test cert valid for 1 day
+        
+        IssuerConfiguration issuerConfiguration = new IssuerConfiguration(issuerKey.getPrivate(), issuerCert, configuration);
+        SamlGenerator samlGenerator = new SamlGenerator(issuerConfiguration);
         // generate assertion
         HostTrustStatus trust = new HostTrustStatus();
         trust.asset_tag = true;

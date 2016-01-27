@@ -10,5 +10,6 @@
     </root>
     
     <logger name="com.intel.mtwilson.audit" level="INFO"/>
+    <logger name="com.intel.dcsg.cpg.classpath" level="INFO"/>
     
 </configuration>
