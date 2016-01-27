@@ -159,7 +159,19 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
     }
     
     @Test
-    public void testGenerateSamlWithAssetTags() throws Exception {
+    public void testManyGenerateSamlWithAssetTags() throws Exception {
+        IssuerConfiguration issuerConfiguration = createIssuerConfiguration();
+        for(int i=0; i<100; i++) {
+            long t0 = System.currentTimeMillis();
+            testGenerateSamlWithAssetTags(issuerConfiguration);
+            long t1 = System.currentTimeMillis();
+            log.debug("ELAPSED: {}", t1-t0);
+            System.gc();
+        }
+    }
+    
+    
+    private IssuerConfiguration createIssuerConfiguration() throws Exception {
         // equivalent of private SamlGenerator getSamlGenerator() in HostTrustBO:
         PropertiesConfiguration configuration = new PropertiesConfiguration();
         configuration.set("saml.issuer", "junit-test"); // String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
@@ -168,6 +180,11 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         X509Certificate issuerCert = RsaUtil.generateX509Certificate("CN=test", issuerKey, 1); // test cert valid for 1 day
         
         IssuerConfiguration issuerConfiguration = new IssuerConfiguration(issuerKey.getPrivate(), issuerCert, configuration);
+        return issuerConfiguration;
+    }
+    
+//    @Test
+    public void testGenerateSamlWithAssetTags(IssuerConfiguration issuerConfiguration) throws Exception {
         SamlGenerator samlGenerator = new SamlGenerator(issuerConfiguration);
         // generate assertion
         HostTrustStatus trust = new HostTrustStatus();
@@ -188,6 +205,8 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         data.VMM_OSName = "Generic OS";
         data.VMM_OSVersion = "1.0";
         TxtHost host = new TxtHost(data, trust);
+        
+        /*
         // generate asset tag cert
         // first, create the CA key pair and certificate
         KeyPair cakey = RsaUtil.generateRsaKeyPair(2048);
@@ -202,6 +221,9 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
                 .attribute("State", "CA", "TX")
                 .build();
         X509AttributeCertificate cert = X509AttributeCertificate.valueOf(attrCertBytes);
+     */   
+        X509AttributeCertificate cert = null; // no asset tag cert
+     
         // generate the assertion with trutsed host information and trusted tag certificate
         SamlAssertion samlAssertion = samlGenerator.generateHostAssertion(host, cert, null);
         // verify and print the assertion contents
@@ -213,6 +235,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
        TrustAssertion trustAssertion = new TrustAssertion(trusted, samlAssertion.assertion);        
         print(trustAssertion);
         * */
-        log.debug("SAML: {}", samlAssertion.assertion);
+
+//        log.debug("SAML: {}", samlAssertion.assertion);
     }
 }

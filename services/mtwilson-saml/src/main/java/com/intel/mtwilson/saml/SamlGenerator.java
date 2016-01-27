@@ -557,13 +557,13 @@ public class SamlGenerator {
         Element plaintextElement = marshaller.marshall(assertion);
 
         String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
-        System.out.println("Assertion String: " + originalAssertionString);
+        log.debug("Assertion String: " + originalAssertionString);
 
         // add signatures and/or encryption
         signAssertion(plaintextElement);
 
         samlAssertion.assertion = XMLHelper.nodeToString(plaintextElement);
-        System.out.println("Signed Assertion String: " + samlAssertion.assertion);
+        log.debug("Signed Assertion String: " + samlAssertion.assertion);
         return samlAssertion;
     }
 
