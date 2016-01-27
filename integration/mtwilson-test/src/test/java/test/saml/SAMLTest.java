@@ -206,10 +206,13 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         SamlAssertion samlAssertion = samlGenerator.generateHostAssertion(host, cert, null);
         // verify and print the assertion contents
 //        SamlConfiguration samlConfiguration = new SamlConfiguration(new CommonsConfigurationAdapter(My.configuration().getConfiguration()));
-         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
-//        X509Certificate[] trusted = keystore.getTrustedCertificates(SimpleKeystore.SAML); // this works for the api client's keystore
+//////        X509Certificate[] trusted = keystore.getTrustedCertificates(SimpleKeystore.SAML); // this works for the api client's keystore
+/*
+        SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
         X509Certificate[] trusted = new X509Certificate[] { keystore.getX509Certificate(keystore.aliases()[0]) }; // this works for mtwilson's mtwilson-saml.jks keystore
        TrustAssertion trustAssertion = new TrustAssertion(trusted, samlAssertion.assertion);        
         print(trustAssertion);
+        * */
+        log.debug("SAML: {}", samlAssertion.assertion);
     }
 }
