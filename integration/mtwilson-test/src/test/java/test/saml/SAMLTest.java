@@ -159,13 +159,9 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
     }
     
     @Test
-    public void testManyGenerateSamlWithAssetTags() throws Exception {
-        IssuerConfiguration issuerConfiguration = createIssuerConfiguration();
-        for(int i=0; i<100; i++) {
-            long t0 = System.currentTimeMillis();
-            testGenerateSamlWithAssetTags(issuerConfiguration);
-            long t1 = System.currentTimeMillis();
-            log.debug("ELAPSED: {}", t1-t0);
+    public void testManyGenerateSamlWithAssetTags() throws Exception {        
+        for(int i=0; i<1000; i++) {
+            testGenerateSaml();
             System.gc();
         }
     }
@@ -183,8 +179,16 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         return issuerConfiguration;
     }
     
-//    @Test
-    public void testGenerateSamlWithAssetTags(IssuerConfiguration issuerConfiguration) throws Exception {
+    //@Test
+    public void testGenerateSaml() throws Exception {
+        IssuerConfiguration issuerConfiguration = createIssuerConfiguration();
+        long t0 = System.currentTimeMillis();
+        testGenerateSamlWithAssetTags(issuerConfiguration);
+        long t1 = System.currentTimeMillis();
+        log.debug("ELAPSED: {}", t1-t0);
+    }
+    
+    private void testGenerateSamlWithAssetTags(IssuerConfiguration issuerConfiguration) throws Exception {
         SamlGenerator samlGenerator = new SamlGenerator(issuerConfiguration);
         // generate assertion
         HostTrustStatus trust = new HostTrustStatus();
