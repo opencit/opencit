@@ -4,23 +4,17 @@
  */
 package com.intel.mtwilson.as.business.trust;
 
-import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostTrust;
 import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.threads.Attestation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
@@ -45,89 +39,40 @@ public class BulkHostTrustBO {
         return getBulkTrustSaml(hosts, forceVerify, null);
     }
 
-    public String getBulkTrustSamlAlternate(Set<String> hosts, boolean forceVerify, Nonce challenge) {
+    public String getBulkTrustSaml(Set<String> hosts, boolean forceVerify, Nonce challenge) {
         try {
-            log.debug("getBulkTrustSamlAlternate started at {}", System.currentTimeMillis());
+            log.debug("getBulkTrustSaml started at {}", System.currentTimeMillis());
             Set<HostQuoteSaml> tasks = new HashSet<>();
             for (String host : hosts) {
                 HostQuoteSaml task = new HostQuoteSaml(host, forceVerify, challenge);
                 tasks.add(task);
             }
             
-            Attestation.getExecutor().invokeAll(Attestation.wrap(tasks), timeout, TimeUnit.SECONDS);
+            log.debug("getBulkTrustSaml invokeAll with timeout: {} seconds", timeout);
+            Attestation.getExecutor().invokeAll(tasks, timeout, TimeUnit.SECONDS);
             List<String> results = new ArrayList<>();
             for (HostQuoteSaml task : tasks) {
                 // Bug:547 - Since the comment mentioned that the return value will not be used and the java.util.concurrent.TimeoutException was being thrown
                 // by the get statement, we are ignoring the exception and continuing.
                 if (task.getResult() == null) {
+                    log.debug("getBulkTrustSaml null for {}", task.hostname);
                     results.add(task.getTimeoutResult());
                 } else if (task.isError()) {
+                    log.debug("getBulkTrustSaml error for {}", task.hostname);
                     results.add(task.getResult()); // already an error response
                 } else {
+                    log.debug("getBulkTrustSaml result for {}", task.hostname);
                     results.add(task.getResult());
                 }
             }
 
             String report = String.format("<Hosts>%s</Hosts>", StringUtils.join(results, ""));
-            log.debug("getBulkTrustSamlAlternate finished at {}", System.currentTimeMillis());
+            log.debug("getBulkTrustSaml finished at {}", System.currentTimeMillis());
             return report;
         } catch (Exception ex) {
             // throw new ASException(ex);
             // Bug: 1038 - prevent leaks in error messages to client
-            log.debug("getBulkTrustSamlAlternate error at {}", System.currentTimeMillis());
-            log.error("Error during bulk host trust retrieval.", ex);
-            throw new ASException(ErrorCode.AS_BULK_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
-        }
-    }
-
-    public String getBulkTrustSaml(Set<String> hosts, boolean forceVerify, Nonce challenge) {
-        try {
-            Set<HostQuoteSaml> tasks = new HashSet<>();
-            ArrayList<Future<?>> taskStatus = new ArrayList<>();
-            List<String> results = new ArrayList<>();
-
-            for (String host : hosts) {
-                HostQuoteSaml task = new HostQuoteSaml(host, forceVerify, challenge);
-                tasks.add(task);
-                Future<?> status = Attestation.getExecutor().submit((Runnable) task);
-                taskStatus.add(status);
-            }
-
-            // Bug:547 - Since the comment mentioned that the return value will not be used and the java.util.concurrent.TimeoutException was being thrown
-            // by the get statement, we are ignoring the exception and continuing.
-            for (Future<?> status : taskStatus) {
-                try {
-                    status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
-                } catch (Exception ex) {
-                    // we will log the exception and ignore the error.
-                    log.error("Exception while retrieving the status of the tasks", ex);
-                }
-            }
-//            scheduler.shutdown(); //  bug #503 remove this and replace with calls to Future.get() to get all our results
-
-//            if( scheduler.awaitTermination(timeout, TimeUnit.SECONDS) ) { //  bug #503 replace with waiting for all Futures that WE SUBMITTED to return (because in static thread pool other requests may be submitting tasks to the same pool... we don't want to wait for all of them, jus tours )
-//                log.info("All tasks completed on time");
-//            }
-//            else {
-//                log.info("Timeout reached before all tasks completed"); // should set the error code ErrorCode.AS_ASYNC_TIMEOUT on the ones that timed out (no result available)
-//            }
-
-            for (HostQuoteSaml task : tasks) {
-                if (task.getResult() == null) {
-                    results.add(task.getTimeoutResult());
-                } else if (task.isError()) {
-                    results.add(task.getResult()); // already an error response
-                } else {
-                    results.add(task.getResult());
-                }
-            }
-
-            String report = String.format("<Hosts>%s</Hosts>", StringUtils.join(results, ""));
-
-            return report;
-        } catch (Exception ex) {
-            // throw new ASException(ex);
-            // Bug: 1038 - prevent leaks in error messages to client
+            log.debug("getBulkTrustSaml error at {}", System.currentTimeMillis());
             log.error("Error during bulk host trust retrieval.", ex);
             throw new ASException(ErrorCode.AS_BULK_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }

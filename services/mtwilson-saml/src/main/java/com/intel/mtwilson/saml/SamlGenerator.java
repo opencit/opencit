@@ -108,6 +108,7 @@ public class SamlGenerator {
         }
         //setValiditySeconds(Integer.valueOf(configuration.get("saml.validity.seconds", "3600")));
         this.validitySeconds = issuerConfiguration.getValiditySeconds();
+        log.debug("IssuerConfiguration validitySeconds: {}", this.validitySeconds);
         assert validitySeconds != null;
     }
     
@@ -134,9 +135,11 @@ public class SamlGenerator {
         samlAssertion = new SamlAssertion();
         Assertion assertion = createAssertion(host, tagCertificate, vmMetaData);
 
+        log.debug("Generating XML elements for assertion");
         AssertionMarshaller marshaller = new AssertionMarshaller();
         Element plaintextElement = marshaller.marshall(assertion);
         
+        log.debug("Generating XML text for assertion");
         String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
         log.debug("Assertion String: " + originalAssertionString);
 
@@ -457,6 +460,7 @@ public class SamlGenerator {
          */
         private Assertion createAssertion(TxtHost host, X509AttributeCertificate tagCertificate, Map<String, String> vmMetaData) throws ConfigurationException, UnknownHostException {
             // Create the assertion
+            log.debug("createAssertion for hostname: {}", host.getHostName());
             SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
             Assertion assertion = (Assertion) assertionBuilder.buildObject();
             assertion.setID("HostTrustAssertion"); // ID is arbitrary, only needs to be unique WITHIN THE DOCUMENT, and is required so that the Signature element can refer to it, for example #HostTrustAssertion

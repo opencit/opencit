@@ -25,6 +25,8 @@ import java.security.cert.CertificateException;
  * @author jbuhacoff
  */
 public class IssuerConfiguration {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssuerConfiguration.class);
+
     private final PrivateKey privateKey;
     private final Certificate certificate;
     private final String issuerName; // for example, http://1.2.3.4/AttestationService
@@ -44,12 +46,13 @@ public class IssuerConfiguration {
     public IssuerConfiguration(Configuration configuration) throws FileNotFoundException, IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableEntryException {
         SamlConfiguration saml = new SamlConfiguration(configuration);
 
+        log.debug("SAML keystore file: {}", saml.getSamlKeystoreFile());
 
 //            URL keystore = getClass().getResource(config.getString ("saml.keystore.file"));
 //            System.out.println("keystore url: "+keystore.toString());
 //            InputStream keystoreInputStream = keystore.openStream();
         //File keystoreFile = new File(saml.getSamlKeystoreFile());// new File(configuration.getString("saml.keystore.file")); //ResourceFinder.getFile(config.getString("saml.keystore.file"));
-        File keystoreFile = new File(saml.getSamlKeystoreFile()); // My.configuration().getSamlKeystoreFile();
+        File keystoreFile = saml.getSamlKeystoreFile(); // My.configuration().getSamlKeystoreFile();
 //            InputStream keystoreInputStream = keystoreResource.getInputStream(); // this obtains it from the database (or whatever resource is provided)
 //            keyStore = KeyStoreUtil.getKeyStore(SAMLSignature.class.getResourceAsStream(config.getString ("keystore")),config.getString ("storepass"));
         try (FileInputStream keystoreInputStream = new FileInputStream(keystoreFile)) {

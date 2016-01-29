@@ -61,6 +61,7 @@ import com.intel.mtwilson.policy.rule.XmlMeasurementLogEquals;
 import com.intel.mtwilson.policy.rule.XmlMeasurementLogIntegrity;
 import com.intel.mtwilson.saml.IssuerConfiguration;
 import com.intel.mtwilson.saml.SamlConfiguration;
+import com.intel.mtwilson.threads.Attestation;
 import com.intel.mtwilson.util.ASDataCipher;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -108,19 +109,6 @@ public class HostTrustBO {
         hostBO = new HostBO(); 
         mapper = JacksonObjectMapperProvider.createDefaultMapper();
         configuration = My.configuration().getConfiguration();
-    }
-    
-    private static class IssuerConfigurationHolder {
-        private static final IssuerConfiguration samlIssuerConfiguration = loadIssuerConfiguration();
-        
-        private static IssuerConfiguration loadIssuerConfiguration() {
-            try {
-                return new IssuerConfiguration(new CommonsConfiguration(configuration));
-            }
-            catch(IOException | GeneralSecurityException e) {
-                throw new IllegalStateException("Cannot load SAML issuer configuration", e);
-            }
-        }
     }
     
 //    public HostTrustBO(PersistenceManager pm) {
@@ -1807,11 +1795,12 @@ public class HostTrustBO {
             }
 
             if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                log.debug("Host has binding certificate");
                 host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
             }
             
+            log.debug("Creating host assertion for: {}", host.getHostName());
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate, null);
-
             log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
 
             tblSamlAssertion.setSaml(samlAssertion.assertion);
@@ -1835,7 +1824,7 @@ public class HostTrustBO {
              *
              */
             throw e;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // throw new ASException( e);
             log.error("Error during retrieval of host trust status.", ex);
             throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
@@ -1843,21 +1832,8 @@ public class HostTrustBO {
     }
 
     private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException, GeneralSecurityException {
-        String issuerName = configuration.getString(SamlConfiguration.SAML_ISSUER);
-        if( issuerName == null ) {
-            issuerName = configuration.getString("mtwilson.api.url");
-            if( issuerName == null ) {
-                InetAddress localhost = InetAddress.getLocalHost();
-                issuerName = "https://" + localhost.getHostAddress() + ":8443/mtwilson";   // was; 8181/AttestationService       
-                configuration.setProperty(SamlConfiguration.SAML_ISSUER, issuerName);
-            }
-            else {
-                configuration.setProperty(SamlConfiguration.SAML_ISSUER, issuerName);
-            }
-        }
-        
 //        String issuer = conf.getString("saml.issuer", defaultIssuer);
-        SamlGenerator saml = new SamlGenerator(IssuerConfigurationHolder.samlIssuerConfiguration);
+        SamlGenerator saml = new SamlGenerator(Attestation.getIssuerConfiguration());
         return saml;
     }
     
@@ -2105,7 +2081,7 @@ public class HostTrustBO {
     }
     
     private Date getCacheStaleAfter(){
-        return new DateTime().minusSeconds(IssuerConfigurationHolder.samlIssuerConfiguration.getValiditySeconds()).toDate();
+        return new DateTime().minusSeconds(Attestation.getIssuerConfiguration().getValiditySeconds()).toDate();
     }
     private HostTrust getHostTrustObj(TblTaLog tblTaLog) {
         HostTrust hostTrust = new HostTrust(ErrorCode.OK,"");

@@ -94,45 +94,19 @@ public class BulkHostTrust {
                     }
                 }
                 
-                // issue 4978 alternate bulk host trust implementation can be enabled via configuration
-                boolean useAlternateRequestProcessor = ASConfig.getConfiguration().getBoolean("mtwilson.performance.taskmanager.enabled", false);
-                if(useAlternateRequestProcessor) {
-                    // NEW CODE HERE -- SYNCH/WAIT FOR RESULTS, because only new API would support ASYNC mode
-//                    OrderDispatcher.submit(order);
-                    // alternative behavior
-                    BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(timeout);
+                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(timeout);
 
-                    if( challengeHex == null || challengeHex.isEmpty() ) {
-                        return bulkHostTrustBO.getBulkTrustSamlAlternate(hostSet, forceVerify, null);
-                    }
-                    else {
-                        if( !Digest.sha1().isValidHex(challengeHex) ) {
-                            throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
-                        }
-                        Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
-
-                        return bulkHostTrustBO.getBulkTrustSamlAlternate(hostSet, forceVerify, challenge);
-                    }
+                if( challengeHex == null || challengeHex.isEmpty() ) {
+                    return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
                 }
                 else {
-                    // original behavior
-                    BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(timeout);
-
-                    if( challengeHex == null || challengeHex.isEmpty() ) {
-                        return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
+                    if( !Digest.sha1().isValidHex(challengeHex) ) {
+                        throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
                     }
-                    else {
-                        if( !Digest.sha1().isValidHex(challengeHex) ) {
-                            throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
-                        }
-                        Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+                    Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
 
-                        return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify, challenge);
-                    }
+                    return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify, challenge);
                 }
-                
-
-        
 
         }
 

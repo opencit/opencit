@@ -280,10 +280,11 @@ public class HostBO {
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
                     validCaSignature = true;
+                    break;
                 }
             }
             catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
-                log.debug("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+                log.debug("Failed to verify AIK signature with CA: {}", e.getMessage()); // but don't re-throw because maybe another cert in the list is a valid signer
             }
         }
         return validCaSignature;
