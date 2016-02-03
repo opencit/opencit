@@ -493,10 +493,15 @@ public class HostTrustBO {
                         tblHosts.setBiosMleId(biosMLE);
                         tblHosts.setVmmMleId(null);
 
+                        long t0 = System.currentTimeMillis();
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        long t1 = System.currentTimeMillis();
+                        log.trace("performance: hostTrustPolicyFactory.loadTrustPolicyForHost: {}ms", t1-t0);
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport tempTrustReport = policyEngine.apply(hostReport, trustPolicy);
-
+                       long t2 = System.currentTimeMillis();
+                        log.trace("performance: policyEngine.apply: {}ms", t2-t1);
+ 
                         if (tempTrustReport != null && tempTrustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
                             // We found the new MLE to map to. We need to see if the VMM MLE also needs to be updated
                             log.debug("UpdateHostIfUntrusted: Found the new matching BIOS MLE '{}' for host '{}'.", biosMLE.getName(), tblHosts.getName());
@@ -613,7 +618,7 @@ public class HostTrustBO {
             } 
 
             long updateHostIfUntrustedVMMStop = System.currentTimeMillis();
-            log.debug("UpdateHostIfUntrusted: VMM update performance {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
+            log.trace("performance: UpdateHostIfUntrusted VMM update: {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
             
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
@@ -636,7 +641,7 @@ public class HostTrustBO {
             TrustReport finalTrustReport = policyEngine.apply(hostReport, trustPolicy);            
             
             long updateHostIfUntrustedStop = System.currentTimeMillis();
-            log.debug("UpdateHostIfUntrusted Performance {}", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
+            log.trace("performance: UpdateHostIfUntrusted: {}ms", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
             
             return finalTrustReport;
                                    
@@ -755,6 +760,7 @@ public class HostTrustBO {
         }
         tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
         
+        
         long getAgentManifestStart = System.currentTimeMillis(); 
         PcrManifest pcrManifest;
         if( challenge == null ) {
@@ -772,12 +778,15 @@ public class HostTrustBO {
         hostReport.tpmQuote = null;
         hostReport.variables = new HashMap<String,String>(); 
         if( agent.isAikAvailable() ) {
+            long getAikStart = System.currentTimeMillis();
             if( agent.isAikCaAvailable() ) {
                 hostReport.aik = new Aik(agent.getAikCertificate());                
             }
             else {
                 hostReport.aik = new Aik(agent.getAik()); 
             }
+            long getAikStop = System.currentTimeMillis();
+            log.trace("performance: getAik or getAikCertificate: {}ms", getAikStop-getAikStart);
         }
         
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());
@@ -1506,7 +1515,10 @@ public class HostTrustBO {
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         try {
+            long t0 = System.currentTimeMillis();
             TblHosts tblHost = hostBO.getHostByName(hostName);
+            long t1 = System.currentTimeMillis();
+            log.trace("performance: hostBO.getHostByName in {}ms", t1-t0);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
@@ -1906,7 +1918,10 @@ public class HostTrustBO {
         
         if(forceVerify != true){
             //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
+            long t0 = System.currentTimeMillis();
             TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName()); //hostId);
+            long t1 = System.currentTimeMillis();
+            log.trace("performance: My.jpa().mwSamlAssertion().findByHostAndExpiry: {}ms", t1-t0);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
@@ -1924,6 +1939,7 @@ public class HostTrustBO {
 //            return getTrustWithSaml(tblHosts, hostId);
                 return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, challenge); // issue #4978 use specified nonce, if available
         }catch(Exception e) {
+            log.error("Cannot obtain host trust, getTrustWithSaml failed", e);
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
             tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
             tblSamlAssertion.setHostId(tblHosts);
@@ -1937,9 +1953,6 @@ public class HostTrustBO {
             tblSamlAssertion.setVmmTrust(false);
             
             try {
-                log.error("Caught exception, generating saml assertion");
-                log.error("Printing stacktrace first");
-                e.printStackTrace();
                 tblSamlAssertion.setSaml("");
                 int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
                 tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());

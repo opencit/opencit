@@ -24,7 +24,8 @@ import javax.servlet.annotation.WebListener;
 import org.apache.commons.configuration.Configuration;
 
 /**
- * The fixed thread pool means there are still references to the loaded classes.
+ * Initializes the data encryption key and the SAML issuer configuration
+ * once when the attestation starts.
  *
  * @author jbuhacoff
  */
