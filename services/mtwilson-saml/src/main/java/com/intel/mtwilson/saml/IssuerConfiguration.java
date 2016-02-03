@@ -19,14 +19,14 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 /**
- * Loads the private key, certificate, and other settings required
- * for the SAML issuer.
- * 
+ * Loads the private key, certificate, and other settings required for the SAML
+ * issuer.
+ *
  * @author jbuhacoff
  */
 public class IssuerConfiguration {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssuerConfiguration.class);
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssuerConfiguration.class);
     private final PrivateKey privateKey;
     private final Certificate certificate;
     private final String issuerName; // for example, http://1.2.3.4/AttestationService
@@ -43,35 +43,26 @@ public class IssuerConfiguration {
         jsr105provider = saml.getJsr105Provider(); // conf.getString(JSR105_PROVIDER, "org.jcp.xml.dsig.internal.dom.XMLDSigRI");
         validitySeconds = saml.getSamlValiditySeconds();
     }
+
     public IssuerConfiguration(Configuration configuration) throws FileNotFoundException, IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableEntryException {
         SamlConfiguration saml = new SamlConfiguration(configuration);
 
         log.debug("SAML keystore file: {}", saml.getSamlKeystoreFile());
-
-//            URL keystore = getClass().getResource(config.getString ("saml.keystore.file"));
-//            System.out.println("keystore url: "+keystore.toString());
-//            InputStream keystoreInputStream = keystore.openStream();
-        //File keystoreFile = new File(saml.getSamlKeystoreFile());// new File(configuration.getString("saml.keystore.file")); //ResourceFinder.getFile(config.getString("saml.keystore.file"));
-        File keystoreFile = saml.getSamlKeystoreFile(); // My.configuration().getSamlKeystoreFile();
-//            InputStream keystoreInputStream = keystoreResource.getInputStream(); // this obtains it from the database (or whatever resource is provided)
-//            keyStore = KeyStoreUtil.getKeyStore(SAMLSignature.class.getResourceAsStream(config.getString ("keystore")),config.getString ("storepass"));
+        File keystoreFile = saml.getSamlKeystoreFile(); // replaces My.configuration().getSamlKeystoreFile();
         try (FileInputStream keystoreInputStream = new FileInputStream(keystoreFile)) {
-            KeyStore keyStore = getKeyStore(keystoreInputStream, saml.getSamlKeystorePassword()); /*configuration.getString("saml.keystore.password"*//*,System.getenv("SAMLPASSWORD")*/ 
+            KeyStore keyStore = getKeyStore(keystoreInputStream, saml.getSamlKeystorePassword()); /*configuration.getString("saml.keystore.password"*//*,System.getenv("SAMLPASSWORD")*/
             KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(saml.getSamlKeyAlias(), //  /*configuration.getString("saml.key.alias"),*/
                     new KeyStore.PasswordProtection(saml.getSamlKeyPassword().toCharArray()));    //configuration.getString("saml.key.password"/*, System.getenv("SAMLPASSWORD")*/).toCharArray()));
-
             privateKey = entry.getPrivateKey();
             certificate = entry.getCertificate();
         }
-        
+
         issuerName = configuration.get(SamlConfiguration.SAML_ISSUER, "AttestationService"); // saml.getSamlIssuer();
         issuerServiceName = "Cloud Integrity Technology";
         jsr105provider = saml.getJsr105Provider(); // conf.getString(JSR105_PROVIDER, "org.jcp.xml.dsig.internal.dom.XMLDSigRI");
         validitySeconds = saml.getSamlValiditySeconds();
-        
-        
     }
-    
+
     public PrivateKey getPrivateKey() {
         return privateKey;
     }
@@ -87,15 +78,15 @@ public class IssuerConfiguration {
     public String getIssuerServiceName() {
         return issuerServiceName;
     }
-    
-    public String getJsr105Provider() { 
+
+    public String getJsr105Provider() {
         return jsr105provider;
     }
 
     public Integer getValiditySeconds() {
         return validitySeconds;
     }
-    
+
     /**
      * Get a KeyStore object given the keystore filename and password.
      */
@@ -105,6 +96,4 @@ public class IssuerConfiguration {
         result.load(in, password.toCharArray());
         return result;
     }
-
-    
 }

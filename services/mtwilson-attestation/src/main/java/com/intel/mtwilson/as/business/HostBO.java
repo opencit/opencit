@@ -280,6 +280,7 @@ public class HostBO {
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
                     validCaSignature = true;
+                    log.debug("Verified CA signature: {}", pca.getSubjectX500Principal().getName());
                     break;
                 }
             }
@@ -383,16 +384,6 @@ public class HostBO {
     }
 
         public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-            if( log.isDebugEnabled() ) {
-                try {
-                ObjectMapper mapper = new ObjectMapper();
-                log.debug("updateHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
-                }
-                catch(IOException e) {
-                    log.debug("cannot serialize host input to updateHost", e);
-                }
-            }
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {

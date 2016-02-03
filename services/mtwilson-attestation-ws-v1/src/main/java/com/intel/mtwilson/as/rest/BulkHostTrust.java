@@ -1,8 +1,6 @@
 package com.intel.mtwilson.as.rest;
 
-import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
-import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
@@ -11,18 +9,13 @@ import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
-import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.model.Nonce;
-import java.io.File;
-import java.io.IOException;
-//import com.intel.mtwilson.threads.OrderDispatcher;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
