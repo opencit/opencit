@@ -68,8 +68,8 @@ public class TblHosts implements Serializable {
      private Date updatedOn;
      * 
      */
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hostId")
-    private Collection<TblSamlAssertion> tblSamlAssertionCollection;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hostId")
+//    private Collection<TblSamlAssertion> tblSamlAssertionCollection;
     @Column(name = "Location")
     private String location;
     private static final long serialVersionUID = 1L;
@@ -492,14 +492,14 @@ public class TblHosts implements Serializable {
         this.location = location;
     }
 
-    @XmlTransient
-    public Collection<TblSamlAssertion> getTblSamlAssertionCollection() {
-        return tblSamlAssertionCollection;
-    }
-
-    public void setTblSamlAssertionCollection(Collection<TblSamlAssertion> tblSamlAssertionCollection) {
-        this.tblSamlAssertionCollection = tblSamlAssertionCollection;
-    }
+//    @XmlTransient
+//    public Collection<TblSamlAssertion> getTblSamlAssertionCollection() {
+//        return tblSamlAssertionCollection;
+//    }
+//
+//    public void setTblSamlAssertionCollection(Collection<TblSamlAssertion> tblSamlAssertionCollection) {
+//        this.tblSamlAssertionCollection = tblSamlAssertionCollection;
+//    }
 
     public String getHardwareUuid() {
         return hardware_uuid;
