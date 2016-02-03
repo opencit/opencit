@@ -39,7 +39,7 @@ public class Attestation implements ServletContextListener {
         try {
         log.debug("Initializing ASDataCipher...");
         My.initDataEncryptionKey();
-        int maxThreads = ASConfig.getConfiguration().getInt("mtwilson.bulktrust.threads.max", 32);
+        int maxThreads = ASConfig.getConfiguration().getInt("mtwilson.bulktrust.threads.max", 16);
         log.debug("Creating fixed thread pool with n={}", maxThreads);
         executor = Executors.newFixedThreadPool(maxThreads, new AttestationThreadFactory());
         
