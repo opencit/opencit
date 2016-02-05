@@ -490,6 +490,13 @@ Function .onInit
                   done1:
 FunctionEnd
 
+Function SetupVCRedist
+         SetOutPath $INSTDIR\
+         
+         File "..\tpmtool\vcredist_x64.exe"
+         ExecShell "open" '$INSTDIR\vcredist_x64.exe'
+FunctionEnd
+
 
 Function CITServerPage
         !insertmacro MUI_HEADER_TEXT $(PREREQ_TITLE) $(CIT_SUBTITLE)
@@ -504,7 +511,7 @@ Function CITServerPage
         ${else}
                ${NSD_CreateLabel} 0 40 100% 12u "Microsoft Visual C++ 2013 Redistributable x64 not found. Please run the following Visual C++ installation for Intel CIT Trustagent setup."
                Pop $mylabel
-               ExecShell "open" '$INSTDIR\vcredist_x64.exe'
+               Call SetupVCRedist
         ${endif}
         ${NSD_CreateLabel} 0 100 100% 12u "Please ensure that Intel CIT Server is running for CIT Trustagent."
         Pop $mylabel
