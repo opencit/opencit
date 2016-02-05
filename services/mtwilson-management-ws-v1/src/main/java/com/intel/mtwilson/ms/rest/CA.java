@@ -308,7 +308,14 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getTlsCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
+
+            File tlsPemFile = My.configuration().getTlsCertificateFile();
+            try (FileInputStream in = new FileInputStream(tlsPemFile)) {
+                String content = IOUtils.toString(in);
+                return content;
+            }
+            
+/*            String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
             if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; 
             }
@@ -332,7 +339,7 @@ public class CA {
                 throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
             }else{
                 throw new FileNotFoundException("Could not obtain TLS cert chain location from config");
-            }
+            }*/
             
         }
         catch (FileNotFoundException e) {

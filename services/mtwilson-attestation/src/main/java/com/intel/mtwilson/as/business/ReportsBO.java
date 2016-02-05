@@ -408,8 +408,14 @@ public class ReportsBO {
         
         for (ModuleLogReport te : temptbootxmSubModuleReport.values())
             logger.debug("addManifestLogs - post processing sub modules {} - {} - {}", te.getComponentName(), te.getValue(), te.getWhitelistValue());
-        tbootxmModuleLogReport.getModuleLogs().addAll(temptbootxmSubModuleReport.values());
-        moduleReports.put("tbootxm", tbootxmModuleLogReport);
+        Collection<ModuleLogReport> temptbootxmSubModuleReportValues = temptbootxmSubModuleReport.values();
+        if (temptbootxmSubModuleReportValues != null && temptbootxmSubModuleReportValues.size() > 0) {
+            tbootxmModuleLogReport.getModuleLogs().addAll(temptbootxmSubModuleReportValues);
+        }
+        List<ModuleLogReport> tbootxmModuleLogs = tbootxmModuleLogReport.getModuleLogs();
+        if (tbootxmModuleLogs != null && tbootxmModuleLogs.size() > 0) {
+            moduleReports.put("tbootxm", tbootxmModuleLogReport);
+        }
 
         manifest.getModuleLogs().addAll(moduleReports.values());
 
