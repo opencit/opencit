@@ -28,7 +28,8 @@ public class MyJdbi {
     return null;
   }*/
     
-    private static DBI dbi = null;
+    // issue #4978: removing static instance
+//    private static DBI dbi = null;
     
     /**
      * Must close connection when done!  for example: 
@@ -44,10 +45,17 @@ public class MyJdbi {
   } 
  
  private static DBI getDBI() {
+     /*
+     log.debug("MyJdbi (mtwilson-shiro-jdbi) static DBI instance: {}", dbi);
      if( dbi == null ) {
         dbi = new DBI(new ExistingConnectionFactory());
+        log.debug("MyJdbi (mtwilson-shiro-jdbi) created new DBI instance: {}", dbi);
      }
      return dbi;
+     */
+      // issue #4978: creating new DBI instance for each request
+     log.debug("MyJdbi (mtwilson-shiro-jdbi) created new DBI instance");
+     return new DBI(new ExistingConnectionFactory());
  }
 
  
@@ -55,7 +63,9 @@ public class MyJdbi {
         @Override
         public Connection openConnection() throws SQLException {
             try {
-                return My.jdbc().connection();
+                Connection connection = My.jdbc().connection();
+                log.debug("MyJdbi (mtwilson-shiro-jdbi) connection: {}", connection);
+                return connection;
             }
             catch(IOException | ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);

@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.rest;
 
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
@@ -18,6 +19,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.launcher.ws.ext.V1;
+import com.intel.mtwilson.model.Nonce;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -67,19 +69,18 @@ public class BulkHostTrust {
         @RequiresPermissions("host_attestations:create,retrieve")
         public String getTrustSaml(
                 @QueryParam("hosts") String hosts,
+                @QueryParam("challenge") String challengeHex,
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
                 //                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
-                @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
+                @QueryParam("timeout") Integer timeout) {
             
                 ValidationUtil.validate(hosts);
-                Integer myTimeOut = timeout;
                 // if no timeout value is passed to function, check config for default, 
                 // if not in config, go with default value
                 // Modified the default time out back to 600 seconds as we are seeing time out issues. 30 seconds short for VMware hosts.
-                if (timeout == 600) {
-                        log.info("getTrustSaml called with default timeout, checking config");
-                        myTimeOut = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.attestation.hostTimeout", 600);
-                        log.debug("getTrustSaml config returned back" + myTimeOut);
+                if (timeout == null) {
+                        timeout = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.attestation.hostTimeout", 600);
+                        log.info("getTrustSaml using default timeout {}", timeout);
                 }
                 if (hosts == null || hosts.length() == 0) {
 
@@ -87,7 +88,7 @@ public class BulkHostTrust {
                                 "hosts");
                 }
 
-                Set<String> hostSet = new HashSet<String>();
+                Set<String> hostSet = new HashSet<>();
                 // bug #783  make sure that we only pass to the next layer hostnames that are likely to be valid 
                 for(String host : Arrays.asList(hosts.split(","))) {
                     log.debug("Host: '{}'", host);
@@ -95,8 +96,21 @@ public class BulkHostTrust {
                         hostSet.add(host.trim());
                     }
                 }
-                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */myTimeOut);
-                return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
+
+                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */timeout);
+
+                if( challengeHex == null || challengeHex.isEmpty() ) {
+                    return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
+                }
+                else {
+                    if( !Digest.sha1().isValidHex(challengeHex) ) {
+                        throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_INVALID_INPUT, "challenge");
+                    }
+                    Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+
+                    return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify, challenge);
+                }
+                
 
 
         }

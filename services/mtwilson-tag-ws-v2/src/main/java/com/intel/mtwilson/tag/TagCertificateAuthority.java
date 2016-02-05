@@ -6,7 +6,6 @@ package com.intel.mtwilson.tag;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
@@ -16,7 +15,6 @@ import com.intel.mtwilson.tag.common.X509AttrBuilder;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.*;
 import com.intel.mtwilson.tag.model.*;
-import com.intel.mtwilson.tag.model.x509.UTF8NameValueMicroformat;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
 import com.intel.mtwilson.tag.selection.SelectionUtil;
 import com.intel.mtwilson.tag.selection.xml.*;
@@ -26,11 +24,8 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
  * Creates tag certificates for existing certificate requests in accordance with

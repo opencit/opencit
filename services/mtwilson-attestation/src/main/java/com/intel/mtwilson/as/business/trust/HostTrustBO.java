@@ -24,6 +24,7 @@ import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
@@ -125,6 +126,10 @@ public class HostTrustBO {
         //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); 
         samlKeystoreResource = new FileResource(My.configuration().getSamlKeystoreFile());
     }
+
+    public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
+        return getTrustStatus(hostName, null);
+    }
         
     /**
      * BUG #607 complete rewrite of this to use the "TrustPolicy" framework in the trust-policy module 
@@ -133,12 +138,12 @@ public class HostTrustBO {
      * @param hostName must not be null
      * @return 
      */
-    public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
+    public HostTrustStatus getTrustStatus(Hostname hostName, Nonce challenge) throws IOException {
         if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
 //        long start = System.currentTimeMillis();
         
         TblHosts tblHosts = getHostByName(hostName);
-        return getTrustStatus(tblHosts, hostName.toString());
+        return getTrustStatus(tblHosts, hostName.toString(), challenge);
     }
     
     public HostTrustStatus getTrustStatusByAik(Sha1Digest aik) throws IOException {
@@ -165,18 +170,6 @@ public class HostTrustBO {
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         boolean biosMLEFound = false, VMMMLEFound = false;
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
-        
-            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-//            if( log.isDebugEnabled() ) {
-//                try {
-//                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostConfigObj)); //This statement may contain clear text passwords
-//                }
-//                catch(IOException e) {
-//                    log.debug("cannot serialize host input to addHost", e);
-//                }
-//            }
-            
         
         try {
             
@@ -209,7 +202,21 @@ public class HostTrustBO {
             }
             tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
             
-            PcrManifest pcrManifest = agent.getPcrManifest();
+            PcrManifest pcrManifest;
+            if( hostConfigObj.getChallengeHex() == null || hostConfigObj.getChallengeHex().isEmpty() ){
+                pcrManifest = agent.getPcrManifest();
+            }
+            else {
+                if( Digest.sha1().isValidHex(hostConfigObj.getChallengeHex()) ) {
+                    Nonce challenge = new Nonce(Digest.sha1().valueHex(hostConfigObj.getChallengeHex()).getBytes());
+                    pcrManifest = agent.getPcrManifest(challenge);
+                }
+                else {
+                    log.error("Cannot retrieve PCRs from host because of invalid challenge: {}", hostConfigObj.getChallengeHex());
+                    throw new ASException(ErrorCode.AS_INVALID_INPUT);
+                }
+            }
+            
             if( pcrManifest == null ) {
                 throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
             }
@@ -656,6 +663,9 @@ public class HostTrustBO {
         }           
     }
     
+    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) throws IOException {
+        return getTrustStatus(tblHosts, hostId, null);
+    }
     
     /**
      * 
@@ -663,7 +673,7 @@ public class HostTrustBO {
      * @param hostId can be Hostname or AIK (SHA1 hex) ; it's used in any exceptions to refer to the host.  this allows us to use the same code for a trust report lookup by hostname and by aik
      * @return 
      */
-    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) throws IOException {
+    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId, Nonce challenge) throws IOException {
         if (tblHosts == null) {
             throw new ASException(
                     ErrorCode.AS_HOST_NOT_FOUND,
@@ -673,7 +683,7 @@ public class HostTrustBO {
         log.debug( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
         log.debug( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
-        TrustReport trustReport = getTrustReportForHost(tblHosts, hostId);
+        TrustReport trustReport = getTrustReportForHost(tblHosts, hostId, challenge); // issue #4978 use specified nonce, if available
         List<RuleResult> results = trustReport.getResults();
         for (RuleResult res : results) {
             log.debug("Trust Report Rule Name: {} - status is {}.", res.getRuleName(), res.isTrusted());
@@ -736,10 +746,12 @@ public class HostTrustBO {
      * at a higher level if needed for a non-privacy application.
      * 
      * @param tblHosts
+     * @param hostId hostname or aik sha1
+     * @param challenge is optiona; may be null
      * @return
      * @throws IOException 
      */
-    public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId) throws IOException {
+    public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId, Nonce challenge) throws IOException {
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
         long getAgentStart = System.currentTimeMillis(); 
@@ -752,14 +764,20 @@ public class HostTrustBO {
         tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
         
         long getAgentManifestStart = System.currentTimeMillis(); 
-        PcrManifest pcrManifest = agent.getPcrManifest();
+        PcrManifest pcrManifest;
+        if( challenge == null ) {
+            pcrManifest = agent.getPcrManifest();
+        }
+        else {
+            pcrManifest = agent.getPcrManifest(challenge); // issue #4978 use specified nonce if available
+        }
         long getAgentManifestStop = System.currentTimeMillis();
         log.trace("performance: getPcrManifest: {}ms", getAgentManifestStop-getAgentManifestStart);
         
         HostReport hostReport = new HostReport();
         hostReport.tagCertificate = null; 
         hostReport.pcrManifest = pcrManifest;
-        hostReport.tpmQuote = null; 
+        hostReport.tpmQuote = null;
         hostReport.variables = new HashMap<String,String>(); 
         if( agent.isAikAvailable() ) {
             if( agent.isAikCaAvailable() ) {
@@ -1734,7 +1752,11 @@ public class HostTrustBO {
     public String getTrustWithSaml(TblHosts tblHosts, String hostId) {
         String hostAttestationUuid = new UUID().toString();
         log.debug("Generating new UUID for saml assertion record 2: {}", hostAttestationUuid);
-        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid).getSaml();
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid).getSaml();  // issue #4978 use specified nonce, if available
+    }
+
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid) {
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, null);
     }
     
     /**
@@ -1743,10 +1765,10 @@ public class HostTrustBO {
      * @param hostAttestationUuid
      * @return
      */
-    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid) {
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, Nonce challenge) {
         try {
 
-            TrustReport hostTrustReport = getTrustReportForHost(tblHosts, tblHosts.getName());
+            TrustReport hostTrustReport = getTrustReportForHost(tblHosts, tblHosts.getName(), challenge); // issue #4978 use specified nonce, if available
             log.debug("TRUSTREPORT: {}", mapper.writeValueAsString(hostTrustReport));
             
             logTrustReport(tblHosts, hostTrustReport); // Need to cache the attestation report ### v1 requirement to log to mw_ta_log
@@ -1835,9 +1857,13 @@ public class HostTrustBO {
     }
 
     public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
+        return getTrustWithSaml(host, forceVerify, null);
+    }
+    
+    public String getTrustWithSaml(String host, boolean forceVerify, Nonce challenge) throws IOException {
         My.initDataEncryptionKey();
         TblHosts tblHosts = getHostByName(new Hostname((host)));
-        return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify);
+        return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify, challenge);
     }
 
     public String getTrustWithSamlForHostnames(Collection<String> hosts) throws IOException {
@@ -1849,14 +1875,22 @@ public class HostTrustBO {
         }
         return getTrustWithSaml(tblHostsList);
     }
-        
+
     public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
+        return getTrustWithSaml(tblHosts, hostId, forceVerify, null);
+    }
+        
+    public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify, Nonce challenge) throws IOException {
         String hostAttestationUuid = new UUID().toString();
         log.debug("Generating new UUID for saml assertion record 1: {}", hostAttestationUuid);
-        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify).getSaml();
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify, challenge).getSaml();
+    }
+
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify) throws IOException {
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify, null);
     }
     
-    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify) throws IOException {
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify, Nonce challenge) throws IOException {
         log.debug("getTrustWithSaml: Getting trust for host: " + tblHosts.getName() + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
@@ -1890,7 +1924,7 @@ public class HostTrustBO {
         
         try {
 //            return getTrustWithSaml(tblHosts, hostId);
-            return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid);
+                return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, challenge); // issue #4978 use specified nonce, if available
         }catch(Exception e) {
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
             tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
@@ -1964,6 +1998,10 @@ public class HostTrustBO {
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
+        return getTrustWithCache(host, forceVerify, null);
+    }
+    
+    public HostTrust getTrustWithCache(String host, Boolean forceVerify, Nonce challenge) {
         log.debug("getTrustWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         try {
             
@@ -1987,7 +2025,7 @@ public class HostTrustBO {
         
            log.debug("Getting trust and saml assertion from host.");
         
-           HostTrustStatus status = getTrustStatus(new Hostname(host));
+           HostTrustStatus status = getTrustStatus(new Hostname(host), challenge);
            
            HostTrust hostTrust = new HostTrust(ErrorCode.OK,"OK");
            hostTrust.setBiosStatus((status.bios)?1:0);

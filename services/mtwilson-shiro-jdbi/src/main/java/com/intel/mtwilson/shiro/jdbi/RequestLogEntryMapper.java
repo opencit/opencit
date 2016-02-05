@@ -35,7 +35,7 @@ public class RequestLogEntryMapper implements ResultSetMapper<RequestLogEntry> {
         int max = meta.getColumnCount();
         boolean found = false;
         for(int i=1; i<=max; i++) {
-            if( meta.getColumnName(i).equals(columnName)) { //
+            if( meta.getColumnName(i).equals(columnName)) {
                 found = true;
                 break;
             }
