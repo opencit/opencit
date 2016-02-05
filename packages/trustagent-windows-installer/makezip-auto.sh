@@ -51,7 +51,7 @@ fi
 
 cd $targetDir
 $MAKENSIS "${projectNameVersion}/nsis/trustagentinstallscript.nsi"
-mv "${projectNameVersion}/nsis/cit_trustagentsetup.exe" "${projectNameVersion}.exe"
+mv "${projectNameVersion}/nsis/Setup_TrustAgent.exe" "${projectNameVersion}.exe"
 
 # This is not necessary, but to zip it
 $makezip -r "${projectNameVersion}.zip" "${projectNameVersion}"
