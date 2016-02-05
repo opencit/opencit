@@ -28,7 +28,6 @@ import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
-
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 

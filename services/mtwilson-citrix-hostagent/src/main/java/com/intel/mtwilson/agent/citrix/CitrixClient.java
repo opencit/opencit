@@ -18,6 +18,7 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
@@ -240,6 +241,10 @@ public class CitrixClient {
     }
 
     public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
+        return getQuoteInformationForHost(pcrList, null);
+    }
+    
+    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList, Nonce challenge) {
         log.debug("getQuoteInformationForHost pcrList == " + pcrList);
         try {
 
@@ -248,7 +253,14 @@ public class CitrixClient {
                 connect();
             }
 
-            String nonce = generateNonce();
+            String nonce;
+            if( challenge == null ) {
+                nonce = generateNonce();
+            }
+            else {
+                nonce = Base64.encodeBase64String(challenge.toByteArray());
+            }
+            
             String sessionId = generateSessionId();
             String aikCertificate = getAIKCertificate();
 

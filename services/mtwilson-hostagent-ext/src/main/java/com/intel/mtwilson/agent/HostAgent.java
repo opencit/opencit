@@ -189,6 +189,8 @@ public interface HostAgent {
      * @return 
      */
     PcrManifest getPcrManifest() throws IOException;
+
+    PcrManifest getPcrManifest(Nonce challenge) throws IOException;
     
     /**
      * SAMPLE OUTPUT FROM VMWare Host:
@@ -210,7 +212,8 @@ public interface HostAgent {
      * @throws IOException 
      */
     String getHostAttestationReport(String pcrList) throws IOException;
-    
+
+    String getHostAttestationReport(String pcrList, Nonce challenge) throws IOException;
     
     /**
      * Use this to obtain host-specific information such as UUID, which may be 
