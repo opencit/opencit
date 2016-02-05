@@ -47,7 +47,7 @@
         </encoder>
     </appender>
 
-    <root level="${TRUSAGENT_LOG_LEVEL:-INFO}">
+    <root level="${TRUSTAGENT_LOG_LEVEL:-INFO}">
         <appender-ref ref="LogFile"/>
         <appender-ref ref="ConsoleError"/>
         <appender-ref ref="ConsoleWarn"/>
