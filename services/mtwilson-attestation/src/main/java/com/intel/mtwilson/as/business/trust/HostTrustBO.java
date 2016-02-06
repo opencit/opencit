@@ -1,6 +1,8 @@
 package com.intel.mtwilson.as.business.trust;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
@@ -57,10 +59,16 @@ import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissingExpectedEntries;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogValueMismatchEntries;
 import com.intel.mtwilson.policy.rule.XmlMeasurementLogEquals;
 import com.intel.mtwilson.policy.rule.XmlMeasurementLogIntegrity;
+import com.intel.mtwilson.saml.IssuerConfiguration;
+import com.intel.mtwilson.saml.SamlConfiguration;
+import com.intel.mtwilson.threads.Attestation;
+import com.intel.mtwilson.util.ASDataCipher;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -88,25 +96,19 @@ import org.slf4j.MarkerFactory;
 public class HostTrustBO {
     public static final String SAML_KEYSTORE_NAME = "SAML";
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTrustBO.class);
+    private static Configuration configuration;
     Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.HOST_ATTESTATION.getValue());
     
-    private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
-    private static final int CACHE_VALIDITY_SECS;
-    private Resource samlKeystoreResource = null;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     
-    private HostBO hostBO = new HostBO(); 
-    
-    static{
-        CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-        //log.debug("Config saml.validity.seconds = " + CACHE_VALIDITY_SECS);
-    }
+    private HostBO hostBO;
     
     public HostTrustBO() {
         super();
+        hostBO = new HostBO(); 
         mapper = JacksonObjectMapperProvider.createDefaultMapper();
-        loadSamlSigningKey();
+        configuration = My.configuration().getConfiguration();
     }
     
 //    public HostTrustBO(PersistenceManager pm) {
@@ -116,16 +118,6 @@ public class HostTrustBO {
     
     public void setHostBO(HostBO hostBO) { this.hostBO = hostBO; }
     
-    private void loadSamlSigningKey() {
-        /*
-        MwKeystore mwKeystore = keystoreJpa.findMwKeystoreByName(SAML_KEYSTORE_NAME);
-        if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
-            samlKeystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
-        }
-        */
-        //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); 
-        samlKeystoreResource = new FileResource(My.configuration().getSamlKeystoreFile());
-    }
 
     public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
         return getTrustStatus(hostName, null);
@@ -501,10 +493,15 @@ public class HostTrustBO {
                         tblHosts.setBiosMleId(biosMLE);
                         tblHosts.setVmmMleId(null);
 
+                        long t0 = System.currentTimeMillis();
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        long t1 = System.currentTimeMillis();
+                        log.trace("performance: hostTrustPolicyFactory.loadTrustPolicyForHost: {}ms", t1-t0);
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport tempTrustReport = policyEngine.apply(hostReport, trustPolicy);
-
+                       long t2 = System.currentTimeMillis();
+                        log.trace("performance: policyEngine.apply: {}ms", t2-t1);
+ 
                         if (tempTrustReport != null && tempTrustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
                             // We found the new MLE to map to. We need to see if the VMM MLE also needs to be updated
                             log.debug("UpdateHostIfUntrusted: Found the new matching BIOS MLE '{}' for host '{}'.", biosMLE.getName(), tblHosts.getName());
@@ -621,7 +618,7 @@ public class HostTrustBO {
             } 
 
             long updateHostIfUntrustedVMMStop = System.currentTimeMillis();
-            log.debug("UpdateHostIfUntrusted: VMM update performance {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
+            log.trace("performance: UpdateHostIfUntrusted VMM update: {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
             
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
@@ -644,7 +641,7 @@ public class HostTrustBO {
             TrustReport finalTrustReport = policyEngine.apply(hostReport, trustPolicy);            
             
             long updateHostIfUntrustedStop = System.currentTimeMillis();
-            log.debug("UpdateHostIfUntrusted Performance {}", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
+            log.trace("performance: UpdateHostIfUntrusted: {}ms", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
             
             return finalTrustReport;
                                    
@@ -763,6 +760,7 @@ public class HostTrustBO {
         }
         tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
         
+        
         long getAgentManifestStart = System.currentTimeMillis(); 
         PcrManifest pcrManifest;
         if( challenge == null ) {
@@ -780,12 +778,15 @@ public class HostTrustBO {
         hostReport.tpmQuote = null;
         hostReport.variables = new HashMap<String,String>(); 
         if( agent.isAikAvailable() ) {
+            long getAikStart = System.currentTimeMillis();
             if( agent.isAikCaAvailable() ) {
                 hostReport.aik = new Aik(agent.getAikCertificate());                
             }
             else {
                 hostReport.aik = new Aik(agent.getAik()); 
             }
+            long getAikStop = System.currentTimeMillis();
+            log.trace("performance: getAik or getAikCertificate: {}ms", getAikStop-getAikStart);
         }
         
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());
@@ -1514,7 +1515,10 @@ public class HostTrustBO {
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         try {
+            long t0 = System.currentTimeMillis();
             TblHosts tblHost = hostBO.getHostByName(hostName);
+            long t1 = System.currentTimeMillis();
+            log.trace("performance: hostBO.getHostByName in {}ms", t1-t0);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
@@ -1803,11 +1807,12 @@ public class HostTrustBO {
             }
 
             if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                log.debug("Host has binding certificate");
                 host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
             }
             
+            log.debug("Creating host assertion for: {}", host.getHostName());
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate, null);
-
             log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
 
             tblSamlAssertion.setSaml(samlAssertion.assertion);
@@ -1831,25 +1836,24 @@ public class HostTrustBO {
              *
              */
             throw e;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // throw new ASException( e);
             log.error("Error during retrieval of host trust status.", ex);
             throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
 
-    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
-        Configuration conf = My.configuration().getConfiguration();
-        InetAddress localhost = InetAddress.getLocalHost();
-        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; 
-        String issuer = conf.getString("saml.issuer", defaultIssuer);
-        SamlGenerator saml = new SamlGenerator(samlKeystoreResource, conf);
-        saml.setIssuer(issuer);
+    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException, GeneralSecurityException {
+//        String issuer = conf.getString("saml.issuer", defaultIssuer);
+        SamlGenerator saml = new SamlGenerator(Attestation.getIssuerConfiguration());
         return saml;
     }
     
     public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
-        My.initDataEncryptionKey();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
         log.debug("getTrustWithSamlByAik calling getHostByAik for aik {}", aik.toString());
         TblHosts tblHosts = getHostByAik(aik);
         log.debug("getTrustWithSamlByAik calling getTrustWithSaml for host {} aik {}", tblHosts.getName(), aik.toString());
@@ -1861,14 +1865,20 @@ public class HostTrustBO {
     }
     
     public String getTrustWithSaml(String host, boolean forceVerify, Nonce challenge) throws IOException {
-        My.initDataEncryptionKey();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
         TblHosts tblHosts = getHostByName(new Hostname((host)));
         return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify, challenge);
     }
 
     public String getTrustWithSamlForHostnames(Collection<String> hosts) throws IOException {
-        My.initDataEncryptionKey();
-        ArrayList<TblHosts> tblHostsList = new ArrayList<TblHosts>();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
+        ArrayList<TblHosts> tblHostsList = new ArrayList<>();
         for(String host : hosts) {
             TblHosts tblHosts = getHostByName(new Hostname((host)));
             tblHostsList.add(tblHosts);
@@ -1908,7 +1918,10 @@ public class HostTrustBO {
         
         if(forceVerify != true){
             //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
+            long t0 = System.currentTimeMillis();
             TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName()); //hostId);
+            long t1 = System.currentTimeMillis();
+            log.trace("performance: My.jpa().mwSamlAssertion().findByHostAndExpiry: {}ms", t1-t0);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
@@ -1926,6 +1939,7 @@ public class HostTrustBO {
 //            return getTrustWithSaml(tblHosts, hostId);
                 return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, challenge); // issue #4978 use specified nonce, if available
         }catch(Exception e) {
+            log.error("Cannot obtain host trust, getTrustWithSaml failed", e);
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
             tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
             tblSamlAssertion.setHostId(tblHosts);
@@ -1939,9 +1953,6 @@ public class HostTrustBO {
             tblSamlAssertion.setVmmTrust(false);
             
             try {
-                log.error("Caught exception, generating saml assertion");
-                log.error("Printing stacktrace first");
-                e.printStackTrace();
                 tblSamlAssertion.setSaml("");
                 int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
                 tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
@@ -2083,7 +2094,7 @@ public class HostTrustBO {
     }
     
     private Date getCacheStaleAfter(){
-        return new DateTime().minusSeconds(CACHE_VALIDITY_SECS).toDate();
+        return new DateTime().minusSeconds(Attestation.getIssuerConfiguration().getValiditySeconds()).toDate();
     }
     private HostTrust getHostTrustObj(TblTaLog tblTaLog) {
         HostTrust hostTrust = new HostTrust(ErrorCode.OK,"");

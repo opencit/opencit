@@ -48,10 +48,10 @@ public class TblSamlAssertionJpaController implements Serializable {
                 tblSamlAssertion.setHostId(hostId);
             }
             em.persist(tblSamlAssertion);
-            if (hostId != null) {
-                hostId.getTblSamlAssertionCollection().add(tblSamlAssertion);
-                em.merge(hostId);
-            }
+//            if (hostId != null) {
+//                hostId.getTblSamlAssertionCollection().add(tblSamlAssertion);
+//                em.merge(hostId);
+//            }
             em.getTransaction().commit();
         } finally {
                 em.close();
@@ -70,14 +70,14 @@ public class TblSamlAssertionJpaController implements Serializable {
                 tblSamlAssertion.setHostId(hostIdNew);
             }
             tblSamlAssertion = em.merge(tblSamlAssertion);
-            if (hostIdOld != null && !hostIdOld.equals(hostIdNew)) {
-                hostIdOld.getTblSamlAssertionCollection().remove(tblSamlAssertion);
-                hostIdOld = em.merge(hostIdOld);
-            }
-            if (hostIdNew != null && !hostIdNew.equals(hostIdOld)) {
-                hostIdNew.getTblSamlAssertionCollection().add(tblSamlAssertion);
-                em.merge(hostIdNew);
-            }
+//            if (hostIdOld != null && !hostIdOld.equals(hostIdNew)) {
+//                hostIdOld.getTblSamlAssertionCollection().remove(tblSamlAssertion);
+//                hostIdOld = em.merge(hostIdOld);
+//            }
+//            if (hostIdNew != null && !hostIdNew.equals(hostIdOld)) {
+//                hostIdNew.getTblSamlAssertionCollection().add(tblSamlAssertion);
+//                em.merge(hostIdNew);
+//            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -104,11 +104,11 @@ public class TblSamlAssertionJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The tblSamlAssertion with id " + id + " no longer exists.", enfe);
             }
-            TblHosts hostId = tblSamlAssertion.getHostId();
-            if (hostId != null) {
-                hostId.getTblSamlAssertionCollection().remove(tblSamlAssertion);
-                em.merge(hostId);
-            }
+//            TblHosts hostId = tblSamlAssertion.getHostId();
+//            if (hostId != null) {
+//                hostId.getTblSamlAssertionCollection().remove(tblSamlAssertion);
+//                em.merge(hostId);
+//            }
             em.remove(tblSamlAssertion);
             em.getTransaction().commit();
         } finally {

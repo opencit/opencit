@@ -5,27 +5,17 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
-import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
-import com.intel.mtwilson.datatypes.HostResponse;
-import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.TxtHostRecordList;
-import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.model.Nonce;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -96,8 +86,8 @@ public class BulkHostTrust {
                         hostSet.add(host.trim());
                     }
                 }
-
-                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */timeout);
+                
+                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(timeout);
 
                 if( challengeHex == null || challengeHex.isEmpty() ) {
                     return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
@@ -110,8 +100,6 @@ public class BulkHostTrust {
 
                     return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify, challenge);
                 }
-                
-
 
         }
 

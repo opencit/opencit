@@ -48,7 +48,9 @@ import com.intel.mtwilson.util.ResourceFinder;
 import com.intel.mtwilson.wlm.business.MleBO;
 import com.intel.mtwilson.wlm.business.OemBO;
 import com.intel.mtwilson.wlm.business.OsBO;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
@@ -777,7 +779,7 @@ public class HostBO {
                 
                 
                 log.debug("TIMETAKEN: for getting host information is: {}",  (System.currentTimeMillis() - configWLStart));                
-                System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
+                log.debug("Starting to process the white list configuration from host: {}", gkvHost.HostName);
 
                 // Let us verify if we got all the data back correctly or not (Bug: 442)
                 if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null) {
@@ -802,7 +804,7 @@ public class HostBO {
                 }
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
-                System.err.println("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":"
+                log.debug("Successfully retrieved the host information. Details: {}",  gkvHost.BIOS_Oem + ":"
                         + gkvHost.BIOS_Version + ":" + gkvHost.VMM_OSName + ":" + gkvHost.VMM_OSVersion
                         + ":" + gkvHost.VMM_Version + ":" + gkvHost.Processor_Info);
 
@@ -857,7 +859,7 @@ public class HostBO {
                 // We are checking for component name since in the attestation report all the pcr and the event logs would use componentname as the label 
                 if (attestationReport != null && !attestationReport.isEmpty()) {
                     if (!attestationReport.contains("ComponentName")) {
-                       System.err.println("Attestation report content: " + attestationReport);
+                       log.debug("Attestation report content: {}", attestationReport);
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                     }
                 }
@@ -1727,25 +1729,39 @@ public class HostBO {
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         List<X509Certificate> privacyCaCerts;
-        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
-            privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
-            pcaList.addAll(privacyCaCerts);
-            //IOUtils.closeQuietly(privacyCaIn);
-            log.info("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
-        } catch(IOException | CertificateException e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificates from file
-            log.error("Cannot load PrivacyCA.list.pem");            
+        File pcaListPemFile = null;
+        try {
+            pcaListPemFile = ResourceFinder.getFile("PrivacyCA.list.pem");
+            try (InputStream privacyCaIn = new FileInputStream(pcaListPemFile)) {
+                privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
+                pcaList.addAll(privacyCaCerts);
+               //IOUtils.closeQuietly(privacyCaIn);
+                log.info("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
+            } catch(IOException | CertificateException e) {
+                // FileNotFoundException: cannot find PrivacyCA.pem
+                // CertificateException: error while reading certificates from file
+                log.error("Cannot load PrivacyCA.list.pem");            
+            }
         }
-        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem"))) {
-            X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
-            pcaList.add(privacyCaCert);
-            //IOUtils.closeQuietly(privacyCaIn);
-            log.info("Added certificate from PrivacyCA.pem");
-        } catch(IOException | CertificateException e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificate from file
-            log.error("Cannot load PrivacyCA.pem", e);
+        catch(FileNotFoundException e) {
+            log.debug("Cannot load external certificates from PrivacyCA.list.pem: {}", e.getMessage());
+        }
+        File pcaPemFile = null;
+        try {
+            pcaPemFile = ResourceFinder.getFile("PrivacyCA.pem");
+            try (InputStream privacyCaIn = new FileInputStream(pcaPemFile)) {
+                X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+                pcaList.add(privacyCaCert);
+                //IOUtils.closeQuietly(privacyCaIn);
+                log.info("Added certificate from PrivacyCA.pem");
+            } catch(IOException | CertificateException e) {
+                // FileNotFoundException: cannot find PrivacyCA.pem
+                // CertificateException: error while reading certificate from file
+                log.error("Cannot load PrivacyCA.pem", e);
+            }
+        }
+        catch(FileNotFoundException e) {
+            log.debug("Cannot load local certificates from PrivacyCA.pem: {}", e.getMessage());
         }
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
@@ -1755,6 +1771,8 @@ public class HostBO {
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
                     validCaSignature = true;
+                    log.debug("Verified CA signature: {}", pca.getSubjectX500Principal().getName());
+                    break;
                 }
             }
             catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {

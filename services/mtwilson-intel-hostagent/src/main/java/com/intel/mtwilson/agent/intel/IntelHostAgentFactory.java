@@ -63,8 +63,12 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
                 // mtwilson version 2.0 beta has authentication support on the trust agent but not yet in the mtwilson portal
                 // so we use this default username and empty password until the mtwilson portal is updated to ask for trust agent
                 // login credentials
+                if( intelConnectionString.getUsername() != null ) {
                 properties.setProperty("mtwilson.api.username", intelConnectionString.getUsername());
+                }
+                if( intelConnectionString.getPassword() != null ) {
                 properties.setProperty("mtwilson.api.password", intelConnectionString.getPassword());
+                }
 //                properties.setProperty("mtwilson.api.username", "mtwilson");
 //                properties.setProperty("mtwilson.api.password", "");
 //                properties.setProperty("mtwilson.api.ssl.policy", "INSECURE");
