@@ -20,3 +20,5 @@ CREATE INDEX idx_json_host_id on mw_ta_log (host_id ASC);
 CREATE INDEX idx_json_host_id on mw_ta_log (host_id ASC);
 
 CREATE INDEX idx_asset_tag_host_id on mw_asset_tag_certificate (host_id ASC);
+
+INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20160202120000,NOW(),'Patch for creating SAML indexes for better performance.');
