@@ -110,7 +110,6 @@
             <artifactId>xstream</artifactId>
         </dependency>
         
-        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-repository-api</artifactId>
@@ -521,41 +520,13 @@
                                                             
         <!-- end jetty -->
 
-        <!-- being restlet (for test client) -->
         <!--
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet</artifactId>  
-            <version>2.2-M4</version>  
-        </dependency>
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet.ext.slf4j</artifactId>  
-            <version>2.2-M4</version>  
-        </dependency>
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet.ext.jackson</artifactId>  
-            <version>2.2-M4</version>  
-        </dependency>
-        -->
-        <!--
-       <dependency>  
-          <groupId>org.restlet.jse</groupId>  
-          <artifactId>org.restlet.ext.jetty</artifactId>  
-          <version>2.2-M4</version>
-       </dependency>
-        <dependency>  
-          <groupId>org.restlet.jse</groupId>  
-          <artifactId>org.restlet.ext.simple</artifactId>  
-          <version>2.2-M4</version>
-        </dependency>
-        -->
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet.ext.ssl</artifactId>  
             <version>2.2-M4</version>
         </dependency>
+        -->
 
         <!-- end restlet (for test client) -->
     </dependencies>  

@@ -7,21 +7,11 @@ package com.intel.mtwilson.plugin;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.plugin.api.Plugin;
-import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.mtwilson.My;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import javax.persistence.Query;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +31,24 @@ public class AutoRefreshTrust implements Runnable, Plugin {
     private long maxCacheDuration = 5; // hour
     private TimeUnit maxCacheDurationUnits = TimeUnit.MINUTES;
     private int refreshTimeBeforeSamlExpiry = 300; // seconds
-    private long timeout = 120; // seconds
-    private TimeUnit timeoutUnits = TimeUnit.SECONDS;
+    private long interval = 120; // seconds
+    private TimeUnit intervalUnits = TimeUnit.SECONDS;
     private BulkHostTrustBO bulkHostTrustBO = null;
     private TblSamlAssertionJpaController samlJpa = null;
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public void setMaxCacheDuration(long maxCacheDuration) { this.maxCacheDuration = maxCacheDuration; }
     public void setMaxCacheDurationUnits(TimeUnit maxCacheDurationUnits) { this.maxCacheDurationUnits = maxCacheDurationUnits; }
-    public void setTimeout(long timeout) { this.timeout = timeout; }
-    public void setTimeoutUnits(TimeUnit timeoutUnits) { this.timeoutUnits = timeoutUnits; }
+    public void setInterval(long interval) { this.interval = interval; }
+    public void setIntervalUnits(TimeUnit intervalUnits) { this.intervalUnits = intervalUnits; }
     public void setBulkHostTrustBO(BulkHostTrustBO bulkHostTrustBO) { this.bulkHostTrustBO = bulkHostTrustBO; }
     public void setTblSamlAssertionJpaController(TblSamlAssertionJpaController samlJpa) { this.samlJpa = samlJpa; }
     private volatile boolean running;
+
+    public AutoRefreshTrust(long interval, TimeUnit intervalUnits) {
+        this.interval = interval;
+        this.intervalUnits = intervalUnits;
+    }
+    
     
     public void cancel() {
         running = false;
@@ -67,25 +63,19 @@ public class AutoRefreshTrust implements Runnable, Plugin {
             if (hostsToRefresh != null && hostsToRefresh.size() > 0) {
                 log.info("AutoRefreshTrust got {} hosts to refresh", hostsToRefresh.size());
                 HashSet<String> hosts = new HashSet<>(hostsToRefresh);
-                long bulkBOTimeout = My.configuration().getConfiguration().getLong("mtwilson.ms.registration.hostTimeout", timeout); // Default is 60 seconds
+                long bulkBOTimeout = My.configuration().getConfiguration().getLong("mtwilson.ms.registration.hostTimeout", 60); // Default is 60 seconds
                 bulkHostTrustBO = new BulkHostTrustBO((int)bulkBOTimeout);
                 String saml = bulkHostTrustBO.getBulkTrustSaml(hosts, true);
                 log.info("Auto bulk refresh SAML: {}", saml);
             } else {
                 log.info("AutoRefreshTrust: No hosts for bulk refresh");
             }
+            if( !running ) { break; }
             try {
-                long sleepInterval = My.configuration().getConfiguration().getLong("mtwilson.auto.refresh.trust.interval.seconds", timeout);
-                if (sleepInterval == 0) {
-                    // If the user sets the auto refresh interval to 0, then stop the thread
-                    running = false;
-                    log.info("AutoRefreshTrust: User has set the refresh interval to {} seconds. So, stopping the auto refresh thread.", sleepInterval);
-                } else {
-                    log.info("AutoRefreshTrust: Auto refresh thread would sleep for {} seconds.", sleepInterval);
-                    Thread.sleep(sleepInterval*1000);
-                }
+                log.info("AutoRefreshTrust: Auto refresh thread would sleep for {} seconds.", TimeUnit.SECONDS.convert(interval, intervalUnits));
+                Thread.sleep(TimeUnit.MILLISECONDS.convert(interval, intervalUnits));
             } catch (InterruptedException ex) {
-                log.info("AutoRefreshTrust: Error during waiting for the next process");
+                log.info("AutoRefreshTrust: Error during waiting for the next process: {}", ex.getMessage());
             }
         }
     }
