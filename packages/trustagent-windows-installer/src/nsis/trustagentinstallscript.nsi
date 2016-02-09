@@ -26,7 +26,7 @@ var mylabel
 var vcr1Flag
 var vcr2Flag
 !define Environ 'HKCU "Environment"'
-!define MUI_ICON "ta.ico"
+!define MUI_ICON "TAicon.ico"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "ta.bmp"
 !define MUI_HEADERIMAGE_RIGHT
@@ -329,7 +329,7 @@ Section "install"
         File "..\java.security"
         File "..\version"
         File "readme.txt"
-        File "ta.ico"
+        File "TAicon.ico"
         File "..\tpmtool\vcredist_x64.exe"
         File "TrustAgent.exe"
         File "TrustAgentTray.exe"
