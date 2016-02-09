@@ -26,9 +26,9 @@ var mylabel
 var vcr1Flag
 var vcr2Flag
 !define Environ 'HKCU "Environment"'
-!define MUI_ICON "TAicon.ico"
+!define MUI_ICON "ta.ico"
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "TAicon_centered.bmp"
+!define MUI_HEADERIMAGE_BITMAP "ta.bmp"
 !define MUI_HEADERIMAGE_RIGHT
 ; ------------------------------------------------------------------
 ; ***************************** PAGES ******************************
