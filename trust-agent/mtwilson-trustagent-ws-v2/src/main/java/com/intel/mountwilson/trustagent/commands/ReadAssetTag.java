@@ -50,7 +50,7 @@ public class ReadAssetTag implements ICommand {
     
     private boolean readFromNvram() throws TAException, IOException {
         try {
-            String cmd = "tpmtool nvread " + index;
+            String cmd = "tpmtool.exe nvread " + index;
             log.debug("Running command: " + cmd);
             CommandResult cmdResult = CommandUtil.runCommand(cmd);
             
@@ -71,7 +71,7 @@ public class ReadAssetTag implements ICommand {
     
     private boolean indexExists() throws TAException, IOException {     
         try {
-            CommandResult result = CommandUtil.runCommand("tpmtool nvinfo " + index);
+            CommandResult result = CommandUtil.runCommand("tpmtool.exe nvinfo " + index);
             if (result != null && result.getStdout() != null) {
                 if(result.getStdout().contains("NVRAM index")) 
                     return true;
