@@ -44,6 +44,8 @@ import org.apache.commons.lang3.StringUtils;
 @Path("/tpm")
 public class Tpm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tpm.class);
+    private long t0 = System.currentTimeMillis();
+    
 
     /*
     @POST
@@ -55,11 +57,18 @@ public class Tpm {
     }
     */
     
+    private void logPerformance(String message) {
+        long t1 = System.currentTimeMillis();
+        log.debug("performance: after {} ms: {}", t1-t0, message);
+        t0 = t1;
+    }
+    
     @POST
     @Path("/quote")
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     public TpmQuoteResponse tpmQuote(TpmQuoteRequest tpmQuoteRequest, @Context HttpServletRequest request) throws IOException, TAException {
+        logPerformance("inside tpmQuote");
         /**
          * issue #1038 we will hash this ip address together with the input
          * nonce to produce the quote nonce; mtwilson server will do the same
@@ -75,6 +84,7 @@ public class Tpm {
          * verification
          */
         TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
+        logPerformance("TrustagentConfiguration.loadConfiguration()");
         if( configuration.isTpmQuoteWithIpAddress() ) {
             if( IPv4Address.isValid(request.getLocalAddr()) ) {
                 IPv4Address ipv4 = new IPv4Address(request.getLocalAddr());
@@ -95,28 +105,37 @@ public class Tpm {
             
             context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
             
+        logPerformance("new TADataContext()");
             new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
+        logPerformance("CreateNonceFileCmd");
             new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
+        logPerformance("ReadIdentityCmd");
 
             // Get the module information
             new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
+        logPerformance("GenerateModulesCmd");
             new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
+        logPerformance("RetrieveTcbMeasurement");
             new GenerateQuoteCmd(context).execute();
+        logPerformance("GenerateQuoteCmd");
             new BuildQuoteXMLCmd(context).execute();
+        logPerformance("BuildQuoteXMLCmd");
             
 //            return context.getResponseXML();
             TpmQuoteResponse response = context.getTpmQuoteResponse();
+        logPerformance("context.getTpmQuoteResponse()");
             // delete temporary session directory
             CommandLine command = new CommandLine("rm");
             command.addArgument("-rf");
             command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder()));
             Result result = ExecUtil.execute(command);
+        logPerformance("ExecUtil.execute(command)");
             if (result.getExitCode() != 0) {
                 log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
                 throw new TAException(ErrorCode.ERROR, result.getStderr());
             }
             log.debug("command stdout: {}", result.getStdout());
-            
+            logPerformance("before return response");
             return response;
     }
     

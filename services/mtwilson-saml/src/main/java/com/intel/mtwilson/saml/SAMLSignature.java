@@ -36,48 +36,23 @@ import org.w3c.dom.NodeList;
  */
 public class SAMLSignature {
 
-    private XMLSignatureFactory factory;
-    private KeyStore keyStore;
-    private KeyPair keyPair;
-    private KeyInfo keyInfo;
-
-    /**
-     * Get a KeyStore object given the keystore filename and password.
-     */
-    public static KeyStore getKeyStore(InputStream in, String password)
-            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
-        KeyStore result = KeyStore.getInstance(KeyStore.getDefaultType());
-        result.load(in, password.toCharArray());
-        return result;
-    }
+    private final XMLSignatureFactory factory;
+    private final IssuerConfiguration issuerConfiguration;
+    private final KeyInfo keyInfo;
 
     /**
      * Loads a keystore and builds a stock key-info structure for use by base
      * classes.
      */
-    public SAMLSignature(Configuration configuration) throws ClassNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IllegalAccessException, InstantiationException, IOException, CertificateException {
-        SamlConfiguration saml = new SamlConfiguration(configuration);
+    public SAMLSignature(IssuerConfiguration issuerConfiguration) throws ClassNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IllegalAccessException, InstantiationException, IOException, CertificateException {
+        this.issuerConfiguration = issuerConfiguration;
         
-        String providerName = saml.getJsr105Provider(); //configuration.getString("jsr105Provider", "org.jcp.xml.dsig.internal.dom.XMLDSigRI");
+        String providerName = issuerConfiguration.getJsr105Provider(); //configuration.getString("jsr105Provider", "org.jcp.xml.dsig.internal.dom.XMLDSigRI");
         factory = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
 
-//            URL keystore = getClass().getResource(config.getString ("saml.keystore.file"));
-//            System.out.println("keystore url: "+keystore.toString());
-//            InputStream keystoreInputStream = keystore.openStream();
-        //File keystoreFile = new File(saml.getSamlKeystoreFile());// new File(configuration.getString("saml.keystore.file")); //ResourceFinder.getFile(config.getString("saml.keystore.file"));
-        File keystoreFile = My.configuration().getSamlKeystoreFile();
-//            InputStream keystoreInputStream = keystoreResource.getInputStream(); // this obtains it from the database (or whatever resource is provided)
-//            keyStore = KeyStoreUtil.getKeyStore(SAMLSignature.class.getResourceAsStream(config.getString ("keystore")),config.getString ("storepass"));
-        try (FileInputStream keystoreInputStream = new FileInputStream(keystoreFile)) {
-            keyStore = getKeyStore(keystoreInputStream, saml.getSamlKeystorePassword()); /*configuration.getString("saml.keystore.password"*//*,System.getenv("SAMLPASSWORD")*/ 
-        }
-        KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(saml.getSamlKeyAlias(), //  /*configuration.getString("saml.key.alias"),*/
-                new KeyStore.PasswordProtection(saml.getSamlKeyPassword().toCharArray()));    //configuration.getString("saml.key.password"/*, System.getenv("SAMLPASSWORD")*/).toCharArray()));
-        keyPair = new KeyPair(entry.getCertificate().getPublicKey(),
-                entry.getPrivateKey());
 
         KeyInfoFactory kFactory = factory.getKeyInfoFactory();
-        keyInfo = kFactory.newKeyInfo(Collections.singletonList(kFactory.newX509Data(Collections.singletonList(entry.getCertificate()))));
+        keyInfo = kFactory.newKeyInfo(Collections.singletonList(kFactory.newX509Data(Collections.singletonList(issuerConfiguration.getCertificate()))));
     }
 
     /**
@@ -100,7 +75,7 @@ public class SAMLSignature {
                 Collections.singletonList(ref));
 
         XMLSignature signature = factory.newXMLSignature(signedInfo, keyInfo);
-        DOMSignContext signContext = new DOMSignContext(keyPair.getPrivate(), target);
+        DOMSignContext signContext = new DOMSignContext(issuerConfiguration.getPrivateKey(), target);
         signature.sign(signContext);
 
         // For the result to be schema-valid, we have to move the signature

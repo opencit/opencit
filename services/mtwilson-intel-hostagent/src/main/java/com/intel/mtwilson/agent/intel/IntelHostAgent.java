@@ -115,13 +115,17 @@ public class IntelHostAgent implements HostAgent {
         throw new UnsupportedOperationException("Not supported  yet."); 
     }
 
-
     @Override
     public PcrManifest getPcrManifest() throws IOException {
+        return getPcrManifest(null);
+    }
+
+    @Override
+    public PcrManifest getPcrManifest(Nonce challenge) throws IOException {
         if( pcrManifest == null ) {
             try {
                 TAHelper helper = new TAHelper();
-                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient); 
+                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient, challenge); 
             }
             catch(Exception e) {
                 throw new IOException("Cannot retrieve PCR Manifest from "+hostAddress.toString(), e);
@@ -151,6 +155,11 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public String getHostAttestationReport(String pcrList) throws IOException {
+        return getHostAttestationReport(pcrList, null);
+    }
+    
+    @Override
+    public String getHostAttestationReport(String pcrList, Nonce challenge) throws IOException {
         if( vendorHostReport != null ) { return vendorHostReport; }
         if( vmmName == null ) { getHostDetails(); }
 //        throw new UnsupportedOperationException("Not supported yet.");
@@ -159,7 +168,7 @@ public class IntelHostAgent implements HostAgent {
         try {
             TAHelper helper = new TAHelper();
             // currently the getHostAttestationReport function is ONLY called from Management Service HostBO.configureWhiteListFromCustomData(...)  so there wouldn't be any saved trusted AIK in the database anyway
-            pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient);
+            pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient, challenge);
             vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrManifest, vmmName);
             log.debug("Host attestation report for {}", hostAddress);
             log.debug(vendorHostReport);
@@ -226,4 +235,5 @@ public class IntelHostAgent implements HostAgent {
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 }
