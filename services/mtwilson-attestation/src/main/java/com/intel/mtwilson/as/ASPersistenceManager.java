@@ -7,14 +7,13 @@ package com.intel.mtwilson.as;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  *
  * @author jbuhacoff
  */
 public class ASPersistenceManager extends PersistenceManager {
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ASPersistenceManager.class);
+    
 
     @Override
     public void configure() {

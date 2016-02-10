@@ -1,6 +1,7 @@
 
 package com.intel.mtwilson.as.rest;
 
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
@@ -99,10 +100,19 @@ public class Reports {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_XML)
     @Path("/attestation")
-    public String getHostAttestationReport(@QueryParam("hostName")String hostName) {
+    public String getHostAttestationReport(@QueryParam("hostName")String hostName, @QueryParam("challengeHex") String challengeHex) {
         ValidationUtil.validate(hostName);
         if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-        else return reportsBO.getHostAttestationReport(new Hostname(hostName));   
+        if( challengeHex == null || challengeHex.isEmpty() ) {
+            return reportsBO.getHostAttestationReport(new Hostname(hostName));   
+        }
+        else {
+            if( !Digest.sha1().isValidHex(challengeHex) ) {
+                throw new ValidationException("Invalid challenge");
+            }
+            Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+            return reportsBO.getHostAttestationReport(new Hostname(hostName), challenge);
+        }
     }
     
     private List<Hostname> hostnameListFromCSV(String hostnameCSV) {

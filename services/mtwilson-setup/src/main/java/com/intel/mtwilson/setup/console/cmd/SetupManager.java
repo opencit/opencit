@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.console.cmd;
 
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
@@ -13,6 +14,8 @@ import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
 import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.SetupException;
@@ -216,7 +219,7 @@ public class SetupManager implements Command {
     }
 
     protected void execute(List<SetupTask> tasks) throws IOException {
-        PropertiesConfiguration properties = loadConfiguration();
+        Configuration properties = loadConfiguration();
 //        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
 //        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
         boolean error = false;
@@ -296,7 +299,10 @@ public class SetupManager implements Command {
         }
     }
     
-    protected PropertiesConfiguration loadConfiguration() throws IOException {
+    protected Configuration loadConfiguration() throws IOException {
+        ConfigurationProvider configurationProvider = ConfigurationFactory.getConfigurationProvider();
+        Configuration configuration = configurationProvider.load();
+        /*
         File file = getConfigurationFile();
         if (file.exists()) {
             log.debug("Loading configuration file {}", file.getAbsolutePath());
@@ -308,16 +314,22 @@ public class SetupManager implements Command {
             }
         }
         return new PropertiesConfiguration();
+        */
+        return configuration;
     }
 
-    protected void storeConfiguration(PropertiesConfiguration configuration) throws IOException {
         // write the configuration back to disk
+    protected void storeConfiguration(Configuration configuration) throws IOException {
         log.debug("Starting store configuration to file");
+        ConfigurationProvider configurationProvider = ConfigurationFactory.getConfigurationProvider();
+        configurationProvider.save(configuration);
+        /*
         File file = getConfigurationFile();
         try (FileOutputStream out = new FileOutputStream(file)) {
             Properties properties = beforeStore(configuration.getProperties());
             properties.store(out, "saved by mtwilson setup");
         }
+        */
         log.debug("Finished store configuration to file");
     }
     

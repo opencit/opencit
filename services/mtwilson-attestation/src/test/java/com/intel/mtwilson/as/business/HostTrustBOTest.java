@@ -71,6 +71,7 @@ public class HostTrustBOTest {
         //assertTrue("true".equals(response));
     }
     
+    /*
     @Test
     public void testCipher() {
         My.initDataEncryptionKey("NCJcq+T0FSanxY54rUhoGw==");
@@ -78,6 +79,7 @@ public class HostTrustBOTest {
         System.out.print("url = " + url);
         
     }
+    */
 
 //    @Test
 //    public void testCertificateMarkers() {

@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.mountwilson.as.common.ASConfig;
@@ -18,6 +19,8 @@ import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
@@ -194,8 +197,19 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                 log.error("HostAttestation:Create - Invalid input specified. Must specify Host UUID, AIK SHA1, or Host Name.");
                 throw new RepositoryInvalidInputException(locator);
             }
-            
-            HostAttestation hostAttestation = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), item.getId().toString(), true);
+            String challengeHex = item.getChallenge();
+            HostAttestation hostAttestation;
+            if( challengeHex == null || challengeHex.isEmpty() ) {
+                hostAttestation = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), item.getId().toString(), true);
+            }
+            else {
+                if( !Digest.sha1().isValidHex(challengeHex) ) {
+                    throw new RepositoryCreateException("Invalid challenge");
+                }
+                Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+                hostAttestation = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), item.getId().toString(), true, challenge);
+            }
+            // issue #4978 use specified nonce, if available
             item.setAikSha1(hostAttestation.getAikSha1());
             item.setChallenge(hostAttestation.getChallenge());
             item.setCreatedOn(hostAttestation.getCreatedOn());
@@ -210,8 +224,8 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
         } catch (RepositoryException re) {
             throw re;
         } catch (Exception ex) {
-            log.error("Error during retrieval of host attestation status from cache.", ex);
-            throw new RepositorySearchException(ex);
+            log.error("Error during remote attestation", ex);
+            throw new RepositoryCreateException(ex);
         }
     }
 

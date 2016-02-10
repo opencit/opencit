@@ -20,6 +20,7 @@ public class HostConfigData {
     private HostVMMType hostVmmType;
     private TxtHostRecord txtHostRecord;
     private boolean overWriteWhiteList;
+    private String challengeHex;
     
 
     // By default we will use the OEM as the white list target for both BIOS and VMM.
@@ -35,6 +36,7 @@ public class HostConfigData {
         this.hostVmmType = null;
         this.txtHostRecord = null;
         this.overWriteWhiteList = false;
+        this.challengeHex = null;
     }
     
     
@@ -50,6 +52,7 @@ public class HostConfigData {
         this.hostVmmType = obj.hostVmmType;
         this.txtHostRecord = obj.txtHostRecord;
         this.overWriteWhiteList = obj.getOverWriteWhiteList();        
+        this.challengeHex = obj.challengeHex;
     }
     
     @JsonProperty("Host_VMM_Type")
@@ -162,6 +165,16 @@ public class HostConfigData {
         this.overWriteWhiteList = overWriteWhiteList;
     }
 
+    @JsonProperty("Challenge")
+    public void setChallengeHex(String challengeHex) {
+        this.challengeHex = challengeHex;
+    }
+
+    @JsonProperty("Challenge")
+    public String getChallengeHex() {
+        return challengeHex;
+    }
+    
     @Override
     @Regex(RegexPatterns.ANY_VALUE)
     public String toString() {

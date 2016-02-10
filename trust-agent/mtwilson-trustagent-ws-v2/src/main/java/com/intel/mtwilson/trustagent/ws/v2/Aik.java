@@ -29,61 +29,68 @@ import javax.ws.rs.core.Response;
 
 /**
  * This was previously called create_identity
- * 
+ *
  * @author jbuhacoff
  */
 @V2
 @Path("/aik")
 public class Aik {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Aik.class);
-    
+    private static X509Certificate identity = null;
+    private static X509Certificate identityIssuer = null;
+
     protected TrustagentConfiguration getConfiguration() throws IOException {
         return TrustagentConfiguration.loadConfiguration();
     }
-    
+
     @GET
     @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
     public X509Certificate getIdentity() throws IOException, CertificateException {
-        TrustagentConfiguration configuration = getConfiguration();
-        if( configuration.isDaaEnabled() ) {
-            log.debug("daa is currently not supported");
-//                new CreateIdentityDaaCmd(context).execute();
-//                new BuildIdentityXMLCmd(context).execute();
-            return null;
-        }
-        else {
-            TrustagentRepository repository = new TrustagentRepository(configuration);
-            X509Certificate aikCertificate = repository.getAikCertificate();
-            if( aikCertificate == null ) {
-                throw new WebApplicationException(Response.serverError().header("Error", "Cannot load AIK certificate file").build());
+        if (identity == null) {
+            TrustagentConfiguration configuration = getConfiguration();
+            if (configuration.isDaaEnabled()) {
+                log.debug("daa is currently not supported");
+                //                new CreateIdentityDaaCmd(context).execute();
+                //                new BuildIdentityXMLCmd(context).execute();
+                return null;
+            } else {
+                TrustagentRepository repository = new TrustagentRepository(configuration);
+                X509Certificate aikCertificate = repository.getAikCertificate();
+                if (aikCertificate == null) {
+                    throw new WebApplicationException(Response.serverError().header("Error", "Cannot load AIK certificate file").build());
+                }
+                identity = aikCertificate;
             }
-            return aikCertificate;
         }
+        return identity;
     }
- 
+
     @GET
     @Path("/ca")
     @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
     public X509Certificate getIdentityCA() throws IOException {
-        TrustagentConfiguration configuration = getConfiguration();
-        File keystoreFile = configuration.getTrustagentKeystoreFile();
-        if( !keystoreFile.exists() ) {
-            log.error("Missing keystore file: {}", keystoreFile.getAbsolutePath());
+        if (identityIssuer == null) {
+            TrustagentConfiguration configuration = getConfiguration();
+            File keystoreFile = configuration.getTrustagentKeystoreFile();
+            if (!keystoreFile.exists()) {
+                log.error("Missing keystore file: {}", keystoreFile.getAbsolutePath());
 //            response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
 //            return null;
-            throw new WebApplicationException(Response.serverError().header("Error", "Missing CA keystore file").build());
-        }
-        try {
-            SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), configuration.getTrustagentKeystorePassword());
-            X509Certificate privacyCACertificate = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
-            return privacyCACertificate;
-        }
-        catch(KeyManagementException | NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
-            log.error("Unable to load Privacy CA certificate from keystore file");
-            log.debug("Unable to load Privacy CA certificate from keystore file", e);
+                throw new WebApplicationException(Response.serverError().header("Error", "Missing CA keystore file").build());
+            }
+            try {
+                SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), configuration.getTrustagentKeystorePassword());
+                X509Certificate privacyCACertificate = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
+                identityIssuer = privacyCACertificate;
+            } catch (KeyManagementException | NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+                log.error("Unable to load Privacy CA certificate from keystore file");
+                log.debug("Unable to load Privacy CA certificate from keystore file", e);
 //            response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
 //            return null;
-            throw new WebApplicationException(Response.serverError().header("Error", "Cannot load Privacy CA certificate file").build());
+                throw new WebApplicationException(Response.serverError().header("Error", "Cannot load Privacy CA certificate file").build());
+            }
         }
+        return identityIssuer;
     }
 }

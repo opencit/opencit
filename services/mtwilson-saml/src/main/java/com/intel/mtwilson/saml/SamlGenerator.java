@@ -47,8 +47,6 @@ import org.opensaml.xml.schema.XSAny;
 import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.util.XMLHelper;
 import org.w3c.dom.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * When we respond with an assertion, if we want to prevent caching we should include these headers:
@@ -59,23 +57,28 @@ import org.slf4j.LoggerFactory;
  * @author jbuhacoff
  */
 public class SamlGenerator {
-    private Logger log = LoggerFactory.getLogger(getClass());
-    private static XMLObjectBuilderFactory builderFactory;
-    private String issuerName; // for example, http://1.2.3.4/AttestationService
-    private String issuerServiceName; // for example "AttestationService"
-    private Integer validitySeconds; // for example 3600 for one hour
-    private SAMLSignature signatureGenerator = null;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SamlGenerator.class);
+    private static final Object init = new Object();
+    private final XMLObjectBuilderFactory builderFactory;
+    private final IssuerConfiguration issuerConfiguration;
+    private final Integer validitySeconds; // for example 3600 for one hour
+    private final SAMLSignature signatureGenerator;
     private SamlAssertion samlAssertion = null;
 //    private Resource keystoreResource = null;
     
-    /**
-     * Compatibility constructor 
-     * @param keystoreResource  ignored
-     * @param configuration  commons-configuration object 
-     * @throws ConfigurationException 
-     */
-    public SamlGenerator(Resource keystoreResource, org.apache.commons.configuration.Configuration configuration) throws ConfigurationException {
-        this(new CommonsConfiguration(configuration));
+    private static class XMLObjectBuilderFactoryHolder {
+        private static final XMLObjectBuilderFactory builderFactory = createBuilderFactory();
+        
+        private static XMLObjectBuilderFactory createBuilderFactory() {
+            try {
+        // OpenSAML 2.3
+         DefaultBootstrap.bootstrap();
+            return Configuration.getBuilderFactory();
+            }
+            catch(ConfigurationException e) {
+                throw new IllegalStateException("Cannot initialize OpenSAML", e);
+            }
+        }
     }
     
     /**
@@ -89,34 +92,26 @@ public class SamlGenerator {
      * jsr105Provider=org.jcp.xml.dsig.internal.dom.XMLDSigRI # SAML XML signature provider
      * keystore.path=.            # disk path to SAML keystore (currently ignored)
      * 
-     * 
-     * @param configuration with the keys described
+     * Compatibility constructor 
+     * @param keystoreResource  ignored
+     * @param configuration  commons-configuration object 
      * @throws ConfigurationException 
      */
-    public SamlGenerator(com.intel.dcsg.cpg.configuration.Configuration configuration /*Resource keystoreResource, org.apache.commons.configuration.Configuration configuration*/) throws ConfigurationException {
-        builderFactory = getSAMLBuilder();
+    public SamlGenerator(IssuerConfiguration issuerConfiguration) throws ConfigurationException {
+        this.issuerConfiguration = issuerConfiguration;
+        this.builderFactory = XMLObjectBuilderFactoryHolder.builderFactory;
         try {
-            signatureGenerator = new SAMLSignature(/*keystoreResource,*/ configuration);
+            signatureGenerator = new SAMLSignature(issuerConfiguration);
         } catch (ClassNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | IllegalAccessException | InstantiationException | IOException | CertificateException ex) {
             log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
+            throw new ConfigurationException("Failed to initialize SAML signature generator", ex);
         }
-        setIssuer(configuration.get("saml.issuer", "AttestationService"));
-        setValiditySeconds(Integer.valueOf(configuration.get("saml.validity.seconds", "3600")));
+        //setValiditySeconds(Integer.valueOf(configuration.get("saml.validity.seconds", "3600")));
+        this.validitySeconds = issuerConfiguration.getValiditySeconds();
+        log.debug("IssuerConfiguration validitySeconds: {}", this.validitySeconds);
+        assert validitySeconds != null;
     }
     
-    
-    public final void setIssuer(String issuer) {
-        this.issuerName = issuer;
-        this.issuerServiceName = "AttestationService-0.5.4"; 
-    }
-    
-    /**
-     * 
-     * @param seconds number of seconds or null to not set any expiration
-     */
-    public final void setValiditySeconds(Integer seconds) {
-        this.validitySeconds = seconds;
-    }
     
     /*
     public void setKeystoreResource(Resource keystoreResource) {
@@ -140,17 +135,19 @@ public class SamlGenerator {
         samlAssertion = new SamlAssertion();
         Assertion assertion = createAssertion(host, tagCertificate, vmMetaData);
 
+        log.debug("Generating XML elements for assertion");
         AssertionMarshaller marshaller = new AssertionMarshaller();
         Element plaintextElement = marshaller.marshall(assertion);
         
+        log.debug("Generating XML text for assertion");
         String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
-        System.out.println("Assertion String: " + originalAssertionString);
+        log.debug("Assertion String: " + originalAssertionString);
 
         // add signatures and/or encryption
         signAssertion(plaintextElement);
         
         samlAssertion.assertion =  XMLHelper.nodeToString(plaintextElement);
-        System.out.println("Signed Assertion String: " + samlAssertion.assertion );
+        log.debug("Signed Assertion String: " + samlAssertion.assertion );
         return samlAssertion;
     }
     
@@ -175,13 +172,13 @@ public class SamlGenerator {
             Element plaintextElement = marshaller.marshall(assertion);
 
             String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
-            System.out.println("Assertion String: " + originalAssertionString);
+            log.debug("Assertion String: " + originalAssertionString);
 
             // add signatures and/or encryption
             signAssertion(plaintextElement);
 
             samlAssertion.assertion =  XMLHelper.nodeToString(plaintextElement);
-            System.out.println("Signed Assertion String: " + samlAssertion.assertion );
+            log.debug("Signed Assertion String: " + samlAssertion.assertion );
             
             return samlAssertion;
         }
@@ -190,17 +187,6 @@ public class SamlGenerator {
         }
     }
  
-	public static XMLObjectBuilderFactory getSAMLBuilder() throws ConfigurationException{
- 
-		if(builderFactory == null){
-			// OpenSAML 2.3
-			 DefaultBootstrap.bootstrap();
-	         builderFactory = Configuration.getBuilderFactory();
-		}
- 
-		return builderFactory;
-	}
- 
  
         // create the issuer
         
@@ -208,7 +194,7 @@ public class SamlGenerator {
             // Create Issuer
             SAMLObjectBuilder issuerBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Issuer.DEFAULT_ELEMENT_NAME);
             Issuer issuer = (Issuer) issuerBuilder.buildObject();
-            issuer.setValue(this.issuerName);
+            issuer.setValue(issuerConfiguration.getIssuerName());
             return issuer;
         }
         // create the Subject Name
@@ -237,7 +223,7 @@ public class SamlGenerator {
             // Create the NameIdentifier
             SAMLObjectBuilder nameIdBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
             NameID nameId = (NameID) nameIdBuilder.buildObject();
-            nameId.setValue(issuerServiceName);
+            nameId.setValue(issuerConfiguration.getIssuerServiceName());
 //            nameId.setNameQualifier(input.getStrNameQualifier()); optional:  
             nameId.setFormat(NameID.UNSPECIFIED); // !!! CAN ALSO USE X509 SUBJECT FROM HOST CERTIFICATE instead of host name in database   
             subjectConfirmation.setNameID(nameId);
@@ -474,6 +460,7 @@ public class SamlGenerator {
          */
         private Assertion createAssertion(TxtHost host, X509AttributeCertificate tagCertificate, Map<String, String> vmMetaData) throws ConfigurationException, UnknownHostException {
             // Create the assertion
+            log.debug("createAssertion for hostname: {}", host.getHostName());
             SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
             Assertion assertion = (Assertion) assertionBuilder.buildObject();
             assertion.setID("HostTrustAssertion"); // ID is arbitrary, only needs to be unique WITHIN THE DOCUMENT, and is required so that the Signature element can refer to it, for example #HostTrustAssertion
@@ -560,7 +547,7 @@ public class SamlGenerator {
         // Create the NameIdentifier
         SAMLObjectBuilder nameIdBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
         NameID nameId = (NameID) nameIdBuilder.buildObject();
-        nameId.setValue(issuerServiceName);
+        nameId.setValue(issuerConfiguration.getIssuerServiceName());
         nameId.setFormat(NameID.UNSPECIFIED); // !!! CAN ALSO USE X509 SUBJECT FROM HOST CERTIFICATE instead of host name in database   
         subjectConfirmation.setNameID(nameId);
 
@@ -574,13 +561,13 @@ public class SamlGenerator {
         Element plaintextElement = marshaller.marshall(assertion);
 
         String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
-        System.out.println("Assertion String: " + originalAssertionString);
+        log.debug("Assertion String: " + originalAssertionString);
 
         // add signatures and/or encryption
         signAssertion(plaintextElement);
 
         samlAssertion.assertion = XMLHelper.nodeToString(plaintextElement);
-        System.out.println("Signed Assertion String: " + samlAssertion.assertion);
+        log.debug("Signed Assertion String: " + samlAssertion.assertion);
         return samlAssertion;
     }
 

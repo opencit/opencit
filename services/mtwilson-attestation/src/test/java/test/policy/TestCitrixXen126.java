@@ -457,7 +457,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
         HostTrustBO hostTrustBO = new HostTrustBO();
-        TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname);        
+        TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname, null);        
         log.debug(json.writeValueAsString(trustReport));
 //        log.debug(xml.writeValueAsString(trustReport)); // xml doesn't seem to seriailze the same info somehow... 
         
