@@ -153,6 +153,9 @@ public class TrustagentConfiguration {
     public File getAikBlobFile() {
         return new File(Folders.configuration() + File.separator + "aik.blob");        
     }
+    public File getAikOpaqueFile() {
+        return new File(Folders.configuration() + File.separator + "aik.opaque");        
+    }
     
     public int getTrustagentHttpTlsPort() {
         return Integer.valueOf(conf.get(TRUSTAGENT_HTTP_TLS_PORT, "1443"));
