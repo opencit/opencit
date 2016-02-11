@@ -75,7 +75,7 @@ public class CreateIdentity implements Configurable, Runnable {
             
             // create the identity request
             boolean shortcut = true;
-            String HisIdentityLabel = "HIS Identity Key"; 
+            String HisIdentityLabel = "HIS_Identity_Key"; 
             
             TpmIdentity newId;
             if (IdentityOS.isWindows()) { 

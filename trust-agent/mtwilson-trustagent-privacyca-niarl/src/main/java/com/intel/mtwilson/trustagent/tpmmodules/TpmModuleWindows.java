@@ -236,7 +236,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
             + " -sym " + TpmUtils.byteArrayToHexString(symCaAttestation)
             + " -key_index " + keyIndex;
             */
-            String HisIdentityLabel = "HIS Identity Key";
+            String HisIdentityLabel = "HIS_Identity_Key";
             
             // form the command arguments. This commands only returns the secrect encrypted inside the asymCaContents.
             String[] cmdArgs = {"ActivateIdentity",
