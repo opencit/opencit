@@ -10,7 +10,9 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import java.io.File;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -77,6 +79,19 @@ public class GenerateQuoteCmd implements ICommand {
         byte[] nonce = Base64.decodeBase64(context.getNonce());
 
         if (osName.toLowerCase().contains("windows")) {
+            
+            // In the case of Windows, we import the AIK first
+            String aikOpaqueFile = Folders.configuration() + File.separator + "aik.opaque";
+            log.debug("AikOpaqueFile: " + aikOpaqueFile);
+
+            String aikImportCmdLine = String.format("tpmtool.exe importaik \"%s\" HIS_Identity_Key", aikOpaqueFile);
+            log.debug("cmd to run: ", aikImportCmdLine);
+            try {
+                CommandUtil.runCommand(aikImportCmdLine);
+            }catch (Exception e) {
+                throw new TAException(ErrorCode.COMMAND_ERROR, "Error while importing AIK" ,e);
+            }
+            
             // format is: "tpmtool.exe [aik name] {attestation file} {nonce} {aikauth}" 
             commandLine = String.format("tpmtool.exe aikquote %s %s %s", // skip the authkey for now
                 byteArrayToHexString(keyName.getBytes()),
