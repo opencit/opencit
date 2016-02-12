@@ -299,6 +299,18 @@ FunctionEnd
 ; ----------------------------------------------------------------------------------
 
 Section "install"
+        StrCpy $3 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
+        nsExec::ExecToStack 'wmic product where "$3" get name'
+        Pop $0
+        Pop $1
+        ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
+        StrCmp $0 "" notfound1
+                StrCpy $vcr1Flag 1
+                Goto done1
+        notfound1:
+                  MessageBox MB_OK "Microsoft Visual C++ not installed properly. Exiting the TrustAgent Installation.."
+                  Quit
+        done1:
 
         # Set output path to the installation directory (also sets the working directory for shortcuts)
         SetOutPath $INSTDIR\
@@ -507,18 +519,6 @@ Function CITServerPage
         nsDialogs::Show
 FunctionEnd
 Function CITServerLeave
-        StrCpy $3 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
-        nsExec::ExecToStack 'wmic product where "$3" get name'
-        Pop $0
-        Pop $1
-        ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
-        StrCmp $0 "" notfound1
-                StrCpy $vcr1Flag 1
-                Goto done1
-        notfound1:
-                  MessageBox MB_OK "Microsoft Visual C++ not installed properly. Exiting the TrustAgent Installation.." 
-                  Quit
-        done1:
 FunctionEnd
 
 
