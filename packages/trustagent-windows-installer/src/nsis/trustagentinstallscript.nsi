@@ -24,7 +24,6 @@ ShowInstDetails show
 
 var mylabel
 var vcr1Flag
-var vcr2Flag
 !define Environ 'HKCU "Environment"'
 !define MUI_ICON "TAicon.ico"
 !define MUI_HEADERIMAGE
@@ -385,19 +384,20 @@ Section "install"
         nsExec::Exec 'cmd /k netsh advfirewall firewall add rule name="trustagent" protocol=TCP dir=in localport=1443 action=allow'
 
         # Run tasetup.cmd
-        
         ExecWait '$INSTDIR\bin\tasetup.cmd'
-        ExecWait '$INSTDIR\initsvcsetup.cmd'
         ReadRegStr $0 HKLM "Software\Microsoft\Windows NT\CurrentVersion" "ProductName"
         StrCpy $6 "Hyper-V Server 2012 R2"
         StrCmp $0 $6 hypercheck
-                ExecWait '$INSTDIR\inittraysetup.cmd'
+                ExecWait 'wscript "$INSTDIR\nocmd.vbs" "$INSTDIR\initsvcsetup.cmd"'
+                ExecWait 'wscript "$INSTDIR\nocmd.vbs" "$INSTDIR\inittraysetup.cmd"'
                 Goto hyperdone
         hypercheck:
+                 ExecWait '$INSTDIR\initsvcsetup.cmd'
                  Goto hyperdone
         hyperdone:
                   Delete $INSTDIR\initsvcsetup.cmd
                   Delete $INSTDIR\inittraysetup.cmd
+                  Delete $INSTDIR\nocmd.vbs
         
 
 SectionEnd
@@ -467,7 +467,6 @@ Function .onInit
         Pop $R0
 
         StrCpy $2 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
-        StrCpy $3 "Name like '%%Microsoft Visual C++ 2013 x64 Additional Runtime%%'"
         nsExec::ExecToStack 'wmic product where "$2" get name'
         Pop $0
         Pop $1
@@ -478,16 +477,6 @@ Function .onInit
         notfound:
                  StrCpy $vcr1Flag 0
         done:
-             nsExec::ExecToStack 'wmic product where "$3" get name'
-             Pop $0
-             Pop $1
-             ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Additional Runtime"
-                  StrCmp $0 "" notfound1
-                         StrCpy $vcr2Flag 1
-                         Goto done1
-                  notfound1:
-                           StrCpy $vcr2Flag 0
-                  done1:
 FunctionEnd
 
 Function SetupVCRedist
@@ -505,11 +494,11 @@ Function CITServerPage
         ${NSD_CreateLabel} 0 0 100% 12u ""
         Pop $mylabel
         ${if} $vcr1Flag == 1
-        ${Andif} $vcr2Flag == 1
                ${NSD_CreateLabel} 0 40 100% 12u "Microsoft Visual C++ 2013 Redistributable x64 is installed"
                Pop $mylabel
         ${else}
-               ${NSD_CreateLabel} 0 40 100% 12u "Microsoft Visual C++ 2013 Redistributable x64 not found. Please run the following Visual C++ installation for Intel CIT Trustagent setup."
+               ${NSD_CreateLabel} 0 30 100% 12u "Microsoft Visual C++ 2013 Redistributable x64 not found."
+               ${NSD_CreateLabel} 0 60 100% 12u "Please run the following Visual C++ installation for Intel CIT Trustagent setup."
                Pop $mylabel
                Call SetupVCRedist
         ${endif}
@@ -518,6 +507,18 @@ Function CITServerPage
         nsDialogs::Show
 FunctionEnd
 Function CITServerLeave
+        StrCpy $3 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
+        nsExec::ExecToStack 'wmic product where "$3" get name'
+        Pop $0
+        Pop $1
+        ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
+        StrCmp $0 "" notfound1
+                StrCpy $vcr1Flag 1
+                Goto done1
+        notfound1:
+                  MessageBox MB_OK "Microsoft Visual C++ not installed properly. Exiting the TrustAgent Installation.." 
+                  Quit
+        done1:
 FunctionEnd
 
 
@@ -534,7 +535,7 @@ Function EnvCustomLeave
         !insertmacro MUI_INSTALLOPTIONS_READ $R3 "InstallOptionsFile.ini" "Field 9" "State"
         SetOutPath $INSTDIR
         FileOpen $0 "trustagent.env" w
-        FileWrite $0 "MTWILSON_API_URL=$R0"
+        FileWrite $0 "MTWILSON_API_URL=https://$R0:8443/mtwilson/v2"
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_API_USERNAME=$R1"
         FileWrite $0 "$\r$\n"
