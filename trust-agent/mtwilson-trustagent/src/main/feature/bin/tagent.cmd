@@ -82,15 +82,19 @@ if "%wcommand%"=="start" (
   call:trustagent_setup %cmdparams%
 ) ELSE IF "%wcommand%"=="authorize" (
   call:trustagent_authorize
+) ELSE IF "%wcommand%"=="start-http-server" (
+  call:trustagent_start
+) ELSE IF "%wcommand%"=="version" (
+  echo. CIT trust agent Windows version 1.0
 ) ELSE IF "%wcommand%"=="help" (
   call:print_help
 ) ELSE (
   IF "%*"=="" (
     call:print_help
   ) ELSE (
-    echo. Running command: %*
+    echo. Command "%*" not supported yet
 
-    "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
+    REM "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
 GOTO:EOF
