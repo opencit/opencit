@@ -320,6 +320,7 @@ Section "install"
         CreateDirectory $INSTDIR\bin
         SetOutPath $INSTDIR\bin
         File /r "..\bin\tagent.cmd"
+        File /r "..\bin\agenthandler.cmd"
         File /r "..\bin\tasetup.cmd"
         File /r "..\bin\tpm_bindaeskey"
         File /r "..\bin\tpm_createkey"
