@@ -21,7 +21,7 @@ set package_config_filename=%intel_conf_dir%\%package_name%.properties
 set package_env_filename=%package_dir%\%package_name%.env
 set package_version_filename=%package_dir%\env.d\trustagent.version
 set ASSET_TAG_SETUP="y"
-set trustagent_cmd=%package_dir%\bin\tagent.cmd
+set trustagent_cmd=%package_dir%\bin\agenthandler.cmd
 set bootdriver_dir=%package_dir%\bootdriver
 
 set logfile=%package_dir%\logs\install.log
