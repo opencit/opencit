@@ -78,6 +78,8 @@ if "%wcommand%"=="start" (
   call:trustagent_start
 ) ELSE IF "%wcommand%"=="stop" (
   call:trustagent_stop
+) ELSE IF "%wcommand%"=="status" (
+  call:trustagent_status
 ) ELSE IF "%wcommand%"=="setup" (
   call:trustagent_setup %cmdparams%
 ) ELSE IF "%wcommand%"=="authorize" (
@@ -101,12 +103,19 @@ GOTO:EOF
 REM functions
 :trustagent_start
   echo. Starting trustagent service
-  >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main start-http-server
+  sc start trustagent
+  echo. Trustagent started
 GOTO:EOF
 
 :trustagent_stop
-  echo. stopping the trust agent
-  echo. it could do a lot of things
+  echo. Stopping the trust agent
+  sc stop trustagent
+  echo. Trustagent stopped
+GOTO:EOF
+
+:trustagent_status
+  echo. Trustagent status:
+  sc query trustagent
 GOTO:EOF
 
 :trustagent_setup
@@ -155,7 +164,7 @@ GOTO:EOF
 
 :print_help
     REM echo. "Usage: $0 start|stop|authorize|start-http-server|version"
-    echo. "Usage: $0 start|stop|authorize|start-http-server|version"
+    echo. "Usage: $0 start|stop|status|authorize|start-http-server|version"
     echo. "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo. "Available setup tasks:"
     echo. configure-from-environment
@@ -164,4 +173,3 @@ GOTO:EOF
 GOTO:EOF
 
 endlocal
-
