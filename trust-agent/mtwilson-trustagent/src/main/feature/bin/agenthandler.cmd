@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 set DESC=Trust Agent
-set NAME=tagent
+set NAME=agenthandler
 
 REM ###################################################################################################
 REM #Set environment specific variables here 
@@ -92,9 +92,8 @@ if "%wcommand%"=="start" (
   IF "%*"=="" (
     call:print_help
   ) ELSE (
-    echo. Command "%*" not supported yet
-
-    REM "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
+    echo. Running command: %*
+    >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
 GOTO:EOF

@@ -92,9 +92,8 @@ if "%wcommand%"=="start" (
   IF "%*"=="" (
     call:print_help
   ) ELSE (
-    echo. Command "%*" not supported yet
-
-    REM "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
+    echo. Running command: %*
+    >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
 GOTO:EOF
