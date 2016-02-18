@@ -113,6 +113,7 @@ aikqverify_install_prereq() {
   DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
   auto_install "Developer tools" "DEVELOPER" >> "$INSTALL_LOG_FILE"
+  if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 }
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists

@@ -1041,6 +1041,7 @@ auto_uninstall() {
 # in conjunction with the self-extracting installer 
 my_service_install() {
   auto_install "Application requirements" "APPLICATION"
+  if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; return 1; fi
   if [[ -n "$dpkg" && -n "$aptget" ]]; then
     is_installed=`$dpkg --get-selections | grep "${package_name_deb}" | awk '{ print $1 }'`
     if [ -n "$is_installed" ]; then
@@ -1321,6 +1322,7 @@ mysql_install() {
   mysql_detect > /dev/null
   if [[ -z "$MYSQL_HOME" || -z "$mysql" ]]; then
     auto_install "MySQL client" "MYSQL_CLIENT" >> $INSTALL_LOG_FILE
+    if [ $? -ne 0 ]; then echo_failure "Failed to install mysql through package installer"; return 1; fi
     if [[ -z "$MYSQL_HOME" || -z "$mysql" ]]; then
       echo_failure "Unable to auto-install MySQL client" | tee -a $INSTALL_LOG_FILE
       echo "MySQL download URL:" >> $INSTALL_LOG_FILE
@@ -1344,18 +1346,21 @@ mysql_server_install() {
   fi
   if [[ -z "$mysqld" ]]; then
     auto_install "MySQL server" "MYSQL_SERVER"   >> $INSTALL_LOG_FILE
+    if [ $? -ne 0 ]; then echo_failure "Failed to install mysql server through package installer"; return 1; fi
     mysql_server_detect
   fi
   if [[ -z "$mysqld" ]]; then
     MYSQL_SERVER_YUM_PACKAGES=""
     MYSQL_SERVER_APT_PACKAGES="mysql-server-5.5"
     auto_install "MySQL server" "MYSQL_SERVER"  >> $INSTALL_LOG_FILE
+    if [ $? -ne 0 ]; then echo_failure "Failed to install mysql server through package installer"; return 1; fi
     mysql_server_detect
   fi
   if [[ -z "$mysqld" ]]; then
     MYSQL_SERVER_YUM_PACKAGES=""
     MYSQL_SERVER_APT_PACKAGES="mysql-server-5.1"
     auto_install "MySQL server" "MYSQL_SERVER"  >> $INSTALL_LOG_FILE
+    if [ $? -ne 0 ]; then echo_failure "Failed to install mysql server through package installer"; return 1; fi
     mysql_server_detect
   fi
   if [[ -z "$mysqld" ]]; then
@@ -1581,6 +1586,7 @@ postgres_install() {
 
   if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
     auto_install "Postgres client" "POSTGRES_CLIENT" >> $INSTALL_LOG_FILE
+    if [ $? -ne 0 ]; then echo_failure "Failed to install postgresql client through package installer"; return 1; fi
     postgres_detect >> $INSTALL_LOG_FILE
     if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
       echo_failure "Unable to auto-install Postgres client" | tee -a $INSTALL_LOG_FILE
@@ -1652,6 +1658,7 @@ postgres_server_install(){
   if [[ -z "$postgres_com" ]]; then
     echo "Running postgresql auto install..."
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
+    if [ $? -ne 0 ]; then echo_failure "Failed to install postgresql server through package installer"; return 1; fi
     postgres_server_detect
   fi
   
@@ -3538,6 +3545,7 @@ java_install_openjdk() {
   java_detect
   if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
     auto_install "Java" "JAVA"
+    if [ $? -ne 0 ]; then echo_failure "Failed to install openjdk through package installer"; return 1; fi
     java_detect
     if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
       echo_failure "Cannot install Java"
