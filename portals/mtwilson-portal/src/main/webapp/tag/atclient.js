@@ -19,6 +19,8 @@ loadTagsCall = true;
 loadSelsCall = true;
 disable_sel_render = false;
 var pres_selections;
+var uuid_new;
+var uuid_selection;
 //var mtwilson = mtwilson || {};
 mtwilson.atag = mtwilson.atag || {};
 (function() { // start mt wilson asset tag module definition
@@ -1016,14 +1018,39 @@ mtwilson.atag = mtwilson.atag || {};
 
     // removes all tags with this oid
     mtwilson.atag.removeTag = function(uuid) {
-        var i;
-        for (i = data.tags.length - 1; i >= 0; i--) {
-            if (('id' in data.tags[i]) && data.tags[i].id == uuid) {
-                ajax.json.delete('tags', data.tags[i]);
-                //data.tags.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
-                //					return;
-            }
-        }
+	uuid_new = uuid
+		jQuery("#dialog-confirm").remove();
+		var str = '<div id="dialog-confirm" title="Delete Tag?" style="display:none; width: inherit;"><p>Are you sure you want to delete this tag?</p></div>';
+		jQuery('#main').append(str);
+        // Define the Dialog and its properties.
+        jQuery("#dialog-confirm").dialog({
+                resizable: false,
+                modal: true,
+                height: 150,
+                width: 400,
+				open: function(event, ui) {
+					  		jQuery(event.target).parent().css('top', '200px');
+					  },
+                buttons: {
+                        "Delete": function () {
+                                jQuery(this).dialog('close');
+				var i;
+        			for (i = data.tags.length - 1; i >= 0; i--) {
+            				if (('id' in data.tags[i]) && data.tags[i].id == uuid_new) {
+                				ajax.json.delete('tags', data.tags[i]);
+                				//data.tags.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                				//return;
+						break;
+            				}
+        			}
+				uuid_new = "";                                
+                        },
+                                "Cancel": function () {
+                                jQuery(this).dialog('close');
+				uuid_new = "";
+                        }
+                }
+        }); 
         //view.sync();
         //mtwilson.rivets.views['tag-browse-table'].sync();
     };
@@ -1038,26 +1065,38 @@ mtwilson.atag = mtwilson.atag || {};
     // removes all tags with this oid
     mtwilson.atag.removeSelection = function(uuid) {
         log.debug("removeSelection: " + uuid);
-        var i;
-        for (i = data.selections.length - 1; i >= 0; i--) {
-      //      log.debug("removeSelection from model; looking at index " + i);
-    //        log.debug("index i is: " + Object.toJSON(data.selections[i]));
-  //          log.debug("index i uuid is: " + data.selections[i].uuid);
-//            log.debug("typeof data.selections[i].uuid = " + (typeof data.selections[i].uuid));
-            if (data.selections[i].id == uuid) {
-                log.debug("found selection with uuid " + data.selections[i].uuid);
-                ajax.json.delete('selections', data.selections[i]);
-        
-    //            log.debug("ajax request ok");
-      //          data.selections.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
-  //              log.debug("model splice ok");
-                //					return;
-            }
-        }
-//        log.debug("removeSelection synchrnoizing view...");
-//        view.sync();
- //       mtwilson.rivets.views['selection-browse-table'].sync();
-
+	uuid_selection = uuid
+		jQuery("#dialog-confirm-selection").remove();
+		var str = '<div id="dialog-confirm-selection" title="Delete Selection?" style="display:none; width: inherit;"><p>Are you sure you want to delete this selection?</p></div>';
+		jQuery('#main').append(str);
+        // Define the Dialog and its properties.
+        jQuery("#dialog-confirm-selection").dialog({
+                resizable: false,
+                modal: true,
+                height: 150,
+                width: 400,
+				open: function(event, ui) {
+                            jQuery(event.target).parent().css('top', '200px');
+				        },
+                buttons: {
+                        "Delete": function () {
+                                jQuery(this).dialog('close');
+				var i;
+				for (i = data.selections.length - 1; i >= 0; i--) {
+					if (data.selections[i].id == uuid_selection) {
+						log.debug("found selection with uuid " + data.selections[i].uuid);
+						ajax.json.delete('selections', data.selections[i]);
+						break;
+					}
+				}
+                                uuid_selection = "";
+                        },
+                                "Cancel": function () {
+                                jQuery(this).dialog('close');
+                                uuid_selection = "";
+                        }
+                }
+        });	
     };
      // removes all tags with this oid
     mtwilson.atag.exportXmlSelection = function(uuid, type) {
@@ -1082,7 +1121,7 @@ mtwilson.atag = mtwilson.atag || {};
 
 
 
-    mtwilson.atag.deleteCertificate = function(uuid) {
+    mtwilson.atag.deleteCertificate = function(uuid) { 
         var i;
         for (i = data.certificates.length - 1; i >= 0; i--) {
             if (('id' in data.certificates[i]) && data.certificates[i].id == uuid) {

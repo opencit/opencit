@@ -12,12 +12,16 @@
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.contextMenu.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/notifications.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/dashboard.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/intel.css" />
 	
     
     <!--
 	<script type="text/javascript" src="Scripts/JQuery/jquery-1.10.2.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery-ui-1.10.4.min.js"></script>
     -->
+	<script type="text/javascript" src="Scripts/bootstrap.min.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.dialog.js"></script>
@@ -35,7 +39,7 @@
 	<script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
     <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
     <script type="text/javascript" src="Scripts/JQuery/prettify.js"></script>
-    
+
     <script type="text/javascript" src="Scripts/commonUtils.js"></script>
         <script type="text/javascript" src="Scripts/safe.js"></script>
 	<script type="text/javascript" src="Scripts/CommonMessage.js"></script>
@@ -45,12 +49,38 @@
 
 </head>
 <body>
-        <div class="header">
+
+        <nav class="navbar navbar-inverse">
+                                <div class="container-fluid">
+                                        <div class="navbar-header">
+                                                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                                                        <span class="sr-only">Toggle navigation</span>
+                                                        <span class="icon-bar"></span>
+                                                        <span class="icon-bar"></span>
+                                                        <span class="icon-bar"></span>
+                                                </button>
+                                                <div class="navbar-brand-image"><img src="images/intel-logo-white-transparent-84x60.png"></img></div>
+                                                <a class="navbar-brand" href="#"><span title="Intel and the Intel logo are trademarks of Intel Corporation in the U.S. and/or other countries."><!--Intel&reg; -->Cloud Integrity Technology</span></a>
+        <!--
+                                                <a class="navbar-brand" href="#">Key Server - <span title="Intel and the Intel logo are trademarks of Intel Corporation in the U.S. and/or other countries.">Intel&reg; Cloud Integrity Technology</span></a>
+        -->
+                                        </div>
+                                        <!-- the navbar contents are loaded dynamically and inserted into this div after login -->
+                                        <div id="navbar">
+						<ul class="nav navbar-nav navbar-right">
+				                	<li><a href="javascript:;" onclick="openPreferences();" data-toggle="tab">Preferences</a></li>
+                    					<li><a href="javascript:logoutUser();" data-toggle="tab">Logout</a></li>
+						</ul>
+                                        </div>
+                                </div>
+        </nav>
+        <!--<div class="header">-->
+	<!--
             <div class="title"><h1 data-i18n="app.title">Mt. Wilson</h1></div>
             <div class="loginDisplay">
                 <table>
                     <tr style="display:none">
-                        <td> <!-- id="loginStatusValue"-->
+                        <td> <!-- id="loginStatusValue"--><!--
                             <div><span data-18n="app.greeting">Welcome</span> <span id="sessionUser"><%=session.getAttribute("username")%></span></div>
                         </td>
                         <td>
@@ -65,7 +95,7 @@
                     </tr>
                 </table>
             </div>
-
+		-->
             <div class="clear hideSkiplink">
                 <div id="NavigationMenu" class="menu" style="float: left;">
                     <ul id="menubarItems">
@@ -76,7 +106,7 @@
                             <a data-i18n="link.trust">Trust</a>
                             <ul>
                                 <li><a href="javascript:;" onclick="getDashBoardPage()" data-i18n="link.dashboard">Dashboard</a></li> <!-- was "Trust Dashboard" -->
-                                <li><a href="javascript:;" onclick="bulktrustUpdate()" data-i18n="link.bulk_refresh">Bulk Refresh</a></li> <!-- was "Bulk Trust Refresh" -->
+                                <!--<li><a href="javascript:;" onclick="bulktrustUpdate()" data-i18n="link.bulk_refresh">Bulk Refresh</a></li>--> <!-- was "Bulk Trust Refresh" -->
                                 <li><a href="javascript:;" onclick="getShowReportPage()" data-i18n="link.reports">Reports</a></li>
                             </ul>
                         </li>
@@ -91,7 +121,7 @@
                                 <li><a href="javascript:getRegisterHostPage();" data-i18n="link.import">Import...</a></li> <!-- was "Register Host" under Management Console automation -->
                                 <li><a href="javascript:getAddHostPage()" data-i18n="link.add_host">Add Host</a></li>
                                 <li><a href="javascript:getEditHostPage()" data-i18n="link.edit_host">Edit Host</a></li>
-                                <li><a href="javascript:getViewHostPage()" data-i18n="link.view_host">View Host</a></li>
+                                <!--<li><a href="javascript:getViewHostPage()" data-i18n="link.view_host">View Host</a></li>-->
                             </ul>
                         </li>
                         <!-- <li>
@@ -159,10 +189,11 @@
                             <ul>
                                 <li><a href="javascript:getApproveRequestPage();" data-i18n="link.pending_requests">Pending Requests</a></li> <!-- was "Approve Request" -->
                                 <li><a href="javascript:getViewRequest();" data-i18n="link.list_users">List Users</a></li> <!-- was "View Request" -->
-                                <li><a href="javascript:getDeletePendingRegistration();" data-i18n="link.delete_user">Delete User</a></li> <!-- was "Delete Request" -->
+                                <!--<li><a href="javascript:getDeletePendingRegistration();" data-i18n="link.delete_user">Delete User</a></li>--> <!-- was "Delete Request" -->
                                 <li><a href="javascript:getViewExpiringPage();" data-i18n="link.extend_user">Extend User</a></li> <!-- was "Extend Request" -->
                                 <li><a href="javascript:viewCert();" data-i18n="link.view_certificates">View Certificates</a></li>
                                 <li><a href="javascript:getTlsPolicyManagementPage()" data-i18n="link.tls_policy_management">TLS Policy Management</a></li>
+                                <li><a href="javascript:getAuthenticationPage()" data-i18n="link.alerts">Alerts</a></li>
                             </ul>
                         </li>
 
@@ -223,7 +254,7 @@
                 </div>
                 <div style="clear: left;"></div><a id="NavigationMenu_SkipLink"></a>
             </div>
-        </div>
+        <!--</div>-->
         <div class="main" id="mainContainer">
         </div>
         <div>
@@ -239,7 +270,7 @@
             <span id="alert_delete_host" data-i18n="alert.delete_host" style="display: none;">Are you sure you want to delete this host?</span>
         </div>
         <div class="footer">
-            <p>&copy; 2012-2014 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
+            <p>&copy; 2012-2015 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
         </div>
 </body>
 </html>

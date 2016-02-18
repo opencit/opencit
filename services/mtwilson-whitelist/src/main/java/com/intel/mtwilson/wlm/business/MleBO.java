@@ -187,7 +187,10 @@ public class MleBO {
             setTblMle(tblMle, mleData);
 
             mleJpaController.edit(tblMle);
-            updatePcrManifest(tblMle, mleData);
+            
+            // Bug: 4393 - Update the PCR list only if the user has specified an empty or valid PCRs
+            if (mleData.getManifestList() != null)
+                updatePcrManifest(tblMle, mleData);
 
         } catch (ASException ase) {
             throw ase;
@@ -518,6 +521,19 @@ public class MleBO {
                     } else {
                         pcrManifestJpaController.create_v2(pcrManifest, em);
                     }
+                    
+                    // Need to update the manifest list in the MLE table as well. Without this upated, even though this PCR value
+                    // is created it will not be attested.
+                    TblMle mleObj = pcrManifest.getMleId();
+                    List<String> configuredPcrList = Arrays.asList(mleObj.getRequiredManifestList().split(","));
+                    log.debug("addPcrManifest: About to update the existing required manifest list '{}' with '{}'.", mleObj.getRequiredManifestList(), manifestData.getName());
+                    if (!configuredPcrList.contains(manifestData.getName())) {
+                        log.debug("addPcrManifest: Current required manifest list does not contain the new PCR. So updating the MLE.");
+                        String updatedRequiredManifestList = mleObj.getRequiredManifestList() + "," + manifestData.getName();
+                        mleObj.setRequiredManifestList(updatedRequiredManifestList);
+                        My.jpa().mwMle().edit(mleObj);
+                    }
+                        
                 } catch (Exception e) {
                     // log.error("Cannot add PCR "+manifestData.getName()+" to MLE: "+e.toString());
                     log.error("Cannot add PCR {} to MLE: {}.", manifestData.getName(), e.toString());
@@ -534,8 +550,9 @@ public class MleBO {
         // tblMle.setMLEType(mleData.getMleType().toString());
         // tblMle.setAttestationType(mleData.getAttestationType().toString());
         tblMle.setDescription(mleData.getDescription());
-        tblMle.setRequiredManifestList(getRequiredManifestList(mleData
-                .getManifestList()));
+        // Bug: 4393 : Do not update the PCR list if the user has not specified PCR manifest list.
+        if (mleData.getManifestList()!= null)
+            tblMle.setRequiredManifestList(getRequiredManifestList(mleData.getManifestList()));
     }
 
     /**
@@ -856,6 +873,20 @@ public class MleBO {
                 return "true";
             }
 
+            // Update MLE table
+            TblMle mleObj = tblPcr.getMleId();
+            List<String> configuredPcrList = new ArrayList<>(Arrays.asList(mleObj.getRequiredManifestList().split(",")));
+            log.debug("deletePCRWhiteList: About to update the existing required manifest list '{}' by removing '{}'.", mleObj.getRequiredManifestList(), tblPcr.getName());
+            if (configuredPcrList.contains(tblPcr.getName())) {
+                log.debug("deletePCRWhiteList: Current required manifest list contains the new PCR. Will be updating the MLE.");
+                configuredPcrList.remove(tblPcr.getName()); 
+                log.debug("deletePCRWhiteList: Removed the specified PCR.");                
+                String updatedRequiredManifestList = StringUtils.join(configuredPcrList, ",");
+                log.debug("deletePCRWhiteList: Updated manifest list is {}.", updatedRequiredManifestList);                
+                mleObj.setRequiredManifestList(updatedRequiredManifestList);
+                My.jpa().mwMle().edit(mleObj);
+            }
+            
             // Delete the PCR white list entry.
             pcrManifestJpaController.destroy(tblPcr.getId());
 

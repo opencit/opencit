@@ -18,6 +18,8 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
@@ -78,6 +80,9 @@ public class CitrixClient {
 //        log.info("CitrixClient connectionString == " + connectionString);
         // connectionString == citrix:https://xenserver:port;username;password  or citrix:https://xenserver:port;u=username;p=password  or the same w/o the citrix prefix
         try {
+            // We need to explicitly add citrix since both Intel and Citrix hosts have the same connection string format.
+            if (!connectionString.toLowerCase().startsWith("citrix:"))
+                connectionString = "citrix:" + connectionString; 
             ConnectionString.CitrixConnectionString citrixConnection = ConnectionString.CitrixConnectionString.forURL(connectionString);
             hostIpAddress = citrixConnection.getHost().toString();
             port = citrixConnection.getPort();
@@ -236,6 +241,10 @@ public class CitrixClient {
     }
 
     public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
+        return getQuoteInformationForHost(pcrList, null);
+    }
+    
+    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList, Nonce challenge) {
         log.debug("getQuoteInformationForHost pcrList == " + pcrList);
         try {
 
@@ -244,7 +253,14 @@ public class CitrixClient {
                 connect();
             }
 
-            String nonce = generateNonce();
+            String nonce;
+            if( challenge == null ) {
+                nonce = generateNonce();
+            }
+            else {
+                nonce = Base64.encodeBase64String(challenge.toByteArray());
+            }
+            
             String sessionId = generateSessionId();
             String aikCertificate = getAIKCertificate();
 
@@ -437,10 +453,11 @@ public class CitrixClient {
     private HashMap<String, Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
         HashMap<String, Pcr> pcrMp = new HashMap<String, Pcr>();
         log.debug("verifyQuoteAndGetPcr for session " + sessionId);
-        String command = String.format("%s -c %s %s %s", aikverifyCmd, aikverifyhomeData + File.separator + getNonceFileName(sessionId),
-                aikverifyhomeData + File.separator + getCertFileName(sessionId),
-                aikverifyhomeData + File.separator + getQuoteFileName(sessionId));
-
+        String command = String.format("%s -c %s %s %s",
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getCertFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
         log.debug("Command: " + command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
 

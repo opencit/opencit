@@ -5,13 +5,7 @@
 package test.jdbi;
 
 import com.intel.mtwilson.tls.policy.jdbi.*;
-import com.intel.dcsg.cpg.crypto.RandomUtil;
-import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.My;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

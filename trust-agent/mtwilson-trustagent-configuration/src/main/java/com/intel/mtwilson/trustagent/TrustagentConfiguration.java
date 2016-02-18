@@ -7,8 +7,12 @@ package com.intel.mtwilson.trustagent;
 import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
+import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.net.NetUtils;
+import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,6 +23,7 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -26,6 +31,7 @@ import org.apache.commons.codec.binary.Hex;
  */
 public class TrustagentConfiguration {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustagentConfiguration.class);
+    private static final String PASSWORD = "PASSWORD"; // transforms into MTWILSON_PASSWORD, KMS_PASSWORD, etc. environment variables
 
     // Variables such as TRUSTAGENT_HOME, TRUSTAGENT_CONF, etc. for filesystem
     // paths are not defined here; see MyFilesystem instead.
@@ -55,7 +61,8 @@ public class TrustagentConfiguration {
     public static final String SIGNING_KEY_NAME = "sign";
     public static final String SIGNING_KEY_SECRET = "signing.key.secret";
     public static final String SIGNING_KEY_INDEX = "signing.key.index";
-    
+    public static final String TRUSTAGENT_ADMIN_USERNAME = "trustagent.admin.username";
+               
     private Configuration conf;
     
     public TrustagentConfiguration(org.apache.commons.configuration.Configuration configuration) {
@@ -264,6 +271,12 @@ public class TrustagentConfiguration {
         File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
         if( file.exists() ) {
             try(FileInputStream in = new FileInputStream(file)) {
+                String content = IOUtils.toString(in);
+                if (Pem.isPem(content)) {
+                    String password = Environment.get(PASSWORD);
+                    Configuration configuration = new EncryptedConfigurationProvider(new FileResource(file), password).load();
+                    return new TrustagentConfiguration(configuration);
+                }
                 Properties properties = new Properties();
                 properties.load(in);
                 TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration(properties));
@@ -351,5 +364,8 @@ public class TrustagentConfiguration {
     public File getSigningKeyBlobFile() {
         return new File(Folders.configuration() + File.separator + "signingkey.blob");        
     }
-    
+
+    public String getTrustAgentAdminUserName() {
+        return conf.get(TRUSTAGENT_ADMIN_USERNAME); // intentionally no default - this must be generated during setup
+    }    
 }

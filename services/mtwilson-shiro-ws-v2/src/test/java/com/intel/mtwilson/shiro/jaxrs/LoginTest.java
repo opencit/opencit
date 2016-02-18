@@ -5,7 +5,7 @@
 package com.intel.mtwilson.shiro.jaxrs;
 
 import com.intel.mtwilson.shiro.EncryptedTokenContent;
-import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyConfiguration;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.UserId;
 import com.intel.mtwilson.shiro.Username;
@@ -118,10 +118,10 @@ public class LoginTest {
     }
 
     private String getBasicUsername() throws Exception {
-        return My.configuration().getConfiguration().getString("mtwilson.api.username", System.getProperty("user.name", "guest"));
+        return new MyConfiguration().getConfiguration().getString("mtwilson.api.username", System.getProperty("user.name", "guest"));
     }
     private String getBasicPassword() throws Exception {
-        return My.configuration().getConfiguration().getString("mtwilson.api.password", "");
+        return new MyConfiguration().getConfiguration().getString("mtwilson.api.password", "");
     }
 
 }

@@ -45,9 +45,8 @@
                             <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
 				<input type="hidden" name="tlsPolicy"/>
                                 <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()" data-i18n="[value]button.retrieve_hosts"/>
-                            <input type="image" onclick="showDialogUpFlatFileHelp()" src="images/helpicon.png">
-                            <span id="messageForFileUpload"></span>
                             </form>
+                            <input type="image" onclick="showDialogUpFlatFileHelp()" src="images/helpicon.png" class="helperImageClass">
                         </div>
                     </div>
                 </div>

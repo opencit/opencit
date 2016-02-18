@@ -3,6 +3,7 @@
  */
 package com.intel.mountwilson.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mountwilson.common.DemoPortalException;
@@ -291,13 +292,15 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 //		boolean result = false;
 		try {
             ConnectionString connStr;
+            connStr = new ConnectionString(dataVO.getvCenterDetails());
+            /*
             if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
                //log.debug("saveNewHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
                 connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
             } 
             else {
                 connStr = new ConnectionString(dataVO.getvCenterDetails());
-            }
+            }*/
             /*else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
                 //log.debug("saveNewHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
                 connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:",""));
@@ -334,13 +337,15 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 //		boolean result = false;
 		try {
             ConnectionString connStr;
+            connStr = new ConnectionString(dataVO.getvCenterDetails());
+            /*
             if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
                log.debug("updateHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
                 connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
             } 
             else {
                 connStr = new ConnectionString(dataVO.getvCenterDetails());
-            }
+            }*/
             /* else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
                 log.debug("updateHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
                 connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:", ""));
@@ -751,10 +756,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	@Override
 	public List<PcrLogReport> getFailureReportData(String hostName,ApiClient attestationService) throws DemoPortalException {
 		log.info("DemoPortalServicesImpl.getFailureReportData >>");
+                ObjectMapper mapper = new ObjectMapper();
 		
 			AttestationReport report;
 			try {
 				report = attestationService.getAttestationReport(new Hostname(hostName));
+                                log.debug("DemoPortalServicesImpl: {}", mapper.writeValueAsString(report));
+
 				
 			} catch (Exception e) {
 				log.error(e.getMessage());

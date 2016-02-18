@@ -5,19 +5,23 @@
 package com.intel.mountwilson.trustagent.commands;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
-import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -54,7 +58,16 @@ public class GenerateModulesCmd implements ICommand {
         long startTime = System.currentTimeMillis();
         String outputPath = String.format("%s.%s", context.getMeasureLogXmlFile().getAbsolutePath(), RandomUtil.randomHexString(16));
         log.info("Module output file: {}", String.format("OUTFILE=%s", outputPath));
-        CommandUtil.runCommand(EscapeUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()), new String[] { String.format("OUTFILE=%s", outputPath) });
+        Map<String, String> variables = new HashMap<>();
+        variables.put("OUTFILE", EscapeUtil.doubleQuoteEscapeShellArgument(outputPath));
+        CommandLine command = new CommandLine(EscapeUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()));
+        Result result = ExecUtil.execute(command, variables);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 

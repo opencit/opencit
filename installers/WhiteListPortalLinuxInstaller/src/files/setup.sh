@@ -67,7 +67,6 @@ chmod 700 "${package_var_dir}"
 if using_mysql; then   
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.wlmp.db
-      mysql_create_database
       # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
       #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql

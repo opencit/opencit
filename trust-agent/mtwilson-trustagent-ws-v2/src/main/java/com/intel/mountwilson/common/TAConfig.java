@@ -4,7 +4,10 @@
  */
 package com.intel.mountwilson.common;
 
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -82,7 +85,10 @@ public class TAConfig {
         
         // first priority is the configuration file
         File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
-        PropertiesConfiguration standard = new PropertiesConfiguration(file);
+        
+        ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(file);
+        Configuration standard = new CommonsConfigurationAdapter(provider.load());
+        
         dumpConfiguration(standard, "file:"+file.getAbsolutePath());
         composite.addConfiguration(standard);
         
@@ -95,7 +101,7 @@ public class TAConfig {
         dumpConfiguration(composite, "composite");
         return composite;
         }
-        catch(ConfigurationException e) {
+        catch(Exception e) {
             throw new RuntimeException("Cannot load properties configuration", e);
         }
     }

@@ -15,7 +15,7 @@
 				<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
-							<th class="row1" data-i18n="table.options">Options</th>
+							<th class="row1"></th>
 							<th class="row2" data-i18n="table.name">Name</th>
 							<th class="row4" data-i18n="table.description">Description</th>
 						</tr>

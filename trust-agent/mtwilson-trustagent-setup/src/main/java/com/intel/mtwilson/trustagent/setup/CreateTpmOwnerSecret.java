@@ -61,7 +61,10 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
             return true;
         }
         else { /* for Linux. Still need to distinguish between TPM 1.2 and TPM 2.0 */
-            File tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
+            File tpmOwned = new File("/sys/class/tpm/tpm0/device/owned");
+            if (!tpmOwned.exists()) {
+            	tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
+            }
             String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
             Integer number = Integer.valueOf(text.trim());
             return number == 1;

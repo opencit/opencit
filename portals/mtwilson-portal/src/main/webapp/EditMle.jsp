@@ -15,7 +15,6 @@
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
-						<th class="row1" data-i18n="table.options">Options</th>
 						<th class="rowr3" data-i18n="table.name">Name</th>
 						<th class="row2"><span data-i18n="table.version">Version</span>&nbsp;&nbsp;&nbsp;&nbsp;</th>
 						<th class="rowr3"><span data-i18n="table.attestation_type">Attestation Type</span>&nbsp;&nbsp;</th>
@@ -24,6 +23,7 @@
 						<th class="rowr4" data-i18n="table.os_info">OS Info</th>
 						<th class="rowr2" data-i18n="table.oem_name">OEM Name</th>
 						<th class="rowr3" data-i18n="table.description">Description</th>
+						<th class="row1"></th>
 					</tr>
 				</thead>
 				</table>

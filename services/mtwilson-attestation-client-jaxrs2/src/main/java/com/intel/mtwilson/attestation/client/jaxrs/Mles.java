@@ -233,7 +233,7 @@ public class Mles extends MtWilsonClient {
     /**
      * Searches for Mles matching the specified filter criteria.
      * @param criteria MleFilterCriteria object specifying the filter criteria. Search options supported
-     * include id, nameEqualTo, nameContains, osUuid and oemUuid.
+     * include id, nameEqualTo, nameContains, osUuid, oemUuid & mleType.
      * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /v2/mles?filter=false]
      * @return MleCollection having the list of the Mles that match the specified criteria.
      * @since Mt.Wilson 2.0

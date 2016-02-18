@@ -28,12 +28,9 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
-import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
@@ -48,7 +45,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -62,10 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * All settings should be via setters, not via constructor, because this class
  * may be instantiated by a factory.
@@ -116,16 +109,6 @@ public class HostBO {
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-//            if( log.isDebugEnabled() ) {
-//                try {
-//                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("addHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
-//                }
-//                catch(IOException e) {
-//                    log.debug("cannot serialize host input to addHost", e);
-//                }
-//            }
             
            log.trace("HOST BO ADD HOST STARTING");
             
@@ -303,10 +286,12 @@ public class HostBO {
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
                     validCaSignature = true;
+                    log.debug("Verified CA signature: {}", pca.getSubjectX500Principal().getName());
+                    break;
                 }
             }
             catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
-                log.debug("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+                log.debug("Failed to verify AIK signature with CA: {}", e.getMessage()); // but don't re-throw because maybe another cert in the list is a valid signer
             }
         }
         return validCaSignature;
@@ -405,16 +390,6 @@ public class HostBO {
     }
 
         public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-            if( log.isDebugEnabled() ) {
-                try {
-                ObjectMapper mapper = new ObjectMapper();
-                log.debug("updateHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
-                }
-                catch(IOException e) {
-                    log.debug("cannot serialize host input to updateHost", e);
-                }
-            }
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -473,38 +448,28 @@ public class HostBO {
                             log.debug("Getting identity.");
                                 setAikForHost(tblHosts, host, agent);
                         }
-                        
-                            if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
-                                log.info("VMM is updated. Update the host specific manifest");
-                                // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
-                                if (pcrManifest == null)
-                                    pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
+                        // Fix for Bug 4241, where the host specific modules were not getting updated during host re-registration.
+                        // Earlier we were updating the host specific modules only when the host was getting mapped to a 
+                        // different VMM MLE. This conditional check has been removed.
+                        log.debug("About to update the host specific manifest");
+                        // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
+                        if (pcrManifest == null)
+                            pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
-                                // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
-                                // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
-                                // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
-//                                HostReport hostReport = new HostReport();
-//                                hostReport.aik = null; 
-//                                hostReport.pcrManifest = pcrManifest;
-//                                hostReport.tpmQuote = null;
-//                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
-//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
-                                
-                                // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
-                                // already be updated and the query would not find any values to delete.
-                                deleteHostSpecificManifest(tblHosts);
-                                
-                                // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
-                                // the host specific modules.
-                                if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
-                                    log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
-                                    // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
-                                    tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
-                                } else {
-                                    log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
-                                }
-                            }
+                        // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
+                        // already be updated and the query would not find any values to delete.
+                        deleteHostSpecificManifest(tblHosts);
+
+                        // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
+                        // the host specific modules.
+                        if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                            log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                            // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
+                            tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                        } else {
+                            log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                        }
 
                         log.debug("Saving Host in database");
                         tblHosts.setBiosMleId(biosMleId);
@@ -886,11 +851,13 @@ public class HostBO {
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                                     m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                            //					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                            tblHostSpecificManifests.add(tblHostSpecificManifest);
+                            if (tblModuleManifest != null) {
+                                TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                                tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                                tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                                tblHostSpecificManifests.add(tblHostSpecificManifest);
+                            }
                         } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null
                                 && ArrayUtils.contains(openSourceHostSpecificModules, m.getInfo().get("ComponentName"))) {
 
@@ -903,10 +870,12 @@ public class HostBO {
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                                     m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                            tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                            if (tblModuleManifest != null) {
+                                TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                                tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                                tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                            }
                         }
                     }
                 }
@@ -1016,6 +985,12 @@ public class HostBO {
 
                         if (searchCriteria != null && !searchCriteria.isEmpty()) {
                                 tblHostList = tblHostsJpaController.findHostsByNameSearchCriteria(searchCriteria);
+                                // See if the user has specified the Host UUID instead of name
+                                if (tblHostList == null || tblHostList.isEmpty()) {
+                                    TblHosts findHostByUuid = tblHostsJpaController.findHostByUuid(searchCriteria);
+                                    tblHostList = new ArrayList<>();
+                                    tblHostList.add(findHostByUuid);
+                                }
                         } else {
                                 tblHostList = tblHostsJpaController.findTblHostsEntities();
                         }
@@ -1257,7 +1232,6 @@ public class HostBO {
             String bindingKeyCertificate = X509Util.encodePemCertificate(cert);
             tblHosts.setBindingKeyCertificate(bindingKeyCertificate);
             log.debug("Updated the host: {} with binding key certificate: {}", tblHosts.getName(), bindingKeyCertificate);
-        } catch (UnsupportedOperationException ex) {
         } catch (Exception ex) {
             log.error("Error during retrieval of the binding key certificate from the host {}.", tblHosts.getName());
         }        

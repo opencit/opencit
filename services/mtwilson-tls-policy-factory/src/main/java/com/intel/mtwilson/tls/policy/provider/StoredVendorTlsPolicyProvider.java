@@ -69,8 +69,7 @@ public class StoredVendorTlsPolicyProvider implements TlsPolicyProvider {
         if( tlsPolicyRecord.getContentType() == null || tlsPolicyRecord.getContentType().isEmpty() ) {
             return null;
         }
-        JacksonObjectMapperProvider mapperProvider = new JacksonObjectMapperProvider();
-        ObjectMapper mapper = mapperProvider.createDefaultMapper();
+        ObjectMapper mapper = JacksonObjectMapperProvider.createDefaultMapper();;
         TlsPolicyDescriptor tlsPolicyDescriptor = mapper.readValue(tlsPolicyRecord.getContent(), TlsPolicyDescriptor.class);
         return tlsPolicyDescriptor;
     }

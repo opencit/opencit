@@ -8,11 +8,11 @@
     <script type="text/javascript" src="Scripts/handlebars-v1.3.0.js" ></script>
 	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
     <!-- requires jquery (assumes its present on containing page) -->
-    <style media="screen" type="text/css">
+    <!--<style media="screen" type="text/css">
     table.tableDisplay tbody tr.hover {
         background: #ccc;
     }
-    </style>
+    </style>-->
 </head>
 <body>
 <div id="notifications_container" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px;"></div>
@@ -27,11 +27,13 @@
                 <th class="tlspolicy_policy_type" data-i18n="table.policy_type">Policy Type</th>
                 <th class="tlspolicy_comment" data-i18n="table.comment">Comment</th>
                 <th class="tlspolicy_private" style="display: none;" data-i18n="table.policy_scope">Scope</th>
+		<th></th>
             </tr>
         </thead>
         <tbody>
         </tbody>
     </table>
+	<br>
     <div>
         <button id="tlspolicy_create_button" data-i18n="action.create_tls_policy" onclick="onCreateNewTlsPolicy()";>Create new policy</button>
     </div>
@@ -39,7 +41,7 @@
         {{#each tls_policies}}
             <tr data-id="{{id}}">
                 <td class="tlspolicy_id" style="display: none;">{{id}}</td>
-                <td class="tlspolicy_name">{{name}}</td>
+                <td class="tlspolicy_name"><a href="#" onclick="onEditCurrentTlsPolicy()" data-toggle="tooltip" title="Edit policy">{{name}}</a></td>
                 <td class="tlspolicy_policy_type">{{descriptor.policy_type}}</td>
                 <td class="tlspolicy_comment">{{comment}}</td>
                 <td class="tlspolicy_private" style="display: none;">
@@ -49,11 +51,14 @@
                         <span data-i18n="tlspolicy.scope.shared">Shared</span>
                     {{/if}}
                 </td>
+		<td>
+			<a href="#" onclick="onDeleteCurrentTlsPolicy()" data-toggle="tooltip" title="Delete policy"><span class="glyphicon glyphicon-trash"></span></a>
+		</td>
             </tr>
         {{else}}
             <tr>
                 <td style="display: none;"></td>
-                <td colspan="3" data-i18n="[html]tlspolicy.browse.nodata">
+                <td colspan="4" data-i18n="[html]tlspolicy.browse.nodata">
                     <span>
                     There are no TLS policies defined at this time. <br/>
                     Create a TLS policy.
@@ -76,23 +81,23 @@
     <legend data-i18n="form.edit_tls_policy_summary">TLS Policy Summary</legend>
     <ol>
         <li class="tlspolicy-edit-only">
-            <label for="tlspolicy_edit_id" data-i18n="table.id">ID</label>
-            <input id="tlspolicy_edit_id" type="text" name="id" disabled/>
+            <label for="tlspolicy_edit_id" data-i18n="table.id" style="font-weight: normal">ID</label>
+            <input id="tlspolicy_edit_id" type="text" name="id" disabled style="display: inline"/>
         </li>
         <li>
-            <label for="tlspolicy_edit_private" data-i18n="table.policy_scope">Scope</label>
+            <label for="tlspolicy_edit_private" data-i18n="table.policy_scope" style="font-weight: normal">Scope</label>
             <select id="tlspolicy_edit_private" name="private" disabled>
                 <option value="false" data-i18n="tlspolicy.scope.shared">Shared</option>
                 <option value="true" data-i18n="tlspolicy.scope.private">Per-host</option>
             </select>
         </li>
         <li>
-            <label for="tlspolicy_edit_name" data-i18n="table.policy_name" class="tlspolicy-scope-shared">Name</label>
+            <label for="tlspolicy_edit_name" data-i18n="table.policy_name" class="tlspolicy-scope-shared" style="font-weight: normal" required>Name</label>
             <label for="tlspolicy_edit_name" data-i18n="table.host_name" class="tlspolicy-scope-private" style="display: none;">Host Name</label>
-            <input id="tlspolicy_edit_name" type="text" name="name"/>
+            <input id="tlspolicy_edit_name" type="text" name="name" style="display: inline"/>
         </li>
         <li>
-            <label for="tlspolicy_edit_policy_type" data-i18n="table.policy_type">Policy Type</label>
+            <label for="tlspolicy_edit_policy_type" data-i18n="table.policy_type" style="font-weight: normal">Policy Type</label>
             <select id="tlspolicy_edit_policy_type" name="policy_type">
                 <option value="certificate" data-i18n="tlspolicy.policy_type.certificate">Certificate</option>
                 <option value="certificate-digest" data-i18n="tlspolicy.policy_type.certificate_digest">Certificate Fingerprint</option>
@@ -103,7 +108,7 @@
             </select>
         </li>
         <li>
-            <label for="tlspolicy_edit_comment" data-i18n="table.comment">Comment</label>
+            <label for="tlspolicy_edit_comment" data-i18n="table.comment" style="font-weight: normal">Comment</label>
             <textarea id="tlspolicy_edit_comment" name="comment"></textarea>
         </li>
     </ol>
@@ -112,7 +117,7 @@
     <legend data-i18n="form.edit_tls_policy_certificates">Certificates</legend>
     <ol>
         <li>
-            <label for="tlspolicy_edit_certificates_add" data-i18n="action.add_certificate">Add certificate</label>
+            <label for="tlspolicy_edit_certificates_add" data-i18n="action.add_certificate" style="font-weight: normal">Add certificate</label>
             <textarea id="tlspolicy_edit_certificates_add" class="publickey-text" placeholder="Hex or Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
@@ -124,7 +129,7 @@
     <legend data-i18n="form.edit_tls_policy_certificate_digests">Certificate Digests</legend>
     <ol>
         <li>
-            <label for="tlspolicy_edit_certificate_digests_algorithm" data-i18n="input.digest_algorithm">Algorithm</label>
+            <label for="tlspolicy_edit_certificate_digests_algorithm" data-i18n="input.digest_algorithm" style="font-weight: normal">Algorithm</label>
             <select id="tlspolicy_edit_certificate_digests_algorithm" name="digest_algorithm">
                 <option>SHA-1</option>
                 <option>SHA-256</option>
@@ -132,7 +137,7 @@
             </select>
         </li>
         <li>
-            <label for="tlspolicy_edit_certificate_digests_add" data-i18n="action.add_certificate_digest">Add certificate fingerprint</label>
+            <label for="tlspolicy_edit_certificate_digests_add" data-i18n="action.add_certificate_digest" style="font-weight: normal">Add certificate fingerprint</label>
             <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text" placeholder="Hex or Base64-encoded digest using selected algorithm of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
@@ -144,7 +149,7 @@
     <legend data-i18n="form.edit_tls_policy_public_keys">Public Keys</legend>
     <ol>
         <li>
-            <label for="tlspolicy_edit_public_keys_add" data-i18n="action.add_public_key">Add public key</label>
+            <label for="tlspolicy_edit_public_keys_add" data-i18n="action.add_public_key" style="font-weight: normal">Add public key</label>
             <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text" placeholder="Hex or Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
@@ -156,7 +161,7 @@
     <legend data-i18n="form.edit_tls_policy_public_key_digests">Public Key Digests</legend>
     <ol>
         <li>
-            <label for="tlspolicy_edit_public_key_digests_algorithm" data-i18n="input.digest_algorithm">Algorithm</label>
+            <label for="tlspolicy_edit_public_key_digests_algorithm" data-i18n="input.digest_algorithm" style="font-weight: normal">Algorithm</label>
             <select id="tlspolicy_edit_public_key_digests_algorithm" name="digest_algorithm">
                 <option>SHA-1</option>
                 <option>SHA-256</option>
@@ -164,7 +169,7 @@
             </select>
         </li>
         <li>
-            <label for="tlspolicy_edit_public_key_digests_add" data-i18n="action.add_public_key_digest">Add public key fingerprint</label>
+            <label for="tlspolicy_edit_public_key_digests_add" data-i18n="action.add_public_key_digest" style="font-weight: normal">Add public key fingerprint</label>
             <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text" placeholder="Hex or Base64-encoded digest using selected algorithm of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
@@ -201,16 +206,16 @@
     <legend data-i18n="form.edit_tls_policy_summary">TLS Policy Summary</legend>
     <ol>
         <li style="display:none;">
-            <label for="tlspolicy_delete_confirmation_id" data-i18n="table.id">ID</label>
+            <label for="tlspolicy_delete_confirmation_id" data-i18n="table.id" style="font-weight: normal">ID</label>
             <input id="tlspolicy_delete_confirmation_id" type="hidden" name="id"/>
         </li>
         <li>
-            <label for="tlspolicy_delete_confirmation_name" data-i18n="table.policy_name">Name</label>
-            <input id="tlspolicy_delete_confirmation_name" type="text" name="name" disabled/>
+            <label for="tlspolicy_delete_confirmation_name" data-i18n="table.policy_name" style="font-weight: normal">Name</label>
+            <input id="tlspolicy_delete_confirmation_name" type="text" name="name" disabled style="display: inline"/>
         </li>
         <li style="display:none;">
-            <label for="tlspolicy_delete_confirmation_hostrefcount" data-i18n="table.policy_hostrefcount">Referenced by</label>
-            <input id="tlspolicy_delete_confirmation_hostrefcount" type="text" name="hostrefcount" disabled/>
+            <label for="tlspolicy_delete_confirmation_hostrefcount" data-i18n="table.policy_hostrefcount" style="font-weight: normal">Referenced by</label>
+            <input id="tlspolicy_delete_confirmation_hostrefcount" type="text" name="hostrefcount" disabled style="display: inline"/>
         </li>
     </ol>
     </fieldset>
@@ -343,12 +348,12 @@ function onLoadTlsPolicyData(data) {
             $(this).removeClass("hover");
         }
     );
-    tbody.contextMenu({
-        selector: "tr",
-        trigger: 'left',
-        autoHide: true,
-        items: $.contextMenu.fromMenu($('#tlspolicy_browse_item_context_menu'))
-    }); // end contextMenu definition
+    //tbody.contextMenu({
+        //selector: "tr",
+        //trigger: 'left',
+        //autoHide: true,
+        //items: $.contextMenu.fromMenu($('#tlspolicy_browse_item_context_menu'))
+    //}); // end contextMenu definition
 } 
 
 $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, onLoadTlsPolicyData);
@@ -486,6 +491,10 @@ function onCancelEditCurrentTlsPolicy() {
 function onSaveCurrentTlsPolicy() {
     // build the request content
     var tlsPolicy = {};
+	if($("#tlspolicy_edit_name").val() == ""){
+		alert("Please provide 'Name' to save the policy.");
+		return false;
+	}
     tlsPolicy.name = $("#tlspolicy_edit_name").val(); // required user-defined name 
     tlsPolicy.private = $("#tlspolicy_edit_private").val() === "true"; //$("#tlspolicy_edit_private").val(); // required "true" for private, "false" for shared
     tlsPolicy.comment = $("#tlspolicy_edit_comment").val(); // optional user-defined comment

@@ -32,8 +32,12 @@ import java.util.List;
  */
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private String hostConnectionString = "";
+
+    public String getHostConnectionString() {
+        return hostConnectionString;
+    }
     
-        
     private TxtHostRecord convert(TblHosts input) {
         TxtHostRecord converted = new TxtHostRecord();
         converted.AIK_Certificate = input.getAIKCertificate();
@@ -138,7 +142,9 @@ public class HostAgentFactory {
         
         VendorHostAgentFactory factory = Plugins.findByAttribute(VendorHostAgentFactory.class, "vendorProtocol", vendorProtocol);
         if( factory != null ) {
-            return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
+            HostAgent hostAgent = factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
+            hostConnectionString = factory.getVendorConnectionString();
+            return hostAgent;
         }
         log.error("HostAgentFactory: Unsupported host type: {}",vendorProtocol);
         throw new UnsupportedOperationException(String.format("Unsupported host type: %s",vendorProtocol));
@@ -152,7 +158,9 @@ public class HostAgentFactory {
         String vendorProtocol = hostConnection.getVendor().name().toLowerCase();
         VendorHostAgentFactory factory = Plugins.findByAttribute(VendorHostAgentFactory.class, "vendorProtocol", vendorProtocol);
         if( factory != null ) {
-            return factory.getHostAgent(hostConnection.getConnectionString(), tlsPolicy);
+            HostAgent hostAgent =  factory.getHostAgent(hostConnection.getConnectionString(), tlsPolicy);
+            hostConnectionString = factory.getVendorConnectionString();
+            return hostAgent;
         }
         throw new UnsupportedOperationException("No agent factory registered for this host");
     }

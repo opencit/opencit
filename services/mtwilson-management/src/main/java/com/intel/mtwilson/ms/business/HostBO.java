@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.business;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
@@ -47,7 +48,9 @@ import com.intel.mtwilson.util.ResourceFinder;
 import com.intel.mtwilson.wlm.business.MleBO;
 import com.intel.mtwilson.wlm.business.OemBO;
 import com.intel.mtwilson.wlm.business.OsBO;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
@@ -98,12 +101,20 @@ public class HostBO {
         private boolean isError = false;
         private String errorMessage = "";
         private String measurementXmlLog;
+        private Nonce challenge;
         
         public HostAttReport(HostAgent agent, String requiredPCRs) {
             this.agent = agent;
             this.requiredPCRs = requiredPCRs;
+            this.challenge = null;
         }
 
+        public HostAttReport(HostAgent agent, String requiredPCRs, Nonce challenge) {
+            this.agent = agent;
+            this.requiredPCRs = requiredPCRs;
+            this.challenge = challenge;
+        }
+        
         @Override
         public void run() {
             if (isError()) {
@@ -111,8 +122,8 @@ public class HostBO {
             }
             try {
                 long threadStart = System.currentTimeMillis();
-                 attestationReport = agent.getHostAttestationReport(requiredPCRs);
-                 measurementXmlLog = agent.getPcrManifest().getMeasurementXml();
+                 attestationReport = agent.getHostAttestationReport(requiredPCRs, challenge);
+                 measurementXmlLog = agent.getPcrManifest(challenge).getMeasurementXml();
                  log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
             } catch (Throwable te) {
                 isError = true;
@@ -348,6 +359,9 @@ public class HostBO {
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
             }
             
+            // Update the connnection string if needed.
+            String updatedConnectionString = factory.getHostConnectionString();
+            hostObj.AddOn_Connection_String = updatedConnectionString;
             // Let us verify if we got all the data back correctly or not 
             if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
                 throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
@@ -578,8 +592,6 @@ public class HostBO {
      * @return : True if success or else an exception.
      */
     public boolean registerHostFromCustomData(HostConfigData hostConfigObj) {
-
-        boolean registerStatus = false;
         try {
             log.debug("Starting to process the registration for host: " + hostConfigObj.getTxtHostRecord().HostName);
 
@@ -588,7 +600,7 @@ public class HostBO {
             new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
             
             log.debug("Successfully registered the host: " + hostConfigObj.getTxtHostRecord().HostName);
-            registerStatus = true;
+            return true;
 
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -598,7 +610,6 @@ public class HostBO {
             log.error("Unexpected errror during host registration. ", ex);
             throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
-        return registerStatus;
     }
 
     /**
@@ -663,6 +674,22 @@ public class HostBO {
         }
     }
 
+    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
+        if(hostConfigObj.getChallengeHex() == null || hostConfigObj.getChallengeHex().isEmpty() ) {
+            return configureWhiteListFromCustomData(hostConfigObj, null);
+        }
+        else {
+            if( Digest.sha1().isValidHex(hostConfigObj.getChallengeHex()) ) {
+                Nonce challenge = new Nonce(Digest.sha1().valueHex(hostConfigObj.getChallengeHex()).getBytes());
+                return configureWhiteListFromCustomData(hostConfigObj, challenge);
+            }
+            else {
+                log.error("Invalid challenge: {}", hostConfigObj.getChallengeHex());
+                throw new IllegalArgumentException("Invalid challenge");
+            }
+        }
+        
+    }
     /**
      * This function using the white list configuration settings including pcr details, whether the whitelist is for an
      * individual host/for OEM specific host/global white list, etc, configures the DB with the whitelist from the
@@ -671,7 +698,7 @@ public class HostBO {
      * @param hostConfigObj : White List configuration object having all the details.
      * @return : true on success.
      */
-    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
+    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj, Nonce challenge) {
 //        // debug only
 //        try {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -719,16 +746,16 @@ public class HostBO {
 //        log.debug("configureWhiteListFromCustomData TxtHostRecord2: {}", mapper.writeValueAsString(gkvHost)); //This statement may contain clear text passwords
 //        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize TxtHostRecord2" ,e); }
 //        // debug only
-                
+                ConnectionString cs;
                 if(gkvHost.AddOn_Connection_String == null) {
-                    ConnectionString cs = ConnectionString.from(gkvHost);
+                    cs = ConnectionString.from(gkvHost);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 } else {
                     // Oct 23, 2013: We just make sure that the connection string has the prefix. Otherwise the agent factory will not be
                     // able to instantiate the correct one.
-                    ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
+                    cs = new ConnectionString(gkvHost.AddOn_Connection_String);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
-                }
+                }                
                 TblHosts tblHosts = new TblHosts();
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
@@ -755,8 +782,14 @@ public class HostBO {
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
                 }
 
+                // Update the connnection string if needed.
+                String updateAddOnConnectionString = factory.getHostConnectionString();
+                gkvHost.AddOn_Connection_String = updateAddOnConnectionString;
+                tblHosts.setAddOnConnectionInfo(updateAddOnConnectionString);
+                
+                
                 log.debug("TIMETAKEN: for getting host information is: {}",  (System.currentTimeMillis() - configWLStart));                
-                System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
+                log.debug("Starting to process the white list configuration from host: {}", gkvHost.HostName);
 
                 // Let us verify if we got all the data back correctly or not (Bug: 442)
                 if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null) {
@@ -781,7 +814,7 @@ public class HostBO {
                 }
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
-                System.err.println("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":"
+                log.debug("Successfully retrieved the host information. Details: {}",  gkvHost.BIOS_Oem + ":"
                         + gkvHost.BIOS_Version + ":" + gkvHost.VMM_OSName + ":" + gkvHost.VMM_OSVersion
                         + ":" + gkvHost.VMM_Version + ":" + gkvHost.Processor_Info);
 
@@ -813,7 +846,7 @@ public class HostBO {
                 
                 // Now we need to spawn 2 threads. One for retriving the attestation report from the host and another one for checking whether MLE with
                 // matching whitelists exists or not.
-                HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList);
+                HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList, challenge);
                 hostAttReportObj.start();
                 
                 MLEVerify mleVerifyObj = new MLEVerify(hostConfigObj);
@@ -836,7 +869,7 @@ public class HostBO {
                 // We are checking for component name since in the attestation report all the pcr and the event logs would use componentname as the label 
                 if (attestationReport != null && !attestationReport.isEmpty()) {
                     if (!attestationReport.contains("ComponentName")) {
-                       System.err.println("Attestation report content: " + attestationReport);
+                       log.debug("Attestation report content: {}", attestationReport);
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                     }
                 }
@@ -892,13 +925,17 @@ public class HostBO {
                 log.debug("TIMETAKEN: for uploading to DB: {}", (System.currentTimeMillis() - configWLStart));
                 
                 // For hosts that have support for attesting application and data on OS, we would get this measurementXml from the host.
-                // We will store it as it in the mw_measurementXml table and use it during attestation for verification.                
-                String measurementXmlLog = hostAttReportObj.getMeasurementXmlLog();
-                if (measurementXmlLog == null || measurementXmlLog.isEmpty())
-                    log.info("ConfigureWhiteListFromCustomData: No measurement xml log found on the host.");
-                else {
-                    configureMeasurementXmlLog(hostConfigObj, measurementXmlLog);
-                    log.debug("ConfigureWhiteListFromCustomData: Found the following measurement xml log on the host. {}");
+                // We will store it as it in the mw_measurementXml table and use it during attestation for verification.   
+                // We need to store the measurement log only if the VMM MLE is also being created since the final value of the measurement
+                // log would be extended to PCR 19
+                if (hostConfigObj.addVmmWhiteList()) {
+                    String measurementXmlLog = hostAttReportObj.getMeasurementXmlLog();
+                    if (measurementXmlLog == null || measurementXmlLog.isEmpty())
+                        log.info("ConfigureWhiteListFromCustomData: No measurement xml log found on the host.");
+                    else {
+                        configureMeasurementXmlLog(hostConfigObj, measurementXmlLog);
+                        log.debug("ConfigureWhiteListFromCustomData: Found the following measurement xml log on the host. {}");
+                    }
                 }
                 // Register host only if required.
                 /*if (hostConfigObj.isRegisterHost() == true) {
@@ -1717,25 +1754,39 @@ public class HostBO {
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         List<X509Certificate> privacyCaCerts;
-        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
-            privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
-            pcaList.addAll(privacyCaCerts);
-            //IOUtils.closeQuietly(privacyCaIn);
-            log.info("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
-        } catch(IOException | CertificateException e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificates from file
-            log.error("Cannot load PrivacyCA.list.pem");            
+        File pcaListPemFile = null;
+        try {
+            pcaListPemFile = ResourceFinder.getFile("PrivacyCA.list.pem");
+            try (InputStream privacyCaIn = new FileInputStream(pcaListPemFile)) {
+                privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
+                pcaList.addAll(privacyCaCerts);
+               //IOUtils.closeQuietly(privacyCaIn);
+                log.info("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
+            } catch(IOException | CertificateException e) {
+                // FileNotFoundException: cannot find PrivacyCA.pem
+                // CertificateException: error while reading certificates from file
+                log.error("Cannot load PrivacyCA.list.pem");            
+            }
         }
-        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem"))) {
-            X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
-            pcaList.add(privacyCaCert);
-            //IOUtils.closeQuietly(privacyCaIn);
-            log.info("Added certificate from PrivacyCA.pem");
-        } catch(IOException | CertificateException e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificate from file
-            log.error("Cannot load PrivacyCA.pem", e);
+        catch(FileNotFoundException e) {
+            log.debug("Cannot load external certificates from PrivacyCA.list.pem: {}", e.getMessage());
+        }
+        File pcaPemFile = null;
+        try {
+            pcaPemFile = ResourceFinder.getFile("PrivacyCA.pem");
+            try (InputStream privacyCaIn = new FileInputStream(pcaPemFile)) {
+                X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+                pcaList.add(privacyCaCert);
+                //IOUtils.closeQuietly(privacyCaIn);
+                log.info("Added certificate from PrivacyCA.pem");
+            } catch(IOException | CertificateException e) {
+                // FileNotFoundException: cannot find PrivacyCA.pem
+                // CertificateException: error while reading certificate from file
+                log.error("Cannot load PrivacyCA.pem", e);
+            }
+        }
+        catch(FileNotFoundException e) {
+            log.debug("Cannot load local certificates from PrivacyCA.pem: {}", e.getMessage());
         }
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
@@ -1745,6 +1796,8 @@ public class HostBO {
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
                     validCaSignature = true;
+                    log.debug("Verified CA signature: {}", pca.getSubjectX500Principal().getName());
+                    break;
                 }
             }
             catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {

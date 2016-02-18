@@ -117,6 +117,11 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
+        <dependency>
+            <!-- Purpose: to isolate JAXB class loading from the application so that temporary generated classes can be discarded -->
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-classpath</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

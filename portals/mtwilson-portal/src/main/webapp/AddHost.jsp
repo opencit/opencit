@@ -52,15 +52,34 @@
 					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
 				</div>
 			</div>
-		    -->
+		    --><br>
 			<div class="singleDiv" id="hostPortDisplayDiv">
 				<div class="labelDiv" data-i18n="input.host_port">Host Port:</div>
 				<div class="valueDiv" >
                                     <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="1443"-->
 				</div>
 			</div>
-						            
-                                    <div id="citrixStringElement">
+			<div  name="opensource_credentials" id ="opensource_credentials"><a href="#" onclick="fnShowLoginCredentials()">Show login credentials</a></div>			            
+                        <div id="openSourceStringElement">
+				<div class="singleDiv">
+					<div class="labelDiv" data-i18n="input.opensource_details">Server Details:</div>
+					<div class="valueDiv">&nbsp;
+					</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv" data-i18n="input.login_id">Login ID:</div>
+						<div class="valueDiv">
+							<input type="text" maxlength="200" id="MainContent_tbVopensourceLoginId" class="textBoxClass">
+						</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv" data-i18n="input.password">Password:</div>
+						<div class="valueDiv">
+							<input type="password" maxlength="200" id="MainContent_tbVopensourcePass" class="textBoxClass">
+						</div>
+				</div>
+			</div>
+                        <div id="citrixStringElement">
 				<div class="singleDiv">
 					<div class="labelDiv" data-i18n="input.xen_details">XenServer Details:</div>
 					<div class="valueDiv">&nbsp;

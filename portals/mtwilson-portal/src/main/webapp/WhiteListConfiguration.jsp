@@ -36,7 +36,7 @@
                                 </div>
                                 <div class="valueDivConfig">
                                     <input type="checkbox" id="Hypervisor_Checkbox" onclick="fnChangeApplicableFor(checked, 'Hypervisor_bios_applicable_for', 'Oem_Bios_Checkbox')">
-                                    <span data-i18n="label.hypervisor">Hypervisor (VMM)</span>
+                                    <span data-i18n="label.hypervisor" name="Hypervisor_Checkbox_lbl" id="Hypervisor_Checkbox_lbl" >Hypervisor (VMM)</span>
                                 </div>
                             </div>
                             <div class="singleDiv" style="height: 66px;">
@@ -105,6 +105,19 @@
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListOpenSource_portNO">
                                     <span class="requiredField">*</span>
+                                </div>
+                            </div>
+                            <div  name="opensource_credentials" id ="opensource_credentials"><a href="#" onclick="fnShowLoginCredentials()">Show login credentials</a></div>
+                            <div class="singleDiv" id="openSourcesHostType_username">
+                                <div class="labelDiv" data-i18n="input.username">User Name:</div>
+                                <div class="valueDiv">
+                                    <input type="text" class="textBox_Border" id="whiteListOpenSource_userName">
+                                </div>
+                            </div>
+                            <div class="singleDiv" id="openSourcesHostType_password">
+                                <div class="labelDiv" data-i18n="input.password">Password:</div>
+                                <div class="valueDiv">
+                                    <input type="password" class="textBox_Border" id="whiteListOpenSource_password">
                                 </div>
                             </div>
                         </div>

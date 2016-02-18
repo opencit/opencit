@@ -9,13 +9,14 @@ package com.intel.mtwilson.datatypes;
  * @author ssbangal
  */
 public enum HostVMMType {
-    
-    CITRIX_XENSERVER("Citrix XenServer","0,17,18"),
-    KVM("KVM","0,17,18"),
-    VMWARE("VMware ESXi","0,17,18,19,20"),
-    XEN("Xen","0,17,18"),
+
+    CITRIX_XENSERVER("Citrix Xen","0,17,18,19"),
+    HOST_NO_VMM("Linux", "0,17,18,19"),
+    KVM("Linux KVM","0,17,18,19"),
+    XEN("Linux Xen","0,17,18"),
     WINDOWS("WINDOWS", "0,13,14");
-    
+
+
     private String value;
     private String pcrs;
 
@@ -23,7 +24,7 @@ public enum HostVMMType {
         this.setValue(value);
         this.setPcrs(pcrs);
     }
-    
+
     public String getPcrs() {
         return pcrs;
     }

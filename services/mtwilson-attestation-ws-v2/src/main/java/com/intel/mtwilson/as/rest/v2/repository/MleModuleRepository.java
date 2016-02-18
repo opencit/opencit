@@ -157,7 +157,7 @@ public class MleModuleRepository implements DocumentRepository<MleModule, MleMod
     private MleModule convert(TblModuleManifest obj) {
         MleModule convObj = new MleModule();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
-        convObj.setMleUuid(obj.getUuid_hex());
+        convObj.setMleUuid(obj.getMle_uuid_hex());
         convObj.setModuleName(obj.getComponentName());
         convObj.setDescription(obj.getDescription());
         convObj.setModuleValue(obj.getDigestValue());

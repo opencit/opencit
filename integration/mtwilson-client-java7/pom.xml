@@ -452,7 +452,6 @@
             </activation>
             <build>
                 <plugins>
-                    <!--
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
@@ -477,13 +476,13 @@
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-model</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-model</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.trustagent:mtwilson-trustagent-client-jaxrs2</dependencySourceInclude>
                                     </dependencySourceIncludes>
                                     <excludePackageNames>generated:com.intel.mountwilson.as.hostmanifestreport.data:com.intel.mountwilson.as.hosttrustreport.data</excludePackageNames> 
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
-                    -->
                     
             <!-- begin copy dependencies plugin (to create zip file) -->
             <plugin>

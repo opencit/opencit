@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.trustagent.commands;
 
+import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.mtwilson.codec.HexUtil;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
@@ -12,9 +13,15 @@ import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 import java.io.File;
+import java.io.InputStream;
 import java.util.regex.Pattern;
+import org.apache.commons.exec.CommandLine;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,27 +111,40 @@ public class GenerateQuoteCmd implements ICommand {
                 byteArrayToHexString(nonce),
                 identityAuthKey);
             */
-        } else {
-            commandLine = String.format("aikquote -p %s -c %s %s %s %s",
-                identityAuthKey,
-                EscapeUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()),
-                EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
-                selectedPcrs,
-                EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
-        }
-        
-        //debug
-        log.debug("Command Line to be executed: " + commandLine);
-        
-        try {
-            CommandUtil.runCommand(commandLine);
-			log.debug("Create the quote {} ",
-					context.getQuoteFileName());
-			context.setTpmQuote(CommandUtil.readfile(context.getQuoteFileName()));
-		}catch (Exception e) {
-			throw new TAException(ErrorCode.COMMAND_ERROR, "Error while generating quote" ,e);
-		}
 
-    }
-    
+            //debug
+            log.debug("Command Line to be executed: " + commandLine);
+            try {
+                CommandUtil.runCommand(commandLine);
+                log.debug("Create the quote {} ",
+                context.getQuoteFileName());
+                context.setTpmQuote(CommandUtil.readfile(context.getQuoteFileName()));
+            }catch (Exception e) {
+                            throw new TAException(ErrorCode.COMMAND_ERROR, "Error while generating quote" ,e);
+            }
+        } else {
+            try {
+	            CommandLine command = new CommandLine("/opt/trustagent/bin/aikquote");
+	            command.addArgument("-p");
+	            command.addArgument(identityAuthKey);
+	            command.addArgument("-c");
+	            command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()));
+	            command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()));
+	            command.addArguments(selectedPcrs.split("\\s+"));
+	            command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName()));
+	            Result result = ExecUtil.execute(command);
+	            if (result.getExitCode() != 0) {
+	                log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+	                throw new TAException(ErrorCode.ERROR, result.getStderr());
+	            }
+	            log.debug("command stdout: {}", result.getStdout());
+	            log.debug("Create the quote {} ", context.getQuoteFileName());
+	            try (InputStream in = new FileResource(new File(context.getQuoteFileName())).getInputStream()) {
+	                context.setTpmQuote(IOUtils.toByteArray(in));
+	            }
+            } catch (Exception e) {
+                throw new TAException(ErrorCode.COMMAND_ERROR, "Error while generating quote", e);
+            }
+        }
+    }   
 }

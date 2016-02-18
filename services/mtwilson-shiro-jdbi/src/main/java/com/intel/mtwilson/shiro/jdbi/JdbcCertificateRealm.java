@@ -7,7 +7,6 @@ package com.intel.mtwilson.shiro.jdbi;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.shiro.*;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.net.NetUtils;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -16,8 +15,6 @@ import com.intel.mtwilson.shiro.authc.x509.Fingerprint;
 import com.intel.mtwilson.shiro.authc.x509.LoginCertificateId;
 import com.intel.mtwilson.shiro.authc.x509.X509AuthenticationInfo;
 import com.intel.mtwilson.shiro.authc.x509.X509AuthenticationToken;
-import com.intel.mtwilson.shiro.jdbi.LoginDAO;
-import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
@@ -26,15 +23,11 @@ import java.net.SocketException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -101,7 +94,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
             log.debug("doGetAuthorizationInfo for username: {}", username.getUsername());
         }
         try (LoginDAO dao = MyJdbi.authz()) {
-            
+            log.debug("doGetAuthorizationInfo got DAO instance: {}", dao);
             Collection<LoginCertificateId> loginCertificateIds = pc.byType(LoginCertificateId.class);
             for (LoginCertificateId loginCertificateId : loginCertificateIds) {
                 log.debug("doGetAuthorizationInfo for login certificate id: {}", loginCertificateId.getLoginCertificateId());

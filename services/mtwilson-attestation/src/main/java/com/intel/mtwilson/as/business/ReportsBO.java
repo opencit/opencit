@@ -23,7 +23,13 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
+import com.intel.mtwilson.as.data.MwApiClientHttpBasic;
+import com.intel.mtwilson.as.data.MwMeasurementXml;
 import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.model.Measurement;
+import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.XmlMeasurementLog;
 import java.util.*;
 import java.io.IOException;
 
@@ -171,6 +177,9 @@ public class ReportsBO {
     }
 
     public String getHostAttestationReport(Hostname hostName) {
+        return getHostAttestationReport(hostName, null);
+    }
+    public String getHostAttestationReport(Hostname hostName, Nonce challenge) {
         TblHosts tblHosts;
 
         try {
@@ -189,7 +198,7 @@ public class ReportsBO {
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
 //            PcrManifest pcrManifest = agent.getPcrManifest();
-            return agent.getHostAttestationReport("0,17,18,19,20"); // maybe  just 17,18,19,20  // "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
+            return agent.getHostAttestationReport("0,17,18,19,20", challenge); // maybe  just 17,18,19,20  // "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
 
         } catch (ASException aex) {
 
@@ -335,18 +344,37 @@ public class ReportsBO {
     
     private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<>();
+        ModuleLogReport tbootxmModuleLogReport = new ModuleLogReport();
+        HashMap<String, ModuleLogReport> temptbootxmSubModuleReport = new HashMap<>();
         
         if(log.getTblModuleManifestLogCollection() != null){
             logger.debug("addManifestLogs - This is module based attestation with {} of modules.", log.getTblModuleManifestLogCollection().size());
             for (TblModuleManifestLog moduleManifestLog : log.getTblModuleManifestLogCollection()) {
-                moduleReports.put(moduleManifestLog.getName(), new ModuleLogReport(moduleManifestLog.getName(),
+                logger.debug("addManifestLogs - {} - {}", moduleManifestLog.getName(), moduleManifestLog.getValue());
+                if (moduleManifestLog.getName().equalsIgnoreCase("tbootxm")) {
+                    logger.debug("addManifestLogs - Adding the root tbootxm with errors.");
+                    tbootxmModuleLogReport.setComponentName(moduleManifestLog.getName());
+                    tbootxmModuleLogReport.setValue(moduleManifestLog.getValue());
+                    tbootxmModuleLogReport.setWhitelistValue(moduleManifestLog.getWhitelistValue());
+                    tbootxmModuleLogReport.setTrustStatus(0);
+                } else if (moduleManifestLog.getName().startsWith("tbootxm-")) {
+                    logger.debug("addManifestLogs - Adding the sub module {} for tbootxm module with errors.", moduleManifestLog.getName());                    
+                    ModuleLogReport subModuleLogReport = new ModuleLogReport(moduleManifestLog.getName().substring(("tbootxm-").length()),
+                                                              moduleManifestLog.getValue(), moduleManifestLog.getWhitelistValue(),0);
+                    temptbootxmSubModuleReport.put(subModuleLogReport.getComponentName(), subModuleLogReport);
+                } else {
+                    logger.debug("addManifestLogs - Adding the sub module {} for non-tbootxm module with errors.", moduleManifestLog.getName());                    
+                    moduleReports.put(moduleManifestLog.getName(), new ModuleLogReport(moduleManifestLog.getName(),
                         moduleManifestLog.getValue(), moduleManifestLog.getWhitelistValue(),0));
+                }
             }
         }
         
         if(!failureOnly){
             logger.debug("FailureOnly flag is false. Adding all manifests.");
             for(TblModuleManifest moduleManifest : tblPcrManifest.getMleId().getTblModuleManifestCollection()){
+                logger.debug("addManifestLogs - {} - {}", moduleManifest.getComponentName(), moduleManifest.getDigestValue());
+
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
                         !moduleReports.containsKey(moduleManifest.getComponentName())){
                     
@@ -357,14 +385,48 @@ public class ReportsBO {
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }
-                    else {
-                        moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
-                                moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); 
+                    else {                        
+                        if (moduleManifest.getComponentName().equalsIgnoreCase("tbootxm")) {
+
+                            if (tbootxmModuleLogReport.getComponentName() == null || tbootxmModuleLogReport.getComponentName().isEmpty()) {
+                                logger.debug("addManifestLogs - Adding the tbootxm root module", moduleManifest.getComponentName());                    
+                                tbootxmModuleLogReport.setComponentName(moduleManifest.getComponentName());
+                                tbootxmModuleLogReport.setValue(moduleManifest.getDigestValue());
+                                tbootxmModuleLogReport.setWhitelistValue(moduleManifest.getDigestValue());
+                                tbootxmModuleLogReport.setTrustStatus(1);
+                            }
+
+                            MwMeasurementXml findByMleId = My.jpa().mwMeasurementXml().findByMleId(tblPcrManifest.getMleId().getId());
+                            List<Measurement> measurements = new XmlMeasurementLog(PcrIndex.valueOf(tblPcrManifest.getName()), findByMleId.getContent()).getMeasurements();
+                            for(Measurement m : measurements) {
+                                logger.debug("addManifestLogs - Adding the sub module {} for tbootxm root module.", m.getLabel());                    
+                                
+                                ModuleLogReport subModuleLogReport = new ModuleLogReport(m.getLabel(), m.getValue().toString(), m.getValue().toString(),1);
+                                if (!temptbootxmSubModuleReport.containsKey(subModuleLogReport.getComponentName()))
+                                    temptbootxmSubModuleReport.put(subModuleLogReport.getComponentName(), subModuleLogReport);
+                            }
+                        } else {
+
+                            moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
+                                    moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); 
+                        }
                     }
+                    
                 }
             }
         }
         
+        for (ModuleLogReport te : temptbootxmSubModuleReport.values())
+            logger.debug("addManifestLogs - post processing sub modules {} - {} - {}", te.getComponentName(), te.getValue(), te.getWhitelistValue());
+        Collection<ModuleLogReport> temptbootxmSubModuleReportValues = temptbootxmSubModuleReport.values();
+        if (temptbootxmSubModuleReportValues != null && temptbootxmSubModuleReportValues.size() > 0) {
+            tbootxmModuleLogReport.getModuleLogs().addAll(temptbootxmSubModuleReportValues);
+        }
+        List<ModuleLogReport> tbootxmModuleLogs = tbootxmModuleLogReport.getModuleLogs();
+        if (tbootxmModuleLogs != null && tbootxmModuleLogs.size() > 0) {
+            moduleReports.put("tbootxm", tbootxmModuleLogReport);
+        }
+
         manifest.getModuleLogs().addAll(moduleReports.values());
 
     }

@@ -8,7 +8,7 @@
     <description>Mt Wilson Trust Agent</description>
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
-        <artifactId>mtwilson-maven-package</artifactId>
+        <artifactId>mtwilson-core-application-zip</artifactId>
         <version>3.0-SNAPSHOT</version>
         <relativePath />
     </parent>
@@ -68,10 +68,10 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <mkdir dir="${project.build.directory}/feature/bin"/>
+                                        <mkdir dir="${project.build.directory}/application/bin"/>
                                 
                                         <!-- extract mtwilson-tpm-commands.zip -->
-                                        <unzip dest="${project.build.directory}/feature/bin">
+                                        <unzip dest="${project.build.directory}/application/bin">
                                             <fileset dir="${project.build.directory}">
                                                 <include name="mtwilson-tpm-commands.zip"/>
                                             </fileset>
@@ -79,7 +79,7 @@
                                 
                                         <!-- permissions -->
                                         <chmod perm="700">
-                                            <fileset dir="${project.build.directory}/feature/bin">
+                                            <fileset dir="${project.build.directory}/application/bin">
                                                 <include name="**/*"/>
                                             </fileset>
                                         </chmod>
@@ -160,6 +160,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-password-vault</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

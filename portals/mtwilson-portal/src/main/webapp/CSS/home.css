@@ -526,7 +526,7 @@ h5, h6
 
 .dataTableMle{
 	/*width: 550px;*/
-	font-size: medium;
+	font-size: 14px;
     font-weight: inherit;
     margin-left: 61px;
     color: black;
@@ -554,6 +554,16 @@ h5, h6
 	width: 200px;
 	padding-right: 20px;
 	float: left;
+}
+.labelDivEditMle{
+    width: 155px;
+    padding-right: 20px;
+    float: left;
+}
+.labelDivEditMleManifest{
+    width: 160px;
+    padding-right: 20px;
+    float: left;
 }
 .labelDivConfig{
 	width: 180px;
@@ -631,6 +641,7 @@ h5, h6
 }
 .uploadForm{
 	float: left;
+	margin-left: 2px;
 }
 .subLabelDivgkv{
 text-align: center;	
@@ -693,13 +704,15 @@ text-align: center;
 
 .textBoxClass{
 	width:300px;
-	height: 20px;
+	height: 22px;
 	border:1px solid #3A4F63;
 }
 .textAreaBoxClass{
-	width:300px; 
+	width:235px; 
 	border: 1px solid #3A4F63;
-        height: 35px;;
+    height: 40px;
+	text-align: left;
+	overflow-y: scroll;
 }
 
 .getReportButton{
@@ -715,6 +728,21 @@ text-align: center;
 	margin-top: 12px;
 }
 
+#dialog{
+	width: inherit !important;
+}
+
+#tlspolicy_edit_form{
+	width: inherit !important;
+}
+
+#tlspolicy_delete_confirmation{
+	width: inherit !important;
+}
+
+#dialog-confirm{
+	width: inherit !important;
+}
 /*dialog classs*/
 
 .ui-widget-content { border: 1px solid #dddddd; /*background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;*/ color: #333333; }
@@ -777,8 +805,14 @@ text-align: center;
 
 .textBox_Border{
 	width: 500px;
-	height: 20px;
+	height: 22px;
 	float: left;
+}
+.textBox_Border_Mle{
+    width: 500px;
+    height: 23px;
+    float: left;
+	margin-left: 2px;
 }
 .registerHostTable{
 	float: left;
@@ -843,7 +877,7 @@ text-align: center;
     width: 100%;
 }
 .registerUser{
-    font-size: 12px;margin-bottom: 12px;
+    font-size: 14px;margin-bottom: 12px;
 }
 .valueDivConfig{
 	float: left;
@@ -959,7 +993,7 @@ form.tlsform ol.tlspolicy-content li:last-child {
   border-bottom: 1px solid black;
 }
 form.tlsform fieldset[data-policy-type] textarea.publickey-text {
-    height: 75px;
+    height: 55px;
     width: 300px;
 }
 form.tlsform fieldset[data-policy-type] label+textarea+button {

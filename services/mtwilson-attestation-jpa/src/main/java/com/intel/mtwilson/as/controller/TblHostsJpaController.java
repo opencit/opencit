@@ -46,9 +46,9 @@ public class TblHostsJpaController implements Serializable {
     public void create(TblHosts tblHosts) throws CryptographyException {
         //System.err.println("create tblHosts with policy " +  tblHosts.getTlsPolicyName() + " and keystore length " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
        
-        if (tblHosts.getTblSamlAssertionCollection() == null) {
-            tblHosts.setTblSamlAssertionCollection(new ArrayList<TblSamlAssertion>());
-        }
+//        if (tblHosts.getTblSamlAssertionCollection() == null) {
+//            tblHosts.setTblSamlAssertionCollection(new ArrayList<TblSamlAssertion>());
+//        }
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
@@ -62,12 +62,12 @@ public class TblHostsJpaController implements Serializable {
                 biosMleId = em.getReference(biosMleId.getClass(), biosMleId.getId());
                 tblHosts.setBiosMleId(biosMleId);
             }
-            Collection<TblSamlAssertion> attachedTblSamlAssertionCollection = new ArrayList<>();
-            for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertionToAttach : tblHosts.getTblSamlAssertionCollection()) {
-                tblSamlAssertionCollectionTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionTblSamlAssertionToAttach.getId());
-                attachedTblSamlAssertionCollection.add(tblSamlAssertionCollectionTblSamlAssertionToAttach);
-            }
-            tblHosts.setTblSamlAssertionCollection(attachedTblSamlAssertionCollection);
+//            Collection<TblSamlAssertion> attachedTblSamlAssertionCollection = new ArrayList<>();
+//            for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertionToAttach : tblHosts.getTblSamlAssertionCollection()) {
+//                tblSamlAssertionCollectionTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionTblSamlAssertionToAttach.getId());
+//                attachedTblSamlAssertionCollection.add(tblSamlAssertionCollectionTblSamlAssertionToAttach);
+//            }
+//            tblHosts.setTblSamlAssertionCollection(attachedTblSamlAssertionCollection);
             
             System.err.println("tblHosts create before persist");
             em.persist(tblHosts);
@@ -81,15 +81,15 @@ public class TblHostsJpaController implements Serializable {
                 biosMleId.getTblHostsCollection().add(tblHosts);
                 em.merge(biosMleId);
             }
-            for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertion : tblHosts.getTblSamlAssertionCollection()) {
-                TblHosts oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion = tblSamlAssertionCollectionTblSamlAssertion.getHostId();
-                tblSamlAssertionCollectionTblSamlAssertion.setHostId(tblHosts);
-                tblSamlAssertionCollectionTblSamlAssertion = em.merge(tblSamlAssertionCollectionTblSamlAssertion);
-                if (oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion != null) {
-                    oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion.getTblSamlAssertionCollection().remove(tblSamlAssertionCollectionTblSamlAssertion);
-                    em.merge(oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion);
-                }
-            }
+//            for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertion : tblHosts.getTblSamlAssertionCollection()) {
+//                TblHosts oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion = tblSamlAssertionCollectionTblSamlAssertion.getHostId();
+//                tblSamlAssertionCollectionTblSamlAssertion.setHostId(tblHosts);
+//                tblSamlAssertionCollectionTblSamlAssertion = em.merge(tblSamlAssertionCollectionTblSamlAssertion);
+//                if (oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion != null) {
+//                    oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion.getTblSamlAssertionCollection().remove(tblSamlAssertionCollectionTblSamlAssertion);
+//                    em.merge(oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion);
+//                }
+//            }
             em.getTransaction().commit();
         } finally {
             em.close();
@@ -105,20 +105,20 @@ public class TblHostsJpaController implements Serializable {
             TblMle vmmMleIdNew = tblHosts.getVmmMleId();
             TblMle biosMleIdOld = persistentTblHosts.getBiosMleId();
             TblMle biosMleIdNew = tblHosts.getBiosMleId();
-            Collection<TblSamlAssertion> tblSamlAssertionCollectionOld = persistentTblHosts.getTblSamlAssertionCollection();
-            Collection<TblSamlAssertion> tblSamlAssertionCollectionNew = tblHosts.getTblSamlAssertionCollection();
-            List<String> illegalOrphanMessages = null;
-            for (TblSamlAssertion tblSamlAssertionCollectionOldTblSamlAssertion : tblSamlAssertionCollectionOld) {
-                if (!tblSamlAssertionCollectionNew.contains(tblSamlAssertionCollectionOldTblSamlAssertion)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
-                    }
-                    illegalOrphanMessages.add("You must retain TblSamlAssertion " + tblSamlAssertionCollectionOldTblSamlAssertion + " since its hostId field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
+//            Collection<TblSamlAssertion> tblSamlAssertionCollectionOld = persistentTblHosts.getTblSamlAssertionCollection();
+//            Collection<TblSamlAssertion> tblSamlAssertionCollectionNew = tblHosts.getTblSamlAssertionCollection();
+//            List<String> illegalOrphanMessages = null;
+//            for (TblSamlAssertion tblSamlAssertionCollectionOldTblSamlAssertion : tblSamlAssertionCollectionOld) {
+//                if (!tblSamlAssertionCollectionNew.contains(tblSamlAssertionCollectionOldTblSamlAssertion)) {
+//                    if (illegalOrphanMessages == null) {
+//                        illegalOrphanMessages = new ArrayList<>();
+//                    }
+//                    illegalOrphanMessages.add("You must retain TblSamlAssertion " + tblSamlAssertionCollectionOldTblSamlAssertion + " since its hostId field is not nullable.");
+//                }
+//            }
+//            if (illegalOrphanMessages != null) {
+//                throw new IllegalOrphanException(illegalOrphanMessages);
+//            }
             if (vmmMleIdNew != null) {
                 vmmMleIdNew = em.getReference(vmmMleIdNew.getClass(), vmmMleIdNew.getId());
                 tblHosts.setVmmMleId(vmmMleIdNew);
@@ -127,13 +127,13 @@ public class TblHostsJpaController implements Serializable {
                 biosMleIdNew = em.getReference(biosMleIdNew.getClass(), biosMleIdNew.getId());
                 tblHosts.setBiosMleId(biosMleIdNew);
             }
-            Collection<TblSamlAssertion> attachedTblSamlAssertionCollectionNew = new ArrayList<>();
-            for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertionToAttach : tblSamlAssertionCollectionNew) {
-                tblSamlAssertionCollectionNewTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getId());
-                attachedTblSamlAssertionCollectionNew.add(tblSamlAssertionCollectionNewTblSamlAssertionToAttach);
-            }
-            tblSamlAssertionCollectionNew = attachedTblSamlAssertionCollectionNew;
-            tblHosts.setTblSamlAssertionCollection(tblSamlAssertionCollectionNew);
+//            Collection<TblSamlAssertion> attachedTblSamlAssertionCollectionNew = new ArrayList<>();
+//            for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertionToAttach : tblSamlAssertionCollectionNew) {
+//                tblSamlAssertionCollectionNewTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getId());
+//                attachedTblSamlAssertionCollectionNew.add(tblSamlAssertionCollectionNewTblSamlAssertionToAttach);
+//            }
+//            tblSamlAssertionCollectionNew = attachedTblSamlAssertionCollectionNew;
+//            tblHosts.setTblSamlAssertionCollection(tblSamlAssertionCollectionNew);
 
           
             tblHosts = em.merge(tblHosts);
@@ -154,17 +154,17 @@ public class TblHostsJpaController implements Serializable {
                 biosMleIdNew.getTblHostsCollection().add(tblHosts);
                 em.merge(biosMleIdNew);
             }
-            for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertion : tblSamlAssertionCollectionNew) {
-                if (!tblSamlAssertionCollectionOld.contains(tblSamlAssertionCollectionNewTblSamlAssertion)) {
-                    TblHosts oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion = tblSamlAssertionCollectionNewTblSamlAssertion.getHostId();
-                    tblSamlAssertionCollectionNewTblSamlAssertion.setHostId(tblHosts);
-                    tblSamlAssertionCollectionNewTblSamlAssertion = em.merge(tblSamlAssertionCollectionNewTblSamlAssertion);
-                    if (oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion != null && !oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion.equals(tblHosts)) {
-                        oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion.getTblSamlAssertionCollection().remove(tblSamlAssertionCollectionNewTblSamlAssertion);
-                        em.merge(oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion);
-                    }
-                }
-            }
+//            for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertion : tblSamlAssertionCollectionNew) {
+//                if (!tblSamlAssertionCollectionOld.contains(tblSamlAssertionCollectionNewTblSamlAssertion)) {
+//                    TblHosts oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion = tblSamlAssertionCollectionNewTblSamlAssertion.getHostId();
+//                    tblSamlAssertionCollectionNewTblSamlAssertion.setHostId(tblHosts);
+//                    tblSamlAssertionCollectionNewTblSamlAssertion = em.merge(tblSamlAssertionCollectionNewTblSamlAssertion);
+//                    if (oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion != null && !oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion.equals(tblHosts)) {
+//                        oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion.getTblSamlAssertionCollection().remove(tblSamlAssertionCollectionNewTblSamlAssertion);
+//                        em.merge(oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion);
+//                    }
+//                }
+//            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -191,17 +191,17 @@ public class TblHostsJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The tblHosts with id " + id + " no longer exists.", enfe);
             }
-            List<String> illegalOrphanMessages = null;
-            Collection<TblSamlAssertion> tblSamlAssertionCollectionOrphanCheck = tblHosts.getTblSamlAssertionCollection();
-            for (TblSamlAssertion tblSamlAssertionCollectionOrphanCheckTblSamlAssertion : tblSamlAssertionCollectionOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This TblHosts (" + tblHosts + ") cannot be destroyed since the TblSamlAssertion " + tblSamlAssertionCollectionOrphanCheckTblSamlAssertion + " in its tblSamlAssertionCollection field has a non-nullable hostId field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
+//            List<String> illegalOrphanMessages = null;
+//            Collection<TblSamlAssertion> tblSamlAssertionCollectionOrphanCheck = tblHosts.getTblSamlAssertionCollection();
+//            for (TblSamlAssertion tblSamlAssertionCollectionOrphanCheckTblSamlAssertion : tblSamlAssertionCollectionOrphanCheck) {
+//                if (illegalOrphanMessages == null) {
+//                    illegalOrphanMessages = new ArrayList<String>();
+//                }
+//                illegalOrphanMessages.add("This TblHosts (" + tblHosts + ") cannot be destroyed since the TblSamlAssertion " + tblSamlAssertionCollectionOrphanCheckTblSamlAssertion + " in its tblSamlAssertionCollection field has a non-nullable hostId field.");
+//            }
+//            if (illegalOrphanMessages != null) {
+//                throw new IllegalOrphanException(illegalOrphanMessages);
+//            }
             TblMle vmmMleId = tblHosts.getVmmMleId();
             if (vmmMleId != null) {
                 vmmMleId.getTblHostsCollection().remove(tblHosts);

@@ -14,7 +14,7 @@ import com.intel.mountwilson.trustagent.commands.ReadIdentityCmd;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.trustagent.commands.ReadAssetTag;
 import com.intel.mountwilson.trustagent.commands.RetrieveTcbMeasurement;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -27,6 +27,8 @@ import com.intel.mtwilson.trustagent.model.TpmQuoteRequest;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.File;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -34,6 +36,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.exec.CommandLine;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +49,8 @@ import org.apache.commons.lang3.StringUtils;
 @Path("/tpm")
 public class Tpm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tpm.class);
+    private long t0 = System.currentTimeMillis();
+    
 
     /*
     @POST
@@ -57,11 +62,18 @@ public class Tpm {
     }
     */
     
+    private void logPerformance(String message) {
+        long t1 = System.currentTimeMillis();
+        log.debug("performance: after {} ms: {}", t1-t0, message);
+        t0 = t1;
+    }
+    
     @POST
     @Path("/quote")
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     public TpmQuoteResponse tpmQuote(TpmQuoteRequest tpmQuoteRequest, @Context HttpServletRequest request) throws IOException, TAException {
+        logPerformance("inside tpmQuote");
         /**
          * issue #1038 we will hash this ip address together with the input
          * nonce to produce the quote nonce; mtwilson server will do the same
@@ -77,6 +89,7 @@ public class Tpm {
          * verification
          */
         TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
+        logPerformance("TrustagentConfiguration.loadConfiguration()");
         if( configuration.isTpmQuoteWithIpAddress() ) {
             if( IPv4Address.isValid(request.getLocalAddr()) ) {
                 IPv4Address ipv4 = new IPv4Address(request.getLocalAddr());
@@ -127,23 +140,29 @@ public class Tpm {
         }
 
         context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
-
         context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
 
+        logPerformance("new TADataContext()");
         new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
+        logPerformance("CreateNonceFileCmd");
         new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
+        logPerformance("ReadIdentityCmd");
 
         // Get the module information
         if (!osName.toLowerCase().contains("windows")) {
             new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
+            logPerformance("GenerateModulesCmd");
             new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
+            logPerformance("RetrieveTcbMeasurement");
         }
         new GenerateQuoteCmd(context).execute();
+        logPerformance("GenerateQuoteCmd");
         new BuildQuoteXMLCmd(context).execute();
-
-//            return context.getResponseXML();
+        logPerformance("BuildQuoteXMLCmd");
+            
+        // return context.getResponseXML();
         TpmQuoteResponse response = context.getTpmQuoteResponse();
-        // delete temporary session directory
+        logPerformance("context.getTpmQuoteResponse()");
 
         //assetTag 
         response.isTagProvisioned = isTagProvisioned;
@@ -151,17 +170,23 @@ public class Tpm {
             response.assetTag = assetTagHash;
         }
 
-        // we should use more neutral ways to delete the folder
-        FileUtils.forceDelete(new File(context.getDataFolder()));
-
-        /*
-        CommandUtil.runCommand(String.format("rm -rf %s",
-                EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
-
-
-        CommandUtil.runCommand(String.format("rmdir /s /q %s",
-                EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
-        */
+        // delete temporary session directory
+        if (!osName.toLowerCase().contains("windows")) {
+            CommandLine command = new CommandLine("rm");
+            command.addArgument("-rf");
+            command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder()));
+            Result result = ExecUtil.execute(command);
+            logPerformance("ExecUtil.execute(command)");
+            if (result.getExitCode() != 0) {
+                log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+                throw new TAException(ErrorCode.ERROR, result.getStderr());
+            }
+            log.debug("command stdout: {}", result.getStdout());
+        } else {
+            // we should use more neutral ways to delete the folder
+            FileUtils.forceDelete(new File(context.getDataFolder())); 
+        }
+        logPerformance("before return response");
         return response;
     }
     

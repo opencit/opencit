@@ -53,7 +53,7 @@ public class RPClientTest {
                                         +	"</params>"
                                         + "</methodCall>";
         
-        TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.IS_VM_VERIFIED);
+        TCBuffer tcBuffer = Factory.newTCBuffer(RPCCall.IS_VM_VERIFIED);
 		
         // first replace the %s of xmlRPCBlob by VMUUID, rpcore accept all method input arguments in base64 format
         String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary(("425d20e9-0132-48d7-a3d6-563775968efe").getBytes()));
@@ -70,11 +70,9 @@ public class RPClientTest {
         TCBuffer result = instance.send(tcBuffer);
         
         // process response
-        System.out.println("rpid = " + result.getRpId());
         System.out.println("RPC Call Index =" + result.getRPCCallIndex());
         System.out.println("RPC Payload Size = " + result.getRPCPayloadSize());
         System.out.println("RPC Call Status = " + result.getRPCCallStatus());
-        System.out.println("RPC Original RP ID = " + result.getOriginalRpId());
         System.out.println("RPC Payload = " + result.getRPCPayload());
         
         // close RPClient at the end of application

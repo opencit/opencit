@@ -277,6 +277,8 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
         }        
     }
     
+    // Commenting out as it is not being used
+    /*
     private Set<String> loadCache() throws IOException {
             HashSet<String> cache = new HashSet<>();
             try(FileInputStream in = new FileInputStream(getCacheFile())) {
@@ -289,7 +291,7 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
                 }
             }        
         return cache;
-    }
+    }*/
 
     @Override
     protected void execute() throws Exception {

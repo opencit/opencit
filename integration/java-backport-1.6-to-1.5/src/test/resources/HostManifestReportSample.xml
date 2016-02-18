@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<host_manifest_report>
-<Host Name="10.1.71.103">
-<Manifest TrustStatus="0" Name="0" Value="e3a29bd603bf9982113b696cd37af8afc58e2877" Verified_On="2012-02-13T16:39:31.753-08:00"/>
-<Manifest TrustStatus="0" Name="19" Value="cdd56ce92ce515414e72d8203a30b0107717cf27" Verified_On="2012-02-13T16:39:31.753-08:00"/>
-<Manifest TrustStatus="0" Name="17" Value="014936fb8e273d53823636235b1626ab25f1c514" Verified_On="2012-02-13T16:39:31.753-08:00"/>
-<Manifest TrustStatus="0" Name="18" Value="9c65082230f792824eba1c43e3c0fa6255186577" Verified_On="2012-02-13T16:39:31.753-08:00"/>
-</Host>
-</host_manifest_report>

@@ -6,7 +6,6 @@ package test.jdbi;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jdbi.util.UUIDMapper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;

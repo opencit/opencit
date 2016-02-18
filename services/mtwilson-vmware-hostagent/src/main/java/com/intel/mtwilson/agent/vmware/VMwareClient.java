@@ -299,7 +299,9 @@ public class VMwareClient implements TlsClient {
     }
     public Object getMEProperty(String meType, String meName, String propertyName)
             throws InvalidProperty, RuntimeFault, RemoteException {
-        return getMEProperties(meType, meName, new String[]{propertyName}).get(propertyName);
+        Object value = getMEProperties(meType, meName, new String[]{propertyName}).get(propertyName);
+        if (value == null) { throw new InvalidProperty(); }
+        return value;
     }
     
     protected Hashtable getMEProperties(String meType, String meName, String[] properties)
@@ -575,7 +577,7 @@ public class VMwareClient implements TlsClient {
         try {
             vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
         } catch (Exception e) {
-            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); 
+            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, clusterName); 
         }
         try {
             // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet

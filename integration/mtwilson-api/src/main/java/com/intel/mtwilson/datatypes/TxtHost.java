@@ -158,9 +158,11 @@ public class TxtHost {
                 }           
             }
         }
-        if( connStr == null ) { return null; }
         // Now return back the properly formatted connection string.
-        return connStr.getConnectionStringWithPrefix();
+        if( connStr != null ) 
+            return connStr.getConnectionStringWithPrefix();
+        else 
+            return null;        
     }
 
     public String getDescription() {

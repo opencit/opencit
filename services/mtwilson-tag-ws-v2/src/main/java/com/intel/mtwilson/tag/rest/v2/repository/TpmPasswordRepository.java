@@ -15,14 +15,12 @@ import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.repository.RepositoryStoreConflictException;
 import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.tag.dao.TagJdbi;
-import com.intel.mtwilson.tag.model.CertificateLocator;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.tag.model.TpmPasswordCollection;
 import com.intel.mtwilson.tag.model.TpmPasswordFilterCriteria;
 import com.intel.mtwilson.tag.model.TpmPasswordLocator;
+import com.intel.mtwilson.util.ASDataCipher;
 import java.util.Date;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -64,6 +62,8 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             
             TpmPassword obj = dao.findById(locator.id);
             if (obj != null) {
+                String cipherPassword = obj.getPassword();
+                obj.setPassword(ASDataCipher.cipher.decryptString(cipherPassword));
                 return obj;
             }
                                     
@@ -85,7 +85,7 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             TpmPassword obj = dao.findById(item.getId());
             if (obj != null) {
                 Date modifiedOn = new Date();
-                dao.update(item.getId(), item.getPassword(), modifiedOn);
+                dao.update(item.getId(), ASDataCipher.cipher.encryptString(item.getPassword()), modifiedOn);
                 item.setModifiedOn(modifiedOn);
             }
             else {
@@ -112,7 +112,7 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             TpmPassword obj = dao.findById(item.getId());
             if (obj == null){
                 Date modifiedOn = new Date();
-                dao.insert(item.getId(), item.getPassword(), modifiedOn);
+                dao.insert(item.getId(), ASDataCipher.cipher.encryptString(item.getPassword()), modifiedOn);
                 item.setModifiedOn(modifiedOn);
                 log.debug("TpmPassword:Create - Created the TpmPassword {} successfully.", item.getId().toString());
             } else {

@@ -69,9 +69,14 @@ public class StartHttpServer implements Command {
         sslContextFactory.setKeyStorePassword(configuration.getTrustagentKeystorePassword());
         sslContextFactory.setTrustStorePath(configuration.getTrustagentKeystoreFile().getAbsolutePath());
         sslContextFactory.setTrustStorePassword(configuration.getTrustagentKeystorePassword());
-        sslContextFactory.addExcludeProtocols("SSL", "SSLv2", "SSLv3");
-        // fixes this error in mtwilson java.lang.NoClassDefFoundError: org/bouncycastle/jce/spec/ECPublicKeySpec by limiting our supported tls ciphers to RSA ciphers
-        sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA_WITH_AES_128_CBC_SHA","SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA","TLS_RSA_WITH_AES_128_CBC_SHA","SSL_RSA_WITH_3DES_EDE_CBC_SHA");
+        sslContextFactory.setExcludeProtocols("SSL", "SSLv2", "SSLv2Hello", "SSLv3");
+        sslContextFactory.setIncludeCipherSuites(
+                "TLS_DHE_RSA.*", "TLS_ECDHE.*"
+        );
+        sslContextFactory.setExcludeCipherSuites(
+                ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*"
+        );
+        sslContextFactory.setRenegotiationAllowed(false);
         ServerConnector https = new ServerConnector(server,
             new SslConnectionFactory(sslContextFactory,"http/1.1"),
             new HttpConnectionFactory(httpsConfig));

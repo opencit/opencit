@@ -62,7 +62,8 @@ public class MyJpa {
     TblTaLogJpaController mwTaLog;
     MwProcessorMappingJpaController mwProcessorMapping;
     MwAssetTagCertificateJpaController mwAssetTagCertificate;
-    
+    MwVmAttestationReportJpaController mwVmAttestationReportJpaController;
+    MwHostPreRegistrationDetailsJpaController mwHostPreRegistrationDetailsJpaController;
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
     
     public MyJpa(MyPersistenceManager pm) { 
@@ -209,4 +210,13 @@ public class MyJpa {
     public MwMeasurementXmlJpaController mwMeasurementXml() throws IOException {
         return new MwMeasurementXmlJpaController(pm.getASData());
     }
+    
+    public MwVmAttestationReportJpaController mwVmAttestationReport() throws IOException {
+        return new MwVmAttestationReportJpaController(pm.getASData());
+    }
+    
+    public MwHostPreRegistrationDetailsJpaController mwHostPreRegistrationDetails() throws IOException {
+        return new MwHostPreRegistrationDetailsJpaController(pm.getASData());
+    }
+    
 }

@@ -16,8 +16,8 @@
                     <table cellpadding="3" cellspacing="5">
                         <tbody>
                             <tr>
-                                <td><label data-i18n="input.locale">Locale:</label></td>
-                                <td>
+                                <td><label style="font-weight: normal; font-size: 16px" data-i18n="input.locale">Locale:</label></td>
+                                <td style="padding-left: 5px">
                                     <select class="textBoxClass" id="ddlLocales">
                                         <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">
                                             <option value="${locale.localeName}" <c:if test='${locale.localeName == selectedLocale}'> selected </c:if>>${locale.localeName}</option>

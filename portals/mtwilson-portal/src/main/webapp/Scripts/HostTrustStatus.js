@@ -3,11 +3,13 @@ var locationPolicyError = false;
 //This variable will contains name of all VMWare Host type. 
 var VMWareHost = [];
 var VMWareHostLocation = [];
+var selectedHost = [];
 
 //Called on load of HostTrustStatus..jsp
 $(function() {
 	$('#mainTrustDetailsDiv').prepend(disabledDiv);
 	sendJSONAjaxRequest(false, 'getData/getDashBoardData.html', null, populateHostTrustDetails, null);
+	sendJSONAjaxRequest(false, 'getData/getAllHostForView.html', null, processAllHostDetails, null);
 	
 });
 
@@ -16,6 +18,7 @@ function populateHostTrustDetails(responsJSON) {
 	$('#disabledDiv').remove();
 	if (responsJSON.result) {
 		$('#mainTrustDetailsDivHidden').show();
+		$('#refresh_all').show();
 		populateHostTrustDataIntoTable(responsJSON.hostVo);
 		//This statement will create pagination div based on the no_of_pages
 		applyPagination('hostTrustPaginationDiv',responsJSON.noOfPages,fngetHostTrustNextPage,1);
@@ -56,7 +59,7 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			str+='<tr class="'+classValue+'" hostID="'+ escapeForHTMLAttributes(hostDetails[item].hostID) +'" id="host_div_id_'+ escapeForHTMLAttributes(hostDetails[item].hostName.replace(/\./g,'_'))+'">'+
                                                 //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
 				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
-				'<td class="row2">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</td>'+
+				'<td class="row2"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-toggle="tooltip" title="Edit Host">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</a></td>'+
 				'<td align="center" class="row3"><img border="0" src="'+ hostDetails[item].osName +'"></td>';
 				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ hostDetails[item].hypervisorName+'">' : '';
 				str+='<td align="center" class="row4">'+ value +'</td>';
@@ -75,10 +78,10 @@ function populateHostTrustDataIntoTable(hostDetails) {
 				}*/
 				
 				str+='<td class="row9">'+ getHTMLEscapedMessage(hostDetails[item].updatedOn) +'</td>'+
-				'<td nowrap align="center" class="row10"><input class="tableButton" type="button"  value="Refresh" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh"></td>'+
+				'<td nowrap align="center" class="row10"><a href="#" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh" data-toggle="tooltip" title="Refresh"><span class="glyphicon glyphicon-refresh"></span></a></td>'+
 				'<td align="center" class="row11"><a><img src="images/trust_assertion.png" onclick="fnGetTrustSamlDetails(\''+hostDetails[item].hostName+'\')"/></a></td>'+
-			    '<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
-				'<td class="row12">';
+			    '<td class="rowHelp" style="text-align: center"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
+				'<td class="row12" style="text-align: center">';
 				
 				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+ getHTMLEscapedMessage(hostDetails[item].errorMessage) +'</textarea>';}
 				str+='</td>'+
@@ -426,72 +429,112 @@ function byProperty(property) {
 }
 
 function getFailureReportSuccess(responseJSON) {
-	$('#disabledDiv').remove();
-	if(responseJSON.result){
+    $('#disabledDiv').remove();
+    if (responseJSON.result) {
         var reportdata = responseJSON.reportdata;
-        var str ="";
-        str+='<div class="tableDisplay"><table width="100%" cellpadding="0" cellspacing="0">'+
-              '<thead><tr>'+
-              '<th class="failureReportRow1"></th>'+
-              '<th class="failureReportRow2" data-i18n="table.pcr_name">PCR Name</th>'+
-              '<th class="failureReportRow3" data-i18n="table.pcr_value">PCR Value</th>'+
-              '<th class="failureReportRow4" data-i18n="table.whitelist_value">WhiteList Value</th>'+
-              '</tr></thead></table></div>';
-          
-          str+='<div class="" style="overflow: auto;">'+
-              '<table width="100%" cellpadding="0" cellspacing="0"><tbody>';
-          
-          var classValue = null;
-          
-          // PCRs should be ordered. issue #460 
-          reportdata.sort(byProperty("name")); // name is PCR Name
-          
-        for(var item in reportdata){
-			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
-			var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
-            str+='<tr class="'+classValue+'">'+
-                        '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+            	
-            	'<td class="failureReportRow2">'+reportdata[item].name+'</td>'+
-                '<td class="failureReportRow3" style="'+styleUntrusted+'" >'+reportdata[item].value+'</td>'+
-                '<td class="failureReportRow4" >'+reportdata[item].whiteListValue+'</td>'+
-                '</tr>';
-            
+        var str = "";
+        str += '<div class="tableDisplay"><table width="100%" cellpadding="0" cellspacing="0">' +
+                '<thead><tr>' +
+                '<th class="failureReportRow1"></th>' +
+                '<th class="failureReportRow2" data-i18n="table.pcr_name">PCR Name</th>' +
+                '<th class="failureReportRow3" data-i18n="table.pcr_value">PCR Value</th>' +
+                '<th class="failureReportRow4" data-i18n="table.whitelist_value">WhiteList Value</th>' +
+                '</tr></thead></table></div>';
+
+        str += '<div class="" style="overflow: auto;">' +
+                '<table width="100%" cellpadding="0" cellspacing="0"><tbody>';
+
+        var classValue = null;
+
+        // PCRs should be ordered. issue #460 
+        reportdata.sort(byProperty("name")); // name is PCR Name
+
+        for (var item in reportdata) {
+            if (item % 2 === 0) {
+                classValue = 'evenRow';
+            } else {
+                classValue = 'oddRow';
+            }
+            var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
+            str += '<tr class="' + classValue + '">' +
+                    '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>' +
+                    '<td class="failureReportRow2">' + reportdata[item].name + '</td>' +
+                    '<td class="failureReportRow3" style="' + styleUntrusted + '" >' + reportdata[item].value + '</td>' +
+                    '<td class="failureReportRow4" >' + reportdata[item].whiteListValue + '</td>' +
+                    '</tr>';
+
             var moduleLog = reportdata[item].moduleLogs;
-            str+='<tr style="display: none;">';
-            if (moduleLog.length > 0) {
-    			str+='<td class="'+classValue+'" colspan="4">'+
-    	             '<div class="subTableDivFailureReport" >'+
-    	             '<table width="100%" cellpadding="0" cellspacing="0">'+
-    	             '<thead><tr>'+
-    	              '<th class="failureReportSubRow1">Component Name</th>'+
-    	              '<th class="failureReportSubRow2">Value</th>'+
-    	              '<th class="failureReportSubRow3">WhiteList Value</th>'+
-    	              '</tr></thead>';
-    			
-    			for(var logs in moduleLog){
-    				var logclass = null;
-    				if(logs % 2 === 0){logclass='evenRow';}else{logclass='oddRow';}
-    				styleUntrusted = moduleLog[logs].trustStatus == 0 ? "color:red;" : "";
-    	            str+='<tr class="'+logclass+'">'+
-    	                '<td class="failureReportSubRow1" name="mleName">'+moduleLog[logs].componentName+'</td>'+
-    	                '<td class="failureReportSubRow2" name="mleName" style="'+styleUntrusted+'" >'+moduleLog[logs].value+'</td>'+
-    	                '<td class="failureReportSubRow3" name="mleName">'+moduleLog[logs].whitelistValue+'</td>'+
-    	                '</tr>';
-    	        }
-    			
-    			str+='</table></div>';
-    			
-            }else {
-    			str+='<td class="'+classValue+'" colspan="4">'+
-    				'<div class="subTableDiv" style="text-align: left;" data-i18n="label.no_module_logs">This PCR does not have any Module Logs.</div></td>';
-			}
-            str+="</tr>";
+            str += '<tr style="display: none;">';
+            if (moduleLog.length > 0 && reportdata[item].moduleLogs[0].componentName != null) {
+                str += '<td class="' + classValue + '" colspan="4">' +
+                        '<div class="subTableDivFailureReport" >' +
+                        '<table width="100%" cellpadding="0" cellspacing="0">' +
+                        '<thead><tr>' +
+                        '<th class="failureReportSubRow0"></th>'+
+                        '<th class="failureReportSubRow1">Component Name</th>' +
+                        '<th class="failureReportSubRow2">Value</th>' +
+                        '<th class="failureReportSubRow3">WhiteList Value</th>' +
+                        '</tr></thead>';
+
+                for (var logs in moduleLog) {
+                    var logclass = null;
+                    if (logs % 2 === 0) {
+                        logclass = 'evenRow';
+                    } else {
+                        logclass = 'oddRow';
+                    }
+                    styleUntrusted = moduleLog[logs].trustStatus == 0 ? "color:red;" : "";
+                    str += '<tr class="' + logclass + '">' +
+                            '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+                            '<td class="failureReportSubRow1" name="mleName">' + moduleLog[logs].componentName + '</td>' +
+                            '<td class="failureReportSubRow2" name="mleName" style="' + styleUntrusted + '" >' + moduleLog[logs].value + '</td>' +
+                            '<td class="failureReportSubRow3" name="mleName">' + moduleLog[logs].whitelistValue + '</td>' +
+                            '</tr>';
+                    
+                    var subModuleLog = moduleLog[logs].moduleLogs;
+                    str+='<tr style="display: none;">';
+                    if (subModuleLog.length > 0) {
+                    str += '<td class="' + classValue + '" colspan="4">' +
+                            '<div class="subTableDivFailureReport" >' +
+                            '<table width="100%" cellpadding="0" cellspacing="0">' +
+                            '<thead><tr>' +
+                            '<th class="failureReportSubRow1">Component Name</th>' +
+                            '<th class="failureReportSubRow2">Value</th>' +
+                            '<th class="failureReportSubRow3">WhiteList Value</th>' +
+                            '</tr></thead>';
+
+                            for (var subModulelogs in subModuleLog){
+                                var logclass = null;
+                                if (subModulelogs % 2 === 0){logclass = 'evenRow'; } else{logclass = 'oddRow'; }
+                                styleUntrusted = subModuleLog[subModulelogs].trustStatus == 0 ? "color:red;" : "";
+                                str += '<tr class="' + logclass + '">' +
+                                '<td class="failureReportSubRow1" name="mleName">' + subModuleLog[subModulelogs].componentName + '</td>' +
+                                '<td class="failureReportSubRow2" name="mleName" style="' + styleUntrusted + '" >' + subModuleLog[subModulelogs].value + '</td>' +
+                                '<td class="failureReportSubRow3" name="mleName">' + subModuleLog[subModulelogs].whitelistValue + '</td>' +
+                                '</tr>';
+                            }
+                        str+='</table></div>';
+
+                    } else {
+                         str+='<td class="'+classValue+'" colspan="4">'+
+                            '<div class="subTableDiv" style="text-align: left;" >This module does not have any additional modules.</div></td>';
+                    }
+                    str+="</tr>";                                            
+                }
+
+                str += '</table></div>';
+
+            } else {
+                str += '<td class="' + classValue + '" colspan="4">' +
+                        '<div class="subTableDiv" style="text-align: left;" data-i18n="label.no_module_logs">This PCR does not have any Module Logs.</div></td>';
+            }
+            str += "</tr>";
         }
-       
-        str+='</tbody> </table></div>';
-        $('#showFailureReportTable').html('<div>'+str+'</div>');
-    }else{
-        $('#showFailureReportTable').html('<div class="errorMessage">'+responseJSON.message+'</div>');
+
+        str += '</tbody> </table></div>';
+        $('#showFailureReportTable').html('<div>' + str + '</div>');
+    } else {
+        $('#showFailureReportTable').html('<div class="errorMessage">' + responseJSON.message + '</div>');
     }
 }
 
@@ -556,3 +599,32 @@ function updateTrustStatusSuccess(response,element,host) {
 	}
       // alert(response.toSource());
 }
+
+// Added new scriplets for refresh all option
+function processAllHostDetails(responseJSON) {
+        if (responseJSON.result) {
+		selectedHost = responseJSON.hostVo;
+        }else {
+                $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responseJSON.message)+'</span>');
+        }
+}
+
+function fnGetUpdateForAllHosts() {
+        var data = "selectedHost=";
+    	for ( var host in selectedHost) {
+            data+=selectedHost[host].hostName+";";
+        }
+        $('#mainContainer').html('<div id="DashBoardPage"></div>');
+        setLoadImage('DashBoardPage', '40px', '500px');
+        data=data.substring(0,data.length-1);
+        sendJSONAjaxRequest(false, 'getData/updateTrustForSelected.html', data, fnUpdateTrustForSelectedSuccess, null);
+}
+
+function fnUpdateTrustForSelectedSuccess(responseJSON) {
+        if (responseJSON.result) {
+                getDashBoardPage();
+        }else {
+                $('#errorMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(responseJSON.message)+'</div>');
+        }
+}
+

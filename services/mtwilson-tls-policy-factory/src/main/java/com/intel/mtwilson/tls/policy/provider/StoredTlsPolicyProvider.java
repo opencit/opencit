@@ -4,10 +4,8 @@
  */
 package com.intel.mtwilson.tls.policy.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.net.Hostname;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.x509.repository.CertificateRepository;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
@@ -16,10 +14,8 @@ import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import com.intel.mtwilson.tls.policy.TlsProtection;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyMigrationException;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
@@ -28,7 +24,6 @@ import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
 import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyWriter;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;

@@ -12,5 +12,6 @@ public enum TrustMarker {
     BIOS,
     VMM,
     ASSET_TAG,
+    VM,
     LOCATION;            
 }

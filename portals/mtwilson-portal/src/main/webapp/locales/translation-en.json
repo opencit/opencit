@@ -9,7 +9,7 @@
         "branch": "Branch",
         "build_timestamp": "Built on",
         "greeting": "Welcome",
-        "greeting2": "Welcome to Mt.Wilson"
+        "greeting2": "Intel Cloud Integrity Technology"
     },
     "nav": {
         "first": "First",
@@ -71,7 +71,8 @@
         "asset_tag": "Asset Tag Reference Implementation",
         "tag_management":"Asset Tag Management",
         "tag_selection_management":"Tag Selection",
-        "tag_certificate_management":"Manage Certificates"
+        "tag_certificate_management":"Manage Certificates",
+        "alerts":"Alerts"
     },
     "header": {
         "about": "",
@@ -115,7 +116,8 @@
         "certificate_creation":"Create New Certificate",
         "certificate_browse":"Browse Certificates",
         "servers_to_provision":"Step 1: Select the servers to provision the tags",
-        "choose_tag_selection":"Step 2: Choose the Tag selection"
+        "choose_tag_selection":"Step 2: Choose the Tag selection",
+        "alerts_header":"Alerts"
     },
     "link": {
         "import": "Import",
@@ -174,7 +176,8 @@
         "encrypted":"Encrypted",
         "deploy":"Deploy",
         "download":"Download",
-        "revoke":"Revoke"
+        "revoke":"Revoke",
+        "alerts":"Alerts"
     },
     "button": {
         "update_trust_status": "Update Trust Status",
@@ -261,6 +264,7 @@
         "vmware_cluster": "VMware Cluster:",
         "vcenter_server": "vCenter Server:",
         "xen_details": "XenServer Details:",
+        "opensource_details": "Server Details",
         "wl_host": "Whitelist Host:",
         "manifest_list": "Manifest List:",
         "required_manifests": "Required Manifests:",
@@ -338,10 +342,10 @@
         "whitelist_value": "Whitelist Value"
     },
     "label": {
-        "dl_root_ca": "Click on Download icon to download Root CA Certificate",
-        "dl_privacy_ca": "Click on Download icon to download Privacy CA Certificate",
-        "dl_tls": "Click on Download icon to download TLS Certificate",
-        "dl_saml": "Click on Download icon to download SAML Certificate",
+        "dl_root_ca": "Download Root CA Certificate",
+        "dl_privacy_ca": "Download Privacy CA Certificate",
+        "dl_tls": "Download TLS Certificate",
+        "dl_saml": "Download SAML Certificate",
         "oem_bios": "OEM BIOS",
         "hypervisor": "Hypervisor (VMM)",
         "configured_pcr22": "(If configured in TPM PCR 22)",
@@ -402,7 +406,8 @@
         "upload_xml":"Upload XML",
         "no_pending_api_requests":"No requests are currently pending to be reviewed.",
         "mtw_1x_roles":"Mt Wilson 1.x roles for backward compatibility:",
-        "mtw_2x_roles":"Mt Wilson 2.x roles:"
+        "mtw_2x_roles":"Mt Wilson 2.x roles:",
+        "get_authentication_status":"Authentication Status"
     },
     "placeholder": {
         "selection_name":"Name of this selection",
@@ -526,7 +531,7 @@
         "delete_host":"Are you sure you want to delete this host?"
     },
     "help": {
-        "upload_flat_file_help":"<p>Provide a plain text file (.txt format) containing a list of hosts to be registered in the following formats:</p><p>Agent | Host_Name | connection string</p><br><p><b>For Open Source Based Hosts:</b></p><p>intel|Host_Name|Host_Port_no</p><p><i>e.g.   intel|myTrustAgent|1443</i></p><br><p><b>For VMWare Based Hosts:</b></p><p>vmware|Host_Name|Vmware_Connection_String*</p><p><i>e.g. vmware|myVmwareHost|https://192.168.1.0:443/sdk;Administrator;Password</i></p><br><p><b>For Citrix Type</b></p><p>citrix|Host_Name|Citrix_Connection_String*</p><p><i>e.g.   citrix|myCitrixHost|https://192.168.1.0:443/;Administrator;Password</i></p><br><p>* Connection strings must be valid urls.  Please notice the / after the port number.  This is required.</p>",
+        "upload_flat_file_help":"<p>Provide a plain text file (.txt format) containing a list of hosts to be registered in the following formats:</p><p>Agent | Host_Name | connection string</p><br><p><b>For Open Source Based Hosts:</b></p><p>intel|Host_Name|OpenSource_Connection_String</p><p><i>e.g.   intel|HostIP|https://HostIP:1443/;login;password</i></p><br><p><b>For VMWare Based Hosts:</b></p><p>vmware|Host_Name|Vmware_Connection_String*</p><p><i>e.g. vmware|myVmwareHost|https://vCenterServer:443/sdk;Administrator;Password</i></p><br><p><b>For Citrix Type</b></p><p>citrix|Host_Name|Citrix_Connection_String*</p><p><i>e.g.   citrix|myCitrixHost|https://myCitrixHost:443/;Administrator;Password</i></p><br><p>* Connection strings must be valid urls.  Please notice the / after the port number.  This is required.</p>",
         "vcenter_string_help":"<p>Please provide the hostname or IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.</p><p><i>Ex: hostname.com</i></p><p><i>Ex: 192.168.1.1</i></p><p><i>Ex: 192.168.1.0:444</i></p>",
         "add_location_help":"<p>Please provide Location for server.</p>",
         "required_pcr_values_help":"<p>This option allows the user to change the PCRs to be used for White Listing.</p><br><p>By default the tool selects the minimum required PCRs based on the host type.</p><p>PCR[0]- Holds the Core Root of Trust Measurement (CRTM) including BIOS start-up code, Power-on-self-test, and other OEM provided code such as embedded Option ROMs and other Host Platform Extensions.</p><p>PCR[1]- Host Platform Configuration measurement which includes BIOS setup or devices controlled by embedded Option ROMS.</p><p>PCR[2]- Option ROM Code measures option ROM code for add-in devices not provided by the OEM as an embedded device (e.g., PCI RAID adaptor, Network adaptor, etc.).</p><p>PCR[3]- Option ROM Configuration and Data - measures configuration data covered by option ROM code for add-in devices not provided by the OEM.</p><p>PCR[4]- IPL code that performs the initial boot, usually the Master Boot Record (MBR).</p><p>PCR[5]- IPL Configuration and Data (i.e., the configuration and data used by the IPL Code).</p><p>PCR[17]- Code and data associated with the secure launch process [SINIT, BIOS ACM, & Launch Control Policies.</p><p>PCR[18]- Measurement of the MLE [Tboot + First module in the grub.conf (if applicable)]</p><p>PCR[19-20]- Measurement of the core kernel module(s).</p>",

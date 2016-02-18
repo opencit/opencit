@@ -19,7 +19,7 @@ clean:
 	rm -f aikqverify aikqverify.o aikqverifywin aikverifywin.o
 
 install:
-	mkdir /var/opt/intel/aikverifyhome/bin
+	mkdir -p /var/opt/intel/aikverifyhome/bin
 	chmod 755 aikqverify openssl.sh
 	cp aikqverify /var/opt/intel/aikverifyhome/bin
 	cp aikqverifywin /var/opt/intel/aikverifyhome/bin

@@ -4,6 +4,7 @@
  */
 package test.saml;
 
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
@@ -16,6 +17,7 @@ import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.saml.IssuerConfiguration;
 import java.io.File;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
@@ -64,7 +66,8 @@ public class SamlVerificationTest {
         hostTrustStatus.vmm = false;
         TxtHost host = new TxtHost(txtHostRecord, hostTrustStatus);
         // generate SAML assertion
-        SamlGenerator generator = new SamlGenerator(resource, configuration);
+        IssuerConfiguration issuerConfiguration = new IssuerConfiguration(new CommonsConfiguration(configuration));
+        SamlGenerator generator = new SamlGenerator(issuerConfiguration);
         SamlAssertion assertion = generator.generateHostAssertion(host, null, null);
         log.debug("assertion: {}", assertion.assertion);
         // verify SAML assertion

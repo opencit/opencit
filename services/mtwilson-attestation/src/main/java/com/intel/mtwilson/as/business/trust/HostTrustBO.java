@@ -1,6 +1,8 @@
 package com.intel.mtwilson.as.business.trust;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
@@ -24,6 +26,7 @@ import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
@@ -50,9 +53,22 @@ import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.saml.TxtHostWithAssetTag;
+import com.intel.mtwilson.as.rest.v2.model.VMAttestation;
+import com.intel.mtwilson.policy.fault.XmlMeasurementLogContainsUnexpectedEntries;
+import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissingExpectedEntries;
+import com.intel.mtwilson.policy.fault.XmlMeasurementLogValueMismatchEntries;
+import com.intel.mtwilson.policy.rule.XmlMeasurementLogEquals;
+import com.intel.mtwilson.policy.rule.XmlMeasurementLogIntegrity;
+import com.intel.mtwilson.saml.IssuerConfiguration;
+import com.intel.mtwilson.saml.SamlConfiguration;
+import com.intel.mtwilson.threads.Attestation;
+import com.intel.mtwilson.util.ASDataCipher;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -64,9 +80,12 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
 import org.apache.commons.configuration.Configuration;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -77,27 +96,19 @@ import org.slf4j.MarkerFactory;
 public class HostTrustBO {
     public static final String SAML_KEYSTORE_NAME = "SAML";
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTrustBO.class);
+    private static Configuration configuration;
     Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.HOST_ATTESTATION.getValue());
     
-    private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
-    private static final int CACHE_VALIDITY_SECS;
-    private Resource samlKeystoreResource = null;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     
-    private HostBO hostBO = new HostBO(); 
-    
-    static{
-        CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-        //log.debug("Config saml.validity.seconds = " + CACHE_VALIDITY_SECS);
-    }
+    private HostBO hostBO;
     
     public HostTrustBO() {
         super();
-        JacksonObjectMapperProvider provider = new JacksonObjectMapperProvider();
-        provider = new JacksonObjectMapperProvider();
-        mapper = provider.createDefaultMapper();
-        loadSamlSigningKey();
+        hostBO = new HostBO(); 
+        mapper = JacksonObjectMapperProvider.createDefaultMapper();
+        configuration = My.configuration().getConfiguration();
     }
     
 //    public HostTrustBO(PersistenceManager pm) {
@@ -107,15 +118,9 @@ public class HostTrustBO {
     
     public void setHostBO(HostBO hostBO) { this.hostBO = hostBO; }
     
-    private void loadSamlSigningKey() {
-        /*
-        MwKeystore mwKeystore = keystoreJpa.findMwKeystoreByName(SAML_KEYSTORE_NAME);
-        if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
-            samlKeystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
-        }
-        */
-        //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); 
-        samlKeystoreResource = new FileResource(My.configuration().getSamlKeystoreFile());
+
+    public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
+        return getTrustStatus(hostName, null);
     }
         
     /**
@@ -125,12 +130,12 @@ public class HostTrustBO {
      * @param hostName must not be null
      * @return 
      */
-    public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
+    public HostTrustStatus getTrustStatus(Hostname hostName, Nonce challenge) throws IOException {
         if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
 //        long start = System.currentTimeMillis();
         
         TblHosts tblHosts = getHostByName(hostName);
-        return getTrustStatus(tblHosts, hostName.toString());
+        return getTrustStatus(tblHosts, hostName.toString(), challenge);
     }
     
     public HostTrustStatus getTrustStatusByAik(Sha1Digest aik) throws IOException {
@@ -157,18 +162,6 @@ public class HostTrustBO {
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         boolean biosMLEFound = false, VMMMLEFound = false;
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
-        
-            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-//            if( log.isDebugEnabled() ) {
-//                try {
-//                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostConfigObj)); //This statement may contain clear text passwords
-//                }
-//                catch(IOException e) {
-//                    log.debug("cannot serialize host input to addHost", e);
-//                }
-//            }
-            
         
         try {
             
@@ -199,8 +192,23 @@ public class HostTrustBO {
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
-
-            PcrManifest pcrManifest = agent.getPcrManifest();
+            tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
+            
+            PcrManifest pcrManifest;
+            if( hostConfigObj.getChallengeHex() == null || hostConfigObj.getChallengeHex().isEmpty() ){
+                pcrManifest = agent.getPcrManifest();
+            }
+            else {
+                if( Digest.sha1().isValidHex(hostConfigObj.getChallengeHex()) ) {
+                    Nonce challenge = new Nonce(Digest.sha1().valueHex(hostConfigObj.getChallengeHex()).getBytes());
+                    pcrManifest = agent.getPcrManifest(challenge);
+                }
+                else {
+                    log.error("Cannot retrieve PCRs from host because of invalid challenge: {}", hostConfigObj.getChallengeHex());
+                    throw new ASException(ErrorCode.AS_INVALID_INPUT);
+                }
+            }
+            
             if( pcrManifest == null ) {
                 throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
             }
@@ -233,7 +241,7 @@ public class HostTrustBO {
             } else {
                 
                 String targetType = hostConfigObj.getBiosWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigObj.getBiosWLTarget()) {
                     case BIOS_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -308,7 +316,7 @@ public class HostTrustBO {
                 
             } else {
                 String targetType = hostConfigObj.getVmmWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigObj.getVmmWLTarget()) {
                     case VMM_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -485,10 +493,15 @@ public class HostTrustBO {
                         tblHosts.setBiosMleId(biosMLE);
                         tblHosts.setVmmMleId(null);
 
+                        long t0 = System.currentTimeMillis();
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        long t1 = System.currentTimeMillis();
+                        log.trace("performance: hostTrustPolicyFactory.loadTrustPolicyForHost: {}ms", t1-t0);
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport tempTrustReport = policyEngine.apply(hostReport, trustPolicy);
-
+                       long t2 = System.currentTimeMillis();
+                        log.trace("performance: policyEngine.apply: {}ms", t2-t1);
+ 
                         if (tempTrustReport != null && tempTrustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
                             // We found the new MLE to map to. We need to see if the VMM MLE also needs to be updated
                             log.debug("UpdateHostIfUntrusted: Found the new matching BIOS MLE '{}' for host '{}'.", biosMLE.getName(), tblHosts.getName());
@@ -605,7 +618,7 @@ public class HostTrustBO {
             } 
 
             long updateHostIfUntrustedVMMStop = System.currentTimeMillis();
-            log.debug("UpdateHostIfUntrusted: VMM update performance {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
+            log.trace("performance: UpdateHostIfUntrusted VMM update: {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
             
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
@@ -628,7 +641,7 @@ public class HostTrustBO {
             TrustReport finalTrustReport = policyEngine.apply(hostReport, trustPolicy);            
             
             long updateHostIfUntrustedStop = System.currentTimeMillis();
-            log.debug("UpdateHostIfUntrusted Performance {}", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
+            log.trace("performance: UpdateHostIfUntrusted: {}ms", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
             
             return finalTrustReport;
                                    
@@ -647,6 +660,9 @@ public class HostTrustBO {
         }           
     }
     
+    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) throws IOException {
+        return getTrustStatus(tblHosts, hostId, null);
+    }
     
     /**
      * 
@@ -654,7 +670,7 @@ public class HostTrustBO {
      * @param hostId can be Hostname or AIK (SHA1 hex) ; it's used in any exceptions to refer to the host.  this allows us to use the same code for a trust report lookup by hostname and by aik
      * @return 
      */
-    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) throws IOException {
+    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId, Nonce challenge) throws IOException {
         if (tblHosts == null) {
             throw new ASException(
                     ErrorCode.AS_HOST_NOT_FOUND,
@@ -664,10 +680,10 @@ public class HostTrustBO {
         log.debug( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
         log.debug( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
-        TrustReport trustReport = getTrustReportForHost(tblHosts, hostId);
+        TrustReport trustReport = getTrustReportForHost(tblHosts, hostId, challenge); // issue #4978 use specified nonce, if available
         List<RuleResult> results = trustReport.getResults();
         for (RuleResult res : results) {
-            log.debug("Trust Report Rule Name: {}", res.getRuleName());
+            log.debug("Trust Report Rule Name: {} - status is {}.", res.getRuleName(), res.isTrusted());
             if (!res.isTrusted()) {
                 for (Fault f : res.getFaults()) {
                     if (f != null && f.getFaultName() != null && f.getCause() != null)
@@ -727,10 +743,12 @@ public class HostTrustBO {
      * at a higher level if needed for a non-privacy application.
      * 
      * @param tblHosts
+     * @param hostId hostname or aik sha1
+     * @param challenge is optiona; may be null
      * @return
      * @throws IOException 
      */
-    public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId) throws IOException {
+    public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId, Nonce challenge) throws IOException {
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
         long getAgentStart = System.currentTimeMillis(); 
@@ -740,25 +758,36 @@ public class HostTrustBO {
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
             throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId);
         }
+        tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
+        
         
         long getAgentManifestStart = System.currentTimeMillis(); 
-        PcrManifest pcrManifest = agent.getPcrManifest();
+        PcrManifest pcrManifest;
+        if( challenge == null ) {
+            pcrManifest = agent.getPcrManifest();
+        }
+        else {
+            pcrManifest = agent.getPcrManifest(challenge); // issue #4978 use specified nonce if available
+        }
         long getAgentManifestStop = System.currentTimeMillis();
         log.trace("performance: getPcrManifest: {}ms", getAgentManifestStop-getAgentManifestStart);
         
         HostReport hostReport = new HostReport();
         hostReport.tagCertificate = null; 
         hostReport.pcrManifest = pcrManifest;
-        hostReport.tpmQuote = null; 
+        hostReport.tpmQuote = null;
         hostReport.variables = new HashMap<String,String>(); 
         hostReport.assetTagReported = pcrManifest.getProvisionedTag(); //asset tag received from the host
         if( agent.isAikAvailable() ) {
+            long getAikStart = System.currentTimeMillis();
             if( agent.isAikCaAvailable() ) {
                 hostReport.aik = new Aik(agent.getAikCertificate());                
             }
             else {
                 hostReport.aik = new Aik(agent.getAik()); 
             }
+            long getAikStop = System.currentTimeMillis();
+            log.trace("performance: getAik or getAikCertificate: {}ms", getAikStop-getAikStart);
         }
         
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());
@@ -1016,6 +1045,7 @@ public class HostTrustBO {
                     TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
                     // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. 
                     if( pcr == null ) {
+                        log.debug("Unable to find the PCR {} in the map. Creating a new one.", pcrPolicy.getExpectedPcr().getIndex());
                         //log.warn("Trust policy includes PCR {} but MLE does not define it", pcrPolicy.getExpectedPcr().getIndex().toInteger());
                         // create the missing pcr record in the report so the user will see it in the UI 
                         pcr = new TblTaLog();
@@ -1053,7 +1083,7 @@ public class HostTrustBO {
                     }
                     pcr.setTrustStatus(result.isTrusted());
                     if( !result.isTrusted() ) {
-                        pcr.setError("Incorrect value for PCR "+pcrPolicy.getExpectedPcr().getIndex().toString());
+                        pcr.setError("Incorrect value for PCR " + pcrPolicy.getExpectedPcr().getIndex().toString());
                     }
     //                pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
     //                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString()); 
@@ -1069,9 +1099,11 @@ public class HostTrustBO {
                     }*/
                 }
                 if( rule instanceof PcrEventLogIntegrity ) { // for now assuming there is only one, for pcr 19...
+                    log.debug("Processing PcrEventLogIntegrity rule");
                     PcrEventLogIntegrity eventLogIntegrityRule = (PcrEventLogIntegrity)rule;
                     TblTaLog pcr = taLogMap.get(eventLogIntegrityRule.getPcrIndex());
                     if (pcr != null) {
+                        log.debug("Setting PCR {} trust status to {}.", eventLogIntegrityRule.getPcrIndex(), result.isTrusted());
                         pcr.setTrustStatus(result.isTrusted()); 
                         if( !result.isTrusted() ) {
                             pcr.setError("No integrity in PCR "+eventLogIntegrityRule.getPcrIndex().toString());
@@ -1106,19 +1138,27 @@ public class HostTrustBO {
 
                             TblTaLog pcr = taLogMap.get(missingEntriesFault.getPcrIndex());
                             if (pcr != null) {
-        //                        pcr.setHostID(host.getId());
-                                pcr.setTrustStatus(false); // PCR not trusted since one or more required modules are missing, which we will detail below
-                                pcr.setError("Missing modules");
-        //                        pcr.setUpdatedOn(today);
-        //                        pcr.setManifestName(missingEntriesFault.getPcrIndex().toString());    
-        //                        pcr.setManifestValue(""); // doesn't match up with how we store data. we would need to look for another related fault about the dynamic value not matching... 
-        //                        if( biosPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
-        //                            pcr.setMleId(host.getBiosMleId().getId());
-        //                        }
-        //                        if( vmmPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
-        //                            pcr.setMleId(host.getVmmMleId().getId());
-        //                        }
-                                talogJpa.create(pcr); // exception to creating all at the end... 
+                                if (pcr.getId() != null) {
+                                    log.debug("TaTblLog ID {} already exists.", pcr.getId());
+                                    pcr = talogJpa.findTblTaLog(pcr.getId());
+                                }
+                                pcr.setTrustStatus(false); 
+                                if (pcr.getError()== null || pcr.getError().isEmpty())
+                                    pcr.setError("Missing modules");
+                                else
+                                    pcr.setError(pcr.getError() + " and " + " Missing modules");
+                                if (pcr.getId() == null) {
+                                    log.debug("TaTblLog ID does not exist. Creating a new one. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                    talogJpa.create(pcr);
+                                } else {                            
+                                    try {
+                                        log.debug("Editing the existing TaTblLog ID. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                        talogJpa.edit(pcr);
+                                    } catch (IllegalOrphanException | NonexistentEntityException | ASDataException ex) {
+                                        log.error("Error updating the status in the TaLog table.", ex);
+                                    }
+                                }
+                                taLogMap.put(missingEntriesFault.getPcrIndex(), pcr);
 
                                 Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                                 for(Measurement m : missingEntries) {
@@ -1303,22 +1343,169 @@ public class HostTrustBO {
                     }                    
                 }
 
+                // Now process the XmlMeasurementLogEquals rule
+                if( rule instanceof XmlMeasurementLogEquals ) { 
+                    log.debug("Processing the XmlMeasurementLogEquals rule");
+                    TblTaLog pcr;
+                    List<Fault> faults = result.getFaults();
+                    for(Fault fault : faults) {
+                        if( fault instanceof XmlMeasurementLogValueMismatchEntries ) { 
+                            log.debug("Host is having modules for which the values are not matching the configured white list.");
+                            XmlMeasurementLogValueMismatchEntries mismatchEntriesFault = (XmlMeasurementLogValueMismatchEntries)fault;
+
+                            pcr = taLogMap.get(mismatchEntriesFault.getPcrIndex());
+                            if (pcr != null) {
+                                if (pcr.getId() != null) {
+                                    log.debug("TaTblLog ID {} already exists.", pcr.getId());
+                                    pcr = talogJpa.findTblTaLog(pcr.getId());
+                                }
+                                pcr.setTrustStatus(false); 
+                                if (pcr.getError()== null || pcr.getError().isEmpty())
+                                    pcr.setError("Mismatch of tbootxm modules");
+                                else
+                                    pcr.setError(pcr.getError() + " and " + " Mismatch of tbootxm modules");
+                                if (pcr.getId() == null) {
+                                    log.debug("TaTblLog ID does not exist. Creating a new one. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                    talogJpa.create(pcr);
+                                    log.debug("TaTblLog ID created - {}", pcr.getId());
+                                } else {                            
+                                    try {
+                                        log.debug("Editing the existing TaTblLog ID {} . {} - {}", pcr.getId(), pcr.getTrustStatus(), pcr.getError());
+                                        talogJpa.edit(pcr);
+                                    } catch (IllegalOrphanException | NonexistentEntityException | ASDataException ex) {
+                                        log.error("Error updating the status in the TaLog table.", ex);
+                                    }
+                                }
+                                taLogMap.put(mismatchEntriesFault.getPcrIndex(), pcr);
+
+                                Set<Measurement> mismatchEntries = mismatchEntriesFault.getMismatchEntries();
+                                for(Measurement m : mismatchEntries) {
+                                    log.debug("Updated entry : " + m.getLabel() + "||" + m.getValue().toString());
+                                    // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getMeasurementXml() == null ) {
+                                        throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
+                                    }
+
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getLabel());
+                                    if (findByTaLogIdAndName == null) {
+                                        TblModuleManifestLog event = new TblModuleManifestLog();
+                                        event.setName("tbootxm-" + m.getLabel());
+                                        event.setTaLogId(pcr);
+                                        event.setValue(m.getInfo().get("Actual_Value"));
+                                        event.setWhitelistValue(m.getValue().toString());
+                                        moduleLogJpa.create(event);
+                                    } 
+                                }
+                            }
+                        }
+                        if( fault instanceof XmlMeasurementLogMissingExpectedEntries ) { 
+                            log.debug("Host is missing modules for which the white lists are configured.");
+                            XmlMeasurementLogMissingExpectedEntries missingEntriesFault = (XmlMeasurementLogMissingExpectedEntries)fault;
+
+                            pcr = taLogMap.get(missingEntriesFault.getPcrIndex());
+                            if (pcr != null) {
+                                if (pcr.getId() != null) {
+                                    log.debug("TaTblLog ID {} already exists.", pcr.getId());
+                                    pcr = talogJpa.findTblTaLog(pcr.getId());
+                                }
+                                pcr.setTrustStatus(false); 
+                                if (pcr.getError()== null || pcr.getError().isEmpty())
+                                    pcr.setError("Missing tbootxm modules");
+                                else
+                                    pcr.setError(pcr.getError() + " and " + " Missing tbootxm modules");
+                                if (pcr.getId() == null) {
+                                    log.debug("TaTblLog ID does not exist. Creating a new one. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                    talogJpa.create(pcr);
+                                    log.debug("TaTblLog ID created - {}", pcr.getId());
+                                } else {                            
+                                    try {
+                                        log.debug("Editing the existing TaTblLog ID {} . {} - {}", pcr.getId(), pcr.getTrustStatus(), pcr.getError());
+                                        talogJpa.edit(pcr);
+                                    } catch (IllegalOrphanException | NonexistentEntityException | ASDataException ex) {
+                                        log.error("Error updating the status in the TaLog table.", ex);
+                                    }
+                                }
+                                taLogMap.put(missingEntriesFault.getPcrIndex(), pcr);
+
+                                Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
+                                for(Measurement m : missingEntries) {
+                                    log.debug("Updated entry : " + m.getLabel() + "||" + m.getValue().toString());
+                                    // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getMeasurementXml() == null ) {
+                                        throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
+                                    }
+
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getLabel());
+                                    if (findByTaLogIdAndName == null) {
+                                        TblModuleManifestLog event = new TblModuleManifestLog();
+                                        event.setName("tbootxm-" + m.getLabel());
+                                        event.setTaLogId(pcr);
+                                        event.setValue(""); // Since the module is missing, there is no current value.
+                                        event.setWhitelistValue(m.getValue().toString());
+                                        moduleLogJpa.create(event);
+                                    } 
+                                }
+                            }
+                        }
+                        if( fault instanceof XmlMeasurementLogContainsUnexpectedEntries ) { 
+                            log.debug("Host is having additional modules for which the white lists are not configured.");
+                            XmlMeasurementLogContainsUnexpectedEntries unexpectedEntriesFault = (XmlMeasurementLogContainsUnexpectedEntries)fault;
+
+                            pcr = taLogMap.get(unexpectedEntriesFault.getPcrIndex());
+                            if (pcr != null) {
+                                if (pcr.getId() != null) {
+                                    log.debug("TaTblLog ID {} already exists.", pcr.getId());
+                                    pcr = talogJpa.findTblTaLog(pcr.getId());
+                                }
+                                pcr.setTrustStatus(false); 
+                                if (pcr.getError()== null || pcr.getError().isEmpty())
+                                    pcr.setError("Containing unexpected tbootxm modules");
+                                else
+                                    pcr.setError(pcr.getError() + " and " + " Containing unexpected tbootxm modules");
+                                if (pcr.getId() == null) {
+                                    log.debug("TaTblLog ID does not exist. Creating a new one. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                    talogJpa.create(pcr);
+                                    log.debug("TaTblLog ID created - {}", pcr.getId());
+                                } else {                            
+                                    try {
+                                        log.debug("Editing the existing TaTblLog ID {} . {} - {}", pcr.getId(), pcr.getTrustStatus(), pcr.getError());
+                                        talogJpa.edit(pcr);
+                                    } catch (IllegalOrphanException | NonexistentEntityException | ASDataException ex) {
+                                        log.error("Error updating the status in the TaLog table.", ex);
+                                    }
+                                }
+                                taLogMap.put(unexpectedEntriesFault.getPcrIndex(), pcr);
+
+                                List<Measurement> unexpectedEntries = unexpectedEntriesFault.getUnexpectedEntries();
+                                for(Measurement m : unexpectedEntries) {
+                                    log.debug("Updated entry : " + m.getLabel() + "||" + m.getValue().toString());
+                                    // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getMeasurementXml() == null ) {
+                                        throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
+                                    }
+
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getLabel());
+                                    if (findByTaLogIdAndName == null) {
+                                        TblModuleManifestLog event = new TblModuleManifestLog();
+                                        event.setName("tbootxm-" + m.getLabel());
+                                        event.setTaLogId(pcr);
+                                        event.setValue(m.getValue().toString()); 
+                                        event.setWhitelistValue(""); // Since this is an unexpected module, there will not be any whitelist associated.
+                                        moduleLogJpa.create(event);
+                                    } 
+                                }
+                            }
+                        }          
+                    }                    
+                }
+
             }
             // now create all those mw_ta_log records (one per pcr)
             for(TblTaLog pcr : taLogMap.values()) {
                 if( pcr.getId() == null ) {
+                    log.debug("Creating new entry for {}.", pcr.getManifestName());
                     talogJpa.create(pcr);
                 }
-    //            else {
-    //                try {
-    //                    log.debug("LogPcrTrustStatus : Adding the log details for {} - {}", pcr.getId(), (pcr.getTrustStatus() + "||" + pcr.getError()));
-    //                    talogJpa.edit(pcr); // it it was already created (reasonable instance of PcrEventLogIncludes or not)
-    //            }
-    //                catch(Exception e) {
-    //                    log.error("Error in logPcrTrustStatus.", e);
-    //                    //e.printStackTrace(System.out);
-    //                }
-    //            }
             }
         } catch (IOException ex) {
             log.error("Error during logging of the PCR trust status", ex);
@@ -1329,7 +1516,10 @@ public class HostTrustBO {
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         try {
+            long t0 = System.currentTimeMillis();
             TblHosts tblHost = hostBO.getHostByName(hostName);
+            long t1 = System.currentTimeMillis();
+            log.trace("performance: hostBO.getHostByName in {}ms", t1-t0);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
@@ -1567,7 +1757,11 @@ public class HostTrustBO {
     public String getTrustWithSaml(TblHosts tblHosts, String hostId) {
         String hostAttestationUuid = new UUID().toString();
         log.debug("Generating new UUID for saml assertion record 2: {}", hostAttestationUuid);
-        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid).getSaml();
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid).getSaml();  // issue #4978 use specified nonce, if available
+    }
+
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid) {
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, null);
     }
     
     /**
@@ -1576,14 +1770,25 @@ public class HostTrustBO {
      * @param hostAttestationUuid
      * @return
      */
-    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid) {
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, Nonce challenge) {
         try {
-            //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
-            //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
-            
-            TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
 
-            TxtHost host = getHostWithTrust(tblHosts, hostId,tblSamlAssertion);
+            TrustReport hostTrustReport = getTrustReportForHost(tblHosts, tblHosts.getName(), challenge); // issue #4978 use specified nonce, if available
+            log.debug("TRUSTREPORT: {}", mapper.writeValueAsString(hostTrustReport));
+            
+            logTrustReport(tblHosts, hostTrustReport); // Need to cache the attestation report ### v1 requirement to log to mw_ta_log
+
+            HostTrustStatus trust = new HostTrustStatus();
+            trust.bios = hostTrustReport.isTrustedForMarker(TrustMarker.BIOS.name());
+            trust.vmm = hostTrustReport.isTrustedForMarker(TrustMarker.VMM.name());
+            trust.asset_tag = hostTrustReport.isTrustedForMarker(TrustMarker.ASSET_TAG.name());
+
+            TxtHostRecord data = createTxtHostRecord(tblHosts);
+            TxtHost host = new TxtHost(data, trust);
+
+            TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
+            tblSamlAssertion.setHostId(tblHosts);
+            
             
             tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
             tblSamlAssertion.setBiosTrust(host.isBiosTrusted());
@@ -1603,35 +1808,19 @@ public class HostTrustBO {
             }
 
             if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                log.debug("Host has binding certificate");
                 host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
             }
             
+            log.debug("Creating host assertion for: {}", host.getHostName());
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate, null);
-
-            
-            // We will check if the asset-tag was verified successfully for the host. If so, we need to retrieve
-            // all the attributes for that asset-tag and send it to the saml generator.
-/*            X509AttributeCertificate tagCertificate = null; 
-            if (host.isAssetTagTrusted()) {
-                AssetTagCertBO atagCertBO = new AssetTagCertBO();
-                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
-                if (atagCertForHost != null) {
-                    tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
-//                        atags.add(new AttributeOidAndValue("UUID", atagCertForHost.getUuid())); // should already be the "Subject" attribute of the certificate, if not then we need to get it from one of the cert attributes
-                }
-            }
-
-            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate);
-*/
             log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
 
             tblSamlAssertion.setSaml(samlAssertion.assertion);
             tblSamlAssertion.setExpiryTs(samlAssertion.expiry_ts);
             tblSamlAssertion.setCreatedTs(samlAssertion.created_ts);
             
-            TrustReport hostTrustReport = getTrustReportForHost(tblHosts, tblHosts.getName());
             tblSamlAssertion.setTrustReport(mapper.writeValueAsString(hostTrustReport));
-            logTrustReport(tblHosts, hostTrustReport); // Need to cache the attestation report ### v1 requirement to log to mw_ta_log
                 
             My.jpa().mwSamlAssertion().create(tblSamlAssertion);
 
@@ -1648,25 +1837,24 @@ public class HostTrustBO {
              *
              */
             throw e;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // throw new ASException( e);
             log.error("Error during retrieval of host trust status.", ex);
             throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
 
-    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
-        Configuration conf = My.configuration().getConfiguration();
-        InetAddress localhost = InetAddress.getLocalHost();
-        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; 
-        String issuer = conf.getString("saml.issuer", defaultIssuer);
-        SamlGenerator saml = new SamlGenerator(samlKeystoreResource, conf);
-        saml.setIssuer(issuer);
+    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException, GeneralSecurityException {
+//        String issuer = conf.getString("saml.issuer", defaultIssuer);
+        SamlGenerator saml = new SamlGenerator(Attestation.getIssuerConfiguration());
         return saml;
     }
     
     public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
-        My.initDataEncryptionKey();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
         log.debug("getTrustWithSamlByAik calling getHostByAik for aik {}", aik.toString());
         TblHosts tblHosts = getHostByAik(aik);
         log.debug("getTrustWithSamlByAik calling getTrustWithSaml for host {} aik {}", tblHosts.getName(), aik.toString());
@@ -1674,28 +1862,46 @@ public class HostTrustBO {
     }
 
     public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
-        My.initDataEncryptionKey();
+        return getTrustWithSaml(host, forceVerify, null);
+    }
+    
+    public String getTrustWithSaml(String host, boolean forceVerify, Nonce challenge) throws IOException {
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
         TblHosts tblHosts = getHostByName(new Hostname((host)));
-        return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify);
+        return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify, challenge);
     }
 
     public String getTrustWithSamlForHostnames(Collection<String> hosts) throws IOException {
-        My.initDataEncryptionKey();
-        ArrayList<TblHosts> tblHostsList = new ArrayList<TblHosts>();
+        if( ASDataCipher.cipher == null ) {
+            log.warn("ASDataCipher was not initialized");
+            My.initDataEncryptionKey();
+        }
+        ArrayList<TblHosts> tblHostsList = new ArrayList<>();
         for(String host : hosts) {
             TblHosts tblHosts = getHostByName(new Hostname((host)));
             tblHostsList.add(tblHosts);
         }
         return getTrustWithSaml(tblHostsList);
     }
-        
+
     public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
+        return getTrustWithSaml(tblHosts, hostId, forceVerify, null);
+    }
+        
+    public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify, Nonce challenge) throws IOException {
         String hostAttestationUuid = new UUID().toString();
         log.debug("Generating new UUID for saml assertion record 1: {}", hostAttestationUuid);
-        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify).getSaml();
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify, challenge).getSaml();
+    }
+
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify) throws IOException {
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify, null);
     }
     
-    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify) throws IOException {
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify, Nonce challenge) throws IOException {
         log.debug("getTrustWithSaml: Getting trust for host: " + tblHosts.getName() + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
@@ -1709,9 +1915,14 @@ public class HostTrustBO {
         if (!agent.isTpmPresent()) {
             throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, hostId);
         }
+        tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
+        
         if(forceVerify != true){
             //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
+            long t0 = System.currentTimeMillis();
             TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName()); //hostId);
+            long t1 = System.currentTimeMillis();
+            log.trace("performance: My.jpa().mwSamlAssertion().findByHostAndExpiry: {}ms", t1-t0);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
@@ -1727,8 +1938,9 @@ public class HostTrustBO {
         
         try {
 //            return getTrustWithSaml(tblHosts, hostId);
-            return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid);
+                return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, challenge); // issue #4978 use specified nonce, if available
         }catch(Exception e) {
+            log.error("Cannot obtain host trust, getTrustWithSaml failed", e);
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
             tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
             tblSamlAssertion.setHostId(tblHosts);
@@ -1742,9 +1954,6 @@ public class HostTrustBO {
             tblSamlAssertion.setVmmTrust(false);
             
             try {
-                log.error("Caught exception, generating saml assertion");
-                log.error("Printing stacktrace first");
-                e.printStackTrace();
                 tblSamlAssertion.setSaml("");
                 int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
                 tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
@@ -1801,6 +2010,10 @@ public class HostTrustBO {
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
+        return getTrustWithCache(host, forceVerify, null);
+    }
+    
+    public HostTrust getTrustWithCache(String host, Boolean forceVerify, Nonce challenge) {
         log.debug("getTrustWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         try {
             
@@ -1824,7 +2037,7 @@ public class HostTrustBO {
         
            log.debug("Getting trust and saml assertion from host.");
         
-           HostTrustStatus status = getTrustStatus(new Hostname(host));
+           HostTrustStatus status = getTrustStatus(new Hostname(host), challenge);
            
            HostTrust hostTrust = new HostTrust(ErrorCode.OK,"OK");
            hostTrust.setBiosStatus((status.bios)?1:0);
@@ -1882,7 +2095,7 @@ public class HostTrustBO {
     }
     
     private Date getCacheStaleAfter(){
-        return new DateTime().minusSeconds(CACHE_VALIDITY_SECS).toDate();
+        return new DateTime().minusSeconds(Attestation.getIssuerConfiguration().getValiditySeconds()).toDate();
     }
     private HostTrust getHostTrustObj(TblTaLog tblTaLog) {
         HostTrust hostTrust = new HostTrust(ErrorCode.OK,"");
@@ -1943,6 +2156,7 @@ public class HostTrustBO {
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
+            tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
 
 //            PcrManifest pcrManifest = agent.getPcrManifest();
 //            if( pcrManifest == null ) {
@@ -1968,7 +2182,7 @@ public class HostTrustBO {
                 // adding this filter criteria of HostName, for the Host #2 we would match the Whitelist of Host #1 and hence we would not create
                 // a new white list. 
                 String targetType = hostConfigData.getBiosWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigData.getBiosWLTarget()) {
                     case BIOS_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2051,7 +2265,7 @@ public class HostTrustBO {
                 // the OEM of the box from which the first whitelist was created. Otherwise it would match with the whitelist of Host #1 and
                 // we would not create the second white list.
                 String targetType = hostConfigData.getVmmWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigData.getVmmWLTarget()) {
                     case VMM_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2202,6 +2416,75 @@ public class HostTrustBO {
             log.error("Error during retrieval of host trust status.", ex);
             throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
+    }
+    
+    public VMAttestation getVMAttestationReport(TblHosts tblHosts, Map<String, String> vmMetaData, boolean includeHostReport) throws IOException {
+
+        VMAttestation vmAttestation = new VMAttestation();
+        SamlAssertion samlAssertion;
+        
+        HostAttestation hostAttestation = new HostAttestation(); 
+        log.debug("getVMAttestationReport: Getting trust for host: " + tblHosts.getName() + " & VM:" + vmMetaData.get("VM_Instance_Id"));
+        
+        try {            
+            TxtHostRecord data = createTxtHostRecord(tblHosts);
+            TxtHost host;
+
+            String hostAttestationUuid = new UUID().toString();
+            
+            if (includeHostReport) {
+                log.debug("getVMAttestationReport: Generating the complete attestation report for the host - {}.", tblHosts.getName());
+                try {                
+                    log.debug("getVMAttestationReport: Generating new UUID for saml assertion record : {}", hostAttestationUuid);
+                    hostAttestation = getTrustWithSaml(tblHosts, tblHosts.getId().toString(), hostAttestationUuid, false); // We do not want to force the host attestation everytime                
+                } catch (Exception e) {
+                    log.error("getVMAttestationReport: Error during retrieval of host trust status.", e);
+                    throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
+                }
+                log.debug("getVMAttestationReport: Successfully created the Host Attestation for {}", hostAttestation.getHostName());
+                vmAttestation.setHostAttestationReport(hostAttestation);
+                host = new TxtHost(data, hostAttestation.getHostTrustResponse().trust);
+            } else {
+                log.debug("getVMAttestationReport: Generating the basic trust report for the host - {}.", tblHosts.getName());
+                HostTrustStatus trustStatusWithCache = getTrustStatusWithCache(tblHosts.getName(), false);
+                host = new TxtHost(data, trustStatusWithCache);
+            }
+
+            log.debug("getVMAttestationReport: Retrieved the trust response of BIOS {} & VMM {}.", host.isBiosTrusted(), host.isVmmTrusted());
+            
+            if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                log.debug("getVMAttestationReport: Setting the binding key certificate for {}", hostAttestation.getHostName());
+                host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
+            }
+            
+            // Check if the host is trusted. If not, the VM metadata has to be modified to set the VM trust status to false
+            if (!host.isBiosTrusted() || !host.isVmmTrusted()) {
+                vmMetaData.put("VM_Trust_Status", String.valueOf(false));
+                vmAttestation.setTrustStatus(false);
+            } else {
+                vmAttestation.setTrustStatus(true);
+            }
+            
+            try {
+                log.debug("getVMAttestationReport: About to generate SAML assertion for Host {} running VM {}.", 
+                        hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
+                samlAssertion = getSamlGenerator().generateVMAssertion(host, vmMetaData);
+                vmAttestation.setVmSaml(samlAssertion.assertion);
+                log.debug("getVMAttestationReport: Successfully generated SAML assertion for Host {} running VM {}.", 
+                        hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
+                
+            } catch (MarshallingException | ConfigurationException | UnknownHostException | GeneralSecurityException | XMLSignatureException | MarshalException ex) {
+                log.error("getVMAttestationReport: Error during retrieval of host trust status.", ex);
+                throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
+            }            
+        } catch (ASException ae) {
+            throw ae;
+        } catch (Exception ex) {
+                log.error("getVMAttestationReport: Error during creation of VM attestation report.", ex);
+                throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
+        }
+        
+        return vmAttestation;
     }
     
     /*

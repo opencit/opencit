@@ -1,0 +1,93 @@
+/*
+ * Copyright (C) 2014 Intel Corporation. All rights reserved.
+ * Author: jbuhacoff
+ * 
+ * Notes:
+ * The bootstrap.css/bootstrap.min.css were modified to prefer
+ * the font-family selections "Intel Clear", Tahoma, and Geneva 
+ * before the bootstrap choices for the html and body descriptors.
+ */
+html {
+    font-family: "Intel Clear", Tahoma, Geneva, sans-serif;
+}
+section {
+    width: 275px;
+    float: left;
+    display: block; /* for older browsers */
+    margin-left: 5px;
+    margin-right: 5px;
+}
+form fieldset {
+    /*border: 1px solid black;
+    width: 225px;*/
+}
+form fieldset input {
+    display: block;
+}
+form fieldset p {
+    margin-top: 10px;
+}
+/*
+table.data-table {
+    table-layout: fixed; 
+    border-collapse: collapse; 
+    border-width: 1px; 
+    border-color: #000; 
+    border-style: solid;
+}
+table.data-table th {
+    border-color: #000; 
+    border-style: solid;
+}
+table.data-table td {
+    border-color: #000; 
+    border-style: solid;
+}
+*/
+#splashscreen .splashscreen-background-image {
+    background-image: url("../images/intel-logo-blue-transparent-160x121.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+}
+@media (min-height: 200px) {
+    #splashscreen .splashscreen-background-image {
+        min-height: 200px;
+    }    
+}
+@media (min-height: 400px) {
+    #splashscreen .splashscreen-background-image {
+        min-height: 400px;
+    }    
+}
+@media (min-height: 600px) {
+    #splashscreen .splashscreen-background-image {
+        min-height: 600px;
+    }    
+}
+@media (min-height: 1200px) {
+    #splashscreen .splashscreen-background-image {
+        min-height: 1200px;
+    }    
+}
+
+.navbar-inverse .navbar-brand-image {
+    height: 72px;  /* match navbar-brand height */
+	width: 84px;
+    float: left;
+/*
+    background-image: url("../images/intel-logo-white-transparent-84x60.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+*/
+}
+.navbar-inverse .navbar-brand-image img {
+	margin:0px auto;
+	display:block;
+	margin-top: 6px; /* image height is 60px but height of banner is 72px so we give it a margin of 6px */
+	margin-bottom: 6px; /* image height is 60px but height of banner is 72px so we give it a margin of 6px */
+}
+ul.navbar-right {
+	margin-top: 11px; /* center the navbar (height 50px) in the new 72px high banner */
+}

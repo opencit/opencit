@@ -10,9 +10,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
-@JacksonXmlRootElement(localName = "methodResponse")
+@JacksonXmlRootElement(localName = "methodCall")
 public class MethodResponse {
 	
+    @JacksonXmlProperty(localName = "methodName")
+    private String methodName;
+    
     @JacksonXmlProperty(localName = "params")
     //@JacksonXmlElementWrapper(useWrapping = false)
     private Param[] params;
@@ -21,7 +24,7 @@ public class MethodResponse {
     public String toString() {
         String str ="<params>";
         for (Param param : params) {
-            str = str + param.toString();
+            str = str.concat(param.toString());
         }
         str = str + "</params>";
         return str;
