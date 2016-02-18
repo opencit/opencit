@@ -55,8 +55,9 @@ public class Hosts extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/
+     * 
      * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
      *          "bios_mle_uuid":"7e90c088-c9c7-486f-9480-9cd0a7a3b977","vmm_mle_uuid":"fb2cb173-5e19-446b-9161-aa7368c5c882",
      *          "tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}'
@@ -64,9 +65,9 @@ public class Hosts extends MtWilsonClient {
      * Output: {"id":"2fbe5090-7eb7-4af5-aefd-afa5cd70bf4d","name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
      *          "bios_mle_uuid":"7e90c088-c9c7-486f-9480-9cd0a7a3b977","vmm_mle_uuid":"fb2cb173-5e19-446b-9161-aa7368c5c882",
      *          "tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   Properties prop = My.configuration().getClientProperties();
      *   Hosts client = new Hosts(prop);
      *   Host obj = new Host();
@@ -76,7 +77,7 @@ public class Hosts extends MtWilsonClient {
      *   obj.setVmmMleUuid("fb2cb173-5e19-446b-9161-aa7368c5c882");
      *   obj.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
      *   Host createHost = client.createHost(obj);
-     * </pre>
+     * </xmp></pre></div>
      */
     public Host createHost(Host obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -92,15 +93,15 @@ public class Hosts extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/e43424ca-9e00-4cb9-b038-9259d0307888
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   Properties prop = My.configuration().getClientProperties();
      *   Hosts client = new Hosts(prop);  
      *   client.deleteHost("e43424ca-9e00-4cb9-b038-9259d0307888");
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteHost(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -119,16 +120,16 @@ public class Hosts extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts?nameContains=192
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   Hosts client = new Hosts(My.configuration().getClientProperties());
      *   HostFilterCriteria criteria = new HostFilterCriteria();
      *   criteria.nameContains = "192";
      *  client.deleteHost(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteHost(HostFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -147,16 +148,18 @@ public class Hosts extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/e43424ca-9e00-4cb9-b038-9259d0307888
+     * 
      * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
      *          "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6","tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}
+     * 
      * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2",
      *          "connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
      *          "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6","tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   Properties prop = My.configuration().getClientProperties();
      *   Hosts client = new Hosts(prop);    
      *   Host obj = new Host();
@@ -167,7 +170,7 @@ public class Hosts extends MtWilsonClient {
      *   obj.setVmmMleUuid("98101211-b617-4f59-8132-a5d05360acd6");
      *   obj.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
      *   Host editHost = client.editHost(obj);
-     * </pre>
+     * </xmp></pre></div>
      */
     public Host editHost(Host obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -186,17 +189,18 @@ public class Hosts extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e
+     * 
      * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2", "connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
      * "bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985", "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   Properties prop = My.configuration().getClientProperties();
      *   Hosts hosts = new Hosts(prop);
      *   Host retrieveHost = hosts.retrieveHost("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
-     * </pre>
+     * </xmp></pre></div>
     */
     public Host retrieveHost(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -217,19 +221,20 @@ public class Hosts extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts?nameContains=192
+     * 
      * Output: {"hosts":[{"id":"de07c08a-7fc6-4c07-be08-0ecb2f803681","name":"192.168.0.2", "connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
      * "bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985","vmm_mle_uuid":"45c03402-e33d-4b54-9893-de3bbd1f1681"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   Properties prop = My.configuration().getClientProperties();
      *   Hosts client = new Hosts(prop);
      *   HostFilterCriteria criteria = new HostFilterCriteria();
      *   criteria.nameContains = "192";
      *   HostCollection objCollection = client.searchHosts(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public HostCollection searchHosts(HostFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());

@@ -438,6 +438,11 @@
             <artifactId>mtwilson-privacyca-client-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-vm-attestation-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- end clients for mtwilson features -->
         
@@ -469,6 +474,7 @@
                                     <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                                     <dependencySourceIncludes>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-vm-attestation-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-client-jaxrs2</dependencySourceInclude>

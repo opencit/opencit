@@ -48,8 +48,9 @@ public class CaCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned application/x-pem-file
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/ca-certificates/root
+     * 
      * Output: 
      * -----BEGIN CERTIFICATE-----
      * MIIC0zCCAbugAwIBAgIJAP8y0d2XNaa0MA0GCSqGSIb3DQEBCwUAMCkxETAPBgNVBAsTCG10d2ls
@@ -66,15 +67,15 @@ public class CaCertificates extends MtWilsonClient {
      * 2wzn8esuaBfEx0GGeJQyPDRV3fbpDON9sZRMLjS6pX99XeAdh+qJdjaW9CYsfi40k1vlZRK/Pt2H
      * gkVhnRnidYrMN5Qu4VqEQkd4Gz0jPJW+EfnbM+W/PvlWgDIZvhq7UfpjMA==
      * -----END CERTIFICATE-----
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  CaCertificates client = new CaCertificates(My.configuration().getClientProperties());
      *  X509Certificate rootCertificate = client.retrieveCaCertificate("root");
      *  X509Certificate tlsCertificate = client.retrieveCaCertificate("tls");
      *  X509Certificate samlCertificate = client.retrieveCaCertificate("saml");
      *  X509Certificate privacyCertificate = client.retrieveCaCertificate("privacy");
-     * </pre>
+     * </xmp></pre></div>
     */    
     public X509Certificate retrieveCaCertificate(String certificateId) {
         //  {id} can be:  "root", "saml", "tls", "privacy"

@@ -38,19 +38,19 @@ public class HostAiks extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/d24dd52f-524e-43aa-8673-4013ecf64a4a/aiks/d24dd52f-524e-43aa-8673-4013ecf64a4a
      * Output: {"id":"d24dd52f-524e-43aa-8673-4013ecf64a4a","aik_sha1":"0dfa39952dec39848990acac56a7ec8787bef1d4",
      * "aik_public_key":"-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzjfKA2qYuZjG6jr/q5WxyVUhXAmAmqmh\r\n/i
      * RegwN4eFLksYGcCcMa9NZKi7gGvGHHEdmI2d+Wvt19DoKEENi93UVa+TwARl44bbu3sJZyw4Kq\r\n8dkScgM8SZ3TS/qhBX7DritlzVj7FPk4SjrVrwVhr+Z7FCTn90/
      * VB3EZtSL9Kl3rrX06QdB/3xE8\r\n9E8wErKmXvFo/pUZ98tHpDyGEUrDRohjKVFBdHRIEVxh5jfTWQdFSlVygDhUHPFeGNYbevNpm9h9\r\nUVjsQWvzDRKeFVXHN6IEx
      * ULw5dON4qbmdtvcXp/KQmoJ+gRCyN2UPX3S5J3tMcehIbzOQrIz0VP8\r\nR6EMyQIDAQAB\r\n-----END PUBLIC KEY-----\r\n"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAiks client = new HostAiks(getClientProperties());
      *   HostAik retrieveHostAik = client.retrieveHostAik("d24dd52f-524e-43aa-8673-4013ecf64a4a");
-     * </pre>
+     * </xmp></pre></div>
     */    
     public HostAik retrieveHostAik(String hostUuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -75,22 +75,23 @@ public class HostAiks extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/d24dd52f-524e-43aa-8673-4013ecf64a4a/aiks
+     * 
      * Output: {"aiks":[{"id":"d24dd52f-524e-43aa-8673-4013ecf64a4a","aik_sha1":"0dfa39952dec39848990acac56a7ec8787bef1d4",
      * "aik_public_key":"-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzjfKA2qYuZjG6jr/q5WxyVUhXAmAmqm
      * h\r\n/iRegwN4eFLksYGcCcMa9NZKi7gGvGHHEdmI2d+Wvt19DoKEENi93UVa+TwARl44bbu3sJZyw4Kq\r\n8dkScgM8SZ3TS/qhBX7DritlzVj7FPk4SjrVrw
      * Vhr+Z7FCTn90/VB3EZtSL9Kl3rrX06QdB/3xE8\r\n9E8wErKmXvFo/pUZ98tHpDyGEUrDRohjKVFBdHRIEVxh5jfTWQdFSlVygDhUHPFeGNYbevNpm9h9\r\nU
      * VjsQWvzDRKeFVXHN6IExULw5dON4qbmdtvcXp/KQmoJ+gRCyN2UPX3S5J3tMcehIbzOQrIz0VP8\r\nR6EMyQIDAQAB\r\n-----END PUBLIC KEY-----\r\n"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAiks client = new HostAiks(getClientProperties());
      *   HostAik retrieveHostAik = client.retrieveHostAik("d24dd52f-524e-43aa-8673-4013ecf64a4a");
      *   HostAikFilterCriteria criteria = new HostAikFilterCriteria();
      *   criteria.hostUuid = "d24dd52f-524e-43aa-8673-4013ecf64a4a";
      *   HostAikCollection searchHostAiks = client.searchHostAiks(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public HostAikCollection searchHostAiks(HostAikFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
