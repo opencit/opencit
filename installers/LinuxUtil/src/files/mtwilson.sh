@@ -583,7 +583,7 @@ case "$1" in
           tomcat_async_stop
         fi
         echo "Removing Mt Wilson configuration in $configDir..."
-        find "$configDir/" -type f -exec shred -uzn 3 {} \;
+        cd /tmp && find "$configDir/" -type f -exec shred -uzn 3 {} \;
         ;;
   key-backup)
         key_backup $@
