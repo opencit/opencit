@@ -765,15 +765,16 @@ if [ "$(whoami)" == "root" ]; then
         fi
         postgres_installed=0 #postgres is being installed
         # don't need to restart postgres server unless the install script says we need to (by returning zero)
-        if postgres_server_install; then
-          postgres_restart >> $INSTALL_LOG_FILE
-          sleep 10
-        fi
+        postgres_server_install
+        if [ $? -ne 0 ]; then echo_failure "Failed to install postgresql server"; exit -1; fi
+        postgres_restart >> $INSTALL_LOG_FILE
+        #sleep 10
         # postgres server end
       fi 
       # postgres client install here
       echo "Installing postgres client..."
       postgres_install
+      if [ $? -ne 0 ]; then echo_failure "Failed to install postgresql"; exit -1; fi
       # do not need to restart postgres server after installing the client.
       #postgres_restart >> $INSTALL_LOG_FILE
       #sleep 10
@@ -927,6 +928,7 @@ chmod +x *.bin
 
 echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
+if [ $? -ne 0 ]; then echo_failure "Failed to install linux utility"; exit -1; fi
 echo "Mt Wilson linux utility installation done" | tee -a  $INSTALL_LOG_FILE
 
 mkdir -p /opt/mtwilson/logs
@@ -1010,25 +1012,29 @@ set_owner_for_mtwilson_directories
 
 if [[ -n "opt_attservice"  && -f "$attestation_service" ]]; then
   echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
-  ./$attestation_service 
+  ./$attestation_service
+  if [ $? -ne 0 ]; then echo_failure "Failed to install attestation service"; exit -1; fi
   echo "mtwilson service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_mangservice" && -f "$management_service"  ]]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
+  if [ $? -ne 0 ]; then echo_failure "Failed to install management service"; exit -1; fi
   echo "Management Service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_wlmservice" && -f "$whitelist_service" ]]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
+  if [ $? -ne 0 ]; then echo_failure "Failed to install whitelist service"; exit -1; fi
   echo "Whitelist Service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_mtwportal" && "$mtw_portal" ]]; then
   echo "Installing Mtw Combined Portal..." | tee -a  $INSTALL_LOG_FILE
-  ./$mtw_portal 
+  ./$mtw_portal
+  if [ $? -ne 0 ]; then echo_failure "Failed to install portal"; exit -1; fi
   echo "Mtw Combined Portal installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
@@ -1078,7 +1084,7 @@ update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "
 update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_ISSUER_DN"
 
 #call_setupcommand create-database
-call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
+#call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 call_tag_setupcommand setup-manager initialize-db --force
 
 call_tag_setupcommand tag-init-database
@@ -1106,6 +1112,7 @@ chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
 if [ ! -z "$opt_logrotate" ]; then
   echo "Installing Log Rotate..." | tee -a  $INSTALL_LOG_FILE
   ./$logrotate_installer
+  if [ $? -ne 0 ]; then echo_failure "Failed to install log rotation"; exit -1; fi
   #echo "Log Rotate installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
@@ -1138,6 +1145,7 @@ fi
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
   ./$monit_installer  #>> $INSTALL_LOG_FILE
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit"; exit -1; fi
   #echo "Monit installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
