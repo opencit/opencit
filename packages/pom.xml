@@ -9,7 +9,7 @@
 
     <parent>
             <groupId>com.intel.mtwilson.maven</groupId>
-            <artifactId>mtSwilson-dist-feature</artifactId>
+            <artifactId>mtwilson-dist-feature</artifactId>
             <version>3.0-SNAPSHOT</version>
             <relativePath />
     </parent>
