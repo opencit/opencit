@@ -48,6 +48,7 @@
                 <dependency>
                     <groupId>com.intel.mtwilson.trustagent</groupId>
                     <artifactId>mtwilson-trustagent</artifactId>
+                    <classifier>application</classifier>
                     <version>${project.version}</version>
                     <type>zip</type>
                 </dependency>	
@@ -78,6 +79,7 @@
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.trustagent</groupId>
                                             <artifactId>mtwilson-trustagent</artifactId>
+                                            <classifier>application</classifier>
                                             <version>${project.version}</version>
                                             <type>zip</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
@@ -90,7 +92,7 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>	
+                    </plugin>                   
                     <!-- end copy artifacts plugin -->
                     <!-- begin copy other resources plugin -->
                     <plugin>

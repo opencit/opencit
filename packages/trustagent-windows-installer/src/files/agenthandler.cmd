@@ -57,11 +57,11 @@ set JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF\logback.xml -Dfs.nam
 
 REM @###################################################################################################
 
-set TA_JARS=
+REM set TA_JARS=
 REM # generated variables
-for /f  "delims=" %%a in ('dir "%TRUSTAGENT_JAVA%" /s /b') do (
-  set TA_JARS=%%a;!TA_JARS!
-)
+REM for /f  "delims=" %%a in ('dir "%TRUSTAGENT_JAVA%" /s /b') do (
+REM  set TA_JARS=%%a;!TA_JARS!
+REM )
 REM set CLASSPATH=%TA_JARS%
 REM echo %CLASSPATH%
 

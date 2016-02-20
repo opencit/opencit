@@ -54,13 +54,16 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
     }
     
     private boolean isTpmOwned() throws IOException {
+        log.debug("Identify the OS");
         if (IdentityOS.isWindows()) { 
+            log.debug("It is Windows");
             /* return for now since Windows usually take the ownership of TPM be default 
              * need to check later for exceptions
             */
             return true;
         }
         else { /* for Linux. Still need to distinguish between TPM 1.2 and TPM 2.0 */
+            log.debug("It is Linux");
             File tpmOwned = new File("/sys/class/tpm/tpm0/device/owned");
             if (!tpmOwned.exists()) {
             	tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
