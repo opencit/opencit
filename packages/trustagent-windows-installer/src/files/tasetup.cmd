@@ -172,8 +172,8 @@ ECHO. ==Update the extensions cache file before running any tagent commands
 REM # create a trustagent username "mtwilson" with no password and all privileges
 REM # which allows mtwilson to access it until mtwilson UI is updated to allow
 REM # entering username and password for accessing the trust agent
-ECHO. ==Create a trustagent username "mtwilson" with no password
->>"%logfile%" call "%trustagent_cmd%" password mtwilson --nopass *:*
+REM ECHO. ==Create a trustagent username "mtwilson" with no password
+REM >>"%logfile%" call "%trustagent_cmd%" password mtwilson --nopass *:*
 
 REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
 ECHO. ==Copy shiro-win.ini to shiro.ini
