@@ -176,8 +176,34 @@ REM ECHO. ==Create a trustagent username "mtwilson" with no password
 REM >>"%logfile%" call "%trustagent_cmd%" password mtwilson --nopass *:*
 
 REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
-ECHO. ==Copy shiro-win.ini to shiro.ini
-copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini" > nul
+ECHO. ==Generate shiro-win.ini
+REM copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini" > nul
+ECHO. [main] >"%intel_conf_dir%\shiro.ini"
+ECHO. ssl.enabled = true >>"%intel_conf_dir%\shiro.ini"
+ECHO. ssl.port = 1443 >>"%intel_conf_dir%\shiro.ini"
+ECHO. filePasswordRealm=com.intel.mtwilson.shiro.file.FilePasswordRealm >>"%intel_conf_dir%\shiro.ini"
+ECHO. filePasswordRealm.userFilePath=%intel_conf_dir%\users.txt >>"%intel_conf_dir%\shiro.ini"
+ECHO. filePasswordRealm.permissionFilePath=%intel_conf_dir%\permissions.txt >>"%intel_conf_dir%\shiro.ini"
+ECHO. passwordMatcher=com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher >>"%intel_conf_dir%\shiro.ini"
+ECHO. filePasswordRealm.credentialsMatcher=$passwordMatcher >>"%intel_conf_dir%\shiro.ini"
+ECHO. securityManager.realms = $filePasswordRealm >>"%intel_conf_dir%\shiro.ini"
+ECHO. # built-in authentication strategy >>"%intel_conf_dir%\shiro.ini"
+ECHO. #authcStrategy = org.apache.shiro.authc.pam.FirstSuccessfulStrategy >>"%intel_conf_dir%\shiro.ini"
+ECHO. #authcStrategy = org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy >>"%intel_conf_dir%\shiro.ini"
+ECHO. authcStrategy = com.intel.mtwilson.shiro.LoggingAtLeastOneSuccessfulStrategy >>"%intel_conf_dir%\shiro.ini"
+ECHO. securityManager.authenticator.authenticationStrategy = $authcStrategy >>"%intel_conf_dir%\shiro.ini"
+ECHO. authcPassword=com.intel.mtwilson.shiro.authc.password.HttpBasicAuthenticationFilter >>"%intel_conf_dir%\shiro.ini"
+ECHO. authcPassword.applicationName=Trust Agent >>"%intel_conf_dir%\shiro.ini"
+ECHO. authcPassword.authcScheme=Basic >>"%intel_conf_dir%\shiro.ini"
+ECHO. authcPassword.authzScheme=Basic >>"%intel_conf_dir%\shiro.ini"
+ECHO. # define security by url matching, the first match wins so order is important >>"%intel_conf_dir%\shiro.ini"
+ECHO. # also /path/*  will match /path/a and /path/b but not /path/c/d  >>"%intel_conf_dir%\shiro.ini"
+ECHO. # but /path/**  will match /path/a and /path/b and also /path/c/d >>"%intel_conf_dir%\shiro.ini"
+ECHO. [urls] >>"%intel_conf_dir%\shiro.ini"
+ECHO. /index.html = anon >>"%intel_conf_dir%\shiro.ini"
+ECHO. /v2/version = anon >>"%intel_conf_dir%\shiro.ini"
+ECHO. /** = ssl, authcPassword, perms >>"%intel_conf_dir%\shiro.ini"
+
 
 REM # INSTALL the citbootdriver to support geotag
 REM  cd "%bootdriver_dir%"
