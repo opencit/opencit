@@ -382,7 +382,7 @@ Section "install"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "Publisher" "Intel Corporation"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "DisplayVersion" "1.0"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "DisplayIcon" "$INSTDIR\TAicon.ico"
-
+        
         # Create System Environment Variable - TRUSTAGENT_HOME
         !define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
         !define env_hkcu 'HKCU "Environment"'
@@ -458,7 +458,7 @@ Section "Uninstall"
         # Delete Registry Keys
         DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\TrustAgent"
         DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent"
-
+        
 SectionEnd
 
 ; ----------------------------------------------------------------------------------
@@ -479,17 +479,32 @@ Function .onInit
         ${GetParameters} $cmdLineParams
         Pop $R0
 
-        StrCpy $2 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
-        nsExec::ExecToStack 'wmic product where "$2" get name'
-        Pop $0
-        Pop $1
-        ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
-        StrCmp $0 "" notfound
-                StrCpy $vcr1Flag 1
-                Goto done
-        notfound:
-                 StrCpy $vcr1Flag 0
-        done:
+        ReadRegStr $3 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "DisplayName"
+        ReadRegStr $4 HKLM "Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "DisplayName"
+        StrCmp $3 "TrustAgent" previous
+        StrCmp $4 "TrustAgent" previous
+        Goto prereq
+
+        previous:
+                 MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "TrustAgent is already installed. Click `OK` to remove the previous version or `Cancel` to cancel this upgrade." IDOK uninst
+                 Abort
+        uninst:
+               ClearErrors
+               Exec $INSTDIR\Uninstall.exe
+
+
+        prereq:
+                StrCpy $2 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
+                nsExec::ExecToStack 'wmic product where "$2" get name'
+                Pop $0
+                Pop $1
+                ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
+                StrCmp $0 "" notfound
+                     StrCpy $vcr1Flag 1
+                     Goto done1
+                notfound:
+                     StrCpy $vcr1Flag 0
+                done1:
 FunctionEnd
 
 Function SetupVCRedist
