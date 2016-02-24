@@ -68,6 +68,7 @@ REM echo %CLASSPATH%
 set CLASSPATH=%TRUSTAGENT_JAVA%\*
 REM echo. %JAVA_HOME%
 
+set TASTATUS=
 REM parsing the command arguments
 set wcommand=%1
 set cmdparams=
@@ -78,6 +79,8 @@ if "%wcommand%"=="start" (
   call:trustagent_start
 ) ELSE IF "%wcommand%"=="stop" (
   call:trustagent_stop
+) ELSE IF "%wcommand%"=="restart" (
+  call:trustagent_restart
 ) ELSE IF "%wcommand%"=="status" (
   call:trustagent_status
 ) ELSE IF "%wcommand%"=="setup" (
@@ -103,19 +106,34 @@ GOTO:EOF
 REM functions
 :trustagent_start
   echo. Starting trustagent service
-  sc start trustagent
+  sc start trustagent >null
   echo. Trustagent started
 GOTO:EOF
 
 :trustagent_stop
   echo. Stopping the trust agent
-  sc stop trustagent
+  sc stop trustagent > null
   echo. Trustagent stopped
 GOTO:EOF
 
+:trustagent_restart
+  call :get_status
+  echo. Stopping trustagent
+  IF "%TASTATUS%"=="Stopped" (
+     echo.   Trustagent was not running
+  ) ELSE (
+     sc stop trustagent >null
+     echo.   Trustagent stopped
+  )
+  echo. Starting trustagent
+  sc start trustagent > null
+  echo.   Trustagent started
+GOTO:EOF
+
 :trustagent_status
-  echo. Trustagent status:
-  sc query trustagent
+  REM set TASTATUS=
+  call :get_status
+  echo. Trustagent status: %TASTATUS%
 GOTO:EOF
 
 :trustagent_setup
@@ -171,5 +189,14 @@ GOTO:EOF
     echo. %TRUSTAGENT_SETUP_TASKS%
     echo. register-tpm-password
 GOTO:EOF
+
+:get_status
+  REM set TASTATUS=
+  for /f  "USEBACKQ" %%a in (`wmic service trustagent get state /VALUE ^| findstr /C:"State"`) do ( 
+    set _tmpvar=%%a
+    set _tmpvar1=!_tmpvar:~6!
+    set TASTATUS=!_tmpvar1:~0,-1!
+  )
+  EXIT /B 0
 
 endlocal
