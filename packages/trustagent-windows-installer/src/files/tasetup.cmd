@@ -151,19 +151,19 @@ REM fix_existing_aikcert
 REM # collect all the localhost ip addresses and make the list available as the
 REM # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
 ECHO. ==Find the IP address of the host==
-set DEFAULT_TRUSTAGENT_TLS_CERT_IP=
+set DEFAULT_TRUSTAGENT_TLS_CERT_IP=""
 for /f "tokens=14 delims= " %%a in ('ipconfig ^| findstr "IPv4"') do (
-  IF "%DEFAULT_TRUSTAGENT_TLS_CERT_IP%"=="" (
+  IF !DEFAULT_TRUSTAGENT_TLS_CERT_IP!=="" (
     set DEFAULT_TRUSTAGENT_TLS_CERT_IP=%%a
   ) ELSE (
     set DEFAULT_TRUSTAGENT_TLS_CERT_IP=%%a,!DEFAULT_TRUSTAGENT_TLS_CERT_IP!
   )
 )
-
-IF "%TRUSTAGENT_TLS_CERT_IP%"=="" (
+set TRUSTAGENT_TLS_CERT_IP=""
+IF %TRUSTAGENT_TLS_CERT_IP%=="" (
   set TRUSTAGENT_TLS_CERT_IP=%DEFAULT_TRUSTAGENT_TLS_CERT_IP%
 )
-REM echo.   TA IP Address: %TRUSTAGENT_TLS_CERT_IP%
+ECHO.   %TRUSTAGENT_TLS_CERT_IP%
 
 REM # before running any tagent commands update the extensions cache file
 ECHO. ==Update the extensions cache file before running any tagent commands 
