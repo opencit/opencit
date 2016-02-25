@@ -32,7 +32,7 @@ public class HostInfoCmdWin implements ICommand {
 
             getOsAndVersion();
             getBiosAndVersion();
-            if(context.getOsName() != null &&  context.getOsName().toLowerCase().contains("Windows")){
+            if(context.getOsName() != null &&  context.getOsName().toLowerCase().contains("windows")){
                 context.setVmmName(context.getOsName());
                 context.setVmmVersion(context.getOsVersion());
                 log.debug("VMM Name: " + context.getVmmName());
