@@ -9,9 +9,14 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.exec.CommandLine;
 
 /**
  *
@@ -19,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class HostInfoCmdWin implements ICommand {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostInfoCmdWin.class);
-
+    private static boolean vmmEnabled = false;
     TADataContext context = null;
 
     public HostInfoCmdWin(TADataContext context) {
@@ -30,18 +35,17 @@ public class HostInfoCmdWin implements ICommand {
     public void execute() throws TAException {
         try {
 
-            getOsAndVersion();
+            getOsName();
+            getOsVersion();
             getBiosAndVersion();
-            if(context.getOsName() != null &&  context.getOsName().toLowerCase().contains("windows")){
-                context.setVmmName(context.getOsName());
-                context.setVmmVersion(context.getOsVersion());
-                log.debug("VMM Name: " + context.getVmmName());
-                log.debug("VMM Version: " + context.getVmmVersion());
-
-            }else{
-                getVmmAndVersion();
-            
+            //getVmmAndVersion();
+            getVmm();
+            if (vmmEnabled) {
+                getVmmVersion();
+            } else {
+                context.setVmmVersion("NA");
             }
+            
             // Retrieve the processor information as well.
             getProcessorInfo();
             getHostUUID();
@@ -61,23 +65,135 @@ public class HostInfoCmdWin implements ICommand {
     Codename:       oneiric
      */
     
-    private void getOsAndVersion() throws TAException, IOException {
-        String osName = System.getProperty("os.name");
+    private void getOsVersion() throws TAException, IOException {
         String osVersion = "";
         try {
             osVersion = jWMI.getWMIValue("Select version from Win32_OperatingSystem", "version");
             if (osVersion.equals("")) {
                 log.error("Error executing jWMI.getWMIvalue to retrieve the OS details");
             }
-            context.setOsName(osName);
             context.setOsVersion(osVersion);
-            log.debug("OS Name: " + context.getOsName());
             log.debug("OS Version: " + context.getOsVersion());
         } catch (Exception ex) {
             Logger.getLogger(HostInfoCmdWin.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    private void getOsName() throws TAException, IOException {
+        
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("os");
+        command.addArgument("get");
+        command.addArgument("caption", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setOsName(resultArray[1]);
+                log.debug("OS full Name: " + context.getOsName());
+            } else {
+                log.error("[wmic os get caption] does not return OS full name");
+            }
+        } else {
+            log.error("Error executing the [wmic os get caption] to retrieve the OS details");
+        }
+    }
+    
+    private void getVmm() throws TAException, IOException {
+        vmmEnabled = false;
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("path");
+        command.addArgument("WIN32_ServerFeature");
+        command.addArgument("get");
+        command.addArgument("ID", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        context.setVmmName("Windows Hyper-V disabled");
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            String vmmID = "" + 20;
+            for (String str : resultArray) {
+                str = str.replaceAll("\\s+", ""); //remove all whitespace
+                if (str.equals(vmmID)) {
+                    log.debug("Setting Hyper-V");
+                    context.setVmmName("Windows Hyper-V");
+                    vmmEnabled=true;
+                    break;
+                }
+            }            
+        } else {
+            log.error("Error executing the [wmic path WIN32_ServerFeature get ID] to retrieve the VMM details");
+        }
+    }
+    
+    /*
+    private void getVmmVersion() throws TAException, IOException {     
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("datafile");
+        command.addArgument("where");
+        command.addArgument("name=c:\\\\windows\\\\system32\\\\vmms.exe\"");
+        command.addArgument("get");
+        command.addArgument("version", false);
+        
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setVmmVersion(resultArray[1]);
+                log.debug("VMM version: " + context.getVmmVersion());
+            } else {
+                context.setVmmVersion("NA");
+                log.error("GetVmmVersion does not return OS full name");
+            }
+        } else {
+            context.setVmmVersion("NA");
+            log.error("Error executing getVmmVersion to retrieve the OS details");
+        }
+    }
+    */
+    
+    private void getVmmVersion() throws TAException, IOException {
+
+        String getVerCMD = Folders.application() + File.separator + "bin" + File.separator + "getvmmver.cmd";              
+        CommandLine command = new CommandLine("cmd.exe");
+        command.addArgument("/c");
+        command.addArgument(getVerCMD, false);
+
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >= 1) {
+                context.setVmmVersion(resultArray[0]);
+                log.debug("VMM version: " + context.getVmmVersion());
+            } else {
+                context.setVmmVersion("NA");
+                log.error("GetVmmVersion does not return OS full name");
+            }
+        } else {
+            context.setVmmVersion("NA");
+            log.error("Error executing getVmmVersion to retrieve the OS details");
+        }
+    }
+        
     private String trim(String text) {
         if( text == null ) { return null; }
         return text.trim();
