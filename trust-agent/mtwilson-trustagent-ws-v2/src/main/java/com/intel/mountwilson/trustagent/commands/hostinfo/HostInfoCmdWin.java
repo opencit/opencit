@@ -117,7 +117,7 @@ public class HostInfoCmdWin implements ICommand {
             throw new TAException(ErrorCode.ERROR, result.getStderr());
         }
         log.debug("command stdout: {}", result.getStdout());
-        context.setVmmName("Windows Hyper-V disabled");
+        context.setVmmName("Windows VMM_Disabled");
         if (result.getStdout() != null) {
             String[] resultArray = result.getStdout().split("\n");
             String vmmID = "" + 20;
