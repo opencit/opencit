@@ -165,7 +165,9 @@ public class TAHelper {
         log.debug("TA Helper getOsName: " + host.VMM_OSName);
         
         //check if the host is Windows
-        isHostWindows = host.VMM_OSName.toLowerCase().contains("windows");
+        //isHostWindows = host.VMM_OSName.toLowerCase().contains("windows");
+        isHostWindows = host.VMM_OSName.toLowerCase().contains("microsoft");
+
         
         // check mtwilson 2.0 configuration first
         String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
