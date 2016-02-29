@@ -550,6 +550,10 @@ Function EnvCustomLeave
         !insertmacro MUI_INSTALLOPTIONS_READ $R1 "InstallOptionsFile.ini" "Field 5" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R2 "InstallOptionsFile.ini" "Field 7" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R3 "InstallOptionsFile.ini" "Field 9" "State"
+        StrCmp $R0 "" textboxcheck
+        StrCmp $R1 "" textboxcheck
+        StrCmp $R2 "" textboxcheck
+        StrCmp $R3 "" textboxcheck
         SetOutPath $INSTDIR
         FileOpen $0 "trustagent.env" w
         FileWrite $0 "MTWILSON_API_URL=https://$R0:8443/mtwilson/v2"
@@ -560,6 +564,9 @@ Function EnvCustomLeave
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_TLS_CERT_SHA1=$R3"
         FileClose $0
+        textboxcheck:
+                MessageBox MB_OK|MB_ICONEXCLAMATION "Please enter valid settings."
+                Abort
 FunctionEnd
 
 
