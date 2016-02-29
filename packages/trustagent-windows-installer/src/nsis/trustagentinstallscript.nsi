@@ -546,6 +546,8 @@ Function EnvCustomPage
         !insertmacro MUI_INSTALLOPTIONS_DISPLAY "InstallOptionsFile.ini"
 FunctionEnd
 Function EnvCustomLeave
+        Push $R0
+        Push $R1
         !insertmacro MUI_INSTALLOPTIONS_READ $R0 "InstallOptionsFile.ini" "Field 3" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R1 "InstallOptionsFile.ini" "Field 5" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R2 "InstallOptionsFile.ini" "Field 7" "State"
@@ -564,9 +566,13 @@ Function EnvCustomLeave
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_TLS_CERT_SHA1=$R3"
         FileClose $0
+        goto exitfunc
         textboxcheck:
                 MessageBox MB_OK|MB_ICONEXCLAMATION "Please enter valid settings."
                 Abort
+        exitfunc:
+                 Pop $R1
+                 Pop $R0
 FunctionEnd
 
 
