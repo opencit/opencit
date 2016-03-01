@@ -164,8 +164,7 @@ public class TAHelper {
         
         log.debug("TA Helper getOsName: " + host.VMM_OSName);
         
-        //check if the host is Windows
-        //isHostWindows = host.VMM_OSName.toLowerCase().contains("windows");
+        //check if the host is Microsoft Windows
         isHostWindows = host.VMM_OSName.toLowerCase().contains("microsoft");
 
         

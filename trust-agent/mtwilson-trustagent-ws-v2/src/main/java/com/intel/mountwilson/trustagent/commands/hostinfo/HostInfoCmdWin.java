@@ -117,7 +117,7 @@ public class HostInfoCmdWin implements ICommand {
             throw new TAException(ErrorCode.ERROR, result.getStderr());
         }
         log.debug("command stdout: {}", result.getStdout());
-        context.setVmmName("Windows VMM_Disabled");
+        context.setVmmName("Microsoft Windows VMM NA");
         if (result.getStdout() != null) {
             String[] resultArray = result.getStdout().split("\n");
             String vmmID = "" + 20;
@@ -125,7 +125,7 @@ public class HostInfoCmdWin implements ICommand {
                 str = str.replaceAll("\\s+", ""); //remove all whitespace
                 if (str.equals(vmmID)) {
                     log.debug("Setting Hyper-V");
-                    context.setVmmName("Windows Hyper-V");
+                    context.setVmmName("Microsoft Windows Hyper-V");
                     vmmEnabled=true;
                     break;
                 }

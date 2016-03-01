@@ -125,7 +125,7 @@ public class HostBO {
 
                         getBiosAndVMM(host);
                         
-                        if (host.getVmm().getOsName().toLowerCase().contains("windows"))
+                        if (host.getVmm().getOsName().toLowerCase().contains("microsoft"))
                             locationPCR = LOCATION_PCR_WINDOWS;
 
                         log.debug("Getting Server Identity.");
