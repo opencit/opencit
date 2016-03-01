@@ -41,7 +41,12 @@
         <appender-ref ref="STDOUT" />
         <appender-ref ref="AUDIT_FILE" />
     </root>
-
+    
+    <!-- INFO:  Enabling session validation scheduler...  -->
+    <logger name="org.apache.shiro.session.mgt" level="ERROR"/>
+    <!-- INFO:  Logged in cit as superuser -->
+    <logger name="com.intel.dcsg.cpg.util.shiro" level="ERROR"/>
+    
     <logger name="com.intel.mtwilson" level="INFO" />
     
 </configuration>

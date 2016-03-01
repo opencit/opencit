@@ -15,14 +15,13 @@
     </parent>
   
     <modules>
-        <module>java-backport-1.6-to-1.5</module>
         <module>mtwilson-api</module>
         <module>mtwilson-client-java6</module>
         <module>mtwilson-client-java7</module>
         <module>mtwilson-env</module>
-        <module>mtwilson-feature-xml</module>
+        <!--<module>mtwilson-feature-xml</module>
         <module>mtwilson-launcher</module>
-        <module>mtwilson-launcher-api</module>
+        <module>mtwilson-launcher-api</module>-->
         <module>mtwilson-launcher-glassfish4</module>
         <module>mtwilson-launcher-jetty9</module>
         <module>mtwilson-launcher-tomcat7</module>
@@ -33,7 +32,7 @@
         <module>mtwilson-tag-selection-xml</module>
         <module>mtwilson-test</module>
         <module>mtwilson-trustpolicy-xml</module>
-        <module>mtwilson-version</module>
+        <!--<module>mtwilson-version</module>-->
         <module>mtwilson-vmquote-xml</module>
         <!--  we don't need to build this every time, it can be done separately for each release
         <module>mtwilson-client-java5</module>

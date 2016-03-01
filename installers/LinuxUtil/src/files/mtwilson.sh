@@ -198,12 +198,12 @@ mtwilson_localhost_integration() {
 
 
 setup() {
-  java_detect; java_env_report > ${env_dir}/java
-  if using_glassfish; then
-    glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
-  elif using_tomcat; then
-    tomcat_detect; tomcat_env_report > ${env_dir}/tomcat
-  fi
+  #java_detect; java_env_report > ${env_dir}/java
+  #if using_glassfish; then
+  #  glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
+  #elif using_tomcat; then
+  #  tomcat_detect; tomcat_env_report > ${env_dir}/tomcat
+  #fi
   find_ctl_commands
 
   # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to glassfish directly)
@@ -583,7 +583,7 @@ case "$1" in
           tomcat_async_stop
         fi
         echo "Removing Mt Wilson configuration in $configDir..."
-        find "$configDir/" -type f -exec shred -uzn 3 {} \;
+        cd /tmp && find "$configDir/" -type f -exec shred -uzn 3 {} \;
         ;;
   key-backup)
         key_backup $@

@@ -13,16 +13,21 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dsmagadX
  */
 public class TblSamlAssertionJpaController implements Serializable {
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public TblSamlAssertionJpaController( EntityManagerFactory emf) {
         this.emf = emf;
@@ -43,10 +48,10 @@ public class TblSamlAssertionJpaController implements Serializable {
                 tblSamlAssertion.setHostId(hostId);
             }
             em.persist(tblSamlAssertion);
-            if (hostId != null) {
-                hostId.getTblSamlAssertionCollection().add(tblSamlAssertion);
-                em.merge(hostId);
-            }
+//            if (hostId != null) {
+//                hostId.getTblSamlAssertionCollection().add(tblSamlAssertion);
+//                em.merge(hostId);
+//            }
             em.getTransaction().commit();
         } finally {
                 em.close();
@@ -65,14 +70,14 @@ public class TblSamlAssertionJpaController implements Serializable {
                 tblSamlAssertion.setHostId(hostIdNew);
             }
             tblSamlAssertion = em.merge(tblSamlAssertion);
-            if (hostIdOld != null && !hostIdOld.equals(hostIdNew)) {
-                hostIdOld.getTblSamlAssertionCollection().remove(tblSamlAssertion);
-                hostIdOld = em.merge(hostIdOld);
-            }
-            if (hostIdNew != null && !hostIdNew.equals(hostIdOld)) {
-                hostIdNew.getTblSamlAssertionCollection().add(tblSamlAssertion);
-                em.merge(hostIdNew);
-            }
+//            if (hostIdOld != null && !hostIdOld.equals(hostIdNew)) {
+//                hostIdOld.getTblSamlAssertionCollection().remove(tblSamlAssertion);
+//                hostIdOld = em.merge(hostIdOld);
+//            }
+//            if (hostIdNew != null && !hostIdNew.equals(hostIdOld)) {
+//                hostIdNew.getTblSamlAssertionCollection().add(tblSamlAssertion);
+//                em.merge(hostIdNew);
+//            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -99,11 +104,11 @@ public class TblSamlAssertionJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The tblSamlAssertion with id " + id + " no longer exists.", enfe);
             }
-            TblHosts hostId = tblSamlAssertion.getHostId();
-            if (hostId != null) {
-                hostId.getTblSamlAssertionCollection().remove(tblSamlAssertion);
-                em.merge(hostId);
-            }
+//            TblHosts hostId = tblSamlAssertion.getHostId();
+//            if (hostId != null) {
+//                hostId.getTblSamlAssertionCollection().remove(tblSamlAssertion);
+//                em.merge(hostId);
+//            }
             em.remove(tblSamlAssertion);
             em.getTransaction().commit();
         } finally {
@@ -254,5 +259,24 @@ public class TblSamlAssertionJpaController implements Serializable {
         return tblSamlAssertionList;
         
     }
-
+    
+    public List<String> findHostnamesWithExpiredCache(Integer expiryInSeconds) {
+        EntityManager em = getEntityManager();
+        try {
+            log.info("AutoRefreshTrust: findHostnamesWithExpiredCache");
+            // To find the list of hosts which would have their SAML getting expired, we calculate what is the earliest create date for which the SAML would expire
+            // and also add a buffer time of about 5 min so that we might get to processing the host before it actually expires.
+            Query query = em.createNativeQuery("SELECT h.Name FROM mw_hosts as h WHERE NOT EXISTS ( SELECT ID FROM mw_saml_assertion as t WHERE h.ID = t.host_id AND t.created_ts > ? )");
+            Calendar maxCache = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");	
+            String currentTime = sdf.format(maxCache.getTime());
+            maxCache.add(Calendar.SECOND, -expiryInSeconds);
+            log.info("AutoRefreshTrust: Query hosts whose SAML was created after {}. Current time is {}.", sdf.format(maxCache.getTime()), currentTime);
+            query.setParameter(1, maxCache);
+            List<String> results = query.getResultList();
+            return results;
+        } finally {
+            em.close();
+        }
+    }
 }

@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 @Path("/binding-key-certificate")
 public class BindingKey {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BindingKey.class);
+    private static X509Certificate binding = null;
     
     protected TrustagentConfiguration getConfiguration() throws IOException {
         return TrustagentConfiguration.loadConfiguration();
@@ -29,19 +30,22 @@ public class BindingKey {
     @GET
     @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
     public X509Certificate getCertificate() throws IOException, CertificateException {
-        TrustagentConfiguration configuration = getConfiguration();
-        if( configuration.isDaaEnabled() ) {
-            log.debug("daa is currently not supported");
-            return null;
-        }
-        else {
-            TrustagentRepository repository = new TrustagentRepository(configuration);
-            X509Certificate bkCertificate = repository.getBindingKeyCertificate();
-            if( bkCertificate == null ) {
-                throw new WebApplicationException(Response.serverError().header("Error", "Cannot load Binding key certificate file").build());
+        if( binding == null ) {
+            TrustagentConfiguration configuration = getConfiguration();
+            if( configuration.isDaaEnabled() ) {
+                log.debug("daa is currently not supported");
+                return null;
             }
-            return bkCertificate;
+            else {
+                TrustagentRepository repository = new TrustagentRepository(configuration);
+                X509Certificate bkCertificate = repository.getBindingKeyCertificate();
+                if( bkCertificate == null ) {
+                    throw new WebApplicationException(Response.serverError().header("Error", "Cannot load Binding key certificate file").build());
+                }
+                binding = bkCertificate;
+            }
         }
+        return binding;
     }
  
 }

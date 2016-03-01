@@ -4,7 +4,7 @@
         <file>${TRUSTAGENT_LOGS:-/var/log/trustagent}/trustagent.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%date %-5level [%thread] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -47,12 +47,17 @@
         </encoder>
     </appender>
 
-    <root level="${TRUSAGENT_LOG_LEVEL:-INFO}">
+    <root level="${TRUSTAGENT_LOG_LEVEL:-INFO}">
         <appender-ref ref="LogFile"/>
         <appender-ref ref="ConsoleError"/>
         <appender-ref ref="ConsoleWarn"/>
         <appender-ref ref="ConsoleInfo"/>
     </root>
+    
+    <!-- INFO:  Enabling session validation scheduler...  -->
+    <logger name="org.apache.shiro.session.mgt" level="ERROR"/>
+    <!-- INFO:  Logged in cit as superuser -->
+    <logger name="com.intel.dcsg.cpg.util.shiro" level="ERROR"/>
     
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="org.apache.shiro" level="INFO"/>
@@ -60,6 +65,6 @@
     <logger name="com.intel.dcsg.cpg" level="INFO"/>
     <logger name="com.intel.dcsg.cpg.console" level="INFO"/>
     <logger name="com.intel.dcsg.cpg.configuration" level="INFO"/>
-
+    
 </configuration>
 

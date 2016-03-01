@@ -205,6 +205,13 @@ public class VmwareHostAgent implements HostAgent {
      return sw.toString();
         
      }*/
+    
+    @Override
+    public PcrManifest getPcrManifest(Nonce challenge) throws IOException {
+        log.error("vmware does not provide TPM quotes; ignoring challenge nonce: {}", challenge);
+        return getPcrManifest();
+    }
+    
     @Override
     public PcrManifest getPcrManifest() throws IOException {
         try {
@@ -312,6 +319,12 @@ public class VmwareHostAgent implements HostAgent {
     }
 
     @Override
+    public String getHostAttestationReport(String pcrList, Nonce challenge) throws IOException {
+        log.error("vmware does not support user-specified nonce, ignoring challenge: {}", challenge);
+        return getHostAttestationReport(pcrList);
+    }
+    
+    @Override
     public String getHostAttestationReport(String pcrList) throws IOException {
         try {
             return vmware.getHostAttestationReport(hostMOR, hostname, pcrList);
@@ -370,4 +383,5 @@ public class VmwareHostAgent implements HostAgent {
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 }

@@ -94,8 +94,8 @@ public class ConfigureRemote implements Command {
                 remote.setRemoteHostTimeout(new Timeout(60, TimeUnit.SECONDS));
                 try {
                     remote.open();
-                    if (remote.getRemoteHostKey() != null && remote.getRemoteHostKey().server != null && remote.getRemoteHostKey().publicKey != null) {
-                        boolean trustRemoteHost = shouldTrustRemoteHost(remote.getRemoteHostKey().server, remote.getRemoteHostKey().publicKey);
+                    if (remote.getRemoteHostKey() != null && remote.getRemoteHostKey().getHost() != null && remote.getRemoteHostKey().getPublicKey() != null) {
+                        boolean trustRemoteHost = shouldTrustRemoteHost(remote.getRemoteHostKey().getHost(), remote.getRemoteHostKey().getPublicKey());
                         if( !trustRemoteHost ) { remote.close(); return; }
                         remote.getRemoteSettings();
 

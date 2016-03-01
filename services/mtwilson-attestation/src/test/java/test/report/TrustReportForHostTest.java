@@ -45,7 +45,7 @@ public class TrustReportForHostTest {
         HostBO hostBO = new HostBO();
         HostTrustBO hostTrustBO = new HostTrustBO();
         hostTrustBO.setHostBO(hostBO);
-        TrustReport report = hostTrustBO.getTrustReportForHost(host, hostname);
+        TrustReport report = hostTrustBO.getTrustReportForHost(host, hostname, null);
         List<RuleResult> results = report.getResultsForMarker("VMM");
         for(RuleResult result : results) {
             log.debug("Rule: {}", result.getRuleName());

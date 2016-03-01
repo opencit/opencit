@@ -5,8 +5,10 @@
 package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.repository.RepositoryException;
@@ -23,6 +25,7 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateWhiteListWithOptionsRunnable.class);
     
     private WhitelistConfigurationData wlConfig;
+    private String challengeHex;
     private String result;
 
     public WhitelistConfigurationData getWlConfig() {
@@ -31,6 +34,14 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
 
     public void setWlConfig(WhitelistConfigurationData wlConfig) {
         this.wlConfig = wlConfig;
+    }
+    
+    public void setChallenge(String challengeHex) {
+        this.challengeHex = challengeHex;
+    }
+
+    public String getChallengeHex() {
+        return challengeHex;
     }
     
     public String getResult() {
@@ -46,7 +57,19 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     public void run() {
         log.debug("Starting to process white list creation using host {}.", wlConfig.getTxtHostRecord().HostName);
         try {
-            boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
+
+            boolean configureWhiteListFromHost;
+            if( challengeHex == null || challengeHex.isEmpty() ) {
+                configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
+            }
+            else {
+                if( !Digest.sha1().isValidHex(challengeHex) ) {
+                    throw new RepositoryCreateException("Invalid challenge");
+                }
+                Nonce challenge = new Nonce(Digest.sha1().valueHex(challengeHex).getBytes());
+                configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig, challenge);
+            }
+            
             result = Boolean.toString(configureWhiteListFromHost);
             log.debug("Completed processing of the white list using host {} with result {}", wlConfig.getTxtHostRecord().HostName, result);
             if (wlConfig.isRegisterHost()) {

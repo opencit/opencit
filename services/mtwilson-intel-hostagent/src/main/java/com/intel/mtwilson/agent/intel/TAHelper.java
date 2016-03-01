@@ -41,6 +41,7 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
@@ -297,12 +298,23 @@ public class TAHelper {
 
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException,
             UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
+        return getQuoteInformationForHost(hostname, client, null);
+    }
+    
+    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client, Nonce challenge) throws NoSuchAlgorithmException, PropertyException, JAXBException,
+            UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
         //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
         File q;
         File n;
         File c;
         File r;
-        byte[] nonce = generateNonce(); // 20 random bytes
+        byte[] nonce;
+        if( challenge == null ) {
+            nonce = generateNonce(); // 20 random bytes
+        }
+        else {
+            nonce = challenge.toByteArray(); // issue #4978: use specified nonce, if available
+        }
 
         // to fix issue #1038 we have a new option to put the host ip address in the nonce (we don't send this to the host - the hsot automatically would do the same thing)
         byte[] verifyNonce = nonce; // verifyNonce is what we save to verify against host's tpm quote response
@@ -405,17 +417,28 @@ public class TAHelper {
 
     }
 
+    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException,
+            UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
+        return getQuoteInformationForHost(hostname, client, null);
+    }
+    
     // NOTE:  this v2 client method is a little different from the getQuoteInformationForHost for the v1 trust agent because
     //        it hashes the nonce and the ip address together  (instead of replacing the last 4 bytes of the nonce 
     //        with the ip address like the v1 does)
-    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException,
+    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentClient client, Nonce challenge) throws NoSuchAlgorithmException, PropertyException, JAXBException,
             UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
         //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
         File q;
         File n;
         File c;
         File r;
-        byte[] nonce = generateNonce(); // 20 random bytes
+        byte[] nonce;
+        if( challenge == null ) {
+            nonce = generateNonce(); // 20 random bytes
+        }
+        else {
+            nonce = challenge.toByteArray(); // issue #4978: use specified nonce, if available
+        }
 
         // to fix issue #1038 we have a new option to put the host ip address in the nonce (we don't send this to the host - the hsot automatically would do the same thing)
         byte[] verifyNonce = nonce; // verifyNonce is what we save to verify against host's tpm quote response

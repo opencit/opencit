@@ -29,7 +29,7 @@
 # 25. create tpm-tools and additional binary symlinks
 # 26. fix_libcrypto for RHEL
 # 27. Install TPM commands
-# 28. create trustagent.version file
+# 28. create trustagent-version file
 # 29. fix_existing_aikcert
 # 30. install monit
 # 31. create TRUSTAGENT_TLS_CERT_IP list of system host addresses
@@ -275,16 +275,6 @@ else
   auto_install_preview "TrustAgent requirements" "TRUSTAGENT"
 fi
 
-# store trustagent username in env file
-echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-username
-echo "export TRUSTAGENT_USERNAME=$TRUSTAGENT_USERNAME" >> $TRUSTAGENT_ENV/trustagent-username
-
-# store log level in env file, if it's set
-if [ -n "$TRUSTAGENT_LOG_LEVEL" ]; then
-  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-logging
-  echo "export TRUSTAGENT_LOG_LEVEL=$TRUSTAGENT_LOG_LEVEL" >> $TRUSTAGENT_ENV/trustagent-logging
-fi
-
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
 # copy it to our new env folder so it will be available to tagent on startup
 if [ -n "$LIBVIRT_DEFAULT_URI" ]; then
@@ -293,36 +283,18 @@ elif [ -n "$VIRSH_DEFAULT_CONNECT_URI" ]; then
   echo "VIRSH_DEFAULT_CONNECT_URI=$VIRSH_DEFAULT_CONNECT_URI" > $TRUSTAGENT_ENV/virsh
 fi
 
-cp version $TRUSTAGENT_CONFIGURATION/trustagent.version
-
-# store the auto-exported environment variables in env file
-# to make them available after the script uses sudo to switch users;
-# we delete that file later
-echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-setup
-for env_file_var_name in $env_file_exports
-do
-  eval env_file_var_value="\$$env_file_var_name"
-  echo "export $env_file_var_name=$env_file_var_value" >> $TRUSTAGENT_ENV/trustagent-setup
-done
+cp version $TRUSTAGENT_CONFIGURATION/trustagent-version
 
 # delete existing java files, to prevent a situation where the installer copies
 # a newer file but the older file is also there
 if [ -d $TRUSTAGENT_HOME/java ]; then
-  rm $TRUSTAGENT_HOME/java/*.jar 2>/dev/null
+  rm -f $TRUSTAGENT_HOME/java/*.jar 2>/dev/null
 fi
 
 # extract trustagent  (trustagent-zip-0.1-SNAPSHOT.zip)
 echo "Extracting application..."
 TRUSTAGENT_ZIPFILE=`ls -1 trustagent-*.zip 2>/dev/null | head -n 1`
 unzip -oq $TRUSTAGENT_ZIPFILE -d $TRUSTAGENT_HOME
-
-## copy utilities script file to application folder
-#cp $UTIL_SCRIPT_FILE $TRUSTAGENT_HOME/bin/functions.sh
-#cp functions $TRUSTAGENT_BIN
-mkdir -p "$TRUSTAGENT_HOME"/share/scripts
-cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
-cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
-chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
@@ -338,11 +310,15 @@ fi
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_HOME
 chmod 755 $TRUSTAGENT_BIN/*
 
-# link /usr/local/bin/tagent -> /opt/trustagent/bin/tagent
+# if prior version had control script in /usr/local/bin, delete it
+if [ "$(whoami)" == "root" ] && [ -f /usr/local/bin/tagent ]; then
+  rm /usr/local/bin/tagent
+fi
 EXISTING_TAGENT_COMMAND=`which tagent 2>/dev/null`
 if [ -n "$EXISTING_TAGENT_COMMAND" ]; then
   rm -f "$EXISTING_TAGENT_COMMAND"
 fi
+# link /usr/local/bin/tagent -> /opt/trustagent/bin/tagent
 ln -s $TRUSTAGENT_BIN/tagent.sh /usr/local/bin/tagent
 if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
   ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
@@ -522,14 +498,6 @@ cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
 cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
 chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"/share/scripts
-
-# if prior version had control script in /usr/local/bin, delete it
-if [ "$(whoami)" == "root" ] && [ -f tagent ]; then
-  rm tagent
-fi
-if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
-  ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
-fi
 chmod +x $TRUSTAGENT_BIN/*
 
 # in 3.0, java home is now under trustagent home by default
@@ -619,8 +587,8 @@ return_dir=`pwd`
     cd ..
   fi
   cd ..
-  # create trustagent.version file
-  package_version_filename=$TRUSTAGENT_ENV/trustagent.version
+  # create trustagent-version file
+  package_version_filename=$TRUSTAGENT_ENV/trustagent-version
   datestr=`date +%Y-%m-%d.%H%M`
   touch $package_version_filename
   chmod 600 $package_version_filename
@@ -688,6 +656,7 @@ monit_install() {
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
   auto_install "Monit" "MONIT"
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; exit -1; fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
       echo_failure "Unable to auto-install Monit"
@@ -705,6 +674,7 @@ monit_src_install() {
   DEVELOPER_YUM_PACKAGES="make gcc"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
   auto_install "Developer tools" "DEVELOPER"
+  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; exit -1; fi
   monit_clear; monit_detect;
   if [[ -z "$monit" ]]; then
     if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then
@@ -837,6 +807,8 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
   # if already user provided we assume user will also provide later for restarts
   # otherwise, we generate and store the password
   if [ -z "$TRUSTAGENT_PASSWORD" ] && [ ! -f $TRUSTAGENT_CONFIGURATION/.trustagent_password ]; then
+    touch $TRUSTAGENT_CONFIGURATION/.trustagent_password
+    chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_CONFIGURATION/.trustagent_password
     tagent generate-password > $TRUSTAGENT_CONFIGURATION/.trustagent_password
   fi
 

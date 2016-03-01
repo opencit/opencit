@@ -25,7 +25,7 @@
         <file>${USER_HOME}/mtwilson.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%date %-5level [%thread] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -89,6 +89,11 @@
         <appender-ref ref="ConsoleInfo"/>
     </root>
 
-    <logger name="com.intel.mtwilson" level="DEBUG" />
+    <logger name="com.intel.mtwilson" level="INFO">
+        <appender-ref ref="LogFile"/>
+        <appender-ref ref="ConsoleError"/>
+        <appender-ref ref="ConsoleWarn"/>
+        <appender-ref ref="ConsoleInfo"/>
+    </logger>
 
 </configuration>
