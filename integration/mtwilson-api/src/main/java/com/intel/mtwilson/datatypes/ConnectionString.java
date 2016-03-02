@@ -260,7 +260,9 @@ public class ConnectionString {
                     String.format("https://%s:%d/;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
                     String.format("%s", this.addOnConnectionString);
         } else if (this.vendor == Vendor.MICROSOFT) {
-            connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
+            connectionString = (this.addOnConnectionString.isEmpty()) ? 
+                    String.format("https://%s:%d/;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
+                    String.format("%s", this.addOnConnectionString);            
         } else {
             connectionString = "";
         }
