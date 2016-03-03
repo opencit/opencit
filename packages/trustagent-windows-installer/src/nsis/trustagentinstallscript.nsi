@@ -8,7 +8,7 @@
 !include "nsDialogs.nsh"
 
 # Name of application
-Name "Intel CIT TrustAgent"
+Name "Intel CIT Trust Agent"
 
 # Create Setup(installer) file
 OutFile "Setup_TrustAgent.exe"
@@ -34,11 +34,11 @@ var vcr1Flag
 ; ------------------------------------------------------------------
 !insertmacro MUI_PAGE_WELCOME
 LangString PREREQ_TITLE ${LANG_ENGLISH} "Checking Environment for Installation"
-LangString CIT_SUBTITLE ${LANG_ENGLISH} "Checking installation of prerequisites for Intel CIT TrustAgent"
+LangString CIT_SUBTITLE ${LANG_ENGLISH} "Checking installation of prerequisites for Intel CIT Trust Agent"
 Page Custom CITServerPage CITServerLeave
 !insertmacro MUI_PAGE_DIRECTORY
 LangString INSTALL_PREREQ_TITLE ${LANG_ENGLISH} "Setting up prerequisites for Installation"
-LangString ENV_SUBTITLE ${LANG_ENGLISH} "CIT Trustagent environment settings"
+LangString ENV_SUBTITLE ${LANG_ENGLISH} "CIT Trust Agent environment settings"
 Page Custom EnvCustomPage EnvCustomLeave
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -299,19 +299,6 @@ FunctionEnd
 ; ----------------------------------------------------------------------------------
 
 Section "install"
-        StrCpy $3 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
-        nsExec::ExecToStack 'wmic product where "$3" get name'
-        Pop $0
-        Pop $1
-        ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
-        StrCmp $0 "" notfound1
-                StrCpy $vcr1Flag 1
-                Goto done1
-        notfound1:
-                  MessageBox MB_OK "Microsoft Visual C++ not installed properly. Exiting the TrustAgent Installation.."
-                  Quit
-        done1:
-
         # Set output path to the installation directory (also sets the working directory for shortcuts)
         SetOutPath $INSTDIR\
 
@@ -323,15 +310,16 @@ Section "install"
         File /r "..\bin\agenthandler.cmd"
         File /r "..\bin\getvmmver.cmd"
         File /r "..\bin\tasetup.cmd"
+        File /r "..\bin\taupgrade.cmd"
         File /r "..\bin\tpm_bindaeskey"
         File /r "..\bin\tpm_createkey"
         File /r "..\bin\tpm_signdata"
         File /r "..\bin\tpm_unbindaeskey"
         File /r "..\tpmtool\TpmAtt.dll"
         File /r "..\tpmtool\TPMTool.exe"
-        
+
         SetOutPath $INSTDIR\
-        
+
         File /r "..\bootdriver"
         File /r "..\configuration"
         File /r "..\env.d"
@@ -349,7 +337,8 @@ Section "install"
         File "nocmd.vbs"
         File "initsvcsetup.cmd"
         File "inittraysetup.cmd"
-
+        
+        
         ;
         # If trustagent.env file is not already created by Installer UI, copy from extracted files
         IfFileExists "$INSTDIR\trustagent.env" exists doesnotexist
@@ -383,36 +372,48 @@ Section "install"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "Publisher" "Intel Corporation"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "DisplayVersion" "1.0"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent" "DisplayIcon" "$INSTDIR\TAicon.ico"
-        
+
         # Create System Environment Variable - TRUSTAGENT_HOME
         !define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
         !define env_hkcu 'HKCU "Environment"'
         WriteRegExpandStr ${env_hklm} TRUSTAGENT_HOME $INSTDIR
         SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-        
-        # Add TrustAgent to PATH Environment Variable
-        Push "$INSTDIR\bin"
-        Call AddToPath
-        
+
         # Create Firewall Rule to open port 1443 for CIT Server
         nsExec::Exec 'cmd /k netsh advfirewall firewall add rule name="trustagent" protocol=TCP dir=in localport=1443 action=allow'
 
+        # Add TrustAgent to PATH Environment Variable
+        Push "$INSTDIR\bin"
+        Call AddToPath
+
         # Run tasetup.cmd
-        ExecWait '$INSTDIR\bin\tasetup.cmd'
-        ReadRegStr $0 HKLM "Software\Microsoft\Windows NT\CurrentVersion" "ProductName"
-        StrCpy $6 "Hyper-V Server 2012 R2"
-        StrCmp $0 $6 hypercheck
-                ExecWait 'wscript "$INSTDIR\nocmd.vbs" "$INSTDIR\initsvcsetup.cmd"'
-                ExecWait 'wscript "$INSTDIR\nocmd.vbs" "$INSTDIR\inittraysetup.cmd"'
-                Goto hyperdone
-        hypercheck:
-                 ExecWait '$INSTDIR\initsvcsetup.cmd'
-                 Goto hyperdone
-        hyperdone:
-                  Delete $INSTDIR\initsvcsetup.cmd
-                  Delete $INSTDIR\inittraysetup.cmd
-                  Delete $INSTDIR\nocmd.vbs
-        
+        IfFileExists $TEMP\TrustAgent_Backup\*.* restore fresh
+        restore:
+                ExecWait '$INSTDIR\bin\taupgrade.cmd'
+                RMDir /r "$INSTDIR\configuration"
+                CopyFiles "$TEMP\TrustAgent_Backup\java.security" "$INSTDIR\jre\lib\java.security"
+                CopyFiles "$TEMP\TrustAgent_Backup\configuration" "$INSTDIR"
+                CopyFiles "$TEMP\TrustAgent_Backup\trustagent.env" "$INSTDIR"
+                RMDir /r "$TEMP\TrustAgent_Backup"
+                Goto setupcomplete
+        fresh:
+               ExecWait '$INSTDIR\bin\tasetup.cmd'
+               Goto setupcomplete
+        setupcomplete:
+                      ReadRegStr $0 HKLM "Software\Microsoft\Windows NT\CurrentVersion" "ProductName"
+                      StrCpy $6 "Hyper-V Server 2012 R2"
+                      StrCmp $0 $6 hypercheck
+                             ExecWait 'wscript "$INSTDIR\nocmd.vbs" "$INSTDIR\initsvcsetup.cmd"'
+                             ExecWait 'wscript "$INSTDIR\nocmd.vbs" "$INSTDIR\inittraysetup.cmd"'
+                             Goto hyperdone
+                        hypercheck:
+                                   ExecWait '$INSTDIR\initsvcsetup.cmd'
+                                   Goto hyperdone
+                        hyperdone:
+                              Delete $INSTDIR\initsvcsetup.cmd
+                              Delete $INSTDIR\inittraysetup.cmd
+                              Delete $INSTDIR\nocmd.vbs
+
 
 SectionEnd
 
@@ -434,7 +435,7 @@ Section "Uninstall"
 
         # Uninstall CITBOOTDRIVER
         nsExec::Exec 'cmd /k "$INSTDIR\bootdriver\citbootdriversetup.exe" uninstall'
-        
+
         # Remove Firewall rule
         nsExec::Exec 'cmd /k netsh advfirewall firewall delete rule name="trustagent"'
 
@@ -448,7 +449,7 @@ Section "Uninstall"
         # Remove system environment variable TRUSTAGENT_HOME
         DeleteRegValue ${env_hklm} TRUSTAGENT_HOME
         SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-        
+
         # Remove TrustAgent from PATH Environment Variable
         Push "$INSTDIR\bin"
         Call un.RemoveFromPath
@@ -459,7 +460,7 @@ Section "Uninstall"
         # Delete Registry Keys
         DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\TrustAgent"
         DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\TrustAgent"
-        
+
 SectionEnd
 
 ; ----------------------------------------------------------------------------------
@@ -491,6 +492,10 @@ Function .onInit
                  Abort
         uninst:
                ClearErrors
+               CreateDirectory $TEMP\TrustAgent_Backup
+               CopyFiles "$INSTDIR\configuration" "$TEMP\TrustAgent_Backup\configuration"
+               CopyFiles "$INSTDIR\trustagent.env" "$TEMP\TrustAgent_Backup\trustagent.env"
+               CopyFiles "$INSTDIR\java.security" "$TEMP\TrustAgent_Backup\java.security"
                Exec $INSTDIR\Uninstall.exe
 
 
@@ -505,12 +510,17 @@ Function .onInit
                      Goto done1
                 notfound:
                      StrCpy $vcr1Flag 0
+                     MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "Microsoft Visual C++ not installed. Click `OK` to install or`Cancel` to cancel TrustAgent installation." IDOK inst
+                     Abort
+                inst:
+                     Call SetupVCRedist
                 done1:
+
 FunctionEnd
 
 Function SetupVCRedist
          SetOutPath $INSTDIR\
-         
+
          File "..\tpmtool\vcredist_x64.exe"
          ExecShell "open" '$INSTDIR\vcredist_x64.exe'
 FunctionEnd
@@ -526,12 +536,10 @@ Function CITServerPage
                ${NSD_CreateLabel} 0 40 100% 12u "Microsoft Visual C++ 2013 Redistributable x64 is installed"
                Pop $mylabel
         ${else}
-               ${NSD_CreateLabel} 0 30 100% 12u "Microsoft Visual C++ 2013 Redistributable x64 not found."
-               ${NSD_CreateLabel} 0 60 100% 12u "Please run the following Visual C++ installation for Intel CIT Trustagent setup."
-               Pop $mylabel
-               Call SetupVCRedist
+                  MessageBox MB_OK "Microsoft Visual C++ not installed properly. Exiting the Trust Agent Installation.."
+                  Quit
         ${endif}
-        ${NSD_CreateLabel} 0 100 100% 12u "Please ensure that Intel CIT Server is running for CIT Trustagent."
+        ${NSD_CreateLabel} 0 100 100% 12u "Please ensure that Intel CIT Server is running for CIT Trust Agent."
         Pop $mylabel
         nsDialogs::Show
 FunctionEnd
@@ -540,31 +548,48 @@ FunctionEnd
 
 
 Function EnvCustomPage
-        !insertmacro MUI_HEADER_TEXT $(INSTALL_PREREQ_TITLE) $(ENV_SUBTITLE)
-        ReserveFile "InstallOptionsFile.ini"
-        !insertmacro MUI_INSTALLOPTIONS_EXTRACT "InstallOptionsFile.ini"
-        !insertmacro MUI_INSTALLOPTIONS_DISPLAY "InstallOptionsFile.ini"
+        IfFileExists $TEMP\TrustAgent_Backup\*.* skip continue
+        skip:
+             Abort
+        continue:
+                !insertmacro MUI_HEADER_TEXT $(INSTALL_PREREQ_TITLE) $(ENV_SUBTITLE)
+                ReserveFile "InstallOptionsFile.ini"
+                !insertmacro MUI_INSTALLOPTIONS_EXTRACT "InstallOptionsFile.ini"
+                !insertmacro MUI_INSTALLOPTIONS_DISPLAY "InstallOptionsFile.ini"
+
 FunctionEnd
 Function EnvCustomLeave
         Push $R0
         Push $R1
+        Push $R2
+        Push $R3
+        Push $R4
+        Push $R5
         !insertmacro MUI_INSTALLOPTIONS_READ $R0 "InstallOptionsFile.ini" "Field 3" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R1 "InstallOptionsFile.ini" "Field 5" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R2 "InstallOptionsFile.ini" "Field 7" "State"
         !insertmacro MUI_INSTALLOPTIONS_READ $R3 "InstallOptionsFile.ini" "Field 9" "State"
+        !insertmacro MUI_INSTALLOPTIONS_READ $R4 "InstallOptionsFile.ini" "Field 12" "State"
+        !insertmacro MUI_INSTALLOPTIONS_READ $R5 "InstallOptionsFile.ini" "Field 14" "State"
         StrCmp $R0 "" textboxcheck
         StrCmp $R1 "" textboxcheck
         StrCmp $R2 "" textboxcheck
         StrCmp $R3 "" textboxcheck
         SetOutPath $INSTDIR
         FileOpen $0 "trustagent.env" w
-        FileWrite $0 "MTWILSON_API_URL=https://$R0:8443/mtwilson/v2"
+        FileWrite $0 "MTWILSON_API_URL=$R0"
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_API_USERNAME=$R1"
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_API_PASSWORD=$R2"
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_TLS_CERT_SHA1=$R3"
+        FileWrite $0 "$\r$\n"
+        StrCmp $R4 "" +2
+        FileWrite $0 "TRUSTAGENT_LOGIN_USERNAME=$R4"
+        FileWrite $0 "$\r$\n"
+        StrCmp $R5 "" +2
+        FileWrite $0 "TRUSTAGENT_LOGIN_PASSWORD=$R5"
         FileClose $0
         goto exitfunc
         textboxcheck:
@@ -573,6 +598,10 @@ Function EnvCustomLeave
         exitfunc:
                  Pop $R1
                  Pop $R0
+                 Pop $R2
+                 Pop $R3
+                 Pop $R4
+                 Pop $R5
 FunctionEnd
 
 
