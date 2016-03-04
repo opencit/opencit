@@ -24,6 +24,20 @@ ShowInstDetails show
 
 var mylabel
 var vcr1Flag
+var dialog
+var hwnd
+var label1
+var label2
+var label3
+var label4
+var label5
+var label6
+var button1
+var button2
+var button3
+var button4
+var button5
+var button6
 !define Environ 'HKCU "Environment"'
 !define MUI_ICON "TAicon.ico"
 !define MUI_HEADERIMAGE
@@ -496,7 +510,7 @@ Function .onInit
                CopyFiles "$INSTDIR\configuration" "$TEMP\TrustAgent_Backup\configuration"
                CopyFiles "$INSTDIR\trustagent.env" "$TEMP\TrustAgent_Backup\trustagent.env"
                CopyFiles "$INSTDIR\java.security" "$TEMP\TrustAgent_Backup\java.security"
-               Exec $INSTDIR\Uninstall.exe
+               ExecWait $INSTDIR\Uninstall.exe
 
 
         prereq:
@@ -513,16 +527,20 @@ Function .onInit
                      MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "Microsoft Visual C++ not installed. Click `OK` to install or`Cancel` to cancel TrustAgent installation." IDOK inst
                      Abort
                 inst:
-                     Call SetupVCRedist
+                     SetOutPath $INSTDIR\
+
+                     File "..\tpmtool\vcredist_x64.exe"
+                     ExecWait '$INSTDIR\vcredist_x64.exe'
+                     StrCpy $2 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
+                     nsExec::ExecToStack 'wmic product where "$2" get name'
+                     Pop $0
+                     Pop $1
+                     ${StrStr} $0 $1 "Microsoft Visual C++ 2013 x64 Minimum Runtime"
+                     StrCmp $0 "" +2
+                     StrCpy $vcr1Flag 1
+
                 done1:
 
-FunctionEnd
-
-Function SetupVCRedist
-         SetOutPath $INSTDIR\
-
-         File "..\tpmtool\vcredist_x64.exe"
-         ExecShell "open" '$INSTDIR\vcredist_x64.exe'
 FunctionEnd
 
 
@@ -543,20 +561,72 @@ Function CITServerPage
         Pop $mylabel
         nsDialogs::Show
 FunctionEnd
+
 Function CITServerLeave
 FunctionEnd
 
 
 Function EnvCustomPage
-        IfFileExists $TEMP\TrustAgent_Backup\*.* skip continue
-        skip:
+     IfFileExists $TEMP\TrustAgent_Backup\*.* skip continue
+     skip:
              Abort
-        continue:
-                !insertmacro MUI_HEADER_TEXT $(INSTALL_PREREQ_TITLE) $(ENV_SUBTITLE)
-                ReserveFile "InstallOptionsFile.ini"
-                !insertmacro MUI_INSTALLOPTIONS_EXTRACT "InstallOptionsFile.ini"
-                !insertmacro MUI_INSTALLOPTIONS_DISPLAY "InstallOptionsFile.ini"
+     continue:
+	nsDialogs::Create 1018
+		Pop $dialog
 
+        ${NSD_CreateLabel} 0% 0% 40% 10% "CIT_API_URL"
+		Pop $label1
+		ShowWindow $label1 ${SW_SHOW}
+
+	${NSD_CreateText} 40% 0% 40% 10% ""
+		Pop $button1
+		ShowWindow $button1 ${SW_SHOW}
+
+        ${NSD_CreateLabel} 0% 15% 40% 10% "CIT_API_USERNAME"
+		Pop $label2
+		ShowWindow $label2 ${SW_SHOW} 
+
+	${NSD_CreateText} 40% 15% 40% 10% ""
+		Pop $button2
+		ShowWindow $button2 ${SW_SHOW}
+		
+         ${NSD_CreateLabel} 0% 30% 40% 10% "CIT_API_PASSWORD"
+		Pop $label3
+		ShowWindow $label3 ${SW_SHOW}
+
+	${NSD_CreateText} 40% 30% 40% 10% ""
+		Pop $button3
+		ShowWindow $button3 ${SW_SHOW}
+
+        ${NSD_CreateLabel} 0% 45% 40% 10% "CIT_TLS_CERT_SHA1"
+		Pop $label4
+		ShowWindow $label4 ${SW_SHOW}
+
+	${NSD_CreateText} 40% 45% 40% 10% ""
+		Pop $button4
+		ShowWindow $button4 ${SW_SHOW}
+
+	${NSD_CreateCheckbox} 0% 60% 60% 6% "Trust Agent login credentials"
+		Pop $hwnd
+		${NSD_OnClick} $hwnd EnDisableButton
+
+        ${NSD_CreateLabel} 0% 75% 40% 10% "TRUSTAGENT_USERNAME"
+		Pop $label5
+		ShowWindow $label5 ${SW_HIDE}
+
+	${NSD_CreateText} 40% 75% 40% 10% ""
+		Pop $button5
+		ShowWindow $button5 ${SW_HIDE}
+
+        ${NSD_CreateLabel} 0% 90% 40% 10% "TRUSTAGENT_PASSWORD"
+		Pop $label6
+		ShowWindow $label6 ${SW_HIDE}
+
+	${NSD_CreateText} 40% 90% 40% 10% ""
+		Pop $button6
+		ShowWindow $button6 ${SW_HIDE}
+
+	nsDialogs::Show
 FunctionEnd
 Function EnvCustomLeave
         Push $R0
@@ -565,12 +635,12 @@ Function EnvCustomLeave
         Push $R3
         Push $R4
         Push $R5
-        !insertmacro MUI_INSTALLOPTIONS_READ $R0 "InstallOptionsFile.ini" "Field 3" "State"
-        !insertmacro MUI_INSTALLOPTIONS_READ $R1 "InstallOptionsFile.ini" "Field 5" "State"
-        !insertmacro MUI_INSTALLOPTIONS_READ $R2 "InstallOptionsFile.ini" "Field 7" "State"
-        !insertmacro MUI_INSTALLOPTIONS_READ $R3 "InstallOptionsFile.ini" "Field 9" "State"
-        !insertmacro MUI_INSTALLOPTIONS_READ $R4 "InstallOptionsFile.ini" "Field 12" "State"
-        !insertmacro MUI_INSTALLOPTIONS_READ $R5 "InstallOptionsFile.ini" "Field 14" "State"
+        ${NSD_GetText} $button1 $R0
+        ${NSD_GetText} $button2 $R1
+        ${NSD_GetText} $button3 $R2
+        ${NSD_GetText} $button4 $R3
+        ${NSD_GetText} $button5 $R4
+        ${NSD_GetText} $button6 $R5
         StrCmp $R0 "" textboxcheck
         StrCmp $R1 "" textboxcheck
         StrCmp $R2 "" textboxcheck
@@ -585,10 +655,10 @@ Function EnvCustomLeave
         FileWrite $0 "$\r$\n"
         FileWrite $0 "MTWILSON_TLS_CERT_SHA1=$R3"
         FileWrite $0 "$\r$\n"
-        StrCmp $R4 "" +2
+        StrCmp $R4 "" +2 0
         FileWrite $0 "TRUSTAGENT_LOGIN_USERNAME=$R4"
         FileWrite $0 "$\r$\n"
-        StrCmp $R5 "" +2
+        StrCmp $R5 "" +2 0
         FileWrite $0 "TRUSTAGENT_LOGIN_PASSWORD=$R5"
         FileClose $0
         goto exitfunc
@@ -596,15 +666,29 @@ Function EnvCustomLeave
                 MessageBox MB_OK|MB_ICONEXCLAMATION "Please enter valid settings."
                 Abort
         exitfunc:
-                 Pop $R1
                  Pop $R0
+                 Pop $R1
                  Pop $R2
                  Pop $R3
                  Pop $R4
                  Pop $R5
 FunctionEnd
 
-
+Function EnDisableButton
+	Pop $hwnd
+	${NSD_GetState} $hwnd $0
+	${If} $0 == 1
+		ShowWindow $label5 ${SW_SHOW}
+		ShowWindow $label6 ${SW_SHOW}
+		ShowWindow $button5 ${SW_SHOW}
+		ShowWindow $button6 ${SW_SHOW}
+	${Else}
+		ShowWindow $label5 ${SW_HIDE}
+		ShowWindow $label6 ${SW_HIDE}
+		ShowWindow $button5 ${SW_HIDE}
+		ShowWindow $button6 ${SW_HIDE}
+	${EndIf}
+FunctionEnd
 ; ----------------------------------------------------------
 ; ****************** END OF FUNCTIONS **********************
 ; ----------------------------------------------------------
