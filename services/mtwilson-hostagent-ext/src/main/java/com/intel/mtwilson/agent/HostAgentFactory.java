@@ -135,10 +135,11 @@ public class HostAgentFactory {
         }
         String vendorProtocol = cs.getVendor().name().toLowerCase(); // INTEL, CITRIX, VMWARE becomes intel, citrix, vmware
         
-        //treat use intel host agent for microsoft
+        /*treat use intel host agent for microsoft
         if (vendorProtocol.compareTo("microsoft") == 0) {
             vendorProtocol = "intel";
         }
+        */
         
         VendorHostAgentFactory factory = Plugins.findByAttribute(VendorHostAgentFactory.class, "vendorProtocol", vendorProtocol);
         if( factory != null ) {

@@ -210,10 +210,12 @@ public class ConnectionString {
                     password = vmwareConnection.getPassword();
                     break;
                 case MICROSOFT:
-                    IntelConnectionString microsoftConnection = IntelConnectionString.forURL(connectionString);
+                    log.debug("MICROSOFT connection string: {}", connectionString);
+                    MicrosoftConnectionString microsoftConnection = MicrosoftConnectionString.forURL(vendor.MICROSOFT+":"+connectionString);
                     hostname = microsoftConnection.getHost();
                     port = microsoftConnection.getPort();
                     managementServerName = hostname.toString();
+                    log.debug("MICROSOFT vendor: {}", vendor);
                     break;
                 default:
                     throw new UnsupportedOperationException("Vendor not supported yet: "+vendor.toString());
@@ -357,7 +359,7 @@ public class ConnectionString {
     }
 
     /**
-     * This would return the host type of the host, which can be either INTEL, VMWARE or CITRIX.
+     * This would return the host type of the host, which can be either INTEL, VMWARE or CITRIX, or MICROSOFT
      * @return 
      */
     public Vendor getVendor() {
@@ -406,6 +408,48 @@ public class ConnectionString {
         }
     }
 
+        public static class MicrosoftConnectionString {
+        private InternetAddress hostAddress;
+        private int port;
+        private String username;
+        private String password;
+        public InternetAddress getHost() { return hostAddress; }
+        public int getPort() { return port; }
+        public String getUsername() { return username; }
+        public String getPassword() { return password; }
+        
+        public URL toURL() {
+            try {
+                return new URL(String.format("https://%s:%d", hostAddress.toString(), port));
+            }
+            catch(MalformedURLException e) {
+                log.error("Cannot create Intel Host URL: {}", e.toString());
+                return null;
+            }
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
+        }
+        
+        public static MicrosoftConnectionString forURL(String url) throws MalformedURLException {
+            MicrosoftConnectionString cs = new MicrosoftConnectionString();
+            VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }            
+            if( info.vendor !=  Vendor.MICROSOFT ) {
+                throw new IllegalArgumentException("Not a Microsoft Host URL: "+info.url.toExternalForm());
+            }
+            cs.hostAddress = new InternetAddress(info.url.getHost());
+            cs.port = portFromURL(info.url);
+            if( info.options != null ) {
+                cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
+                cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            }
+            return cs;
+        }
+    }
+        
     public static class CitrixConnectionString {
         private InternetAddress hostAddress;
         private int port;
@@ -566,6 +610,65 @@ public class ConnectionString {
     }
     */
     
+    /**
+     * Creates a connection string for an Intel host with default port 9999
+     * @param hostname DNS name or IP address
+     * @return 
+     */
+    public static ConnectionString forMicorsoft(String hostname) {
+        return forIntel(new Hostname(hostname));
+    }
+    
+    /**
+     * Creates a connection string for an Intel host with default port 9999
+     * @param hostname DNS name or IP address
+     * @return 
+     */
+    public static ConnectionString forMicorsoft(Hostname hostname) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.MICROSOFT;
+        conn.hostname = new InternetAddress(hostname.toString());
+        conn.managementServerName = hostname.toString();
+        conn.port = 9999; // default Intel Trust Agent port
+        return conn;
+    }
+    
+    /**
+     * Creates a connection string for an Intel host with specified port
+     * @param hostname DNS name or IP address
+     * @param port to connect to Trust Agent
+     * @return 
+     */
+    public static ConnectionString forMicorsoft(Hostname hostname, Integer port) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.MICROSOFT;
+        conn.hostname = new InternetAddress(hostname.toString());
+        conn.managementServerName = hostname.toString();
+        conn.port = port;
+        return conn;
+    }
+
+    /**
+     * Creates a connection string for an Intel host with specified port
+     * @param hostname DNS name or IP address
+     * @param port to connect to Trust Agent
+     * @return 
+     */
+    public static ConnectionString forMicrosoft(String hostname, Integer port) {
+        return forIntel(new Hostname(hostname), port);
+    }
+
+    public static ConnectionString forMicrosoft(String hostname, Integer port, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.MICROSOFT;
+        conn.hostname = new InternetAddress(hostname);
+        conn.managementServerName = hostname;
+        conn.port = port;
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
+        
     /**
      * Creates a connection string for a Citrix host with default port 443
      * @param hostname DNS name or IP address
