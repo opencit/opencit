@@ -656,10 +656,10 @@ Function EnvCustomLeave
         FileWrite $0 "MTWILSON_TLS_CERT_SHA1=$R3"
         FileWrite $0 "$\r$\n"
         StrCmp $R4 "" +2 0
-        FileWrite $0 "TRUSTAGENT_LOGIN_USERNAME=$R4"
+        FileWrite $0 "TRUSTAGENT_ADMIN_USERNAME=$R4"
         FileWrite $0 "$\r$\n"
         StrCmp $R5 "" +2 0
-        FileWrite $0 "TRUSTAGENT_LOGIN_PASSWORD=$R5"
+        FileWrite $0 "TRUSTAGENT_ADMIN_PASSWORD=$R5"
         FileClose $0
         goto exitfunc
         textboxcheck:
