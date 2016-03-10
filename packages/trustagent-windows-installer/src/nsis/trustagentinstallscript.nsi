@@ -584,17 +584,17 @@ Function EnvCustomPage
 
         ${NSD_CreateLabel} 0% 15% 40% 10% "CIT_API_USERNAME"
 		Pop $label2
-		ShowWindow $label2 ${SW_SHOW} 
+		ShowWindow $label2 ${SW_SHOW}
 
 	${NSD_CreateText} 40% 15% 40% 10% ""
 		Pop $button2
 		ShowWindow $button2 ${SW_SHOW}
-		
+
          ${NSD_CreateLabel} 0% 30% 40% 10% "CIT_API_PASSWORD"
 		Pop $label3
 		ShowWindow $label3 ${SW_SHOW}
 
-	${NSD_CreateText} 40% 30% 40% 10% ""
+	${NSD_CreatePassword} 40% 30% 40% 10% ""
 		Pop $button3
 		ShowWindow $button3 ${SW_SHOW}
 
@@ -622,7 +622,7 @@ Function EnvCustomPage
 		Pop $label6
 		ShowWindow $label6 ${SW_HIDE}
 
-	${NSD_CreateText} 40% 90% 40% 10% ""
+	${NSD_CreatePassword} 40% 90% 40% 10% ""
 		Pop $button6
 		ShowWindow $button6 ${SW_HIDE}
 
