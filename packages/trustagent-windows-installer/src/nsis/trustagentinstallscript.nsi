@@ -530,7 +530,7 @@ Function .onInit
                      SetOutPath $INSTDIR\
 
                      File "..\tpmtool\vcredist_x64.exe"
-                     ExecWait '$INSTDIR\vcredist_x64.exe'
+                     ExecWait '$INSTDIR\vcredist_x64.exe /install /passive /norestart'
                      StrCpy $2 "Name like '%%Microsoft Visual C++ 2013 x64 Minimum Runtime%%'"
                      nsExec::ExecToStack 'wmic product where "$2" get name'
                      Pop $0
