@@ -51,8 +51,8 @@ LangString PREREQ_TITLE ${LANG_ENGLISH} "Checking Environment for Installation"
 LangString CIT_SUBTITLE ${LANG_ENGLISH} "Checking installation of prerequisites for Intel CIT Trust Agent"
 Page Custom CITServerPage CITServerLeave
 !insertmacro MUI_PAGE_DIRECTORY
-LangString INSTALL_PREREQ_TITLE ${LANG_ENGLISH} "Setting up prerequisites for Installation"
-LangString ENV_SUBTITLE ${LANG_ENGLISH} "CIT Trust Agent environment settings"
+LangString INSTALL_PREREQ_TITLE ${LANG_ENGLISH} "Setting up configuration for Installation"
+LangString ENV_SUBTITLE ${LANG_ENGLISH} "CIT Server and Trust Agent environment settings"
 Page Custom EnvCustomPage EnvCustomLeave
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -351,8 +351,8 @@ Section "install"
         File "nocmd.vbs"
         File "initsvcsetup.cmd"
         File "inittraysetup.cmd"
-        
-        
+
+
         ;
         # If trustagent.env file is not already created by Installer UI, copy from extracted files
         IfFileExists "$INSTDIR\trustagent.env" exists doesnotexist
@@ -571,6 +571,7 @@ Function EnvCustomPage
      skip:
              Abort
      continue:
+        !insertmacro MUI_HEADER_TEXT $(INSTALL_PREREQ_TITLE) $(ENV_SUBTITLE)
 	nsDialogs::Create 1018
 		Pop $dialog
 
