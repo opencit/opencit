@@ -318,7 +318,7 @@
             </activation>
             <build>
                 <plugins>
-                    <!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
+                    <!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom   
                     <plugin>
                         <groupId>pl.project13.maven</groupId>
                         <artifactId>git-commit-id-plugin</artifactId>
@@ -338,7 +338,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                  
+                  -->
                 </plugins>
             </build>
         </profile>
