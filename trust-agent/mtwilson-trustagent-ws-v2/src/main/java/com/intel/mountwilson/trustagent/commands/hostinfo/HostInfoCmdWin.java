@@ -93,12 +93,12 @@ public class HostInfoCmdWin implements ICommand {
             String[] resultArray = result.getStdout().split("\n");
             if (resultArray.length >1) {
                 context.setOsVersion(resultArray[1]);
-                log.debug("OS full Name: " + context.getOsName());
+                log.debug("OS version: " + context.getOsVersion());
             } else {
-                log.error("[wmic os get caption] does not return OS full name");
+                log.error("[wmic os get version] does not return OS full name");
             }
         } else {
-            log.error("Error executing the [wmic os get caption] to retrieve the OS details");
+            log.error("Error executing the [wmic os get version] to retrieve the OS details");
         }
     }
     
@@ -227,6 +227,7 @@ public class HostInfoCmdWin implements ICommand {
      * response of dmidecode -s bios-vendor -> S5500.86B.01.00.0060.090920111354
      */
     private void getBiosAndVersion() throws TAException, IOException {
+        /*
         try {
             String biosManufacturer = jWMI.getWMIValue("Select manufacturer from Win32_BIOS", "manufacturer");
             context.setBiosOem(biosManufacturer);
@@ -238,10 +239,58 @@ public class HostInfoCmdWin implements ICommand {
         } catch (Exception ex) {
             Logger.getLogger(HostInfoCmdWin.class.getName()).log(Level.SEVERE, "TA Error Getting Bios and version", ex);
         }
+        */
+        getBiosOem();
+        getBiosVersion();
     }
-    /*
-     * FIXIT: need to find correct tool on Windows to identify hyper-V version
-     */
+    
+    private void getBiosVersion() throws TAException, IOException {
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("bios");
+        command.addArgument("get");
+        command.addArgument("smbiosbiosversion", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setBiosVersion(resultArray[1]);
+                log.debug("Bios Version: " + context.getBiosVersion());
+            } else {
+                log.error("[wmic bios get smbiosbiosversion] does not return Bios Version");
+            }
+        } else {
+            log.error("Error executing the [wmic bios get smbiosbiosversion]");
+        }   
+    }
+    
+    private void getBiosOem() throws TAException, IOException {
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("bios");
+        command.addArgument("get");
+        command.addArgument("manufacturer", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setBiosOem(resultArray[1]);
+                log.debug("OS full Name: " + context.getBiosOem());
+            } else {
+                log.error("[wmic bios get manufacturer]");
+            }
+        } else {
+            log.error("Error executing the [wmic bios get manufacturer]");
+        }   
+    }
 
     private void getVmmAndVersion() throws TAException, IOException {
         context.setVmmName("Windows Hyper-V");
@@ -257,6 +306,7 @@ public class HostInfoCmdWin implements ICommand {
      * @throws IOException 
      */
     private void getProcessorInfo() throws TAException, IOException {
+        /*
         try {
             String processorInfo = "";
             processorInfo = jWMI.getWMIValue("Select ProcessorId from Win32_Processor", "ProcessorId");
@@ -267,6 +317,28 @@ public class HostInfoCmdWin implements ICommand {
         } catch (Exception ex) {
             Logger.getLogger(HostInfoCmdWin.class.getName()).log(Level.SEVERE, "Error retrieving the processor information", ex);
         }
+        */
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("cpu");
+        command.addArgument("get");
+        command.addArgument("ProcessorId", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setProcessorInfo(resultArray[1]);
+                log.debug("OS full Name: " + context.getProcessorInfo());
+            } else {
+                log.error("[wmic os get ProcessorId] does not return ProcessorId");
+            }
+        } else {
+            log.error("Error executing the [wmic os get ProcessorId]");
+        }        
             
     }
     
@@ -276,7 +348,7 @@ public class HostInfoCmdWin implements ICommand {
      * @throws IOException
      */
     public void getHostUUID() throws TAException, IOException {
-        
+        /*
         try {
             String uuidInfo = "";
             uuidInfo = jWMI.getWMIValue("Select UUID from Win32_ComputerSystemProduct", "UUID");
@@ -286,6 +358,28 @@ public class HostInfoCmdWin implements ICommand {
         } catch (Exception ex) {
             Logger.getLogger(HostInfoCmdWin.class.getName()).log(Level.SEVERE, "Error retrieving the UUID information", ex);
         }
-
+        */
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("path");
+        command.addArgument("Win32_ComputerSystemProduct");
+        command.addArgument("get");
+        command.addArgument("uuid", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setHostUUID(resultArray[1]);
+                log.debug("Host UUID: " + context.getHostUUID());
+            } else {
+                log.error("[wmic path Win32_ComputerSystemProduct] does not return uuid");
+            }
+        } else {
+            log.error("Error executing the [wmic path Win32_ComputerSystemProduct]");
+        }
     }
 }
