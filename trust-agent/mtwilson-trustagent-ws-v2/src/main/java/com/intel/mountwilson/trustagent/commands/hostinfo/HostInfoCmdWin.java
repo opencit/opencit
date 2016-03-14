@@ -66,7 +66,7 @@ public class HostInfoCmdWin implements ICommand {
      */
     
     private void getOsVersion() throws TAException, IOException {
-        String osVersion = "";
+        /* String osVersion = "";
         try {
             osVersion = jWMI.getWMIValue("Select version from Win32_OperatingSystem", "version");
             if (osVersion.equals("")) {
@@ -76,6 +76,29 @@ public class HostInfoCmdWin implements ICommand {
             log.debug("OS Version: " + context.getOsVersion());
         } catch (Exception ex) {
             Logger.getLogger(HostInfoCmdWin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        */
+        
+        CommandLine command = new CommandLine("wmic");
+        command.addArgument("os");
+        command.addArgument("get");
+        command.addArgument("version", false);
+        Result result = ExecUtil.execute(command);
+        if (result.getExitCode() != 0) {
+            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+            throw new TAException(ErrorCode.ERROR, result.getStderr());
+        }
+        log.debug("command stdout: {}", result.getStdout());
+        if (result.getStdout() != null) {
+            String[] resultArray = result.getStdout().split("\n");
+            if (resultArray.length >1) {
+                context.setOsVersion(resultArray[1]);
+                log.debug("OS full Name: " + context.getOsName());
+            } else {
+                log.error("[wmic os get caption] does not return OS full name");
+            }
+        } else {
+            log.error("Error executing the [wmic os get caption] to retrieve the OS details");
         }
     }
     
