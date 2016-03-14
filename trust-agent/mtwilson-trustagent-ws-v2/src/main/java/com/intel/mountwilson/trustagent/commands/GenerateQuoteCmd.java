@@ -37,6 +37,8 @@ public class GenerateQuoteCmd implements ICommand {
     
     private TADataContext context;
 
+    //using this variable to indicate if the AIK loaded to TPM. if not, load it; otherwise, skip loading
+    private static boolean isAIKImported = false;
     
     public GenerateQuoteCmd(TADataContext context) {
         this.context = context;
@@ -87,16 +89,19 @@ public class GenerateQuoteCmd implements ICommand {
 
         if (osName.toLowerCase().contains("windows")) {
             
-            // In the case of Windows, we import the AIK first
-            String aikOpaqueFile = Folders.configuration() + File.separator + "aik.opaque";
-            log.debug("AikOpaqueFile: " + aikOpaqueFile);
+            if (!isAIKImported) {
+                // In the case of Windows, we import the AIK first
+                String aikOpaqueFile = Folders.configuration() + File.separator + "aik.opaque";
+                log.debug("AikOpaqueFile: " + aikOpaqueFile);
 
-            String aikImportCmdLine = String.format("tpmtool.exe importaik \"%s\" HIS_Identity_Key", aikOpaqueFile);
-            log.debug("cmd to run: ", aikImportCmdLine);
-            try {
-                CommandUtil.runCommand(aikImportCmdLine);
-            }catch (Exception e) {
-                throw new TAException(ErrorCode.COMMAND_ERROR, "Error while importing AIK" ,e);
+                String aikImportCmdLine = String.format("tpmtool.exe importaik \"%s\" HIS_Identity_Key", aikOpaqueFile);
+                log.debug("cmd to run: ", aikImportCmdLine);
+                try {
+                    CommandUtil.runCommand(aikImportCmdLine);
+                    isAIKImported = true;
+                }catch (Exception e) {
+                    throw new TAException(ErrorCode.COMMAND_ERROR, "Error while importing AIK" ,e);
+                }
             }
             
             // format is: "tpmtool.exe [aik name] {attestation file} {nonce} {aikauth}" 
