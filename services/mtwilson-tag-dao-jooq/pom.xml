@@ -1,14 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-tag-dao-jooq</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    
     <packaging>jar</packaging>
     <name>mtwilson-tag-dao-jooq</name>
     <description>Asset Tag and Provisioning Service Data Access Objects implemented using JOOQ</description>
+    
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
-		<version>3.0-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>3.0-SNAPSHOT</version>
     </parent>
 
 <!--
@@ -32,178 +36,178 @@ Jooq code generation happens in asset-tag-dao.
             
             
 
-<plugin>
-    <groupId>org.codehaus.mojo</groupId>
-    <artifactId>properties-maven-plugin</artifactId>
-    <version>1.0-alpha-2</version>
-    <executions>
-        <execution>
-            <phase>initialize</phase>
-            <goals>
-                <goal>set-system-properties</goal>
-            </goals>
-            <configuration>
-                <properties>
-                    <property>
-                        <name>derby.stream.error.file</name>
-                        <value>${project.build.directory}/derby/derby.log</value>
-                    </property>
-                </properties>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>derby.stream.error.file</name>
+                                    <value>${project.build.directory}/derby/derby.log</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             
 
-                    <!-- before we can generate the jooq classes we need to make sure we have a local database for the jooq generator
-                    to use as input -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>generate-jooq-sources</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="compile_classpath" refid="maven.compile.classpath" />
-                                        <property name="test_classpath" refid="maven.test.classpath" />
-                                        <property name="runtime_classpath" refid="maven.runtime.classpath" />
-                                        <!-- 
-                                        compile the project but exclude the resource classes that depend on jooq generated sources 
-                                        (which do not exist yet since we are in the jooq generation profile) 
-                                        so we must also excldue any java sources that refer directly or indirectly to the jooq generated sources
-                                        in order to get this to compile.
-                                        -->
-                                        <mkdir dir="${project.build.outputDirectory}" />
-                                        <javac srcdir="${basedir}/src/main/java" destdir="${project.build.outputDirectory}" classpath="${compile_classpath}" debug="on" includeantruntime="false" />
-                                        <!-- build the CreateDatabase command separately ; it does not have any dependencies on jooq, so 
-                                        we can build it and then run it (later) to create the database so that jooq can generate sources.
-                                        in contrast to this, all commands are excluded above because starthttpserver for example imports
-                                        RestletApplication which in turn imports the *Resource classes which in turn import jooq generated
-                                        sources, so these classes must be excluded from the first phase of the build when those generated
-                                        sources do not yet exist -->
-                                        <!--
-                                        <javac srcdir="${basedir}/src/main/java" includes="com/intel/mtwilson/tag/dao/jooq/CreateDatabase*"
-                                            destdir="${project.build.outputDirectory}"
-                                            classpath="${compile_classpath}"
-                                            debug="on"
-                                            includeantruntime="false" />
-                                            -->
-                                        <!-- run the program to create a local derby database ; 
-                                     fork=true is important so that Derby shuts down before it starts up again from the jooq plugin 
-                                     (or else you'll get an error that Derby is already started and has the db locked) 
-                                        -->                             
-                                        <java classname="com.intel.mtwilson.tag.dao.jooq.CreateDatabase" classpath="${compile_classpath}" fork="true">
-                                            <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log" />
-                                            <sysproperty key="derby.system.home" value="${project.build.directory}/derby" />
-                                            <arg value="--drop=true" />
-                                        </java>
-                                        <!--
-                                   <java classname="test.jdbi.RepositoryTest" classpath="${test_classpath}">
-                                         <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log" />
-                                        </java> -->
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.ant</groupId>
-                                <artifactId>ant</artifactId>
-                                <version>1.8.4</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>ant-contrib</groupId>
-                                <artifactId>ant-contrib</artifactId>
-                                <version>1.0b3</version>
-                            </dependency>
-                            <!-- required for javac to work; the version tag on this dependency should match the JDK version being used to compile Mt Wilson;  make sure you set the same version for this maven project in your IDE -->
-                            <dependency>
-                                <groupId>com.sun</groupId>
-                                <artifactId>tools</artifactId>
-                                <version>1.6</version>
-                                <scope>system</scope>
-                                <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                            </dependency>
-                        </dependencies>
-                    </plugin>	    
+            <!-- before we can generate the jooq classes we need to make sure we have a local database for the jooq generator
+            to use as input -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-jooq-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <property name="compile_classpath" refid="maven.compile.classpath" />
+                                <property name="test_classpath" refid="maven.test.classpath" />
+                                <property name="runtime_classpath" refid="maven.runtime.classpath" />
+                                <!-- 
+                                compile the project but exclude the resource classes that depend on jooq generated sources 
+                                (which do not exist yet since we are in the jooq generation profile) 
+                                so we must also excldue any java sources that refer directly or indirectly to the jooq generated sources
+                                in order to get this to compile.
+                                -->
+                                <mkdir dir="${project.build.outputDirectory}" />
+                                <javac srcdir="${basedir}/src/main/java" destdir="${project.build.outputDirectory}" classpath="${compile_classpath}" debug="on" includeantruntime="false" />
+                                <!-- build the CreateDatabase command separately ; it does not have any dependencies on jooq, so 
+                                we can build it and then run it (later) to create the database so that jooq can generate sources.
+                                in contrast to this, all commands are excluded above because starthttpserver for example imports
+                                RestletApplication which in turn imports the *Resource classes which in turn import jooq generated
+                                sources, so these classes must be excluded from the first phase of the build when those generated
+                                sources do not yet exist -->
+                                <!--
+                            <javac srcdir="${basedir}/src/main/java" includes="com/intel/mtwilson/tag/dao/jooq/CreateDatabase*"
+                                destdir="${project.build.outputDirectory}"
+                                classpath="${compile_classpath}"
+                                debug="on"
+                                includeantruntime="false" />
+                                -->
+                                <!-- run the program to create a local derby database ; 
+                             fork=true is important so that Derby shuts down before it starts up again from the jooq plugin 
+                             (or else you'll get an error that Derby is already started and has the db locked) 
+                                -->                             
+                                <java classname="com.intel.mtwilson.tag.dao.jooq.CreateDatabase" classpath="${compile_classpath}" fork="true">
+                                    <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log" />
+                                    <sysproperty key="derby.system.home" value="${project.build.directory}/derby" />
+                                    <arg value="--drop=true" />
+                                </java>
+                                <!--
+                           <java classname="test.jdbi.RepositoryTest" classpath="${test_classpath}">
+                                 <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log" />
+                                </java> -->
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant</artifactId>
+                        <version>1.8.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                    </dependency>
+                    <!-- required for javac to work; the version tag on this dependency should match the JDK version being used to compile Mt Wilson;  make sure you set the same version for this maven project in your IDE -->
+                    <dependency>
+                        <groupId>com.sun</groupId>
+                        <artifactId>tools</artifactId>
+                        <version>1.6</version>
+                        <scope>system</scope>
+                        <systemPath>${java.home}/../lib/tools.jar</systemPath>
+                    </dependency>
+                </dependencies>
+            </plugin>	    
           
       
-                    <!-- reference: 
-                    http://www.jooq.org/doc/3.1/manual/getting-started/tutorials/jooq-in-7-steps/jooq-in-7-steps-step3/
-                    http://www.jooq.org/doc/2.4/manual/META/Configuration/
-                    http://mojo.codehaus.org/exec-maven-plugin/java-mojo.htmhttp://mojo.codehaus.org/exec-maven-plugin/java-mojo.html 
+            <!-- reference: 
+            http://www.jooq.org/doc/3.1/manual/getting-started/tutorials/jooq-in-7-steps/jooq-in-7-steps-step3/
+            http://www.jooq.org/doc/2.4/manual/META/Configuration/
+            http://mojo.codehaus.org/exec-maven-plugin/java-mojo.htmhttp://mojo.codehaus.org/exec-maven-plugin/java-mojo.html 
+            -->
+            <plugin>
+
+                <!-- Specify the maven code generator plugin -->
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>3.1.0</version>
+
+                <!-- The plugin should hook into the generate goal -->
+                <executions>
+                    <execution>
+                        <id>generate-jooq-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <!-- Manage the plugin's dependency. In this example, we'll use a Postgres database -->
+                <dependencies>
+                    <!--
+                    <dependency>
+                      <groupId>postgresql</groupId>
+                      <artifactId>postgresql</artifactId>
+                      <version>8.4-702.jdbc4</version>
+                    </dependency>
                     -->
-                    <plugin>
-
-                        <!-- Specify the maven code generator plugin -->
-                        <groupId>org.jooq</groupId>
-                        <artifactId>jooq-codegen-maven</artifactId>
-                        <version>3.1.0</version>
-
-                        <!-- The plugin should hook into the generate goal -->
-                        <executions>
-                            <execution>
-                                <id>generate-jooq-sources</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-
-                        <!-- Manage the plugin's dependency. In this example, we'll use a Postgres database -->
-                        <dependencies>
-                            <!--
-                            <dependency>
-                              <groupId>postgresql</groupId>
-                              <artifactId>postgresql</artifactId>
-                              <version>8.4-702.jdbc4</version>
-                            </dependency>
-                            -->
-                            <dependency>
-                                <groupId>org.apache.derby</groupId>
-                                <artifactId>derby</artifactId>
-                                <version>10.10.1.1</version>
-                            </dependency>
+                    <dependency>
+                        <groupId>org.apache.derby</groupId>
+                        <artifactId>derby</artifactId>
+                        <version>10.10.1.1</version>
+                    </dependency>
     
-                        </dependencies>
+                </dependencies>
 
-                        <!-- Specify the plugin configuration -->
-                        <configuration>
+                <!-- Specify the plugin configuration -->
+                <configuration>
 
-                            <!-- JDBC connection parameters -->
-                            <jdbc>
-                                <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
-                                <url>jdbc:derby:directory:${project.build.directory}/derby/mytestdb;create=true</url>
-                                <user />
-                                <password />
-                            </jdbc>
+                    <!-- JDBC connection parameters -->
+                    <jdbc>
+                        <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
+                        <url>jdbc:derby:directory:${project.build.directory}/derby/mytestdb;create=true</url>
+                        <user />
+                        <password />
+                    </jdbc>
 
-                            <!-- Generator parameters -->
-                            <generator>
-                                <name>org.jooq.util.DefaultGenerator</name>
-                                <database>
-                                    <name>org.jooq.util.derby.DerbyDatabase</name>
-                                    <includes>.*</includes>
-                                    <excludes />
-                                    <inputSchema>APP</inputSchema>
-                                </database>
-                                <generate>
-                                    <relations>true</relations>
-                                    <deprecated>false</deprecated>
-                                </generate>
-                                <target>
-                                    <packageName>com.intel.mtwilson.tag.dao.jooq.generated</packageName>
-                                    <directory>${project.build.directory}/generated-sources/jooq</directory>
-                                </target>
-                            </generator>
-                        </configuration>
-                    </plugin>      
+                    <!-- Generator parameters -->
+                    <generator>
+                        <name>org.jooq.util.DefaultGenerator</name>
+                        <database>
+                            <name>org.jooq.util.derby.DerbyDatabase</name>
+                            <includes>.*</includes>
+                            <excludes />
+                            <inputSchema>APP</inputSchema>
+                        </database>
+                        <generate>
+                            <relations>true</relations>
+                            <deprecated>false</deprecated>
+                        </generate>
+                        <target>
+                            <packageName>com.intel.mtwilson.tag.dao.jooq.generated</packageName>
+                            <directory>${project.build.directory}/generated-sources/jooq</directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>      
                
         </plugins>
     </build>
@@ -211,28 +215,28 @@ Jooq code generation happens in asset-tag-dao.
 
     <dependencies>
 
-<!--        
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.slf4j</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.jackson</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
+        <!--        
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.slf4j</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.jackson</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
         
-            <dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
-            </dependency>
+        </dependency>
         -->
         <!--
         <dependency>
@@ -277,16 +281,16 @@ Jooq code generation happens in asset-tag-dao.
 
         <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
         <!--
-    <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk16</artifactId>
-        <version>1.46</version>
-    </dependency>      
-    <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcmail-jdk16</artifactId>
-        <version>1.46</version>
-    </dependency>      
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>      
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcmail-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>      
         -->
         <dependency>
             <groupId>junit</groupId>
@@ -310,16 +314,16 @@ Jooq code generation happens in asset-tag-dao.
             <artifactId>commons-io</artifactId>
         </dependency>
         <!--
-                <dependency>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpcore</artifactId>
-                    <version>4.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
-                    <version>4.2</version>
-                </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2</version>
+        </dependency>
         -->
         <!-- JSON support -->
         <!--
@@ -372,7 +376,7 @@ Jooq code generation happens in asset-tag-dao.
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi</artifactId>
             <version>2.49</version>
-        </dependency>        
+        </dependency>
         
         
         <!-- apache 2.0 license,  database connection pooling system -->

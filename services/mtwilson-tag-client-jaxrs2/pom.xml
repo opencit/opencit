@@ -1,11 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    
     <packaging>jar</packaging>
     <name>mtwilson-tag-client-jaxrs2</name>
     <description>
-	Java client for Asset Tag Web Service v2
+        Java client for Asset Tag Web Service v2
     </description>
   
     <parent>
@@ -15,49 +18,49 @@
     </parent>
 
     <build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <configuration>
-                <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
-                <noqualifier>all</noqualifier>
-                <tags>
-                    <tag>
-                        <name>mtwRequiresPermissions</name>
-                        <placement>aoptcmf</placement>
-                        <head>Requires permissions:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwContentTypeReturned</name>
-                        <placement>aoptcmf</placement>
-                        <head>Content type returned:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwMethodType</name>
-                        <placement>aoptcmf</placement>
-                        <head>Method Type:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwSampleRestCall</name>
-                        <placement>aoptcmf</placement>
-                        <head>Sample REST call:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwSampleApiCall</name>
-                        <placement>aoptcmf</placement>
-                        <head>Sample API call:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwPreRequisite</name>
-                        <placement>aoptcmf</placement>
-                        <head>Pre-requisite:</head>
-                    </tag>                                
-                </tags>
-            </configuration>
-        </plugin>                    
-    </plugins>      
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
+                    <noqualifier>all</noqualifier>
+                    <tags>
+                        <tag>
+                            <name>mtwRequiresPermissions</name>
+                            <placement>aoptcmf</placement>
+                            <head>Requires permissions:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwContentTypeReturned</name>
+                            <placement>aoptcmf</placement>
+                            <head>Content type returned:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwMethodType</name>
+                            <placement>aoptcmf</placement>
+                            <head>Method Type:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwSampleRestCall</name>
+                            <placement>aoptcmf</placement>
+                            <head>Sample REST call:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwSampleApiCall</name>
+                            <placement>aoptcmf</placement>
+                            <head>Sample API call:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwPreRequisite</name>
+                            <placement>aoptcmf</placement>
+                            <head>Pre-requisite:</head>
+                        </tag>                                
+                    </tags>
+                </configuration>
+            </plugin>                    
+        </plugins>      
     </build>
 
     <dependencies>
@@ -143,26 +146,26 @@
 
         <!-- end jersey  -->
         
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>com.thoughtworks.xstream</groupId>
-        <artifactId>xstream</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
         
 
     

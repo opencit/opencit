@@ -1,6 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-attestation-ws-v1</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    
     <packaging>jar</packaging>
     <name>mtwilson-attestation-ws-v1</name>
 
@@ -248,7 +252,6 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
-            <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
         <!--
@@ -361,10 +364,9 @@
         </dependency>
         
         <!-- for ErrorCode -->
-       <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-i18n</artifactId>
-            <version>${project.version}</version>
         </dependency>
          
         <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
