@@ -28,4 +28,4 @@ fi
 changeVersionCommand="mvn versions:set -DnewVersion=${version}"
 changeParentVersionCommand="mvn versions:update-parent -DnewVersion=${version}"
 $changeVersionCommand
-(cd services && $changeVersionCommand && $changeParentVersionCommand)
+(cd services && $changeVersionCommand) # && $changeParentVersionCommand)

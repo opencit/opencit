@@ -10,26 +10,24 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         
         <!-- configuration folder location for reading/writing extensions.cache file -->
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-configuration</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
         
-		<!-- SetupTask -->
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-setup-ext</artifactId>
-			<version>${project.version}</version>
-			<optional>true</optional>
-		</dependency>
-		<!--
+        <!-- SetupTask -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup-ext</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-text-transform</artifactId>
@@ -39,7 +37,7 @@
             <artifactId>mtwilson-util-collection</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-		-->
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-classpath</artifactId>
@@ -49,7 +47,7 @@
             <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         
-		<!--
+        <!--
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
@@ -76,23 +74,22 @@
             <artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
         
-		<!--
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-my</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-feature-jdbi</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
-<dependency>
-<groupId>com.intel.mtwilson.integration</groupId>
-<artifactId>mtwilson-launcher</artifactId>
-<version>${project.version}</version>
-</dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-feature-jdbi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         -->
             
         <!-- needed to register @V1, @V2, @RPC annotated classes -->
@@ -109,25 +106,20 @@
             <optional>true</optional>
         </dependency>
         
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
-                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-		
         
     </dependencies>  
 

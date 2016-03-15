@@ -12,20 +12,15 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
     </parent>
 
     <build>
-        
         <plugins>
-            
-           
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-               
         </plugins>
     </build>
 
@@ -74,7 +69,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jpa</artifactId>
-            <version>0.2-SNAPSHOT</version>        
+            <!--<version>0.2-SNAPSHOT</version>-->        
         </dependency>
 
         <dependency>

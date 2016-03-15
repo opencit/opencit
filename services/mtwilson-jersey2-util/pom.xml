@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
     </parent>
     
     
@@ -36,7 +36,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -62,21 +61,17 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-server</artifactId>
-            <version>${project.version}</version>
         </dependency>
-                
         
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
             <scope>provided</scope>
         </dependency>
-                
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -97,7 +92,6 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
-
 
         <!-- for multipart, see https://jersey.java.net/documentation/latest/media.html  -->
         <!--

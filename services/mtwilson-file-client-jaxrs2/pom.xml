@@ -18,7 +18,7 @@
     <parent> 
         <groupId>com.intel.mtwilson.services</groupId> 
         <artifactId>mtwilson-services</artifactId> 
-        <version>3.0-SNAPSHOT</version> 
+        <version>3.1-SNAPSHOT</version> 
     </parent>
 
     <build>
@@ -144,23 +144,23 @@
         </dependency>
 		
         <!--
-            <dependency>
-                    <groupId>com.jayway.restassured</groupId>
-                    <artifactId>rest-assured</artifactId>
-                    <version>1.5</version>
-            </dependency>        
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.5</version>
+        </dependency>        
         -->
         <!--
-<dependency>
-    <groupId>com.sun.xml.bind</groupId>
-    <artifactId>jaxb</artifactId>
-    <version>2.1.9</version>
-</dependency>
-<dependency>
-    <groupId>com.sun.xml.bind</groupId>
-    <artifactId>jaxb-impl</artifactId>
-    <version>2.1.9</version>
-</dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.1.9</version>
+        </dependency>
         -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -232,7 +232,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <!--
     <dependency>
@@ -243,8 +242,7 @@
         -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
         </dependency>
 
         <!-- end jersey  -->
