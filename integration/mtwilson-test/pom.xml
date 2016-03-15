@@ -1,7 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-test</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    
     <packaging>jar</packaging>
     <name>mtwilson-test</name>
     <description>
@@ -17,7 +20,7 @@
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
     </parent>
 
 
@@ -117,8 +120,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-extensions-cache</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-extensions-cache</artifactId>        
         </dependency>
 
         <dependency>
@@ -139,8 +141,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -164,8 +165,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-launcher</artifactId>        
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -402,7 +402,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -426,13 +425,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-                <groupId>javax</groupId>
-                <artifactId>javaee-api</artifactId>
-            </dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
-            <version>2.4.1</version>
+            <!--<version>2.4.1</version>-->
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
         <!-- for multipart, see https://jersey.java.net/documentation/latest/media.html  -->

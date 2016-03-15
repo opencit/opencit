@@ -1,13 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-launcher-jetty9</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    
     <packaging>war</packaging>
     <name>mtwilson-launcher-jetty9</name>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
     </parent>
     
     <properties />
@@ -67,18 +71,16 @@ This error message indicates you need a jersey implementation like org.glassfish
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jersey2-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util-v1</artifactId>
             <version>${project.version}</version>
         </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-jersey2-util-v1</artifactId>
-      <version>${project.version}</version>
-    </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -116,26 +118,26 @@ This error message indicates you need a jersey implementation like org.glassfish
             <artifactId>postgresql</artifactId>
         </dependency>
         <!--
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-attestation-jpa</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-management-jpa</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-audit-data</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-audit-handler</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-management-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-audit-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-audit-handler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         -->
         
         <!-- include all the app dependencies -->
@@ -149,26 +151,26 @@ This error message indicates you need a jersey implementation like org.glassfish
     
     <!--
     <profiles>
-    <profile>
-                <id>test</id>
-                <activation>
-                    <property>
-                        <name>test</name>
-                        <value>true</value>
-                    </property>
-                </activation>
-                <dependencies>
-                        <dependency>
-                                <groupId>com.intel.mtwilson.services</groupId>
-                                <artifactId>mtwilson-test-ws-v1</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
-                        <dependency>
-                                <groupId>com.intel.mtwilson.services</groupId>
-                                <artifactId>mtwilson-test-ws-v2</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
-                </dependencies>
+        <profile>
+            <id>test</id>
+            <activation>
+                <property>
+                    <name>test</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.intel.mtwilson.services</groupId>
+                    <artifactId>mtwilson-test-ws-v1</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.services</groupId>
+                    <artifactId>mtwilson-test-ws-v2</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
     -->
