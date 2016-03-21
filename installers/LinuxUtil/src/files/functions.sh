@@ -3069,7 +3069,7 @@ tomcat_create_ssl_cert() {
   local serverName="${1}"
   serverName=$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//')
 
-    local keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
+  local keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
   local keystore="${TOMCAT_HOME}/ssl/.keystore"
   local tomcatServerXml="${TOMCAT_HOME}/conf/server.xml"
   local configDir="/opt/mtwilson/configuration"
@@ -3080,7 +3080,21 @@ tomcat_create_ssl_cert() {
 
   if [ -z "$MTWILSON_TLS_KEYSTORE_PASS" ] || [ "$MTWILSON_TLS_KEYSTORE_PASS" == "changeit" ]; then MTWILSON_TLS_KEYSTORE_PASS=$(generate_password 32); fi
   keystorePassword="$MTWILSON_TLS_KEYSTORE_PASS"   #changeit
+
+  # decrypt file
+  if file_encrypted "${mtwilsonPropertiesFile}"; then
+    encrypted="true"
+    decrypt_file "${mtwilsonPropertiesFile}" "$MTWILSON_PASSWORD"
+  fi
+
+  # read value
   keystorePasswordOld=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+
+  # Return the file to encrypted state, if it was before
+  if [ "$encrypted" == "true" ]; then
+    encrypt_file "${mtwilsonPropertiesFile}" "$MTWILSON_PASSWORD"
+  fi
+
   keystorePasswordOld=${keystorePasswordOld:-"changeit"}
 
   # Create an array of host ips and dns names from csv list passed into function
@@ -4550,17 +4564,18 @@ change_db_pass() {
     postgres_version
     postgres_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-    temp=$("$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
-    echo ""
-    if [ $? -ne 0 ]; then echo_failure "Issue building postgres or expect command."; exit; fi
+    temp=$(cd /tmp && "$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -U "$DATABASE_USERNAME" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
+    if [ $? -ne 0 ]; then echo_failure -e "\nIssue building postgres or expect command."; exit; fi
     # Edit postgres password file if it exists
     if [ -f ~/.pgpass ]; then
+      echo
       echo -n "Updating database password value in .pgpass file...."
-      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' ~/.pgpass
+      sed -i 's|\(.*:'"$DATABASE_SCHEMA"':'"$DATABASE_USERNAME"':\).*|\1'"$new_db_pass"'|' ~/.pgpass
       #temp=`cat ~/.pgpass | cut -f1,2,3,4 -d":"`
       #temp="$temp:$new_db_pass"
       #echo $temp > ~/.pgpass;
     fi
+    postgres_restart
     echo_success "Done"
   fi
 
