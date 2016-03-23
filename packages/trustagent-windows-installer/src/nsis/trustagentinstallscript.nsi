@@ -1,8 +1,5 @@
 !include "MUI.nsh"
 !include "MUI2.nsh"
-!include "InstallOptions.nsh"
-!include "LogicLib.nsh"
-!include "winmessages.nsh"
 !include "wordfunc.nsh"
 !include "FileFunc.nsh"
 !include "nsDialogs.nsh"
@@ -25,19 +22,9 @@ ShowInstDetails show
 var mylabel
 var vcr1Flag
 var dialog
-var hwnd
 var label1
-var label2
-var label3
-var label4
-var label5
-var label6
-var button1
-var button2
-var button3
-var button4
-var button5
-var button6
+var text1
+
 !define Environ 'HKCU "Environment"'
 !define MUI_ICON "TAicon.ico"
 !define MUI_HEADERIMAGE
@@ -565,131 +552,70 @@ FunctionEnd
 Function CITServerLeave
 FunctionEnd
 
+!define __NSD_TextMultiline_CLASS EDIT
+!define __NSD_TextMultiline_STYLE ${DEFAULT_STYLES}|${WS_VSCROLL}|${WS_TABSTOP}|${ES_AUTOHSCROLL}|${ES_MULTILINE}|${ES_WANTRETURN}
+!define __NSD_TextMultiline_EXSTYLE ${WS_EX_WINDOWEDGE}|${WS_EX_CLIENTEDGE}
+!insertmacro __NSD_DefineControl TextMultiline
 
 Function EnvCustomPage
-     IfFileExists $TEMP\TrustAgent_Backup\*.* skip continue
-     skip:
-             Abort
-     continue:
-        !insertmacro MUI_HEADER_TEXT $(INSTALL_PREREQ_TITLE) $(ENV_SUBTITLE)
-	nsDialogs::Create 1018
-		Pop $dialog
+        IfFileExists $TEMP\TrustAgent_Backup\*.* skip continue
+        skip:
+                Abort
+        continue:
+                !insertmacro MUI_HEADER_TEXT $(INSTALL_PREREQ_TITLE) $(ENV_SUBTITLE)
+                nsDialogs::Create 1018
+	        Pop $dialog
 
-        ${NSD_CreateLabel} 0% 0% 40% 10% "CIT_API_URL"
+                Push $R0
+                Push $R1
+                Push $R2
+                 
+	        SetOutPath $INSTDIR
+                File "..\trustagent.env"
+                FileOpen $R0 "trustagent.env" r
+                StrCpy $R1 ""
+                loop:
+                        FileRead $R0 $R2
+                        StrCpy $R1 "$R1$R2"
+                        IfErrors +1 loop
+                FileClose $R0
+
+                ${NSD_CreateTextMultiline} 0% 0% 100% 80% $R1
+		Pop $text1
+		ShowWindow $text1 ${SW_SHOW}
+
+                ${NSD_CreateLabel} 0% 85% 100% 15% "Above settings will be saved in $INSTDIR\trustagent.env."
 		Pop $label1
 		ShowWindow $label1 ${SW_SHOW}
 
-	${NSD_CreateText} 40% 0% 40% 10% ""
-		Pop $button1
-		ShowWindow $button1 ${SW_SHOW}
+		Pop $R2
+		Pop $R1
+		Pop $R0
 
-        ${NSD_CreateLabel} 0% 15% 40% 10% "CIT_API_USERNAME"
-		Pop $label2
-		ShowWindow $label2 ${SW_SHOW}
-
-	${NSD_CreateText} 40% 15% 40% 10% ""
-		Pop $button2
-		ShowWindow $button2 ${SW_SHOW}
-
-         ${NSD_CreateLabel} 0% 30% 40% 10% "CIT_API_PASSWORD"
-		Pop $label3
-		ShowWindow $label3 ${SW_SHOW}
-
-	${NSD_CreatePassword} 40% 30% 40% 10% ""
-		Pop $button3
-		ShowWindow $button3 ${SW_SHOW}
-
-        ${NSD_CreateLabel} 0% 45% 40% 10% "CIT_TLS_CERT_SHA1"
-		Pop $label4
-		ShowWindow $label4 ${SW_SHOW}
-
-	${NSD_CreateText} 40% 45% 40% 10% ""
-		Pop $button4
-		ShowWindow $button4 ${SW_SHOW}
-
-	${NSD_CreateCheckbox} 0% 60% 60% 6% "Trust Agent login credentials"
-		Pop $hwnd
-		${NSD_OnClick} $hwnd EnDisableButton
-
-        ${NSD_CreateLabel} 0% 75% 40% 10% "TRUSTAGENT_USERNAME"
-		Pop $label5
-		ShowWindow $label5 ${SW_HIDE}
-
-	${NSD_CreateText} 40% 75% 40% 10% ""
-		Pop $button5
-		ShowWindow $button5 ${SW_HIDE}
-
-        ${NSD_CreateLabel} 0% 90% 40% 10% "TRUSTAGENT_PASSWORD"
-		Pop $label6
-		ShowWindow $label6 ${SW_HIDE}
-
-	${NSD_CreatePassword} 40% 90% 40% 10% ""
-		Pop $button6
-		ShowWindow $button6 ${SW_HIDE}
-
-	nsDialogs::Show
+                nsDialogs::Show
 FunctionEnd
+
 Function EnvCustomLeave
         Push $R0
         Push $R1
-        Push $R2
-        Push $R3
-        Push $R4
-        Push $R5
-        ${NSD_GetText} $button1 $R0
-        ${NSD_GetText} $button2 $R1
-        ${NSD_GetText} $button3 $R2
-        ${NSD_GetText} $button4 $R3
-        ${NSD_GetText} $button5 $R4
-        ${NSD_GetText} $button6 $R5
+
+        ${NSD_GetText} $text1 $R0
         StrCmp $R0 "" textboxcheck
-        StrCmp $R1 "" textboxcheck
-        StrCmp $R2 "" textboxcheck
-        StrCmp $R3 "" textboxcheck
         SetOutPath $INSTDIR
-        FileOpen $0 "trustagent.env" w
-        FileWrite $0 "MTWILSON_API_URL=$R0"
-        FileWrite $0 "$\r$\n"
-        FileWrite $0 "MTWILSON_API_USERNAME=$R1"
-        FileWrite $0 "$\r$\n"
-        FileWrite $0 "MTWILSON_API_PASSWORD=$R2"
-        FileWrite $0 "$\r$\n"
-        FileWrite $0 "MTWILSON_TLS_CERT_SHA1=$R3"
-        FileWrite $0 "$\r$\n"
-        StrCmp $R4 "" +2 0
-        FileWrite $0 "TRUSTAGENT_ADMIN_USERNAME=$R4"
-        FileWrite $0 "$\r$\n"
-        StrCmp $R5 "" +2 0
-        FileWrite $0 "TRUSTAGENT_ADMIN_PASSWORD=$R5"
-        FileClose $0
+        FileOpen $R1 "trustagent.env" w
+        FileWrite $R1 $R0
+        FileClose $R1
         goto exitfunc
         textboxcheck:
+                Pop $R1
+                Pop $R0
                 MessageBox MB_OK|MB_ICONEXCLAMATION "Please enter valid settings."
                 Abort
         exitfunc:
-                 Pop $R0
-                 Pop $R1
-                 Pop $R2
-                 Pop $R3
-                 Pop $R4
-                 Pop $R5
+                Pop $R1
+                Pop $R0
 FunctionEnd
 
-Function EnDisableButton
-	Pop $hwnd
-	${NSD_GetState} $hwnd $0
-	${If} $0 == 1
-		ShowWindow $label5 ${SW_SHOW}
-		ShowWindow $label6 ${SW_SHOW}
-		ShowWindow $button5 ${SW_SHOW}
-		ShowWindow $button6 ${SW_SHOW}
-	${Else}
-		ShowWindow $label5 ${SW_HIDE}
-		ShowWindow $label6 ${SW_HIDE}
-		ShowWindow $button5 ${SW_HIDE}
-		ShowWindow $button6 ${SW_HIDE}
-	${EndIf}
-FunctionEnd
 ; ----------------------------------------------------------
 ; ****************** END OF FUNCTIONS **********************
 ; ----------------------------------------------------------
