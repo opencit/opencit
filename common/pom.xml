@@ -3,7 +3,7 @@
     
     <groupId>com.intel.mtwilson.common</groupId>
     <artifactId>mtwilson-common</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <description>Mt Wilson Common Projects are being migrated to Mt Wilson Utility Projects</description>
@@ -14,10 +14,9 @@
         <version>3.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
-  
+    
     <modules>
         <module>crypto</module>
     </modules>
-
-
+    
 </project>

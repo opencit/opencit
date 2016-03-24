@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-file-client-jaxrs2</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-file-client-jaxrs2</name>
@@ -14,19 +13,15 @@
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
     </description>
-  
-    <parent> 
-        <groupId>com.intel.mtwilson.services</groupId> 
-        <artifactId>mtwilson-services</artifactId> 
-        <version>3.1-SNAPSHOT</version> 
+    
+    <parent>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <build>
-	
-	
         <plugins>
-            
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -68,7 +63,7 @@
                     </tags>
                 </configuration>
             </plugin>
-                    
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -80,19 +75,12 @@
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin>	    
-		
-      
-
-
-        </plugins>      
-      
-
+            </plugin>
+        </plugins>
     </build>
-
-
-
+    
     <dependencies>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-locale</artifactId>
@@ -113,16 +101,52 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-rfc822</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
+        </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -133,7 +157,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
@@ -142,7 +165,6 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-		
         <!--
         <dependency>
             <groupId>com.jayway.restassured</groupId>
@@ -162,23 +184,8 @@
             <version>2.1.9</version>
         </dependency>
         -->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    
-        <!-- begin httpclient  -->
+        
+        <!-- begin httpclient -->
         <!--
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -195,20 +202,12 @@
         -->
         <!-- end httpclient -->
         
-        
         <!--
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
         -->
-        
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-file-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-            
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -228,25 +227,6 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.2</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-        </dependency>
-        <!--
-    <dependency>
-        <groupId>com.intel.mtwilson.services</groupId>
-        <artifactId>mtwilson-jersey2-util</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
-        </dependency>
-
-        <!-- end jersey  -->
-        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -263,11 +243,8 @@
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
         </dependency>
-
+    </dependencies>
     
-    
-    </dependencies>  
-
     <profiles>
         <profile>
             <activation>
@@ -300,10 +277,9 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
     </profiles>
-
+    
 </project>

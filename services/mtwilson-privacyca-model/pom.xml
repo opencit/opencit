@@ -3,19 +3,17 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-privacyca-model</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-privacyca-model</name>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
-    <dependencies>  
-	
+    
+    <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
@@ -26,19 +24,15 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <optional>true</optional>
         </dependency>
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
-                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -50,17 +44,14 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
             <version>1.46</version>
-        </dependency>      
+        </dependency>
         
         <!-- hex encoder for junit test -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <scope>test</scope>
-        </dependency>      
-        
-
-    </dependencies>  
-
-
+        </dependency>
+    </dependencies>
+    
 </project>

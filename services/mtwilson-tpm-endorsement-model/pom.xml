@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-tpm-endorsement-model</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-tpm-endorsement-model</name>
@@ -12,30 +11,24 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <build>
-        
         <plugins>
-            
-           
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-               
         </plugins>
     </build>
-
-
+    
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -44,7 +37,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>        
-
+        </dependency>
     </dependencies>
+    
 </project>

@@ -3,30 +3,38 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-setup-ws-v2</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-setup-ws-v2</name>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
-    <dependencies>  
-        
+    
+    <dependencies>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-api</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-repository-api</artifactId>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
         </dependency>
         
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
@@ -45,11 +53,7 @@
             <optional>true</optional>
         </dependency>
         -->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        
         <!-- required for javax.ws.rs.QueryParam in RpcFilterCriteria and javax.ws.rs.Path in Rpcs resource -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -71,29 +75,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
-        </dependency>
-        
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
-                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-		
-    </dependencies>  
-
-
+    </dependencies>
+    
 </project>

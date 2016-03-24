@@ -3,19 +3,17 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-my</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-my</name>
     <description>Utility to allow developers to maintain their own local configuration so that JUnit tests do not have any environment-specific configuration embedded in them.</description>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
-
+    
     <build>
         <plugins>
             <plugin>
@@ -38,37 +36,35 @@
                 </executions>
             </plugin>
             <!--
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-shade-plugin</artifactId>
-                            <version>1.5</version>
-                            <executions>
-                                <execution>
-                                    <id>mtwilson-myprefs</id>
-                                    <phase>package</phase>
-                                    <goals>
-                                        <goal>shade</goal>
-                                    </goals>
-                                    <configuration>
-                                        <shadedArtifactAttached>true</shadedArtifactAttached>
-                                        <shadedClassifierName>with-dependencies</shadedClassifierName>
-                                        <transformers>
-                                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                                <manifestEntries>
-                                                    <Main-Class>com.intel.mtwilson.MyPrefs</Main-Class>
-                                                </manifestEntries>
-                                            </transformer>
-                                        </transformers>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-            -->                
-            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>mtwilson-myprefs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-dependencies</shadedClassifierName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>com.intel.mtwilson.MyPrefs</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
         </plugins>
     </build>
-
-
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -81,9 +77,9 @@
         </dependency>
         <!--
         <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                    <version>1.7.5</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.5</version>
             <scope>test</scope>
         </dependency>
         -->
@@ -113,18 +109,37 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
         </dependency>
-        <!--
-           API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-test module
-        -->
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jpa</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jpa</artifactId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
+            <optional>true</optional>
+        </dependency>
+        
+        <!--
+           API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-test module
+        -->
+        
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
             <optional>true</optional>
         </dependency>
         <!--
@@ -169,6 +184,13 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-postgresql</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+	
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <optional>true</optional>
@@ -179,30 +201,6 @@
             <artifactId>postgresql</artifactId>
             <optional>true</optional>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.database</groupId>
-            <artifactId>mtwilson-postgresql</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
-	
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>  
 </project>

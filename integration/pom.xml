@@ -3,26 +3,29 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-integration</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <description>Mt Wilson Integration Projects include utilities and interfaces necessary to integrate Mt Wilson into various environments</description>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-maven-java</artifactId>
         <version>3.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
-  
+    
     <modules>
         <module>mtwilson-api</module>
         <module>mtwilson-client-java6</module>
         <module>mtwilson-client-java7</module>
         <module>mtwilson-env</module>
-        <!--<module>mtwilson-feature-xml</module>
+        <!--<module>mtwilson-feature</module>-->
+        <!--
+        <module>mtwilson-feature-xml</module>
         <module>mtwilson-launcher</module>
-        <module>mtwilson-launcher-api</module>-->
+        <module>mtwilson-launcher-api</module>
+        -->
         <module>mtwilson-launcher-glassfish4</module>
         <module>mtwilson-launcher-jetty9</module>
         <module>mtwilson-launcher-tomcat7</module>
@@ -40,9 +43,6 @@
         <module>mtwilson-client-dotnet</module>
         <module>mtwilson-client-php</module>
         -->
-    
-        <!--
-        <module>mtwilson-feature</module>
-        -->
     </modules>
+    
 </project>

@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-tag-selection-json</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-tag-selection-json</name>
@@ -11,22 +10,17 @@
         Jackson configuration for tag selection JSON structure.
     </description>
     
-    <parent> 
+    <parent>
         <groupId>com.intel.mtwilson.integration</groupId> 
         <artifactId>mtwilson-integration</artifactId> 
-        <version>3.1-SNAPSHOT</version> 
+        <version>3.0-SNAPSHOT</version> 
     </parent>
     
     <build>
-	
         <plugins>
-            
         </plugins>
-        
     </build>
-
-
-
+    
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -47,7 +41,7 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -66,11 +60,10 @@
         </dependency>
         <!--
         <dependency>
-          <groupId>com.fasterxml.jackson.jaxrs</groupId>
-          <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
         </dependency>
         -->
+    </dependencies>
     
-    </dependencies>  
-
 </project>

@@ -1,37 +1,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <groupId>com.intel.mtwilson</groupId>
-  <artifactId>mtwilson-maven-build</artifactId>
-  <version>3.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-     
-  <description>
-    Mt Wilson is a middleware solution that enables data centers to attest
-      to the trust of hypervisors and operating systems on multiple devices
-      including Servers, Clients, Network and Storage components.  
-      The primary purpose of this attestation is for Trust Verification, Remediation, Reporting, 
-      and Compliance in a Data Center and Cloud environments. Whether it is public 
-      cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
-      used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
-      assess and provide an Assurance that the security components on the devices are 
-      protecting the assets executing or stored on the devices. 
-  </description>
+    <modelVersion>4.0.0</modelVersion>
     
-  <modules>
-    <!--<module>maven</module>-->
-    <module>common</module>
-    <module>database</module>
-    <module>integration</module>
-    <module>trust-agent</module>
-    <module>plugins</module> 
-    <module>services</module>
-    <module>portals</module>
-    <module>desktop</module>
-    <module>features</module>
-    <module>installers</module>
-    <module>packages</module>
-  </modules>
-
+    <groupId>com.intel.mtwilson</groupId>
+    <artifactId>mtwilson-maven-build</artifactId>
+    <version>3.0-SNAPSHOT</version>
+    
+    <packaging>pom</packaging>
+    
+    <description>
+        Mt Wilson is a middleware solution that enables data centers to attest
+        to the trust of hypervisors and operating systems on multiple devices
+        including Servers, Clients, Network and Storage components.  
+        The primary purpose of this attestation is for Trust Verification, Remediation, Reporting, 
+        and Compliance in a Data Center and Cloud environments. Whether it is public 
+        cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
+        used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
+        assess and provide an Assurance that the security components on the devices are 
+        protecting the assets executing or stored on the devices. 
+    </description>
+    
+    <modules>
+        <module>common</module>
+        <module>database</module>
+        <module>desktop</module>
+        <module>features</module>
+        <module>installers</module>
+        <module>integration</module>
+        <!--<module>maven</module>-->
+        <module>plugins</module>
+        <module>portals</module>
+        <module>services</module>
+        <module>trust-agent</module>
+        
+        <module>packages</module>
+    </modules>
+    
 </project>
 

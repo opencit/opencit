@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-env</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>Mt Wilson Environments</name>
@@ -11,10 +10,9 @@
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
-
+    
     <build>
         <plugins>
             <plugin>
@@ -36,12 +34,9 @@
                     </execution>
                 </executions>
             </plugin>
- 
-            
         </plugins>
     </build>
-
-
+    
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -54,5 +49,6 @@
             <version>1.6.4</version>
             <scope>provided</scope>
         </dependency>
-    </dependencies>  
+    </dependencies>
+    
 </project>

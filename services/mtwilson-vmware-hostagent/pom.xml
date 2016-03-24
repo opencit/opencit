@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-vmware-hostagent</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-vmware-hostagent</name>
@@ -11,15 +10,17 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
+    
     <!--
-      <url>http://maven.apache.org</url>
-        <issueManagement>
-            <system>Redmine</system>
-            <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/issues</url>
-        </issueManagement>
+    <url>http://maven.apache.org</url>
+    <issueManagement>
+        <system>Redmine</system>
+        <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/issues</url>
+    </issueManagement>
     -->
+    
     <build>
         <plugins>
             <plugin>
@@ -27,76 +28,23 @@
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
         </plugins>
-
     </build>
-
-
+    
     <dependencies>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-hostagent-ext</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.vijava</groupId>
-            <artifactId>vijava</artifactId>
-            <version>5.5</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>	
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- for ErrorCode -->
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-i18n</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-trustagent-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- <dependency>
-            <groupId>commons-pool</groupId>
-            <artifactId>commons-pool</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-net</artifactId>
@@ -105,6 +53,25 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-xml</artifactId>
         </dependency>
+        -->
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-trustagent-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
@@ -130,6 +97,48 @@
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency> -->
-    </dependencies>  
+        </dependency>
+        -->
+        
+        <dependency>
+            <groupId>net.sourceforge.vijava</groupId>
+            <artifactId>vijava</artifactId>
+            <version>5.5</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        -->
+    </dependencies>
+    
 </project>

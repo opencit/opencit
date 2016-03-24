@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.common</groupId>
     <artifactId>mtwilson-crypto</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>Common Crypto</name>
@@ -12,16 +11,16 @@
     <parent>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-common</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -35,14 +34,10 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
-
     </build>
-
-
+    
     <dependencies>
-        
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
@@ -56,7 +51,6 @@
             <artifactId>mtwilson-util-performance</artifactId>
             <scope>test</scope>
         </dependency>
-      
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
@@ -65,7 +59,7 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
-      
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -80,7 +74,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -90,7 +84,7 @@
             <artifactId>commons-io</artifactId>
             <scope>test</scope>
         </dependency>
-    
+        
         <!-- apache http is required for NopX509HostnameVerifier, but user of this project must provide the dependency, we don't want to force it on all users -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -102,7 +96,7 @@
             <artifactId>httpclient</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        
         <!--
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -137,6 +131,6 @@
             <!--<version>2.3.0</version>-->
             <scope>test</scope>
         </dependency>
-
-    </dependencies>  
+    </dependencies>
+    
 </project>

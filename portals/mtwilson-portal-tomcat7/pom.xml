@@ -1,7 +1,9 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.portals</groupId>
     <artifactId>mtwilson-portal-tomcat7</artifactId>
+    
     <packaging>war</packaging>
     <name>mtwilson-portal-tomcat7</name>
     
@@ -10,7 +12,7 @@
         <artifactId>mtwilson-portals</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.portals</groupId>
@@ -18,8 +20,7 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-	   
-
+        
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -52,12 +53,9 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
+    
     <build>
         <plugins>
-        
-        
-        
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -82,8 +80,7 @@
                     </webResources>
                 </configuration>
             </plugin>
-                        
-        </plugins>	
-    
+        </plugins>
     </build>
+    
 </project>

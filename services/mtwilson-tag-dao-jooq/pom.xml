@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-tag-dao-jooq</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-tag-dao-jooq</name>
@@ -12,9 +11,9 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
 <!--
 IMPORTANT NOTE ON BUILDING THIS PROJECT:
 This project depends on asset-tag-dao which generates java code using the JOOQ generator. 
@@ -22,20 +21,14 @@ Don't confuse that with this module which implements various repository interfac
 the application.
 Jooq code generation happens in asset-tag-dao. 
 -->
-
+    
     <build>
-        
         <plugins>
-            
-           
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             
-            
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
@@ -58,7 +51,6 @@ Jooq code generation happens in asset-tag-dao.
                 </executions>
             </plugin>
             
-
             <!-- before we can generate the jooq classes we need to make sure we have a local database for the jooq generator
             to use as input -->
             <plugin>
@@ -134,21 +126,19 @@ Jooq code generation happens in asset-tag-dao.
                         <systemPath>${java.home}/../lib/tools.jar</systemPath>
                     </dependency>
                 </dependencies>
-            </plugin>	    
-          
-      
+            </plugin>
+            
             <!-- reference: 
             http://www.jooq.org/doc/3.1/manual/getting-started/tutorials/jooq-in-7-steps/jooq-in-7-steps-step3/
             http://www.jooq.org/doc/2.4/manual/META/Configuration/
             http://mojo.codehaus.org/exec-maven-plugin/java-mojo.htmhttp://mojo.codehaus.org/exec-maven-plugin/java-mojo.html 
             -->
             <plugin>
-
                 <!-- Specify the maven code generator plugin -->
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
                 <version>3.1.0</version>
-
+                
                 <!-- The plugin should hook into the generate goal -->
                 <executions>
                     <execution>
@@ -159,7 +149,7 @@ Jooq code generation happens in asset-tag-dao.
                         </goals>
                     </execution>
                 </executions>
-
+                
                 <!-- Manage the plugin's dependency. In this example, we'll use a Postgres database -->
                 <dependencies>
                     <!--
@@ -174,12 +164,10 @@ Jooq code generation happens in asset-tag-dao.
                         <artifactId>derby</artifactId>
                         <version>10.10.1.1</version>
                     </dependency>
-    
                 </dependencies>
-
+                
                 <!-- Specify the plugin configuration -->
                 <configuration>
-
                     <!-- JDBC connection parameters -->
                     <jdbc>
                         <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
@@ -187,7 +175,7 @@ Jooq code generation happens in asset-tag-dao.
                         <user />
                         <password />
                     </jdbc>
-
+                    
                     <!-- Generator parameters -->
                     <generator>
                         <name>org.jooq.util.DefaultGenerator</name>
@@ -207,51 +195,12 @@ Jooq code generation happens in asset-tag-dao.
                         </target>
                     </generator>
                 </configuration>
-            </plugin>      
-               
+            </plugin>
         </plugins>
     </build>
-
-
+    
     <dependencies>
-
-        <!--        
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet</artifactId>  
-            <version>2.2-M4</version>  
-        </dependency>
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet.ext.slf4j</artifactId>  
-            <version>2.2-M4</version>  
-        </dependency>
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet.ext.jackson</artifactId>  
-            <version>2.2-M4</version>  
-        </dependency>
-        
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-        </dependency>
-        -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-jdbi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
@@ -268,7 +217,20 @@ Jooq code generation happens in asset-tag-dao.
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
-
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-jdbi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
         <!-- mtwilson integration -->
         <!--
         <dependency>
@@ -278,7 +240,30 @@ Jooq code generation happens in asset-tag-dao.
         </dependency>
         -->
         <!-- end mtwilson integration -->
-
+        
+        <!--        
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.slf4j</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.jackson</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+        </dependency>
+        -->
+        
         <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
         <!--
         <dependency>
@@ -292,6 +277,7 @@ Jooq code generation happens in asset-tag-dao.
             <version>1.46</version>
         </dependency>      
         -->
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -325,6 +311,7 @@ Jooq code generation happens in asset-tag-dao.
             <version>4.2</version>
         </dependency>
         -->
+        
         <!-- JSON support -->
         <!--
         <dependency>
@@ -358,7 +345,7 @@ Jooq code generation happens in asset-tag-dao.
             <version>2.2.2</version>
         </dependency>
         -->
-
+        
         <!-- jooq  database query assembly -->
         <dependency>
             <groupId>org.jooq</groupId>
@@ -370,14 +357,13 @@ Jooq code generation happens in asset-tag-dao.
             <artifactId>jooq-meta</artifactId>
             <version>3.1.0</version>
         </dependency>
-
+        
         <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
         <dependency>
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi</artifactId>
             <!--<version>2.49</version>-->
         </dependency>
-        
         
         <!-- apache 2.0 license,  database connection pooling system -->
         <dependency>
@@ -392,8 +378,6 @@ Jooq code generation happens in asset-tag-dao.
             <artifactId>derby</artifactId>
             <version>10.10.1.1</version>
         </dependency>
-                    
-    </dependencies>  
+    </dependencies>
     
-
 </project>

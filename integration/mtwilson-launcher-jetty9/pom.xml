@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-launcher-jetty9</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>war</packaging>
     <name>mtwilson-launcher-jetty9</name>
@@ -11,15 +10,13 @@
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
     
     <properties />
-
+    
     <build>
-	
         <plugins>
-		    
 	    <plugin>
 		<artifactId>maven-war-plugin</artifactId>
 		<version>2.4</version>
@@ -33,8 +30,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-
-
+            
 <!--
 To test the application:
     mvn jetty:start
@@ -47,8 +43,7 @@ To test the application:
 This error message indicates you need a jersey implementation like org.glassfish.jersey.containers:jersey-container-servlet:2.4.1 on the classpath:
     2014-01-17 09:01:30.157:WARN:oejuc.AbstractLifeCycle:main: FAILED javax.ws.rs.core.Application@83f91b4==null,-1,false: javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application
     javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application
-    
-            -->
+-->
             <plugin>
                 <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
                 <groupId>org.eclipse.jetty</groupId>
@@ -63,11 +58,10 @@ This error message indicates you need a jersey implementation like org.glassfish
                     <reload>manual</reload>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+    
     <dependencies>
-
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
@@ -76,46 +70,11 @@ This error message indicates you need a jersey implementation like org.glassfish
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jersey2-util</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jersey2-util-v1</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-multipart</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-server</artifactId>
-        </dependency>
-        
-        
-        <!-- janino is required to evaluate the throwable filter expressions in logback.xml , only needed if that feature is used -->
-        <dependency>
-            <groupId>janino</groupId>
-            <artifactId>janino</artifactId>
-            <version>2.5.10</version>
-        </dependency>        
-        
-        <!-- temporarily putting jpa dependencies here so we can find persistence.xml -->
-        <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
         </dependency>
         <!--
         <dependency>
@@ -139,6 +98,41 @@ This error message indicates you need a jersey implementation like org.glassfish
             <version>${project.version}</version>
         </dependency>
         -->
+        
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+        </dependency>
+        
+        <!-- janino is required to evaluate the throwable filter expressions in logback.xml , only needed if that feature is used -->
+        <dependency>
+            <groupId>janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>2.5.10</version>
+        </dependency>
+        
+        <!-- temporarily putting jpa dependencies here so we can find persistence.xml -->
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
         
         <!-- include all the app dependencies -->
         <dependency>
@@ -174,4 +168,5 @@ This error message indicates you need a jersey implementation like org.glassfish
         </profile>
     </profiles>
     -->
+    
 </project>

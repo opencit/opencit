@@ -1,39 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
+    <modelVersion>4.0.0</modelVersion>
+    
     <groupId>com.intel.mtwilson.database</groupId>
     <artifactId>mtwilson-database</artifactId>
-    <packaging>pom</packaging>
     <version>3.0-SNAPSHOT</version>
-
-  <name>Mt Wilson Database Support</name>
-  
-  <modules>
-    <module>mysql</module>
-    <module>postgresql</module>
-  </modules>
-
-  <properties>
-        <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
-  </properties>
-
-  <dependencyManagement>
+    
+    <packaging>pom</packaging>
+    <name>Mt Wilson Database Support</name>
+    
+    <modules>
+        <module>mysql</module>
+        <module>postgresql</module>
+    </modules>
+    
+    <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.intel.mtwilson.maven</groupId>
                 <artifactId>mtwilson-maven-bom-coreutil</artifactId>
-                <version>${mtwilson.version}</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.maven</groupId>
                 <artifactId>mtwilson-maven-bom-external</artifactId>
-                <version>${mtwilson.version}</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
-  </dependencyManagement>
+    </dependencyManagement>
 </project>

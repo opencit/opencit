@@ -3,7 +3,7 @@
 
   <groupId>com.intel.mtwilson.services</groupId>
   <artifactId>aikqverify</artifactId>
-  <version>3.1-SNAPSHOT</version>
+  <version>3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>aikqverify</name>
   <description>
@@ -13,7 +13,7 @@
     <parent>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>mtwilson-services</artifactId>
-		<version>3.1-SNAPSHOT</version>
+		<version>3.0-SNAPSHOT</version>
     </parent>
 
     <build>

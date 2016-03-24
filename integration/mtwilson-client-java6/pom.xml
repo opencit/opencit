@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-client-java6</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-client-java6</name>
@@ -14,40 +13,40 @@
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
     </description>
-  
-    <parent> 
-        <groupId>com.intel.mtwilson.integration</groupId> 
-        <artifactId>mtwilson-integration</artifactId> 
-        <version>3.1-SNAPSHOT</version> 
+    
+    <parent>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-integration</artifactId>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <build>
         <!--
-            <testResources>
-                <testResource>
-                    <directory>src/test/json</directory>
-                    <includes>
-                        <include>**/*.json</include>
-                    </includes>
-                </testResource>
-                <testResource>
-                    <directory>src/test/env</directory>
-                    <includes>
-                        <include>**/*.properties</include>
-                    </includes>
-                </testResource>
-                <testResource>
-                    <directory>src/test/resources</directory>
-                    <includes>
-                        <include>**/*.jks</include>
-                        <include>**/cacerts</include>
-                        <include>**/*.html</include>
-                        <include>**/*.xml</include>
-                    </includes>
-                </testResource>
-            </testResources>
+        <testResources>
+            <testResource>
+                <directory>src/test/json</directory>
+                <includes>
+                    <include>**/*.json</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/env</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>**/*.jks</include>
+                    <include>**/cacerts</include>
+                    <include>**/*.html</include>
+                    <include>**/*.xml</include>
+                </includes>
+            </testResource>
+        </testResources>
         -->
-	
+        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -60,7 +59,6 @@
                     <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
-	
             
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -77,6 +75,7 @@
                     </archive>
                 </configuration>
             </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -88,17 +87,10 @@
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin>	    
-		
-
-
-        </plugins>      
-      
-
+            </plugin>
+        </plugins>
     </build>
-
-
-
+    
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -120,49 +112,32 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-rfc822</artifactId>
         </dependency>
+        <!-- the ErrorCode class moved from mtwilson-api to mtwilson-i18n -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-i18n</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-saml-verifier</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-xc</artifactId>
-            <version>1.9.11</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-                
-        <!--
-        <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>maven-embedded-glassfish-plugin</artifactId>
-                <version>3.1.1</version>
-                <type>maven-plugin</type>
-        </dependency>    
-        -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -191,43 +166,82 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <!--
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <version>1.9.11</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>maven-embedded-glassfish-plugin</artifactId>
+            <version>3.1.1</version>
+            <type>maven-plugin</type>
+        </dependency>    
+        -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <!--
         <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>1.6.4</version>
-                <scope>provided</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.4</version>
+            <scope>provided</scope>
         </dependency>
         -->
         <!-- <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jdk14</artifactId>
-                <version>1.6.4</version>
-                <scope>test</scope>
-        </dependency> -->
-	
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.4</version>
+            <scope>test</scope>
+        </dependency>
+        -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
         <!--
         <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>1.1.1</version>
-                <scope>compile</scope>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
         </dependency>
         -->
         <!--
         <dependency>
-                <groupId>commons-beanutils</groupId>
-                <artifactId>commons-beanutils</artifactId>
-                <version>1.8.0</version>
-                <scope>compile</scope>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.8.0</version>
+            <scope>compile</scope>
         </dependency>
         -->
         <dependency>
@@ -240,17 +254,17 @@
         </dependency>
         <!--
         <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>1.3.2</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.3.2</version>
         </dependency>
         -->
         <!--
-            <dependency>
-                    <groupId>com.jayway.restassured</groupId>
-                    <artifactId>rest-assured</artifactId>
-                    <version>1.5</version>
-            </dependency>        
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.5</version>
+        </dependency>        
         -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
@@ -262,28 +276,8 @@
             <artifactId>jaxb-impl</artifactId>
             <version>2.1.9</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- the ErrorCode class moved from mtwilson-api to mtwilson-i18n -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-i18n</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    
-        <!-- begin httpclient  -->
-   
+        
+        <!-- begin httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
@@ -298,15 +292,12 @@
         </dependency>
         <!-- end httpclient -->
         
-        
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
-
         
         <!-- jersey-core provides MultivaluedMap and MediaType -->
-        
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -332,7 +323,6 @@
             <artifactId>jersey-media-multipart</artifactId>
             <scope>test</scope>
         </dependency>
-        
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
@@ -356,46 +346,43 @@
         </dependency>
         -->
         <!--
-<dependency>
-<groupId>javax.activation</groupId>
-<artifactId>activation</artifactId>
-<version>1.1.1</version>
-</dependency>
-<dependency>
-        <groupId>javax</groupId>
-        <artifactId>javaee-web-api</artifactId>
-        <scope>provided</scope>
-</dependency>
-<dependency>
-<groupId>javax.mail</groupId>
-<artifactId>mail</artifactId>
-<version>1.4</version>
-</dependency>
-        -->
-        <!-- end jersey  -->
-        <!--
         <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.47</version>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4</version>
         </dependency>
         -->
-    
-    
+        <!-- end jersey -->
+        
+        <!--
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.47</version>
+        </dependency>
+        -->
+        
         <!-- for Java 1.5 version of the api client -->
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>java-backport-1.6-to-1.5</artifactId>
             <version>0.1-SNAPSHOT</version>
-        </dependency>-->
-        <!-- end Java 1.5 backport dependencies -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
-    </dependencies>  
-
+        -->
+        <!-- end Java 1.5 backport dependencies -->
+    </dependencies>
+    
     <profiles>
         <profile>
             <activation>
@@ -429,8 +416,6 @@
                         </executions>
                     </plugin>
                     
-                    
-      
                     <!-- begin copy dependencies plugin (to create zip file) -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -448,7 +433,7 @@
                         </executions>
                     </plugin>
                     <!-- end copy dependencies plugin -->
-
+                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -482,9 +467,8 @@
                                 <version>1.0b3</version>
                             </dependency>
                         </dependencies>
-                    </plugin>	    
-      
-
+                    </plugin>
+                    
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
@@ -506,9 +490,7 @@
                             </execution>
                         </executions>
                     </plugin>
-
-
-                                        
+                    
                     <!-- create a shaded jar-with-dependencies.  see also:
                     http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
                     -->
@@ -564,20 +546,19 @@
                                             <shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
                                         </relocation>
                                         <!--
-                                            <relocation>
-                                                <pattern>com.sun</pattern>
-                                                <shadedPattern>com.intel.shaded.com.sun</shadedPattern>
-                                            </relocation>
+                                        <relocation>
+                                            <pattern>com.sun</pattern>
+                                            <shadedPattern>com.intel.shaded.com.sun</shadedPattern>
+                                        </relocation>
                                         -->
                                     </relocations>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
-                    
                 </plugins>
             </build>
         </profile>
     </profiles>
-
+    
 </project>

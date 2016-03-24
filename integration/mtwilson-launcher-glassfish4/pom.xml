@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-launcher-glassfish4</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>war</packaging>
     <name>mtwilson-launcher-glassfish4</name>
@@ -11,16 +10,13 @@
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
     
     <properties />
-
+    
     <build>
-	
         <plugins>
-		    
-            
 <!-- 
 The mtwilson-launcher-glassfish4 project produces a web application that
 is compatible with the glassfish4 application container. This is done by
@@ -43,8 +39,7 @@ http://maven.apache.org/plugins/maven-war-plugin/examples/including-excluding-fi
 
 cglib, mimepull,  woodstox-core, and  hk2 were added to the exclusion list but
 no indication of problems with these yet.
-
-            -->            
+-->
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.4</version>
@@ -75,26 +70,21 @@ no indication of problems with these yet.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-
-
         </plugins>
     </build>
+    
     <dependencies>
-
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-client-jersey2.0</artifactId>
-            <version>${project.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-jetty9</artifactId>
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        
-        
     </dependencies>
-
     
 </project>

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-services</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <name>Mt Wilson Services</name>
     <description>mtwilson-services</description>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-maven-java</artifactId>
         <version>3.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
-  
+    
     <modules>
         <module>mtwilson-attestation</module>
         <module>mtwilson-attestation-client-jaxrs2</module>
@@ -94,5 +94,5 @@
         <module>mtwilson-whitelist</module>
         <module>mtwilson-whitelist-ws-v1</module>
     </modules>
-
+    
 </project>

@@ -4,14 +4,13 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-manifest-xml</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
     
     <properties>
@@ -22,6 +21,7 @@
      "yyyy-MM-dd'T'HH:mm:ss.SSSZ"	2001-07-04T12:08:56.235-0700   
         -->
     </properties>
+    
     <build>
         <plugins>
             <plugin>
@@ -54,10 +54,9 @@
                     <verbose>true</verbose>
                 </configuration>
             </plugin>
-            
         </plugins>
     </build>
-
+    
     <dependencies>
         <!-- was: 2.2.7-b63 -->
         <dependency>
@@ -76,7 +75,6 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -113,9 +111,8 @@
             <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
-        
         <!-- end testing -->
-
+        
         <!-- logging -->        
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -126,8 +123,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
         <!-- end logging -->
-
-    </dependencies>  
+    </dependencies>
+    
 </project>

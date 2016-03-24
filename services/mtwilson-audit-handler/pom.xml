@@ -3,18 +3,16 @@
     
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-audit-handler</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-audit-handler</name>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
-
+    
     <build>
         <plugins>
             <plugin>
@@ -23,7 +21,15 @@
             </plugin>
         </plugins>
     </build>
+    
     <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jpa</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-audit-api</artifactId>
@@ -34,6 +40,33 @@
             <artifactId>mtwilson-audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-postgresql</artifactId>
+            <version>${project.version}</version>
+        </dependency> 
+        -->
+        <!-- 
+        Removed this dependency since it was causing cyclic reference exception 
+        and also this project is not needed in the Audit Handler.
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-http-security-server</artifactId>
+            <version>${project.version}</version>
+        </dependency> 
+        -->
+        
         <!--
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -50,40 +83,10 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.database</groupId>
-            <artifactId>mtwilson-postgresql</artifactId>
-            <version>${project.version}</version>
-        </dependency> 
-        -->
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- 
-        Removed this dependency since it was causing cyclic reference exception and also this project is not
-        needed in the Audit Handler.
-         <dependency>
-          <groupId>${project.groupId}</groupId>
-          <artifactId>mtwilson-http-security-server</artifactId>
-          <version>${project.version}</version>
-          </dependency> 
-        -->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
@@ -135,5 +138,6 @@
             <artifactId>javax.ws.rs-api</artifactId>
             <!--<version>2.0</version>-->
         </dependency>
-    </dependencies>  
+    </dependencies>
+    
 </project>

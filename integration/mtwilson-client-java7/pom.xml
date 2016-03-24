@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-client-java7</artifactId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>mtwilson-client-java7</name>
@@ -14,15 +13,14 @@
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
     </description>
-  
-    <parent> 
+    
+    <parent>
         <groupId>com.intel.mtwilson.integration</groupId> 
         <artifactId>mtwilson-integration</artifactId> 
-        <version>3.1-SNAPSHOT</version> 
+        <version>3.0-SNAPSHOT</version> 
     </parent>
-
+    
     <build>
-	
         <!--
         <testResources>
             <testResource>
@@ -48,9 +46,7 @@
             </testResource>
         </testResources>
         -->
-	
         <plugins>
-            
             <!--  REMOVED THIS CONFIGURATION FROM MAVEN-JAR-PLUGIN BELOW 
             <addClasspath>true</addClasspath>
             <classpathPrefix>lib/</classpathPrefix>
@@ -69,24 +65,24 @@
             </plugin>
             -->
             <!--
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-            <execution>
-                <id>regular-jar-with-dependencies</id>
-                <phase>package</phase>
-                <goals>
-                    <goal>shade</goal>
-                </goals>
-                <configuration>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <shadedClassifierName>with-dependencies</shadedClassifierName>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
-            -->            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regular-jar-with-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-dependencies</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -128,7 +124,7 @@
                     </tags>
                 </configuration>
             </plugin>
-                    
+                     
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -140,18 +136,10 @@
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin>	    
-		
-      
-
-
-        </plugins>      
-      
-
+            </plugin>
+        </plugins>
     </build>
-
-
-
+    
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -173,84 +161,9 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
         </dependency>
-        <!--
-                <dependency>
-                        <groupId>com.intel.mtwilson.util</groupId>
-                        <artifactId>mtwilson-util-rfc822</artifactId>
-                </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-saml-verifier</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-		
-        <!--
-        <dependency>
-                        <groupId>org.glassfish</groupId>
-                        <artifactId>maven-embedded-glassfish-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <type>maven-plugin</type>
-        </dependency>    
-        -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
-        </dependency>
-		
-        <!--
-            <dependency>
-                    <groupId>com.jayway.restassured</groupId>
-                    <artifactId>rest-assured</artifactId>
-                    <version>1.5</version>
-            </dependency>        
-        -->
-        <!--
-<dependency>
-    <groupId>com.sun.xml.bind</groupId>
-    <artifactId>jaxb</artifactId>
-    <version>2.1.9</version>
-</dependency>
-<dependency>
-    <groupId>com.sun.xml.bind</groupId>
-    <artifactId>jaxb-impl</artifactId>
-    <version>2.1.9</version>
-</dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -259,34 +172,30 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-http-security</artifactId>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-rfc822</artifactId>
+        </dependency>
+        -->
+        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-saml-verifier</artifactId>
             <version>${project.version}</version>
         </dependency>
-    
-        <!-- begin httpclient  -->
-        <!--
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>commons-pool</groupId>
-            <artifactId>commons-pool</artifactId>
-        </dependency>
-        -->
-        <!-- end httpclient -->
-        
-        
-        <!--
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        -->
-        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-attestation-model</artifactId>
@@ -297,115 +206,11 @@
             <artifactId>mtwilson-tls-policy-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- begin jersey  -->
-    
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-client</artifactId>
-            <!--            <version>2.5.1</version> -->
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <!--            <version>2.5.1</version> -->
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-        </dependency>
-        <!--
-    <dependency>
-        <groupId>com.intel.mtwilson.services</groupId>
-        <artifactId>mtwilson-jersey2-util</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-        -->
-
-        <!-- end jersey  -->
-        
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
-        -->
-        <!--
-        <dependency>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15on</artifactId>
-                        <version>1.47</version>
-        </dependency>
-        -->
-        <!-- start saml verification -->
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-            <version>2.5.1-1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <!-- this exclusion is here because we are providing our own patched version of xmltooling, see below and the "other" projects folder -->
-                <exclusion>
-                    <groupId>org.opensaml</groupId>
-                    <artifactId>xmltooling</artifactId>
-                </exclusion>
-            </exclusions>	
-        </dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>xmltooling</artifactId>
-            <version>1.4.1</version>
-        </dependency>
-        <!-- solves java.lang.ClassNotFoundException: org/jcp/xml/dsig/internal/dom/XMLDSigRI when verifying SAML signatures -->
-        <!-- vesrion must be 1.4.3, after this the class org.jcp.xml.dsig.internal.dom.XMLDsigRI is moved to org.apache.jcp  so opensaml doesn't find it -->
-        <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
-            <version>1.4.3</version>
-        </dependency>
-            	    
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <!-- end saml verification -->
         
         <!-- clients for mtwilson features -->
         <dependency>
@@ -438,11 +243,187 @@
             <artifactId>mtwilson-privacyca-client-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
         <!-- end clients for mtwilson features -->
         
-    </dependencies>  
-
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        
+        <!--
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>maven-embedded-glassfish-plugin</artifactId>
+            <version>3.1.1</version>
+            <type>maven-plugin</type>
+        </dependency>    
+        -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        -->
+        <!--
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.5</version>
+        </dependency>        
+        -->
+        <!--
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+        -->
+        
+        <!-- begin httpclient  -->
+        <!--
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+        </dependency>
+        -->
+        <!-- end httpclient -->
+        
+        <!--
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        -->
+        
+        <!-- begin jersey  -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <!--            <version>2.5.1</version> -->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <!--            <version>2.5.1</version> -->
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
+        </dependency>
+        <!-- end jersey  -->
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+        -->
+        <!--
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.47</version>
+        </dependency>
+        -->
+        
+        <!-- start saml verification -->
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>2.5.1-1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <!-- this exclusion is here because we are providing our own patched version of xmltooling, see below and the "other" projects folder -->
+                <exclusion>
+                    <groupId>org.opensaml</groupId>
+                    <artifactId>xmltooling</artifactId>
+                </exclusion>
+            </exclusions>	
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>xmltooling</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+        <!-- solves java.lang.ClassNotFoundException: org/jcp/xml/dsig/internal/dom/XMLDSigRI when verifying SAML signatures -->
+        <!-- vesrion must be 1.4.3, after this the class org.jcp.xml.dsig.internal.dom.XMLDsigRI is moved to org.apache.jcp  so opensaml doesn't find it -->
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <!-- end saml verification -->
+    </dependencies>
+    
     <profiles>
         <profile>
             <activation>
@@ -501,7 +482,7 @@
                         </executions>
                     </plugin>
                     <!-- end copy dependencies plugin -->
-
+                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -535,9 +516,8 @@
                                 <version>1.0b3</version>
                             </dependency>
                         </dependencies>
-                    </plugin>	    
-      
-
+                    </plugin>
+                    
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
@@ -631,10 +611,9 @@
                             </execution>
                         </executions>
                     </plugin>
-                    
                 </plugins>
             </build>
         </profile>
     </profiles>
-
+    
 </project>
