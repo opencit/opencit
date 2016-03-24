@@ -122,10 +122,6 @@
             <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-http-security</artifactId>
         </dependency>
@@ -134,6 +130,11 @@
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
         
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-saml-verifier</artifactId>

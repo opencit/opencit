@@ -27,10 +27,6 @@
     <dependencies>
         <!-- common-java -->
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey2-util</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
@@ -60,6 +56,11 @@
         </dependency>
         
         <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
