@@ -27,7 +27,7 @@
     </modules>
     
     <properties>
-        <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
+        <mtwilson.version>3.0-SNAPSHOT</mtwilson.version>
     </properties>
     
     <build>

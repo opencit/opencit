@@ -41,8 +41,6 @@ if [ $? -ne 0 ]; then echo "Failed to change maven version on \"database\" folde
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"desktop\" folder" >&2; exit 3; fi
 (cd features && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"features\" folder" >&2; exit 3; fi
-(cd installers && $changeVersionCommand)
-if [ $? -ne 0 ]; then echo "Failed to change maven version on \"installers\" folder" >&2; exit 3; fi
 (cd integration && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"integration\" folder" >&2; exit 3; fi
 (cd plugins && $changeVersionCommand)
@@ -53,5 +51,11 @@ if [ $? -ne 0 ]; then echo "Failed to change maven version on \"portals\" folder
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"services\" folder" >&2; exit 3; fi
 (cd trust-agent && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"trust-agent\" folder" >&2; exit 3; fi
+sed -i 's/\(<mtwilson.version>\).*\(<\/mtwilson.version>\)/\1'${version}'\2/g' installers/pom.xml
+if [ $? -ne 0 ]; then echo "Failed to change mtwilson.version in \"installers/pom.xml\"" >&2; exit 3; fi
+(cd installers && $changeVersionCommand)
+if [ $? -ne 0 ]; then echo "Failed to change maven version on \"installers\" folder" >&2; exit 3; fi
+(cd packages && $changeVersionCommand)
+if [ $? -ne 0 ]; then echo "Failed to change maven version on \"packages\" folder" >&2; exit 3; fi
 sed -i 's/\-[0-9\.]*\(\-SNAPSHOT\|\(\-\|\.zip$\|\.bin$\|\.jar$\)\)/-'${version}'\2/g' build.targets
 if [ $? -ne 0 ]; then echo "Failed to change versions in \"build.targets\" file" >&2; exit 3; fi
