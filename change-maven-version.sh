@@ -41,6 +41,8 @@ if [ $? -ne 0 ]; then echo "Failed to change maven version on \"database\" folde
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"desktop\" folder" >&2; exit 3; fi
 (cd features && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"features\" folder" >&2; exit 3; fi
+sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/mtwilson-export-data-bundle/feature.xml
+if [ $? -ne 0 ]; then echo "Failed to change version in \"features/mtwilson-export-data-bundle/feature.xml\"" >&2; exit 3; fi
 (cd integration && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"integration\" folder" >&2; exit 3; fi
 (cd plugins && $changeVersionCommand)
