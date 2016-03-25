@@ -57,7 +57,7 @@
                 <dependency>
                     <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
                     <artifactId>tbootxm</artifactId>
-                    <version>0.1-SNAPSHOT</version>
+                    <version>${project.version}</version>
                     <type>bin</type>
                     <classifier>rhel</classifier>
                 </dependency>
@@ -136,7 +136,7 @@
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
                                             <artifactId>tbootxm</artifactId>
-                                            <version>0.1-SNAPSHOT</version>
+                                            <version>${project.version}</version>
                                             <type>bin</type>
                                             <classifier>rhel</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
