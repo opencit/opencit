@@ -36,7 +36,7 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
         this.wlConfig = wlConfig;
     }
     
-    public void setChallenge(String challengeHex) {
+    public void setChallengeHex(String challengeHex) {
         this.challengeHex = challengeHex;
     }
 
