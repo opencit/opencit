@@ -219,7 +219,7 @@ REM # and make sure it's successful before trying to start the trust agent
 REM # NOTE: only the output from start-http-server is redirected to the logfile;
 REM #       the stdout from the setup command will be displayed
 ECHO. ==Call trustagent setup
->>"%logfile%" call "%trustagent_cmd%" setup
+call "%trustagent_cmd%" setup
 REM ECHO. ==Start trustagent service
 REM call "%trustagent_cmd%" start
 

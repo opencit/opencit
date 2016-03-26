@@ -53,7 +53,7 @@ REM # not including configure-from-environment because we are running it always 
 REM # not including register-tpm-password because we are prompting for it in the setup.sh
 
 set JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-set JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF\logback.xml -Dfs.name=trustagent"
+set JAVA_OPTS=-Dlogback.configurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
 
 REM @###################################################################################################
 
