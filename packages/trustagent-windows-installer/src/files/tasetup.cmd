@@ -11,6 +11,10 @@ for %%a in ("%package_bin:~0,-1%") do set package_dir=%%~dpa
 REM echo. %package_bin%
 echo. ==Trust Agent located at: %package_dir%
 
+set TRUSTAGENT_HOME=%package_dir%
+set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
+set TRUSTAGENT_LOGS=%TRUSTAGENT_HOME%\logs
+
 REM ==set PATH for the current cmd 
 set PATH=%PATH%;%package_bin%
 REM ==set global PATH
@@ -82,6 +86,15 @@ ECHO. ==Backup configuration directory==
 IF EXIST "%intel_conf_dir%\" (
   xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y /Q > nul
 )
+
+REM ## update logback.xml with configured trustagent log directory
+  echo. ^<configuration^> > "%TRUSTAGENT_CONF%\logback.xml.edited"
+  echo.     ^<appender name="LogFile" class="ch.qos.logback.core.FileAppender"^> >> "%TRUSTAGENT_CONF%\logback.xml.edited"
+  echo.         ^<file^>"%TRUSTAGENT_LOGS%\trustagent.log"^</file^> >> "%TRUSTAGENT_CONF%\logback.xml.edited"
+  type "%TRUSTAGENT_CONF%\logback.xml.base" >> "%TRUSTAGENT_CONF%\logback.xml.edited"
+  copy /y "%TRUSTAGENT_CONF%\logback.xml.edited" "%TRUSTAGENT_CONF%\logback.xml"
+  del /q "%TRUSTAGENT_CONF%\logback.xml.edited"
+  REM del /q "%TRUSTAGENT_CONF%\logback.xml.base"
 
 REM FIXIT ##### stop existing trust agent if running
 REM # before we stop the trust agent, remove it from the monit config (if applicable)
@@ -227,15 +240,15 @@ REM # optional: register tpm password with mtwilson so pull provisioning can
 REM #           be accomplished with less reboots (no ownership transfer)
 REM prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD}
 REM if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$REGISTER_TPM_PASSWORD" == "yes" ]]; then 
-REM #	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
-REM 	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
-REM 	prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
+REM # prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
+REM   prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
+REM   prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
 REM     export MTWILSON_API_USERNAME MTWILSON_API_PASSWORD
-REM #	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
-REM #	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
-REM #	TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
-REM 	export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
-REM #	echo "registering $TPM_PASSWORD to $UUID"
-REM #	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
+REM # # json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+REM # # wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
+REM # TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
+REM   export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+REM # echo "registering $TPM_PASSWORD to $UUID"
+REM # wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
 REM     /usr/local/bin/tagent setup register-tpm-password
 REM fi
