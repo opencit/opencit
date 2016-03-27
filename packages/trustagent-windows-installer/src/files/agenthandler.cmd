@@ -14,18 +14,19 @@ for %%i in ("%~dp0..") do set "parentfolder=%%~fi"
 set TRUSTAGENT_HOME=%parentfolder%
 
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
-set logfile=%TRUSTAGENT_HOME%\logs\trustagent.log
+set logfile=%TRUSTAGENT_HOME%\logs\trustagent2.log
 
 set JAVA_HOME=%TRUSTAGENT_HOME%\jre
 set JAVABIN=%JAVA_HOME%\bin\java
 
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
+set TRUSTAGENT_LOGS=%TRUSTAGENT_HOME%\logs
 set TRUSTAGENT_JAVA=%TRUSTAGENT_HOME%\java
 set TRUSTAGENT_BIN=%TRUSTAGENT_HOME%\bin
 set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
 set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
-set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_VAR%\log\http.log
+set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_LOGS%\http.log
 set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
 set TRUSTAGENT_TPM_TASKS=create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership
 set TRUSTAGENT_START_TASKS=create-keystore-password create-tls-keypair take-ownership
