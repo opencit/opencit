@@ -120,13 +120,13 @@ GOTO:EOF
   )
   echo. HARDWARE_UUID: %HARDWARE_UUID%
   set tasklist=%*
-  echo. %tasklist%
+  REM echo. %tasklist%
   IF "%tasklist%"=="" (
     set tasklist=%TRUSTAGENT_SETUP_TASKS%
   ) ELSE IF "%tasklist%"=="--force" (
       set tasklist=%TRUSTAGENT_SETUP_TASKS% --force
   )
-  echo. %tasklist%
+  REM echo. %tasklist%
   "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
 GOTO:EOF
 
