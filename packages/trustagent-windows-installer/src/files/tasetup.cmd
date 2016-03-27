@@ -90,7 +90,7 @@ IF EXIST "%intel_conf_dir%\" (
 REM ## update logback.xml with configured trustagent log directory
   echo. ^<configuration^> > "%TRUSTAGENT_CONF%\logback.xml.edited"
   echo.     ^<appender name="LogFile" class="ch.qos.logback.core.FileAppender"^> >> "%TRUSTAGENT_CONF%\logback.xml.edited"
-  echo.         ^<file^>"%TRUSTAGENT_LOGS%\trustagent.log"^</file^> >> "%TRUSTAGENT_CONF%\logback.xml.edited"
+  echo.        ^<file^>%TRUSTAGENT_LOGS%\trustagent.log^</file^> >> "%TRUSTAGENT_CONF%\logback.xml.edited"
   type "%TRUSTAGENT_CONF%\logback.xml.base" >> "%TRUSTAGENT_CONF%\logback.xml.edited"
   copy /y "%TRUSTAGENT_CONF%\logback.xml.edited" "%TRUSTAGENT_CONF%\logback.xml"
   del /q "%TRUSTAGENT_CONF%\logback.xml.edited"
