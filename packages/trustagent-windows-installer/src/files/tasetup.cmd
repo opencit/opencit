@@ -9,7 +9,8 @@ set package_bin=%~dp0
 for %%a in ("%package_bin:~0,-1%") do set package_dir=%%~dpa
 
 REM echo. %package_bin%
-echo. ==Trust Agent located at: %package_dir%
+REM ECHO.Setup trust agent with CIT server...
+REM echo. ==Trust Agent located at: %package_dir%
 
 set TRUSTAGENT_HOME=%package_dir%
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
@@ -31,7 +32,7 @@ set bootdriver_dir=%package_dir%\bootdriver
 set logfile=%package_dir%\logs\install.log
 
 REM # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-ECHO. ==Configure trust agent version and environment variables==
+ECHO.Trust agent setup: Configure trust agent version and environment variables
 cd %package_dir%
 IF EXIST "%package_dir%\version" (
   REM echo. "Version file found"
@@ -42,11 +43,11 @@ IF EXIST "%package_dir%\version" (
   echo. Version file not found
 )
 
-ECHO. ==Configure trust agent environment variables from trustagent.env
+ECHO.Trust agent setup: Configure trust agent environment variables from trustagent.env
 IF EXIST "%package_dir%\trustagent.env" (
   REM echo. trustagent.env found
   for /f  "USEBACKQ tokens=*" %%a in ("%package_dir%\trustagent.env") do (
-    echo.   %%a
+    REM echo.   %%a
     set %%a
   )
 ) ELSE (
@@ -62,7 +63,7 @@ REM  ECHO. %%a
 )
 
 REM # before we start, clear the install log
-REM ECHO. ==Before start, clear the installation log file %logfile%==
+REM ECHO.Trust agent setup: Before start, clear the installation log file %logfile%
 > "%logfile%" echo. %date%
 >> "%logfile%" echo. %time%
 
@@ -82,7 +83,7 @@ REM auto_install "TrustAgent requirements" "APPLICATION"
 REM ##### backup old files
 
 REM # backup configuration directory before unzipping our package
-ECHO. ==Backup configuration directory==
+ECHO.Trust agent setup: Backup configuration directory
 IF EXIST "%intel_conf_dir%\" (
   xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y /Q > nul
 )
@@ -124,14 +125,14 @@ REM  ln -s "$hex2bin" "${package_dir}/bin"
 REM fi
 
 REM ##Private Java install $JAVA_PACKAGE
-ECHO. ==Unpack JAVA JRE==
+ECHO.Trust agent setup: Unpack JAVA JRE
   cd "%package_dir%\jre"
   jre.exe -qo > nul
   set JAVA_HOME=%package_dir%\jre
   cd "%package_bin%" 
 
 REM patch java.security file
-ECHO. ==Patch java.security file==
+ECHO.Trust agent setup: Patch java.security file
 if exist "%JAVA_HOME%\lib\security\java.security" (
   REM echo. ==Replacing java.security file, existing file will be backed up==
   copy "%JAVA_HOME%\lib\security\java.security" "%JAVA_HOME%\lib\security\java.security.old" > nul
@@ -139,12 +140,12 @@ if exist "%JAVA_HOME%\lib\security\java.security" (
 )
 
 REM  # create trustagent.version file
-echo. ==Create trustagent.version==
+echo.Trust agent setup: Create trustagent.version
 > "%package_version_filename%"  echo. "# Installed Trust Agent on %date% %time%"
 >> "%package_version_filename%"  echo. "TRUSTAGENT_VERSION=%VERSION%"
 >> "%package_version_filename%"  echo "TRUSTAGENT_RELEASE=\"%BUILD%\""
 
-echo. ==Registering tagent in start up==
+echo.Trust agent setup: Registering tagent in start up
 REM register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1
 
 REM fix_existing_aikcert() {
@@ -163,7 +164,7 @@ REM fix_existing_aikcert
 
 REM # collect all the localhost ip addresses and make the list available as the
 REM # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
-ECHO. ==Find the IP address of the host==
+ECHO.Trust agent setup: Find the IP address of the host
 set DEFAULT_TRUSTAGENT_TLS_CERT_IP=""
 for /f "tokens=14 delims= " %%a in ('ipconfig ^| findstr "IPv4"') do (
   IF !DEFAULT_TRUSTAGENT_TLS_CERT_IP!=="" (
@@ -179,7 +180,7 @@ IF %TRUSTAGENT_TLS_CERT_IP%=="" (
 ECHO.   %TRUSTAGENT_TLS_CERT_IP%
 
 REM # before running any tagent commands update the extensions cache file
-ECHO. ==Update the extensions cache file 
+ECHO.Trust agent setup: Updating the extensions cache file... 
 >>"%logfile%" call "%trustagent_cmd%" setup update-extensions-cache-file --force
 
 REM # create a trustagent username "mtwilson" with no password and all privileges
@@ -189,7 +190,7 @@ REM ECHO. ==Create a trustagent username "mtwilson" with no password
 REM >>"%logfile%" call "%trustagent_cmd%" password mtwilson --nopass *:*
 
 REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
-ECHO. ==Generate shiro-win.ini
+ECHO.Trust agent setup: Generate shiro-win.ini
 REM copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini" > nul
 ECHO. [main] >"%intel_conf_dir%\shiro.ini"
 ECHO. ssl.enabled = true >>"%intel_conf_dir%\shiro.ini"
@@ -231,8 +232,9 @@ REM # give tagent a chance to do any other setup (such as the .env file and pcak
 REM # and make sure it's successful before trying to start the trust agent
 REM # NOTE: only the output from start-http-server is redirected to the logfile;
 REM #       the stdout from the setup command will be displayed
-ECHO. ==Call trustagent setup
+ECHO.Trust agent setup: Registering host access information with CIT server
 call "%trustagent_cmd%" setup
+ECHO.Trust agent setup finished (Please verify if there are errors above for TA regsitration with CIT server )
 REM ECHO. ==Start trustagent service
 REM call "%trustagent_cmd%" start
 
