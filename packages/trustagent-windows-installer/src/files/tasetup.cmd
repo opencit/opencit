@@ -179,7 +179,7 @@ IF %TRUSTAGENT_TLS_CERT_IP%=="" (
 ECHO.   %TRUSTAGENT_TLS_CERT_IP%
 
 REM # before running any tagent commands update the extensions cache file
-ECHO. ==Update the extensions cache file before running any tagent commands 
+ECHO. ==Update the extensions cache file 
 >>"%logfile%" call "%trustagent_cmd%" setup update-extensions-cache-file --force
 
 REM # create a trustagent username "mtwilson" with no password and all privileges
