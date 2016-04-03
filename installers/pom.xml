@@ -1,60 +1,61 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
+    <modelVersion>4.0.0</modelVersion>
+    
     <groupId>com.intel.mtwilson.linux</groupId>
-  <artifactId>mtwilson-linux</artifactId>
-  <packaging>pom</packaging>
-  <version>3.0-SNAPSHOT</version>
-  <name>Mt Wilson Services Linux Installers</name>
-
-  <modules>
-    <module>LinuxUtil</module>
-    <module>JavaLinuxInstaller</module>
-    <module>GlassfishLinuxInstaller</module>
-    <module>AttestationServiceLinuxInstaller</module>
-    <module>ManagementServiceLinuxInstaller</module>
-    <module>WLMServiceLinuxInstaller</module>
-    <module>MonitLinuxInstaller</module>
-    <module>mtwilson-client-java6</module>
-    <module>mtwilson-client-java7</module>
-    <module>mtwilson-portal-installer</module>
-    <module>mtwilson-server</module>
-    <module>mtwilson-trustagent-rhel</module>
-    <module>mtwilson-trustagent-ubuntu</module>
-    <module>TomcatLinuxInstaller</module>
-	<module>LogRotateLinuxInstaller</module>
-  </modules>
-
-  <properties>
-        <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
-  </properties>
-  
-  <build>
-    <plugins>
-        <plugin>
-            <groupId>pl.project13.maven</groupId>
-            <artifactId>git-commit-id-plugin</artifactId>
-            <version>2.1.15</version>
-            <executions>
-                <execution>
-                    <phase>initialize</phase>
-                    <goals>
-                        <goal>revision</goal>
-                    </goals>
-                    <inherited>true</inherited>
-                    <configuration>
-                        <skipPoms>false</skipPoms>
-                        <prefix>git</prefix>
-                        <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
-                        <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-  </build>
-
-  <dependencyManagement>
+    <artifactId>mtwilson-linux</artifactId>
+    <version>2.1-SNAPSHOT</version>
+    
+    <packaging>pom</packaging>
+    <name>Mt Wilson Services Linux Installers</name>
+    
+    <modules>
+        <module>AttestationServiceLinuxInstaller</module>
+        <module>GlassfishLinuxInstaller</module>
+        <module>JavaLinuxInstaller</module>
+        <module>LinuxUtil</module>
+        <module>LogRotateLinuxInstaller</module>
+        <module>ManagementServiceLinuxInstaller</module>
+        <module>MonitLinuxInstaller</module>
+        <module>mtwilson-client-java6</module>
+        <module>mtwilson-client-java7</module>
+        <module>mtwilson-portal-installer</module>
+        <module>mtwilson-server</module>
+        <module>mtwilson-trustagent-rhel</module>
+        <module>mtwilson-trustagent-ubuntu</module>
+        <module>TomcatLinuxInstaller</module>
+        <module>WLMServiceLinuxInstaller</module>
+    </modules>
+    
+    <properties>
+        <mtwilson.version>2.1-SNAPSHOT</mtwilson.version>
+    </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.15</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <skipPoms>false</skipPoms>
+                            <prefix>git</prefix>
+                            <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.intel.mtwilson.maven</groupId>
@@ -71,61 +72,61 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-  </dependencyManagement>
+    </dependencyManagement>
     
-  <profiles>
-      <profile>
-          <activation>
-              <property>
-                  <name>release</name>
-              </property>
-          </activation>
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            
             <build>
-            <plugins>
-                            <!-- begin website plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.1</version>
-                    <configuration>
-                        <reportPlugins>
-                        <plugin>
-                          <groupId>org.apache.maven.plugins</groupId>
-                          <artifactId>maven-project-info-reports-plugin</artifactId>
-                          <version>2.5.1</version>
-                          <configuration>
-                            <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-                            <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                          </configuration>
-                          <reports>
-            <!--
-                            <report>dependencies</report>
-                            <report>dependency-info</report>
-            -->
-                            <report>help</report>
-                            <report>index</report>
-                            <report>license</report>
-                            <report>issue-tracking</report>
-                            <report>summary</report>
-                          </reports>
-                        </plugin>
-                        <plugin>
-                          <groupId>org.apache.maven.plugins</groupId>
-                          <artifactId>maven-javadoc-plugin</artifactId>
-                          <version>2.8.1</version>
-                            <configuration>
-                              <show>public</show>
-                            </configuration>
-                        </plugin>                
-                        </reportPlugins>
-                    </configuration>  
-                </plugin>
-                            <!-- end website plugin -->
-            </plugins>
+                <plugins>
+                    <!-- begin website plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <version>3.1</version>
+                        <configuration>
+                            <reportPlugins>
+                                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                                    <version>2.5.1</version>
+                                    <configuration>
+                                        <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                                        <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                                    </configuration>
+                                    <reports>
+                                        <!--
+                                        <report>dependencies</report>
+                                        <report>dependency-info</report>
+                                        -->
+                                        <report>help</report>
+                                        <report>index</report>
+                                        <report>license</report>
+                                        <report>issue-tracking</report>
+                                        <report>summary</report>
+                                    </reports>
+                                </plugin>
+                                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-javadoc-plugin</artifactId>
+                                    <version>2.8.1</version>
+                                    <configuration>
+                                        <show>public</show>
+                                    </configuration>
+                                </plugin>                
+                            </reportPlugins>
+                        </configuration>  
+                    </plugin>
+                    <!-- end website plugin -->
+                </plugins>
             </build>
-      </profile>
-  </profiles>
-
-
+        </profile>
+    </profiles>
+    
 </project>
 

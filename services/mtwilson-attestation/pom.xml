@@ -1,17 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-attestation</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-attestation</name>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>2.1-SNAPSHOT</version>
     </parent>
-
+    
     <build>
-	
         <testResources>
             <testResource>
                 <directory>src/test/env</directory>
@@ -19,17 +21,15 @@
                     <include>**/*.properties</include>
                 </includes>
             </testResource>
-        </testResources>	
-	
+        </testResources>
+        
         <plugins>
-	    
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-
-
         </plugins>
+        
         <!--
         <extensions>
             <extension>
@@ -40,61 +40,9 @@
         </extensions>
         -->
     </build>
+    
     <dependencies>
-        
-        <!--
-        enunciate requires the source to the datatypes in order to document them... but
-        for some reason, when we include the source here, enunciate throws an exception:
-        "Problem assembling the enunciate app. A model must be established."
-        -->
-        <!--
-        <dependency>
-          <groupId>com.intel.mtwilson.integration</groupId>
-          <artifactId>mtwilson-api</artifactId>
-          <version>${project.version}</version>
-          <classifier>sources</classifier>
-          <scope>compile</scope>
-          <optional>true</optional>
-        </dependency>   
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-hostagent-ext</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-saml</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-env</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-crypto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-classpath</artifactId>
@@ -116,19 +64,56 @@
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-attestation-model</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-i18n</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-saml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-env</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.common</groupId>
+            <artifactId>mtwilson-crypto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-attestation-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -146,11 +131,50 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-i18n</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-audit-handler</artifactId>
             <version>${project.version}</version>
         </dependency>
-      
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-audit-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-trust-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java6</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-http-security-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        enunciate requires the source to the datatypes in order to document them... but
+        for some reason, when we include the source here, enunciate throws an exception:
+        "Problem assembling the enunciate app. A model must be established."
+        -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+            <classifier>sources</classifier>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>   
+        -->
+        
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
         <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -158,17 +182,14 @@
             <version>${jersey-version}</version>
         </dependency>
         -->
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -181,20 +202,18 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
-                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
         <!--
-                <dependency>
-                    <groupId>javax.persistence</groupId>
-                    <artifactId>persistence-api</artifactId>
-                    <version>1.0</version>
-                    <scope>test</scope>
-                </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
         -->
         <dependency>
             <groupId>xml-apis</groupId>
@@ -203,28 +222,17 @@
             <!-- <scope>test</scope> this was supposed to be for test but now xercesImpl is in the production artifact so this is required too -->
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-audit-handler</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-audit-data</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!--
-                <dependency>
-                    <groupId>org.codehaus.enunciate</groupId>
-                    <artifactId>enunciate-rt</artifactId>
-                    <version>1.26</version>            
-                </dependency>        
-                <dependency>
-                    <groupId>com.intel.mtwilson.database</groupId>
-                    <artifactId>mtwilson-mysql</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
+        <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rt</artifactId>
+            <version>1.26</version>            
+        </dependency>        
+        <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         -->
         <dependency>
             <groupId>mysql</groupId>
@@ -232,36 +240,19 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-        </dependency>                        
-		
-        <!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
-        <!--
-                <dependency>
-                    <groupId>com.sun.jersey.contribs</groupId>
-                    <artifactId>jersey-spring</artifactId>
-                    <version>1.16</version>
-                </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-trust-policy</artifactId>
-            <version>${project.version}</version>
         </dependency>
         
+        <!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
+        <!--
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java6</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-spring</artifactId>
+            <version>1.16</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-http-security-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        -->
         
         <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
         <!--
@@ -294,8 +285,8 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        
     </dependencies>
+    
     <properties />
     
     <profiles>
@@ -326,7 +317,6 @@
                             <encoding>utf-8</encoding>
                         </configuration>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>

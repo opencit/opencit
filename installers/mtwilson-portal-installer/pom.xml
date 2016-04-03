@@ -1,252 +1,256 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.intel.mtwilson.linux</groupId>
-  <artifactId>mtwilson-portal-installer</artifactId>
-
-  <packaging>pom</packaging>
-  <name>Mt Wilson Portal Linux Installer</name>
-  <description>Self-extracting executable that installs Mt Wilson Portal and its bundled requirements.</description>
-
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.linux</groupId>
+    <artifactId>mtwilson-portal-installer</artifactId>
+    
+    <packaging>pom</packaging>
+    <name>Mt Wilson Portal Linux Installer</name>
+    <description>Self-extracting executable that installs Mt Wilson Portal and its bundled requirements.</description>
+    
     <parent>
-	<groupId>com.intel.mtwilson.linux</groupId>
-	<artifactId>mtwilson-linux</artifactId>
-	<version>3.0-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.linux</groupId>
+        <artifactId>mtwilson-linux</artifactId>
+        <version>2.1-SNAPSHOT</version>
     </parent>
-  
-  <properties>
-    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
-  </properties>
-  
-  <build>
-      <resources>
-          <resource>
-              <directory>src/files</directory>
-          </resource>
-      </resources>      
-  </build>
-  <dependencies>
-    <dependency>
-      <groupId>com.intel.mtwilson.portals</groupId>
-      <artifactId>mtwilson-portal</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.portals</groupId>
-      <artifactId>mtwilson-portal-tomcat7</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>
-    <!--
-    <dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
-      <version>${project.version}</version>
-      <type>sh</type>
-    </dependency>
-    -->
-  </dependencies>
-
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
-          <dependencies>
-              <dependency>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
-                  <version>${project.version}</version>
-                  <type>sh</type>
-              </dependency>
-              <dependency>
-                  <groupId>javax.servlet</groupId>
-                  <artifactId>javax.servlet-api</artifactId>
-                  <version>3.1.0</version>
-                  <scope>provided</scope>
-              </dependency>
-          </dependencies>
-  <build>
-    <plugins>
-       <!-- begin copy rpm artifact  plugin -->
-     <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.portals</groupId>
-                  <artifactId>mtwilson-portal</artifactId>
-                  <version>${project.version}</version>
-                  <type>war</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>mtwilson-portal-glassfish.war</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.intel.mtwilson.portals</groupId>
-                    <artifactId>mtwilson-portal-tomcat7</artifactId>
+    
+    <properties>
+        <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
+    </properties>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/files</directory>
+            </resource>
+        </resources>      
+    </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.intel.mtwilson.portals</groupId>
+            <artifactId>mtwilson-portal</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.portals</groupId>
+            <artifactId>mtwilson-portal-tomcat7</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <!--
+        <dependency>
+          <groupId>com.intel.mtwilson.linux</groupId>
+          <artifactId>mtwilson-linux-util</artifactId>
+          <version>${project.version}</version>
+          <type>sh</type>
+        </dependency>
+        -->
+    </dependencies>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
                     <version>${project.version}</version>
-                    <type>war</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>mtwilson-portal-tomcat.war</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
-                  <version>${project.version}</version>
-                  <type>sh</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>functions</destFileName>
-                </artifactItem>
-              </artifactItems>
-              <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>	
-      <!-- end copy rpm artifact plugin -->
-      <!-- begin copy other resources plugin -->
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${makeself.directory}</outputDirectory>
-		<resources>
-		    <resource>
-			<directory>src/etc</directory>
-			<includes>
-			    <include>version</include>
-			</includes>
-			<filtering>true</filtering>
-		    </resource>
-		    <resource>
-			<directory>src/files</directory>
-			<includes>
-			    <include>**/*</include>
-			</includes>
-			<filtering>false</filtering>
-		    </resource>
-		</resources>
-            </configuration>            
-          </execution>
-        </executions>
-      </plugin>
-      <!-- end copy other resources plugin -->
-      <!-- begin create self-extracting installer plugin -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>create-combined-installer</id>
-	    <phase>compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-	    <configuration>
-	    <executable>bash</executable>
-	    <arguments>
-		<argument>makebin-auto.sh</argument>
-		<argument>${makeself.directory}</argument>
-	    </arguments>
-	    </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- end create self-extracting installer plugin -->
-      <!-- begin deploy installers to repository -->
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-        </plugin>
-      <!-- end deploy installers to repository -->
-    </plugins>
-
-<pluginManagement>
-    <plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.5</version>
-            <executions>
-                <execution>
-                    <id>attach-artifacts</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>attach-artifact</goal>
-                    </goals>
-                    <configuration>
-                        <artifacts>
-                            <artifact>
-                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
-                                <type>bin</type>
-				<!-- this is the combined debian and redhat installer -->
-                            </artifact>
-                        </artifacts>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</pluginManagement>
-  
-  
-  </build>
-      </profile>
-      
-      <profile>
-          <id>gitvars</id>
-          <activation>
-              <property>
-                  <name>!nogit</name>
-              </property>
-          </activation>
-          <build>
-              <plugins>
-<!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
-        <plugin>
-            <groupId>pl.project13.maven</groupId>
-            <artifactId>git-commit-id-plugin</artifactId>
-            <executions>
-                <execution>
-                    <phase>initialize</phase>
-                    <goals>
-                        <goal>revision</goal>
-                    </goals>
-                    <inherited>true</inherited>
-                    <configuration>
-                        <skipPoms>false</skipPoms>
-                        <prefix>git</prefix>
-                        <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-                  
-              </plugins>
-          </build>
-      </profile>
-      
-  </profiles>
-
+                    <type>sh</type>
+                </dependency>
+                <dependency>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                    <version>3.1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            
+            <build>
+                <plugins>
+                    <!-- begin copy rpm artifact  plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.portals</groupId>
+                                            <artifactId>mtwilson-portal</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>war</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>mtwilson-portal-glassfish.war</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.portals</groupId>
+                                            <artifactId>mtwilson-portal-tomcat7</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>war</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>mtwilson-portal-tomcat.war</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>functions</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy rpm artifact plugin -->
+                    
+                    <!-- begin copy other resources plugin -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.directory}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/etc</directory>
+                                            <includes>
+                                                <include>version</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                        <resource>
+                                            <directory>src/files</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy other resources plugin -->
+                    
+                    <!-- begin create self-extracting installer plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>create-combined-installer</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>makebin-auto.sh</argument>
+                                        <argument>${makeself.directory}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end create self-extracting installer plugin -->
+                    
+                    <!-- begin deploy installers to repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                    </plugin>
+                    <!-- end deploy installers to repository -->
+                </plugins>
+                
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>build-helper-maven-plugin</artifactId>
+                            <version>1.5</version>
+                            <executions>
+                                <execution>
+                                    <id>attach-artifacts</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>attach-artifact</goal>
+                                    </goals>
+                                    <configuration>
+                                        <artifacts>
+                                            <artifact>
+                                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
+                                                <type>bin</type>
+                                                <!-- this is the combined debian and redhat installer -->
+                                            </artifact>
+                                        </artifacts>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                
+            </build>
+        </profile>
+        
+        <profile>
+            <id>gitvars</id>
+            <activation>
+                <property>
+                    <name>!nogit</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>revision</goal>
+                                </goals>
+                                <inherited>true</inherited>
+                                <configuration>
+                                    <skipPoms>false</skipPoms>
+                                    <prefix>git</prefix>
+                                    <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
 </project>

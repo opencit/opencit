@@ -1,17 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-audit-api</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-audit-api</name>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>2.1-SNAPSHOT</version>
     </parent>
-
-
+    
     <build>
         <plugins>
             <plugin>
@@ -20,6 +21,7 @@
             </plugin>
         </plugins>
     </build>
+    
     <dependencies>
         <!--
         <dependency>
@@ -31,12 +33,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.3.0</version>
+            <!--<version>2.3.0</version>-->
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.3.0</version>
+            <!--<version>2.3.0</version>-->
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -59,5 +61,6 @@
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
         </dependency>
-    </dependencies>  
+    </dependencies>
+    
 </project>

@@ -1,81 +1,103 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-tag-client-jaxrs2</name>
     <description>
-	Java client for Asset Tag Web Service v2
+        Java client for Asset Tag Web Service v2
     </description>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>2.1-SNAPSHOT</version>
     </parent>
-
+    
     <build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <configuration>
-                <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
-                <noqualifier>all</noqualifier>
-                <tags>
-                    <tag>
-                        <name>mtwRequiresPermissions</name>
-                        <placement>aoptcmf</placement>
-                        <head>Requires permissions:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwContentTypeReturned</name>
-                        <placement>aoptcmf</placement>
-                        <head>Content type returned:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwMethodType</name>
-                        <placement>aoptcmf</placement>
-                        <head>Method Type:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwSampleRestCall</name>
-                        <placement>aoptcmf</placement>
-                        <head>Sample REST call:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwSampleApiCall</name>
-                        <placement>aoptcmf</placement>
-                        <head>Sample API call:</head>
-                    </tag>
-                    <tag>
-                        <name>mtwPreRequisite</name>
-                        <placement>aoptcmf</placement>
-                        <head>Pre-requisite:</head>
-                    </tag>                                
-                </tags>
-            </configuration>
-        </plugin>                    
-    </plugins>      
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
+                    <noqualifier>all</noqualifier>
+                    <tags>
+                        <tag>
+                            <name>mtwRequiresPermissions</name>
+                            <placement>aoptcmf</placement>
+                            <head>Requires permissions:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwContentTypeReturned</name>
+                            <placement>aoptcmf</placement>
+                            <head>Content type returned:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwMethodType</name>
+                            <placement>aoptcmf</placement>
+                            <head>Method Type:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwSampleRestCall</name>
+                            <placement>aoptcmf</placement>
+                            <head>Sample REST call:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwSampleApiCall</name>
+                            <placement>aoptcmf</placement>
+                            <head>Sample API call:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwPreRequisite</name>
+                            <placement>aoptcmf</placement>
+                            <head>Pre-requisite:</head>
+                        </tag>                                
+                    </tags>
+                </configuration>
+            </plugin>                    
+        </plugins>      
     </build>
-
+    
     <dependencies>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,31 +114,11 @@
             <artifactId>commons-configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    
-
-        
-        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
-
         
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <!-- begin jersey  -->
-    
+        <!-- begin jersey -->
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -134,40 +136,28 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.2</version>
         </dependency>
-
+        <!-- end jersey -->
+        
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
-
-        <!-- end jersey  -->
-        
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>com.thoughtworks.xstream</groupId>
-        <artifactId>xstream</artifactId>
-    </dependency>
-        
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
+    </dependencies>
     
-    
-    </dependencies>  
-
-
 </project>
