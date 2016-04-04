@@ -398,7 +398,7 @@ Section "install"
                 RMDir /r "$TEMP\TrustAgent_Backup"
                 Goto setupcomplete
         fresh:
-               ExecWait '$INSTDIR\bin\tasetup.cmd'
+               nsExec::ExecToLog '$INSTDIR\bin\tasetup.cmd'
                Goto setupcomplete
         setupcomplete:
                       ReadRegStr $0 HKLM "Software\Microsoft\Windows NT\CurrentVersion" "ProductName"

@@ -34,7 +34,7 @@ REM set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=create-binding-key certify-binding
 set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=
 set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user %TRUSTAGENT_TPM_TASKS% %TRUSTAGENT_AUTHORIZE_TASKS% %TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS% login-register
 
-ECHO. ==Running tagent service==
+REM ECHO. ==Running tagent service==
 REM # load environment variables (these may override the defaults set above)
 if exist "%TRUSTAGENT_ENV%\" (
 REM  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
@@ -111,14 +111,14 @@ GOTO:EOF
 GOTO:EOF
 
 :trustagent_setup
-  echo.  Setup the trust agent
+  REM echo.  Setup the trust agent
   set HARDWARE_UUID=
   for /f  "USEBACKQ" %%a in (`wmic csproduct get UUID /VALUE ^| findstr /C:"UUID"`) do ( 
     set _tmpvar=%%a
     set _tmpvar1=!_tmpvar:~5!
     set HARDWARE_UUID=!_tmpvar1:~0,-1!
   )
-  echo. HARDWARE_UUID: %HARDWARE_UUID%
+  REM echo. HARDWARE_UUID: %HARDWARE_UUID%
   set tasklist=%*
   REM echo. %tasklist%
   IF "%tasklist%"=="" (
