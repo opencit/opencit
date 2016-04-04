@@ -5,8 +5,10 @@
 package com.intel.mtwilson.trustagent.ws.v2;
 
 import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.hostinfo.HostInfoCmd;
+import com.intel.mountwilson.trustagent.commands.hostinfo.HostInfoCmdWin;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.util.Date;
@@ -33,7 +35,13 @@ public class Host {
     public HostInfo getHostInformation() throws TAException {
         if( hostInfo == null ) {
             TADataContext context = new TADataContext();
-            HostInfoCmd cmd = new HostInfoCmd(context);
+            ICommand cmd;
+            String osName = System.getProperty("os.name");
+            if (osName.toLowerCase().contains("windows"))
+                cmd = new HostInfoCmdWin(context);
+            else
+                cmd = new HostInfoCmd(context);
+
             cmd.execute();
             HostInfo host = new HostInfo();
             host.timestamp = System.currentTimeMillis();

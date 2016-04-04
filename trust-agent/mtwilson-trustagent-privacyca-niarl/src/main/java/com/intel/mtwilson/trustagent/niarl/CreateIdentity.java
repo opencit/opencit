@@ -18,6 +18,7 @@ import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeRequest;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeResponse;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
@@ -32,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -62,13 +64,31 @@ public class CreateIdentity implements Configurable, Runnable {
             X509Certificate privacy = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
             
             // encrypt the EC using the PCA's public key
-            byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+            byte[] ekCert;
+            if (IdentityOS.isWindows()) { 
+                /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
+                Tpm tpm = new Tpm();
+                ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+            } else
+                ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
             TpmIdentityRequest encryptedEkCert = new TpmIdentityRequest(ekCert, (RSAPublicKey) privacy.getPublicKey(), false);
             
             // create the identity request
             boolean shortcut = true;
-            String HisIdentityLabel = "HIS Identity Key"; 
-            TpmIdentity newId = TpmModule.collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, !shortcut);
+            String HisIdentityLabel = "HIS_Identity_Key"; 
+            
+            TpmIdentity newId;
+            if (IdentityOS.isWindows()) { 
+                /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
+                Tpm tpm = new Tpm();
+                newId = tpm.getTpm().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), X509Util.decodeDerCertificate(ekCert), !shortcut);
+                
+                // write the AikOpaque to file
+                String aikopaquefilepath = config.getAikOpaqueFile().getAbsolutePath();
+                writeblob(aikopaquefilepath, newId.getAikOpaque());
+
+            } else
+                newId = TpmModule.collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, !shortcut);
 //             TpmKey aik = new TpmKey(newId.getAikBlob());
             
 //            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); 
@@ -94,7 +114,18 @@ public class CreateIdentity implements Configurable, Runnable {
             int os = IdentityOS.osType();//return os type. win:0; linux:1; other:-1
             byte[] asym1 = new byte[256];
             System.arraycopy(challenge, 0, asym1, 0, asym1.length);
-            byte[] sym1 = new byte[challenge.length - 256];
+            
+            int symlength;
+            log.debug("challengelength: " + challenge.length);
+            if (challenge.length > 512)
+                symlength = challenge.length - 512;
+            else
+                symlength = challenge.length - 256;
+            
+            log.debug("challengelength: " + challenge.length);
+            log.debug("symlength in phase1: " + symlength);
+
+            byte[] sym1 = new byte[symlength];
             System.arraycopy(challenge, 256, sym1, 0, sym1.length);
             byte[] decrypted1;
             if (os == 1) {//linux
@@ -104,7 +135,13 @@ public class CreateIdentity implements Configurable, Runnable {
                 decrypted1 = results.get("aikcert");
             } else //decrypted1 = TpmModuleJava.ActivateIdentity(asym1, sym1, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw); //Comments  temporarily due to TSSCoreService.jar compiling issue 
             {
-                decrypted1 = TpmModule.activateIdentity(config.getTpmOwnerSecret(), config.getAikSecret(), asym1, sym1, config.getAikIndex());
+                //decrypted1 = TpmModule.activateIdentity(config.getTpmOwnerSecret(), config.getAikSecret(), asym1, sym1, config.getAikIndex());               
+                byte[] asymEKblob = new byte[256];
+                int index = 256 + symlength;
+                System.arraycopy(challenge, index, asymEKblob, 0, 256);
+                Tpm tpm = new Tpm();
+                HashMap<String, byte[]> results = tpm.getTpm().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
+                decrypted1 = results.get("aikcert");
             }
             
             // send the answer and receive the AIK certificate
@@ -119,13 +156,22 @@ public class CreateIdentity implements Configurable, Runnable {
             // decode and store the aik certificate
             byte[] asym2 = new byte[256];
             System.arraycopy(encrypted2, 0, asym2, 0, asym2.length);
-            byte[] sym2 = new byte[encrypted2.length - 256];
+            
+            // try to calculate the length of symblob due to the addition of EK_BLOB for Windows
+            log.debug("encrypted2 length: " + encrypted2.length);
+            if (encrypted2.length > 512)
+                symlength = encrypted2.length - 512;
+            else
+                symlength = encrypted2.length - 256;            
+            log.debug("symlength in phase2: " + symlength);
+           
+            byte[] sym2 = new byte[symlength];
             System.arraycopy(encrypted2, 256, sym2, 0, sym2.length);
             byte[] decrypted2;
             byte[] aikblob;
 
             String aikcertfilepath = config.getAikCertificateFile().getAbsolutePath();
-            String aikblobfilepath = config.getAikBlobFile().getAbsolutePath(); 
+            String aikblobfilepath = config.getAikBlobFile().getAbsolutePath();
             if (os == 1) {//linux
                 HashMap<String, byte[]> results = TpmModule.activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asym2, sym2, config.getAikIndex());
                 System.out.println(results);
@@ -140,8 +186,22 @@ public class CreateIdentity implements Configurable, Runnable {
             } else {
                 //decrypted1 = TpmModuleJava.ActivateIdentity(asym1, sym1, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw); 
                 //decrypted2 = TpmModuleJava.ActivateIdentity(asym2, sym2, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw);//Comments  temporarily due to TSSCoreService.jar compiling issue 
-                decrypted2 = TpmModule.activateIdentity(config.getTpmOwnerSecret(), config.getAikSecret(), asym2, sym2, config.getAikIndex());
+                //decrypted2 = TpmModule.activateIdentity(config.getTpmOwnerSecret(), config.getAikSecret(), asym2, sym2, config.getAikIndex());
+                //writecert(aikcertfilepath, decrypted2);
+                byte[] asymEKblob = new byte[256];
+                int index = 256 + symlength;
+                System.arraycopy(encrypted2, index, asymEKblob, 0, 256);
+                
+                Tpm tpm = new Tpm();
+                HashMap<String, byte[]> results = tpm.getTpm().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym2, config.getAikIndex());
+                System.out.println(results);
+
+                decrypted2 = results.get("aikcert");
+                aikblob = results.get("aikblob");
+
                 writecert(aikcertfilepath, decrypted2);
+                writeblob(aikblobfilepath, aikblob);
+                //Runtime.getRuntime().exec("chmod 600 " + aikblobfilepath);
             }
             
         }

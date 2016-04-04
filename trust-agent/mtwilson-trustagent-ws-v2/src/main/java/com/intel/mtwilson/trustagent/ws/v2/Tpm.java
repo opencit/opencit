@@ -15,6 +15,7 @@ import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mountwilson.common.ErrorCode;
+import com.intel.mountwilson.trustagent.commands.ReadAssetTag;
 import com.intel.mountwilson.trustagent.commands.RetrieveTcbMeasurement;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import javax.ws.rs.Consumes;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.TpmQuoteRequest;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import java.io.File;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
 import java.io.IOException;
@@ -32,8 +34,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -96,47 +101,93 @@ public class Tpm {
                 throw new WebApplicationException(Response.serverError().header("Error", "tpm.quote.ipv4 enabled but local address not IPv4").build());
             }
         }
-        
-        
-        
-            TADataContext context = new TADataContext(); // when we call getSessionId it will create a new random one
+          
+        TADataContext context = new TADataContext(); // when we call getSessionId it will create a new random one
+        String osName = System.getProperty("os.name");
+        context.setOsName(osName);
 
-            context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
-            
-            context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
-            
+        /* If it is Windows host, Here we read Geotag from nvram index 0x40000010 and do sha1(nonce | geotag) and use the result as the nonce for TPM quote
+           As of now, we still keep the same geotag provisioning mechanism by writing it to TPM. there are other approaches as well, but not in implementation.
+        */  
+        boolean isTagProvisioned = false;
+        byte[] assetTagHash = null; 
+        if (osName.toLowerCase().contains("windows")) {
+            // 1. Trying to read AssetTag from TPM NVRAM 0x40000010
+            new ReadAssetTag(context).execute();
+            // 2. if provisioned, generate and set the new nonce
+            String assetTag = context.getAssetTagHash();
+            if (assetTag != null) {
+                log.debug("Assetag is: {}", assetTag);
+                try {
+                    assetTagHash = Hex.decodeHex(assetTag.toCharArray());
+                    if (assetTagHash.length == 20) { 
+                        // sha1(nonce | assetTagHash)
+                        log.debug("AssetTagHash is 20 bytes");
+                        byte[] extendedNonceWithAssetTag = Sha1Digest.digestOf(tpmQuoteRequest.getNonce()).extend(assetTagHash).toByteArray();
+                        tpmQuoteRequest.setNonce(extendedNonceWithAssetTag);
+                        isTagProvisioned = true;
+                    }
+                    else {
+                        log.debug("The asset tag read from NVRAM is not 20 bytes!");                  
+                    }
+                } catch (DecoderException ex) {
+                    log.error("Decoding assettag hash error: {}", ex.getMessage());
+                }
+            }
+            else {
+                log.debug("AssetTag is not provisioned");
+            }
+        }
+
+        context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
+        context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
+
         logPerformance("new TADataContext()");
-            new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
+        new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
         logPerformance("CreateNonceFileCmd");
-            new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
+        new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
         logPerformance("ReadIdentityCmd");
 
-            // Get the module information
+        // Get the module information
+        if (!osName.toLowerCase().contains("windows")) {
             new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
-        logPerformance("GenerateModulesCmd");
+            logPerformance("GenerateModulesCmd");
             new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
-        logPerformance("RetrieveTcbMeasurement");
-            new GenerateQuoteCmd(context).execute();
+            logPerformance("RetrieveTcbMeasurement");
+        }
+        new GenerateQuoteCmd(context).execute();
         logPerformance("GenerateQuoteCmd");
-            new BuildQuoteXMLCmd(context).execute();
+        new BuildQuoteXMLCmd(context).execute();
         logPerformance("BuildQuoteXMLCmd");
             
-//            return context.getResponseXML();
-            TpmQuoteResponse response = context.getTpmQuoteResponse();
+        // return context.getResponseXML();
+        TpmQuoteResponse response = context.getTpmQuoteResponse();
         logPerformance("context.getTpmQuoteResponse()");
-            // delete temporary session directory
+
+        //assetTag 
+        response.isTagProvisioned = isTagProvisioned;
+        if (isTagProvisioned) {
+            response.assetTag = assetTagHash;
+        }
+
+        // delete temporary session directory
+        if (!osName.toLowerCase().contains("windows")) {
             CommandLine command = new CommandLine("rm");
             command.addArgument("-rf");
             command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder()));
             Result result = ExecUtil.execute(command);
-        logPerformance("ExecUtil.execute(command)");
+            logPerformance("ExecUtil.execute(command)");
             if (result.getExitCode() != 0) {
                 log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
                 throw new TAException(ErrorCode.ERROR, result.getStderr());
             }
             log.debug("command stdout: {}", result.getStdout());
-            logPerformance("before return response");
-            return response;
+        } else {
+            // we should use more neutral ways to delete the folder
+            FileUtils.forceDelete(new File(context.getDataFolder())); 
+        }
+        logPerformance("before return response");
+        return response;
     }
     
     private String joinIntegers(int[] pcrs, char separator) {

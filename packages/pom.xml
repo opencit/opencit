@@ -19,19 +19,20 @@
         <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>
-    
-    <modules>
-        <!-- 
-        javadoc projects disabled temporarily due to this error:
-        [ERROR] Failed to execute goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar (integration-javadoc-jar) on project mtwilson-client-javadoc: Execution integration-javadoc-jar of goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar failed: For artifact {null:null:null:jar}: The groupId cannot be empty. -> [Help 1]
-        because the message doesn't report which pom has an invalid dependency, we need to conduct an automated search for likely candidates
-        or if this is a bug in the plugin, we need to upgrade to a later version
-        -->
-        <!--
-        <module>mtwilson-client-javadoc</module>
-        <module>mtwilson-server-javadoc</module>
-        -->
-        <module>mtwilson-server-zip</module>
-    </modules>
-    
+      
+  <modules>
+  <!-- 
+  javadoc projects disabled temporarily due to this error:
+  [ERROR] Failed to execute goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar (integration-javadoc-jar) on project mtwilson-client-javadoc: Execution integration-javadoc-jar of goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar failed: For artifact {null:null:null:jar}: The groupId cannot be empty. -> [Help 1]
+  because the message doesn't report which pom has an invalid dependency, we need to conduct an automated search for likely candidates
+  or if this is a bug in the plugin, we need to upgrade to a later version
+  -->
+  <!--
+	<module>mtwilson-client-javadoc</module>
+	<module>mtwilson-server-javadoc</module>
+	-->
+    <module>mtwilson-server-zip</module>
+    <module>trustagent-windows-installer</module>
+  </modules>
+
 </project>
