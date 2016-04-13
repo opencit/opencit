@@ -53,13 +53,14 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-dbcp</artifactId>
         </dependency>
-        
-        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
         </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>

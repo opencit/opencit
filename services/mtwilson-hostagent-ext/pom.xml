@@ -33,6 +33,12 @@
     <dependencies>
         <!-- common-java -->
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
@@ -56,11 +62,6 @@
         -->
         
         <!-- mtwilson -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- mtwilson-attestation-jpa is required for com.intel.mtwilson.as.data.TblHosts which is used by HostAgentFactory -->
         <dependency>
             <groupId>${project.groupId}</groupId>

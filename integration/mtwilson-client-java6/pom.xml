@@ -165,7 +165,8 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-webservice-util</artifactId>
-            <version>${project.version}</version>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
             <scope>test</scope>
         </dependency>
         
