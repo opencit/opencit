@@ -3,7 +3,7 @@
     
     <groupId>com.intel.mtwilson.database</groupId>
     <artifactId>mtwilson-mysql</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <name>MySQL Support</name>

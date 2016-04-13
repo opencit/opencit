@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.intel.mtwilson.trustagent</groupId>
         <artifactId>mtwilson-trustagent-parent</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     
     <build>
