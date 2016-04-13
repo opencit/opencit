@@ -1,19 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.desktop</groupId>
     <artifactId>mtwilson-console</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-console</name>
-  
+    
     <parent>
-		<groupId>com.intel.mtwilson.desktop</groupId>
-		<artifactId>mtwilson-desktop</artifactId>
-		<version>3.0-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.desktop</groupId>
+        <artifactId>mtwilson-desktop</artifactId>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <build>
-	
-
         <testResources>
             <testResource>
                 <directory>src/test/json</directory>
@@ -35,16 +35,13 @@
                 </includes>
             </testResource>
         </testResources>
-	
-	
+        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-	    
             
-                              
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -57,8 +54,8 @@
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin>	    
-		
+            </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -92,13 +89,10 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>     
-
-
+            </plugin>
         </plugins>
     </build>
-
-
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -113,46 +107,87 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
         </dependency>
-
-        <!-- <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                    <version>1.6.4</version>
-        </dependency> -->
+        <!--
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.4</version>
+        </dependency>
+        -->
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
-        </dependency>
-        <dependency>
+        </dependency><dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-        </dependency>
-        <dependency>
+        </dependency><dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-    <dependency>
-		<groupId>commons-digester</groupId>
-		<artifactId>commons-digester</artifactId>
-    </dependency>
-    <dependency>
-		<groupId>commons-jxpath</groupId>
-		<artifactId>commons-jxpath</artifactId>
-    </dependency>
-
+        
+        
+        <dependency>
+            <groupId>commons-digester</groupId>
+            <artifactId>commons-digester</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-jxpath</groupId>
+            <artifactId>commons-jxpath</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-text-transform</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup-ext</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto-key</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-extensions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-net</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-ssh</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>3.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -176,32 +211,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-setup-ext</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-                
-        <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
             <artifactId>mtwilson-mysql</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-hostagent-ext</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- 
-        ***IMPORTANT NOTE***
-        The MySQL Connector/J is included here with scope "test" so that we can run JUnit tests against
-        a MySQL database. You MUST NOT change the scope to anything that would cause the MySQL Connector/J
-        to be included with the Mt Wilson distribution. Intel does not have a license to redistribute MySQL
-        with Mt Wilson.
-        -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
@@ -209,23 +221,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-    
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb</artifactId>
-            <version>2.1.9</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.1.9</version>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -239,60 +237,11 @@
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
-    
         <dependency>
             <groupId>com.intel.mtwilson.common</groupId>
             <artifactId>mtwilson-crypto</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-    
-        <!-- begin sshj for remote administration -->
-        <dependency>
-            <groupId>net.schmizz</groupId>
-            <artifactId>sshj</artifactId>
-            <version>0.8.1</version>
-        </dependency>
-        <!-- end sshj for remote administration  -->
-    
-    
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-io</artifactId>
-</dependency>
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-crypto</artifactId>
-</dependency>
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-crypto-key</artifactId>
-</dependency>
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-extensions</artifactId>
-</dependency>
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-net</artifactId>
-</dependency>
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-console</artifactId>
-</dependency>
-<dependency>
-	<groupId>com.intel.mtwilson.util</groupId>
-	<artifactId>mtwilson-util-ssh</artifactId>
-</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-validation</artifactId>
-		</dependency>
-    
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-webservice-util</artifactId>
@@ -310,30 +259,76 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
+            <artifactId>mtwilson-user-management-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-user-management-model</artifactId>
+            <artifactId>mtwilson-attestation</artifactId>
             <version>${project.version}</version>
         </dependency>
-    
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-management</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 
+        ***IMPORTANT NOTE***
+        The MySQL Connector/J is included here with scope "test" so that we can run JUnit tests against
+        a MySQL database. You MUST NOT change the scope to anything that would cause the MySQL Connector/J
+        to be included with the Mt Wilson distribution. Intel does not have a license to redistribute MySQL
+        with Mt Wilson.
+        -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        
+        <!-- begin sshj for remote administration -->
+        <dependency>
+            <groupId>net.schmizz</groupId>
+            <artifactId>sshj</artifactId>
+            <version>0.8.1</version>
+        </dependency>
+        <!-- end sshj for remote administration  -->
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
             <version>3.2.0.RELEASE</version>
             <type>jar</type>
         </dependency>
-    
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>3.2.0.RELEASE</version>
             <type>jar</type>
         </dependency>
-    
-    
+        
         <!-- text user interface -->
         <dependency>
             <groupId>com.googlecode.lanterna</groupId>
@@ -369,16 +364,7 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.3.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-management</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -414,9 +400,8 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-multipart</artifactId>
         </dependency>
-    </dependencies>  
-
-
+    </dependencies>
+    
     <!-- to enable aspectj weaving, run maven with -Daspectj option on the command line -->
     <profiles>
         <profile>
@@ -428,41 +413,39 @@
             </activation>
             <build>
                 <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
-              <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
-            </goals>
-            <configuration>
-                <source>1.6</source>
-                <target>1.6</target>
-                <!-- aspect libraries are the already-compiled aspect .jars -->
-                <aspectLibraries>
-                    <aspectLibrary>
-                        <groupId>com.intel.mtwilson.util</groupId>
-                        <artifactId>mtwilson-util-validation</artifactId>
-                    </aspectLibrary>
-                </aspectLibraries>
-                <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->
-                <!--
-                <weaveDependencies>
-                    <weaveDependency>
-                        <groupId>com.intel.mtwilson.services</groupId>
-                        <artifactId>mtwilson-management-service</artifactId>
-                    </weaveDependency>
-                </weaveDependencies>
-                -->
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>	
-      
-                    
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>aspectj-maven-plugin</artifactId>
+                        <version>1.4</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
+                                    <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
+                                </goals>
+                                <configuration>
+                                    <source>1.6</source>
+                                    <target>1.6</target>
+                                    <!-- aspect libraries are the already-compiled aspect .jars -->
+                                    <aspectLibraries>
+                                        <aspectLibrary>
+                                            <groupId>com.intel.mtwilson.util</groupId>
+                                            <artifactId>mtwilson-util-validation</artifactId>
+                                        </aspectLibrary>
+                                    </aspectLibraries>
+                                    <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->
+                                    <!--
+                                    <weaveDependencies>
+                                        <weaveDependency>
+                                            <groupId>com.intel.mtwilson.services</groupId>
+                                            <artifactId>mtwilson-management-service</artifactId>
+                                        </weaveDependency>
+                                    </weaveDependencies>
+                                    -->
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
