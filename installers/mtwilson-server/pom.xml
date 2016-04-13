@@ -1,25 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.linux</groupId>
     <artifactId>mtwilson-server</artifactId>
-
+    
     <packaging>pom</packaging>
     <name>Mt Wilson Server Linux Installer</name>
     <description>Installs MySQL, Java, Glassfish, Web Services, and UI Portals</description>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>mtwilson-linux</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
-  
+    
     <properties>
         <makeself.basic>${project.build.directory}/${project.artifactId}-${project.version}</makeself.basic>
         <makeself.jdk_glassfish_monit>${project.build.directory}/${project.artifactId}-${project.version}-jdk_glassfish_monit</makeself.jdk_glassfish_monit>
     </properties>
- 
-
- 
+    
     <build>
         <resources>
             <resource>
@@ -27,7 +26,7 @@
             </resource>
         </resources>
     </build>
- 
+    
     <profiles>
         <profile>
             <activation>
@@ -35,7 +34,7 @@
                     <family>unix</family>
                 </os>
             </activation>
-          
+            
             <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
             <dependencies>
                 <!-- Java and Glassfish -->
@@ -57,7 +56,8 @@
                     <artifactId>tomcat-installer</artifactId>
                     <version>7.0.34</version>
                     <type>bin</type>
-                </dependency>   <!-- Monit -->
+                </dependency>
+                <!-- Monit -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>monit</artifactId>
@@ -70,7 +70,7 @@
                     <version>1.0</version>
                     <type>bin</type>
                 </dependency>
-    
+                
                 <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
                 <!--
                 <dependency>
@@ -86,7 +86,7 @@
                     <type>zip</type>
                 </dependency>
                 -->
-    
+                
                 <!-- this is the setup console -->
                 <!--
                 <dependency>
@@ -104,7 +104,7 @@
                     <version>${project.version}</version>
                     <type>zip</type>
                 </dependency>
-
+                
                 <!-- Web Services -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
@@ -124,7 +124,7 @@
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
-    
+                
                 <!-- UI Portals -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
@@ -132,6 +132,7 @@
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
+                
                 <!-- API Client and Linux Utils -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
@@ -146,12 +147,9 @@
                     <type>sh</type>
                 </dependency>
             </dependencies>
-           
+            
             <build>
                 <plugins>
-        
-        
-        
                     <!-- begin copy artifacts plugin -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -237,7 +235,6 @@
                                             <version>${project.version}</version>
                                             <type>zip</type>
                                         </artifactItem>
-                
                                     </artifactItems>
                                     <outputDirectory>${makeself.basic}</outputDirectory>
                                     <overWriteReleases>false</overWriteReleases>
@@ -329,7 +326,6 @@
                                             <version>1.0</version>
                                             <type>bin</type>
                                         </artifactItem>
-
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-portal-installer</artifactId>
@@ -368,9 +364,9 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>	
+                    </plugin>
                     <!-- end copy artifacts plugin -->
-
+                    
                     <!-- begin copy other resources plugin -->
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
@@ -386,7 +382,7 @@
                                     <outputDirectory>${makeself.basic}</outputDirectory>
                                     <resources>
                                         <resource>
-			                                <directory>src/etc</directory>
+                                            <directory>src/etc</directory>
                                             <includes>
                                                 <include>version</include>
                                             </includes>
@@ -411,7 +407,7 @@
                                 <configuration>
                                     <outputDirectory>${makeself.jdk_glassfish_monit}</outputDirectory>
                                     <resources>
-									    <resource>
+                                        <resource>
                                             <directory>src/etc</directory>
                                             <includes>
                                                 <include>version</include>
@@ -431,7 +427,7 @@
                         </executions>
                     </plugin>
                     <!-- end copy other resources plugin -->
-
+                    
                     <!-- begin create self-extracting installer plugin -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -469,13 +465,14 @@
                         </executions>
                     </plugin>
                     <!-- end create self-extracting installer plugin -->
+                    
                     <!-- begin deploy installers to repository -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
                     </plugin>
                     <!-- end deploy installers to repository -->
-      
+                    
                     <!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
                     <plugin>
                         <groupId>pl.project13.maven</groupId>
@@ -494,9 +491,8 @@
                             </execution>
                         </executions>
                     </plugin>
-      
                 </plugins>
-
+                
                 <pluginManagement>
                     <plugins>
                         <plugin>
@@ -528,10 +524,9 @@
                         </plugin>
                     </plugins>
                 </pluginManagement>
-  
-  
+                
             </build>
         </profile>
     </profiles>
-
+    
 </project>
