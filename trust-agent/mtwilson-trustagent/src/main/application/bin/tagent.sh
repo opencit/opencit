@@ -443,9 +443,9 @@ case "$1" in
     ;;
   uninstall)
     trustagent_stop
+	policyagent_uninstall
     vrtm_uninstall
-	tbootxm_uninstall
-    policyagent_uninstall
+	tbootxm_uninstall    
     openstack_extensions_uninstall
     trustagent_uninstall
     groupdel trustagent > /dev/null 2>&1
