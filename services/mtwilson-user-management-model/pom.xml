@@ -49,6 +49,12 @@
     <dependencies>
         <!-- common-java -->
         <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-repository-api</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
         </dependency>
@@ -81,11 +87,6 @@
         </dependency>
         
         <!-- mtwilson -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-api</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>

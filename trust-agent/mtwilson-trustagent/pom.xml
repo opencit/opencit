@@ -127,6 +127,18 @@
             <artifactId>mtwilson-http-servlets</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-version-ws-v2</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
         </dependency>
@@ -154,16 +166,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-version-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-util</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

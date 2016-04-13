@@ -26,21 +26,23 @@
     <dependencies>
         <!-- common-java -->
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-        </dependency>
-        
-        <!-- mtwilson -->
-        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-api</artifactId>
-            <version>${project.version}</version>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->        
         </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tpm-endorsement-model</artifactId>

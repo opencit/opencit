@@ -49,6 +49,12 @@
             <version>3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
@@ -73,6 +79,12 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-i18n</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
         </dependency>
         
         <!-- mtwilson -->
@@ -117,16 +129,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-management-jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
