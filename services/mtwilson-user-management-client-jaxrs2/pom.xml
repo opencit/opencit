@@ -1,18 +1,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-user-management-client-jaxrs2</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-user-management-client-jaxrs2</name>
     <description>
     </description>
-  
-    <parent> 
-        <groupId>com.intel.mtwilson.services</groupId> 
-        <artifactId>mtwilson-services</artifactId> 
-        <version>3.0-SNAPSHOT</version> 
+    
+    <parent>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
-    <build>	
+    
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -55,7 +58,7 @@
                     </tags>
                 </configuration>
             </plugin>
-                    
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -67,13 +70,18 @@
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin>	    		
-        </plugins>      
+            </plugin>
+        </plugins>
     </build>
-
-
-
+    
     <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-locale</artifactId>
@@ -94,16 +102,60 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-rfc822</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
+        </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-user-management-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -114,7 +166,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
@@ -124,25 +175,10 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
         </dependency>
-       <!--
+        <!--
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
@@ -156,25 +192,6 @@
             <artifactId>commons-pool</artifactId>
         </dependency>
         -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-user-management-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -193,26 +210,6 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey2-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-
-        <!-- end jersey  -->
-        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -236,14 +233,12 @@
             <artifactId>xmlsec</artifactId>
             <version>1.4.3</version>
         </dependency>
-            	    
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
+    </dependencies>
     
-    </dependencies>  
-
     <profiles>
         <profile>
             <activation>
@@ -276,10 +271,9 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
     </profiles>
-
+    
 </project>

@@ -1,49 +1,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.trustagent</groupId>
     <artifactId>mtwilson-trustagent-configuration</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-trustagent-configuration</name>
     <description>Configuration utility for Trust Agent</description>
+    
     <parent>
         <groupId>com.intel.mtwilson.trustagent</groupId>
         <artifactId>mtwilson-trustagent-parent</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
-
-
-
+    
     <build>
-        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-                                                                   
         </plugins>
     </build>
-
     
     <dependencies>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
-            <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-configuration</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -65,8 +53,18 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
-
-            
+        
+        <!-- trustagent -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -89,6 +87,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-
-    </dependencies>  
+    </dependencies>
+    
 </project>

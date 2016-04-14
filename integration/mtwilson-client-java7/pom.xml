@@ -1,7 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-client-java7</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-client-java7</name>
     <description>
@@ -11,16 +13,15 @@
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
     </description>
-  
-    <parent> 
+    
+    <parent>
         <groupId>com.intel.mtwilson.integration</groupId> 
         <artifactId>mtwilson-integration</artifactId> 
-        <version>3.0-SNAPSHOT</version> 
+        <version>3.0.1-SNAPSHOT</version> 
     </parent>
-
+    
     <build>
-	
-<!--
+        <!--
         <testResources>
             <testResource>
                 <directory>src/test/json</directory>
@@ -44,15 +45,13 @@
                 </includes>
             </testResource>
         </testResources>
-	-->
-	
+        -->
         <plugins>
-            
-                            <!--  REMOVED THIS CONFIGURATION FROM MAVEN-JAR-PLUGIN BELOW 
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            -->
-                            <!--
+            <!--  REMOVED THIS CONFIGURATION FROM MAVEN-JAR-PLUGIN BELOW 
+            <addClasspath>true</addClasspath>
+            <classpathPrefix>lib/</classpathPrefix>
+            -->
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -66,66 +65,66 @@
             </plugin>
             -->
             <!--
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>regular-jar-with-dependencies</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                                    <shadedClassifierName>with-dependencies</shadedClassifierName>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                            -->            
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regular-jar-with-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
-                            <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
-                            <noqualifier>all</noqualifier>
-                            <tags>
-                                <tag>
-                                  <name>mtwRequiresPermissions</name>
-                                  <placement>aoptcmf</placement>
-                                  <head>Requires permissions:</head>
-                                </tag>
-                                <tag>
-                                  <name>mtwContentTypeReturned</name>
-                                  <placement>aoptcmf</placement>
-                                  <head>Content type returned:</head>
-                                </tag>
-                                <tag>
-                                  <name>mtwMethodType</name>
-                                  <placement>aoptcmf</placement>
-                                  <head>Method Type:</head>
-                                </tag>
-                                <tag>
-                                  <name>mtwSampleRestCall</name>
-                                  <placement>aoptcmf</placement>
-                                  <head>Sample REST call:</head>
-                                </tag>
-                                <tag>
-                                  <name>mtwSampleApiCall</name>
-                                  <placement>aoptcmf</placement>
-                                  <head>Sample API call:</head>
-                                </tag>
-                                <tag>
-                                  <name>mtwPreRequisite</name>
-                                  <placement>aoptcmf</placement>
-                                  <head>Pre-requisite:</head>
-                                </tag>                                
-                             </tags>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-dependencies</shadedClassifierName>
                         </configuration>
-                    </plugin>
-                    
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
+                    <noqualifier>all</noqualifier>
+                    <tags>
+                        <tag>
+                            <name>mtwRequiresPermissions</name>
+                            <placement>aoptcmf</placement>
+                            <head>Requires permissions:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwContentTypeReturned</name>
+                            <placement>aoptcmf</placement>
+                            <head>Content type returned:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwMethodType</name>
+                            <placement>aoptcmf</placement>
+                            <head>Method Type:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwSampleRestCall</name>
+                            <placement>aoptcmf</placement>
+                            <head>Sample REST call:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwSampleApiCall</name>
+                            <placement>aoptcmf</placement>
+                            <head>Sample API call:</head>
+                        </tag>
+                        <tag>
+                            <name>mtwPreRequisite</name>
+                            <placement>aoptcmf</placement>
+                            <head>Pre-requisite:</head>
+                        </tag>                                
+                    </tags>
+                </configuration>
+            </plugin>
+                     
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -137,18 +136,10 @@
                         </property>
                     </systemProperties>
                 </configuration>
-            </plugin>	    
-		
-      
-
-
-        </plugins>      
-      
-
+            </plugin>
+        </plugins>
     </build>
-
-
-
+    
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -158,47 +149,123 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-xml</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-configuration</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-crypto</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-io</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>3.0-SNAPSHOT</version>
+        </dependency>
         <!--
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-rfc822</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-rfc822</artifactId>
+        </dependency>
         -->
+        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-saml-verifier</artifactId>
             <version>${project.version}</version>
         </dependency>
-		
-        <!--
-       	<dependency>
-          		<groupId>org.glassfish</groupId>
-          		<artifactId>maven-embedded-glassfish-plugin</artifactId>
-          		<version>3.1.1</version>
-          		<type>maven-plugin</type>
-       	</dependency>    
-       	-->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- clients for mtwilson features -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-user-management-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-privacyca-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- end clients for mtwilson features -->
+        
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        
+        <!--
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>maven-embedded-glassfish-plugin</artifactId>
+            <version>3.1.1</version>
+            <type>maven-plugin</type>
+        </dependency>    
+        -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -208,7 +275,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
@@ -219,20 +285,14 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         -->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-configuration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-		
         <!--
-            <dependency>
-                    <groupId>com.jayway.restassured</groupId>
-                    <artifactId>rest-assured</artifactId>
-                    <version>1.5</version>
-            </dependency>        
-       	-->
-		<!--
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.5</version>
+        </dependency>        
+        -->
+        <!--
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb</artifactId>
@@ -243,23 +303,8 @@
             <artifactId>jaxb-impl</artifactId>
             <version>2.1.9</version>
         </dependency>
-		-->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    
+        -->
+        
         <!-- begin httpclient  -->
         <!--
         <dependency>
@@ -277,7 +322,6 @@
         -->
         <!-- end httpclient -->
         
-        
         <!--
         <dependency>
             <groupId>commons-lang</groupId>
@@ -285,33 +329,16 @@
         </dependency>
         -->
         
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- begin jersey  -->
-    
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-<!--            <version>2.5.1</version> -->
+            <!--            <version>2.5.1</version> -->
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
-<!--            <version>2.5.1</version> -->
+            <!--            <version>2.5.1</version> -->
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -325,52 +352,43 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${project.version}</version>
         </dependency>
-        <!--
-<dependency>
-    <groupId>com.intel.mtwilson.services</groupId>
-    <artifactId>mtwilson-jersey2-util</artifactId>
-    <version>${project.version}</version>
-</dependency>
-    -->
-
         <!-- end jersey  -->
         
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
-    </dependency>
-    <!--
-    <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-xml</artifactId>
-    </dependency>
-    -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
         <!--
-           	<dependency>
-         			<groupId>org.bouncycastle</groupId>
-         			<artifactId>bcprov-jdk15on</artifactId>
-         			<version>1.47</version>
-      		</dependency>
-      		-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+        -->
+        <!--
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.47</version>
+        </dependency>
+        -->
+        
         <!-- start saml verification -->
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -400,7 +418,6 @@
             <artifactId>xmlsec</artifactId>
             <version>1.4.3</version>
         </dependency>
-            	    
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
@@ -490,81 +507,80 @@
                         </executions>
                     </plugin>
                     
-            <!-- begin copy dependencies plugin (to create zip file) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase> <!-- was: install -->
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jars</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- end copy dependencies plugin -->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-                                    <fileset dir="${project.build.directory}/jars" />
-                                    <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
-                                    <fileset dir="${basedir}" includes="pom.xml" />
-                                </zip>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant</artifactId>
-                        <version>1.8.4</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>ant-contrib</groupId>
-                        <artifactId>ant-contrib</artifactId>
-                        <version>1.0b3</version>
-                    </dependency>
-                </dependencies>
-            </plugin>	    
-      
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>                      
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
-                                    <type>zip</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                    <!-- begin copy dependencies plugin (to create zip file) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>generate-resources</phase> <!-- was: install -->
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy dependencies plugin -->
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-cli</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+                                            <fileset dir="${project.build.directory}/jars" />
+                                            <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
+                                            <fileset dir="${basedir}" includes="pom.xml" />
+                                        </zip>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant</artifactId>
+                                <version>1.8.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b3</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>                      
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+                                            <type>zip</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     
                     <!-- create a shaded jar-with-dependencies.  see also:
                     http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
@@ -637,10 +653,9 @@
                             </execution>
                         </executions>
                     </plugin>
-                    
                 </plugins>
             </build>
         </profile>
     </profiles>
-
+    
 </project>

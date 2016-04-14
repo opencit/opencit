@@ -1,36 +1,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <groupId>com.intel.mtwilson.packages</groupId>
-  <artifactId>mtwilson-packages</artifactId>
-  <packaging>pom</packaging>
-
-  <name>mtwilson-packages</name>
-
-	<parent>
-		<groupId>com.intel.mtwilson.maven</groupId>
-		<artifactId>mtwilson-dist-feature</artifactId>
-		<version>3.0-SNAPSHOT</version>
-		<relativePath />
-	</parent>
-
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.packages</groupId>
+    <artifactId>mtwilson-packages</artifactId>
+    <version>3.0.1-SNAPSHOT</version>
+    
+    <packaging>pom</packaging>
+    <name>mtwilson-packages</name>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-dist-feature</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    
     <properties>
         <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>
-      
-  <modules>
-  <!-- 
-  javadoc projects disabled temporarily due to this error:
-  [ERROR] Failed to execute goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar (integration-javadoc-jar) on project mtwilson-client-javadoc: Execution integration-javadoc-jar of goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar failed: For artifact {null:null:null:jar}: The groupId cannot be empty. -> [Help 1]
-  because the message doesn't report which pom has an invalid dependency, we need to conduct an automated search for likely candidates
-  or if this is a bug in the plugin, we need to upgrade to a later version
-  -->
-  <!--
-	<module>mtwilson-client-javadoc</module>
-	<module>mtwilson-server-javadoc</module>
-	-->
-    <module>mtwilson-server-zip</module>
-  </modules>
-
+    
+    <modules>
+        <!-- 
+        javadoc projects disabled temporarily due to this error:
+        [ERROR] Failed to execute goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar (integration-javadoc-jar) on project mtwilson-client-javadoc: Execution integration-javadoc-jar of goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar failed: For artifact {null:null:null:jar}: The groupId cannot be empty. -> [Help 1]
+        because the message doesn't report which pom has an invalid dependency, we need to conduct an automated search for likely candidates
+        or if this is a bug in the plugin, we need to upgrade to a later version
+        -->
+        <!--
+        <module>mtwilson-client-javadoc</module>
+        <module>mtwilson-server-javadoc</module>
+        -->
+        <module>mtwilson-server-zip</module>
+    </modules>
+    
 </project>

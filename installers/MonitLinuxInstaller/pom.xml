@@ -1,182 +1,187 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.intel.mtwilson.linux</groupId>
-  <artifactId>monit</artifactId>
-  <version>5.5</version>
-
-  <packaging>pom</packaging>
-  <name>Monit Linux Installer</name>
-  <description>Self-extracting executable that installs the Monit Tool</description>
-
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.linux</groupId>
+    <artifactId>monit</artifactId>
+    <version>5.5</version>
+    
+    <packaging>pom</packaging>
+    <name>Monit Linux Installer</name>
+    <description>Self-extracting executable that installs the Monit Tool</description>
+    
     <parent>
-	<groupId>com.intel.mtwilson.linux</groupId>
-	<artifactId>mtwilson-linux</artifactId>
-	<version>3.0-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.linux</groupId>
+        <artifactId>mtwilson-linux</artifactId>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
-  
-  <properties>
-    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
-  </properties>
-  
-  <build>
-      <resources>
-          <resource>
-              <directory>src/files</directory>
-          </resource>
-      </resources>
-  </build>
-  
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
-  <dependencies>
-    <dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
-      <version>${project.parent.version}</version>
-      <type>sh</type>
-    </dependency>	
-    <dependency>
-      <groupId>com.mmonit</groupId>
-      <artifactId>monit</artifactId>
-      <version>5.5</version>
-      <type>tgz</type>
-      <classifier>linux-src</classifier>
-    </dependency>	
-  </dependencies>
-  
-
-  <build>
-    <plugins>
-       <!-- begin copy rpm artifact  plugin -->
-     <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
-                  <version>${project.parent.version}</version>
-                  <type>sh</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>functions</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.mmonit</groupId>
-                  <artifactId>monit</artifactId>
-                  <version>5.5</version>
-                  <type>tgz</type>
-	          <classifier>linux-src</classifier>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>monit-5.5-linux-src.tar.gz</destFileName>
-                </artifactItem>
-              </artifactItems>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>	
-      <!-- end copy rpm artifact plugin -->
-      <!-- begin copy other resources plugin -->
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${makeself.directory}</outputDirectory>
-		<resources>
-		    <resource>
-			<directory>src/files</directory>
-			<includes>
-			    <include>**/*</include>
-			</includes>
-			<filtering>false</filtering>
-		    </resource>
-		</resources>
-            </configuration>            
-          </execution>
-        </executions>
-      </plugin>
-      <!-- end copy other resources plugin -->
-      <!-- begin create self-extracting installer plugin -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>create-combined-installer</id>
-	    <phase>compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-	    <configuration>
-	    <executable>bash</executable>
-	    <arguments>
-		<argument>makebin-auto.sh</argument>
-		<argument>${makeself.directory}</argument>
-	    </arguments>
-	    </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- end create self-extracting installer plugin -->
-      <!-- begin deploy installers to repository -->
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-        </plugin>
-      <!-- end deploy installers to repository -->
-    </plugins>
-
-<pluginManagement>
-    <plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.5</version>
-            <executions>
-                <execution>
-                    <id>attach-artifacts</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>attach-artifact</goal>
-                    </goals>
-                    <configuration>
-                        <artifacts>
-                            <artifact>
-                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
-                                <type>bin</type>
-                            </artifact>
-                        </artifacts>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</pluginManagement>
-  
-   </build>
-      </profile>
-  </profiles>
+    
+    <properties>
+        <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
+    </properties>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/files</directory>
+            </resource>
+        </resources>
+    </build>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            
+            <dependencies>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.parent.version}</version>
+                    <type>sh</type>
+                </dependency>	
+                <dependency>
+                    <groupId>com.mmonit</groupId>
+                    <artifactId>monit</artifactId>
+                    <version>5.5</version>
+                    <type>tgz</type>
+                    <classifier>linux-src</classifier>
+                </dependency>	
+            </dependencies>
+            
+            <build>
+                <plugins>
+                    <!-- begin copy rpm artifact plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.parent.version}</version>
+                                            <type>sh</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>functions</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.mmonit</groupId>
+                                            <artifactId>monit</artifactId>
+                                            <version>5.5</version>
+                                            <type>tgz</type>
+                                            <classifier>linux-src</classifier>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>monit-5.5-linux-src.tar.gz</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy rpm artifact plugin -->
+                    
+                    <!-- begin copy other resources plugin -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.directory}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/files</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy other resources plugin -->
+                    
+                    <!-- begin create self-extracting installer plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>create-combined-installer</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>makebin-auto.sh</argument>
+                                        <argument>${makeself.directory}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end create self-extracting installer plugin -->
+                    
+                    <!-- begin deploy installers to repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                    </plugin>
+                    <!-- end deploy installers to repository -->
+                </plugins>
+                
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>build-helper-maven-plugin</artifactId>
+                            <version>1.5</version>
+                            <executions>
+                                <execution>
+                                    <id>attach-artifacts</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>attach-artifact</goal>
+                                    </goals>
+                                    <configuration>
+                                        <artifacts>
+                                            <artifact>
+                                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
+                                                <type>bin</type>
+                                            </artifact>
+                                        </artifacts>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                
+            </build>
+        </profile>
+    </profiles>
+    
 </project>

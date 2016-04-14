@@ -1,18 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-whitelist</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-whitelist</name>
 
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     
-    
     <build>
-
         <testResources>
             <testResource>
                 <directory>src/test/json</directory>
@@ -21,7 +22,7 @@
                 </includes>
             </testResource>
         </testResources>
-                
+        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -29,54 +30,18 @@
             </plugin>
         </plugins>
     </build>
+    
     <dependencies>
+        <!-- common-java -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-	
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-attestation-jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- for ErrorCode -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-i18n</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.database</groupId>
-            <artifactId>mtwilson-postgresql</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-management-jpa</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -91,8 +56,26 @@
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-util</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+            <version>3.0-SNAPSHOT</version>
+            <!--<version>${project.version}</version>-->
+        </dependency>
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-attestation-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-postgresql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -104,6 +87,38 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-audit-handler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-audit-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
         <!--
         <dependency>
@@ -130,7 +145,6 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.0</version>
         </dependency>
-                
         <!--
         <dependency>
             <groupId>javax.persistence</groupId>
@@ -139,16 +153,8 @@
             <scope>test</scope>
         </dependency>
         -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-audit-handler</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-audit-data</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
+    
     <properties />
+    
 </project>

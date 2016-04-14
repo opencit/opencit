@@ -1,24 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-attestation-jpa</artifactId>
-
+    
     <name>mtwilson-attestation-jpa</name>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
-
-
+    
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -32,10 +32,9 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
-
     </build>
+    
     <repositories>
         <repository>
             <url>http://download.eclipse.org/rt/eclipselink/maven.repo/</url>
@@ -44,7 +43,42 @@
             <name>Repository for library EclipseLink (JPA 2.0)</name>
         </repository>
     </repositories>
+    
     <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.common</groupId>
+            <artifactId>mtwilson-crypto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-audit-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -52,6 +86,7 @@
             <version>${project.version}</version>
         </dependency>
         -->
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -71,7 +106,6 @@
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
         </dependency>
-            
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
@@ -92,38 +126,6 @@
             <artifactId>derby</artifactId>
             <version>10.8.2.2</version>
             <scope>test</scope>
-        </dependency>            
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-configuration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-crypto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-audit-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
@@ -132,4 +134,5 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    
 </project>
