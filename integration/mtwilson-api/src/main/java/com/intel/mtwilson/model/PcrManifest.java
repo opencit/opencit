@@ -38,9 +38,20 @@ public class PcrManifest extends ObjectModel {
     private final Pcr[] pcrs = new Pcr[24];
     private final PcrEventLog[] pcrEventLogs = new PcrEventLog[24];
     private String measurementXml;
+    private byte[] ProvisionedTag; //this is additional field added to support the new way of assetag attestation -- Haidong
+
+    public byte[] getProvisionedTag() {
+        return ProvisionedTag;
+    }
+
+    public void setProvisionedTag(byte[] ProvisionedTag) {
+        this.ProvisionedTag = ProvisionedTag;
+    }
+
     
     public PcrManifest() {
         this.measurementXml = "";
+        this.ProvisionedTag = null;
     }
     
     public void setPcr(Pcr pcr) {

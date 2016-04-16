@@ -40,25 +40,25 @@ public class IntelHostAgent2 implements HostAgent {
     private String vendorHostReport = null;
     private String vmmName = null;
     private PcrManifest pcrManifest = null;
-    
+
     public IntelHostAgent2(TrustAgentClient client, InternetAddress hostAddress) throws Exception {
         this.client = client;
         this.hostAddress = hostAddress;
 //        this.hostname = hostname;
     }
-    
-    
-    
+
+
+
     @Override
     public boolean isTpmPresent() {
 //        throw new UnsupportedOperationException("Not supported yet.");
         // bug #538  for now assuming all trust-agent hosts have tpm since we don't have a separate capabilities call
-        return true; 
+        return true;
     }
 
     @Override
     public boolean isTpmEnabled() {
-        return true; 
+        return true;
     }
 
     @Override
@@ -67,12 +67,12 @@ public class IntelHostAgent2 implements HostAgent {
     }
 
     @Override
-    public boolean isAikAvailable() { 
+    public boolean isAikAvailable() {
         return true;  // assume we can always get an AIK from a trust agent,  for now
     }
 
     @Override
-    public boolean isAikCaAvailable() { 
+    public boolean isAikCaAvailable() {
         return true; // assume hosts running trust agent always use a privacy ca,  for now
     }
 
@@ -116,28 +116,28 @@ public class IntelHostAgent2 implements HostAgent {
     public String getVendorHostReport()  throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
     @Override
     public TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<PcrIndex> pcr) {
-        throw new UnsupportedOperationException("Not supported  yet."); 
+        throw new UnsupportedOperationException("Not supported  yet.");
     }
 
     @Override
     public PcrManifest getPcrManifest() throws IOException {
         return getPcrManifest(null);
     }
-    
+
     /**
-     * 
+     *
      * @param challenge optional; may be null
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     @Override
     public PcrManifest getPcrManifest(Nonce challenge) throws IOException {
         if( pcrManifest == null ) {
             try {
-                TAHelper helper = new TAHelper();
+                TAHelper helper = new TAHelper(getHostDetails());
                 pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), client, challenge); 
             }
             catch(Exception e) {
@@ -151,7 +151,7 @@ public class IntelHostAgent2 implements HostAgent {
     public TxtHostRecord getHostDetails() throws IOException {
         HostInfo hostInfo = client.getHostInfo();
         TxtHostRecord host = new TxtHostRecord();
-        host.BIOS_Name = hostInfo.getBiosOem().trim(); 
+        host.BIOS_Name = hostInfo.getBiosOem().trim();
         host.BIOS_Oem = hostInfo.getBiosOem().trim();
         host.BIOS_Version = hostInfo.getBiosVersion().trim();
         host.VMM_Name = hostInfo.getVmmName().trim();
@@ -170,7 +170,7 @@ public class IntelHostAgent2 implements HostAgent {
     public String getHostAttestationReport(String pcrList) throws IOException {
         return getHostAttestationReport(pcrList, null);
     }
-    
+
     @Override
     public String getHostAttestationReport(String pcrList, Nonce challenge) throws IOException {
         if( vendorHostReport != null ) { return vendorHostReport; }
@@ -179,7 +179,7 @@ public class IntelHostAgent2 implements HostAgent {
 //        OpenSourceVMMHelper helper = new OpenSourceVMMHelper();
 //        return help.getHostAttestationReport(hostAddress);
         try {
-            TAHelper helper = new TAHelper();
+            TAHelper helper = new TAHelper(getHostDetails());
             // currently the getHostAttestationReport function is ONLY called from Management Service HostBO.configureWhiteListFromCustomData(...)  so there wouldn't be any saved trusted AIK in the database anyway
             pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), client, challenge);
             vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrManifest, vmmName);
@@ -194,12 +194,12 @@ public class IntelHostAgent2 implements HostAgent {
 
     @Override
     public boolean isIntelTxtSupported() {
-        return true; 
+        return true;
     }
 
     @Override
     public boolean isIntelTxtEnabled() {
-        return true; 
+        return true;
     }
 
     @Override
@@ -221,10 +221,10 @@ public class IntelHostAgent2 implements HostAgent {
         // Currently we are just adding the UUID of th host. Going ahead we can add additional details
         if (hostInfo != null)
             hm.put("Host_UUID", hostInfo.getHardwareUuid().trim());
-        
+
         return hm;
     }
-    
+
     @Override
     public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
         Map<String, String> hm = getHostAttributes();
@@ -232,7 +232,7 @@ public class IntelHostAgent2 implements HostAgent {
         //trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
         client.writeTag(tag.toByteArray(), UUID.valueOf(hm.get("Host_UUID")));
     }
-    
+
     @Override
     public X509Certificate getBindingKeyCertificate() {
         try {
@@ -244,7 +244,7 @@ public class IntelHostAgent2 implements HostAgent {
             throw e;
         }
     }
-    
+
 
     @Override
     public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) {

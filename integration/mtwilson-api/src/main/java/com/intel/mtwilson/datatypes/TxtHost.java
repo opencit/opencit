@@ -142,7 +142,7 @@ public class TxtHost {
         } else {
             // Let us first check if the user already has specified the connection string in the correct format. If yes, then return back the connection
             // string since we do not need to do any formatting.
-            if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
+            if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix") || connectionString.startsWith("microsoft")) {
                 return connectionString;
             } else if (connectionString.startsWith("http")) {
                 // the connection string can be for any of the 3 types of hosts. Check if we have the userName and password fields. If they are

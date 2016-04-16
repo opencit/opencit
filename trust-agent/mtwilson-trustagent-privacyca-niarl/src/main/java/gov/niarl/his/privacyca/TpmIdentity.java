@@ -90,4 +90,8 @@ public class TpmIdentity {
 	public byte [] getAikBlob(){
 		return aikKeyBytes;
 	}
+        
+        public byte [] getAikOpaque(){
+		return aikKeyBytes;
+	}
 }
