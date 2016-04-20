@@ -1,0 +1,124 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-jaxrs2-jersey2.0-client</artifactId>
+    <packaging>jar</packaging>
+    <name>mtwilson-jaxrs2-jersey2.0-client</name>
+    <description>Web Services client using JAX-RS 2.0 and jersey-client 2.0</description>
+    <parent>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util</artifactId>
+		<version>2.0.7</version>
+    </parent>
+
+
+    <dependencies>
+
+	
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+        </dependency>        
+		
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-factory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-repository-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.0</version>
+        </dependency>
+<!--        <dependency>
+            <groupId>org.glassfish.jersey.connectors</groupId>
+            <artifactId>jersey-apache-connector</artifactId>
+            <version>2.10.1</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-rpc-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!--
+        Including these dependencies solves this error:
+        
+java.lang.NoSuchMethodError: org.glassfish.hk2.api.ServiceLocatorFactory.create(Ljava/lang/String;Lorg/glassfish/hk2/api/ServiceLocator;Lorg/glassfish/hk2/extension/ServiceLocatorGenerator;Lorg/glassfish/hk2/api/ServiceLocatorFactory$CreatePolicy;)Lorg/glassfish/hk2/api/ServiceLocator;
+        at org.glassfish.jersey.internal.inject.Injections._createLocator(Injections.java:141) ~[jersey-common-2.10.1.jar:na]
+        at org.glassfish.jersey.internal.inject.Injections.createLocator(Injections.java:113) ~[jersey-common-2.10.1.jar:na]
+        at org.glassfish.jersey.server.internal.RuntimeDelegateImpl.<init>(RuntimeDelegateImpl.java:63) ~[jersey-server-2.10.1.jar:na]
+        at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method) ~[na:1.7.0_55]
+        at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57) ~[na:1.7.0_55]
+        at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45) ~[na:1.7.0_55]
+        at java.lang.reflect.Constructor.newInstance(Constructor.java:526) ~[na:1.7.0_55]
+        at java.lang.Class.newInstance(Class.java:374) ~[na:1.7.0_55]
+        at javax.ws.rs.ext.FactoryFinder.newInstance(FactoryFinder.java:117) ~[javax.ws.rs-api-2.0.jar:2.0]
+        at javax.ws.rs.ext.FactoryFinder.find(FactoryFinder.java:165) ~[javax.ws.rs-api-2.0.jar:2.0]
+        at javax.ws.rs.ext.RuntimeDelegate.findDelegate(RuntimeDelegate.java:135) ~[javax.ws.rs-api-2.0.jar:2.0]
+        at javax.ws.rs.ext.RuntimeDelegate.getInstance(RuntimeDelegate.java:120) ~[javax.ws.rs-api-2.0.jar:2.0]
+        at javax.ws.rs.core.UriBuilder.newInstance(UriBuilder.java:95) ~[javax.ws.rs-api-2.0.jar:2.0]
+        at javax.ws.rs.core.UriBuilder.fromUri(UriBuilder.java:119) ~[javax.ws.rs-api-2.0.jar:2.0]
+        at org.glassfish.jersey.client.JerseyWebTarget.<init>(JerseyWebTarget.java:71) ~[jersey-client-2.10.1.jar:na]
+        at org.glassfish.jersey.client.JerseyClient.target(JerseyClient.java:177) ~[jersey-client-2.10.1.jar:na]
+        at org.glassfish.jersey.client.JerseyClient.target(JerseyClient.java:68) ~[jersey-client-2.10.1.jar:na]
+        at com.intel.mtwilson.jaxrs2.client.JaxrsClientBuilder.build(JaxrsClientBuilder.java:214) ~[mtwilson-jaxrs2-client-2.0-SNAPSHOT.jar:na]
+        at com.intel.mtwilson.jaxrs2.client.MtWilsonClient.<init>(MtWilsonClient.java:32) ~[mtwilson-jaxrs2-client-2.0-SNAPSHOT.jar:na]
+        
+        -->
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-utils</artifactId>
+        </dependency>
+
+		</dependencies>  
+    
+</project>

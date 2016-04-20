@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xf="http://www.w3.org/2002/xforms">
+
+    <head>
+        <title>Create Tag</title>
+        <meta name="description" content="A form to create a new tag" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <xf:model>
+            <xf:instance>
+                <f:data xmlns:f="http://mtwilson.intel.com">
+                    <f:TagName/>
+                    <f:TagOid/>
+                    <f:TagValues/>
+                </f:data>
+            </xf:instance>
+        </xf:model>
+    </head>
+    <body>
+
+            <xf:input ref="f:TagName">
+                <xf:label>Tag name</xf:label>
+            </xf:input>
+            <xf:input ref="f:TagOid">
+                <xf:label>Tag OID</xf:label>
+            </xf:input>
+            <xf:input ref="f:TagValues">
+                <xf:label>Tag values</xf:label>
+            </xf:input>
+            
+            
+    </body>
+</html>

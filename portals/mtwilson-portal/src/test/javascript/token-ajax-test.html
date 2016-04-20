@@ -1,0 +1,41 @@
+<html>
+<head>
+<script src="../../main/webapp/Scripts/JQuery/jquery-1.7.2.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+function setTokenInAjax(token) {
+    $.ajax({
+        type: "POST",
+        url: "#",
+        headers: {
+            "AuthorizationToken": token
+        }
+    }).done(function(data) {
+        alert("got data");
+        //alert("got data: "+data);
+    });
+}
+
+$( document ).ready(function() {
+    console.log( "ready!" );
+    setTokenInAjax("quxxx");
+});
+
+</script>
+</head>
+<body>
+
+<h1>Add hidden input to form</h1>
+<form id="getform" action="#" method="GET">
+<input type="submit" value="Test Get"/>
+</form>
+<form id="postform" action="#" method="POST">
+<input type="submit" value="Test Post"/>
+</form>
+<form id="postform2" action="#" method="POST">
+    <input type="hidden" name="AuthorizationToken" value=""/>
+<input type="submit" value="Test Post"/>
+</form>
+
+</body>
+</html>

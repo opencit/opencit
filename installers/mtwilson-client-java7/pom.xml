@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.intel.mtwilson.dist</groupId> 
+    <artifactId>mtwilson-client-java7</artifactId>
+    <packaging>pom</packaging>
+    <name>mtwilson-client-java7</name>
+    <description>
+        The API Client provides an easy-to-use programming interface to access 
+        Mt Wilson services. Using the API Client, you can manage the Whitelist,
+        manage the list of hosts being monitored, obtain attestation on the
+        status of those hosts in SAML format, and more. Please see the documentation
+        for complete details.
+    </description>
+  
+    <parent> 
+        <groupId>com.intel.mtwilson.maven</groupId> 
+        <artifactId>mtwilson-dist-java-zip</artifactId> 
+        <version>2.0.7</version> 
+		<relativePath />
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java7</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>  
+
+</project>

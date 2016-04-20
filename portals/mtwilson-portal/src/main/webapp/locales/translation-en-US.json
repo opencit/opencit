@@ -1,0 +1,101 @@
+{
+    "app": {
+        "title": "Cloud Integrity Technology",
+        "login": "Login",
+        "logout": "Logout",
+        "loading": "Loading...",
+        "version": "Version",
+        "branch": "Branch",
+        "build_timestamp": "Built on"
+    },
+    "nav": {
+        "first": "First",
+        "last": "Last"
+    },
+    "title": {
+        "bulk_refresh": "Bulk Trust Status Update",
+        "reports": "Host Trust Report Status",
+        "register_host": "Host Registration",
+        "vcenter_details": "vCenter Details",
+        "trust_dashboard": "Trust Dashboard",
+        "host_management": "Host Management"
+    },
+    "link": {
+        "import": "Import...",
+        "trust": "Trust",
+        "dashboard": "Dashboard",
+        "bulk_refresh": "Bulk Refresh",
+        "reports": "Report",
+        "host_management": "Host Management",
+        "host": "Host",
+        "add_host": "Add Host",
+        "edit_host": "Edit Host",
+        "view_host": "View Host",
+        "whitelist": "Whitelist",
+        "import_from_trusted_host": "Import from Trusted Host",
+        "edit_mle": "Edit MLE",
+        "edit_os": "Edit OS",
+        "edit_oem": "Edit OEM",
+        "asset_tag_management": "Asset Tag Management",
+        "create_asset_tag": "Tag Creation",
+        "select_asset_tag": "Tag Selection",
+        "certificate_management": "Certificate Management",
+        "tag_provisioning": "Provision Tags",
+        "administration": "Administration",
+        "pending_requests": "Pending Requests",
+        "list_users": "List Users",
+        "delete_user": "Delete User",
+        "extend_user": "Extend User",
+        "view_certificates": "View Certificates",
+        "hostname": "Host Name",
+        "asset_tag": "Asset Tag",
+        "trust_status": "Trust Status",
+        "bios_trust_status": "BIOS Trust Status",
+        "vmm_trust_status": "VMM Trust Status",
+        "overall_trust_status": "Overall Trust Status",
+        "updated_on": "Updated On",
+        "trust_assertion": "Trust Assertion",
+        "trust_report": "Trust Report",
+        "status": "Status",
+        "bios_name": "BIOS Name",
+        "bios_version": "BIOS Build",
+        "vmm_name": "VMM Name",
+        "vmm_version": "VMM Build",
+        "email": "Email Address",
+        "connection_url": "Connection Details",
+        "port": "Port",
+        "description": "Description"
+
+    },
+    "button": {
+        "update_trust_status": "Update Trust Status",
+        "get_report": "Get Report",
+        "import_hosts": "Retrieve Hosts",
+        "import_clusters": "Retrieve Clusters",
+        "add_host": "Add Host",
+        "cancel": "Cancel",
+        "clear": "Clear"
+    },
+    "select": {
+        "flat_file": "Flat File",
+        "vmware_cluster": "VMware Cluster"
+    },
+    "input": {
+        "host_import_source": "Import hosts from:",
+        "host_import_file": "Host(s) File:",
+        "vcenter_server": "vCenter Server:",
+        "login_id": "Login ID:",
+        "username": "Username:",
+        "password": "Password:",
+        "vmware_cluster": "VMware Cluster:",
+        "hostname": "Host Name:",
+        "oem_vendor": "OEM Vendor:",
+        "bios": "BIOS Info:",
+        "os_vmm": "OS-VMM Info:",
+        "description": "Description:",
+        "email": "Email Address:"
+    },
+    "error": {
+        "login_expired": "Your Login Session is Expired. Please Login again."
+    }
+}

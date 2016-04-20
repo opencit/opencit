@@ -1,0 +1,118 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-launcher</artifactId>
+    <packaging>jar</packaging>
+    <name>mtwilson-launcher</name>
+    <description>Launches Mt Wilson services</description>
+    <parent>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-integration</artifactId>
+		<version>2.0.7</version>
+    </parent>
+
+
+    <dependencies>
+
+        <dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-classpath</artifactId>
+        </dependency>
+        <dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-extensions</artifactId>
+        </dependency>
+        
+        <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-launcher-ext</artifactId>
+		<version>${project.version}</version>            
+        </dependency>
+        
+        <dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-module</artifactId>
+		<version>0.2-SNAPSHOT</version>            
+        </dependency>
+
+
+        <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-my</artifactId>
+		<version>${project.version}</version>            
+        </dependency>
+            
+            <!-- for use of AlarmClock for eventloop and for progress monitor -->
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-performance</artifactId>
+        </dependency>
+        <!-- for DirectoryFilter -->
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+        </dependency>
+
+<!--
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1.4-SNAPSHOT</version>
+        </dependency>
+            
+        -->
+            
+            <!--
+<dependency>
+         <groupId>org.reflections</groupId>
+         <artifactId>reflections</artifactId>
+         <version>0.9.9-RC1</version>
+     </dependency>
+        -->
+                             
+        <!-- testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>        
+
+
+        <!-- the following modules are only included for testing the launch from maven -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.plugins</groupId>
+            <artifactId>mtwilson-plugin-sample-annotation</artifactId>
+            <version>1.2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.plugins</groupId>
+            <artifactId>mtwilson-plugin-sample-convention</artifactId>
+            <version>1.2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.plugins</groupId>
+            <artifactId>mtwilson-plugin-sample-manifest</artifactId>
+            <version>1.2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+
+    </dependencies>  
+    
+    
+</project>

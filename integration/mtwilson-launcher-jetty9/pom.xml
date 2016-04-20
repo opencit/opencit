@@ -1,0 +1,170 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mtwilson-launcher-jetty9</artifactId>
+    <packaging>war</packaging>
+    <name>mtwilson-launcher-jetty9</name>
+
+    <parent>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-integration</artifactId>
+        <version>2.0.7</version>
+    </parent>
+    
+    <properties />
+
+    <build>
+	
+        <plugins>
+		    
+	    <plugin>
+		<artifactId>maven-war-plugin</artifactId>
+		<version>2.4</version>
+		<configuration>
+		    <archiveClasses>true</archiveClasses>
+		    <attachClasses>true</attachClasses>
+		</configuration>
+	    </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+
+<!--
+To test the application:
+    mvn jetty:start
+    http://localhost:8080/application.wadl
+    http://localhost:8080/v2/files
+    http://localhost:8080/v2/files.json
+    http://localhost:8080/v2/files.yaml
+    http://localhost:8080/v2/files.xml
+    
+This error message indicates you need a jersey implementation like org.glassfish.jersey.containers:jersey-container-servlet:2.4.1 on the classpath:
+    2014-01-17 09:01:30.157:WARN:oejuc.AbstractLifeCycle:main: FAILED javax.ws.rs.core.Application@83f91b4==null,-1,false: javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application
+    javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application
+    
+            -->
+            <plugin>
+                <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.1.0.RC2</version>
+                <configuration>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                        <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
+                        <!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
+                    </webAppConfig>
+                    <reload>manual</reload>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+    <dependencies>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+        </dependency>
+        
+        
+        <!-- janino is required to evaluate the throwable filter expressions in logback.xml , only needed if that feature is used -->
+        <dependency>
+            <groupId>janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>2.5.10</version>
+        </dependency>        
+        
+        <!-- temporarily putting jpa dependencies here so we can find persistence.xml -->
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <!--
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-attestation-jpa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-management-jpa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-audit-data</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-audit-handler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+        -->
+        
+        <!-- include all the app dependencies -->
+        <dependency>
+            <groupId>com.intel.mtwilson.features</groupId>
+            <artifactId>mtwilson-server</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+    </dependencies>
+    
+    <!--
+    <profiles>
+    <profile>
+                <id>test</id>
+                <activation>
+                    <property>
+                        <name>test</name>
+                        <value>true</value>
+                    </property>
+                </activation>
+                <dependencies>
+                        <dependency>
+                                <groupId>com.intel.mtwilson.services</groupId>
+                                <artifactId>mtwilson-test-ws-v1</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>com.intel.mtwilson.services</groupId>
+                                <artifactId>mtwilson-test-ws-v2</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+                </dependencies>
+        </profile>
+    </profiles>
+    -->
+</project>

@@ -1,0 +1,215 @@
+* { margin: 0; padding: 0; outline: 0 }
+
+body {
+/*	text-align: center; */
+}
+#wrap {
+	margin-left: 5px;
+	margin-right: 5px;
+/*
+	display: inline;
+	text-align: left;
+	*/
+}
+h1, h2, h3 {
+    	font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+
+}
+h1, h2, h3, form {
+	margin-top: 5px;
+	padding: 0px;
+}
+p {
+	margin: 2px;
+	padding: 1px;
+}
+input[type="button"], input[type="submit"] {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#header {
+	clear: both;	
+	padding: 0;			
+	width: 850px;		
+	padding: 0;	margin: 0 0 0 0px;
+}
+#header-links {
+	text-align: right;
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+#header-caption h1 {
+    text-align: center;
+	font: bold 45px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+
+#footer {
+	clear: both;	
+	padding: 0;			
+	width: 850px;		
+	padding: 0;	margin: 0 0 0 0px;
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+#footer p {
+	text-align: center;
+}
+
+nav#resourcenav {
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+/* resource views */
+section.resource-view {
+    clear: both;
+}
+/* resource links inside a resource view */
+section.resource-view nav {
+    margin-left: 5px;
+}
+section nav.resource-links {
+    clear: both;
+}
+section div.data-view {
+    clear: both;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+section div.data-view table {
+	border-collapse: collapse;
+}
+section div.data-view table caption {
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+	border: 1px solid black;
+	text-align: center;
+	padding: 2px;
+	background-color: #dddddd;
+}
+section div.data-view table tfoot td {
+	border: 1px solid black;
+	text-align: center;
+	padding: 2px;
+	background-color: #eeeeee;
+}
+section div.data-view table th {
+	border: 1px solid black;
+	text-align: center;
+	padding: 2px;
+	background-color: #eeeeee;
+}
+section div.data-view table td {
+	border: 1px solid black;
+	text-align: left;
+	padding: 2px;
+}
+
+
+label, input, select, textarea {
+	margin-left: 3px;
+	margin-right: 3px;
+}
+label {
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;    
+}
+form fieldset p {
+    color: #000;
+    border-bottom: 1px solid #aaa;
+    margin-bottom: 10px;
+/*    background-color: #f2f2f2; */
+}
+form fieldset {
+    border: none;
+}
+form fieldset legend {
+    display: none;
+}
+
+/* for use with input.js */
+input.empty {
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+    color: #aaa;
+}
+
+/* for use with validation.js */
+input.error {
+    border: 1px solid red;
+}
+input.required { }
+span.validation-advice {
+    color: red;
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+/*  you can't use :after with input elements, you have to wrap with span like this:  <span class="required-input"><input.../></span>  */
+span.input-required:after {
+    content: "*";
+    color: red;
+    margin-left: 5px;
+}
+
+#content-wrap {
+	width: 850px;		
+	padding: 0;	
+	margin-left: 5px;
+	margin-right: 5px;
+  clear: both;
+}
+#content-wrap { margin: 2; padding: 1; outline: 0 }
+
+#ajaxstatus {
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+	border: none;
+}
+.wait {
+	background: #ffffee url(ajax-loader.gif) no-repeat right center;	
+	border: 1px solid #555555;
+}
+
+
+
+fieldset {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+fieldset legend {
+    text-align: center;
+	font: bold 16px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+fieldset h2 {
+    text-align: left;
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+fieldset ul {
+	list-style: none;    
+}
+
+p.error {
+    font-weight: bold;
+    color: #a00;
+}
+span.error {
+    font-weight: bold;
+    color: #a00;
+}
+label.error {
+    font-weight: bold;
+    color: #a00;    
+}
+.validation-advice {
+    color: #a00;    
+}
+/*
+input.validation-failed {
+    color: #a00;    
+}
+input.validation-passed {
+    color: #070;    
+}
+*/
+
+
+/* log window */
+div#log {
+    margin-top: 15px;
+}

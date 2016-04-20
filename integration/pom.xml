@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.mtwilson.integration</groupId>
+  <artifactId>mtwilson-integration</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Mt Wilson Integration Projects</name>
+
+	<parent>
+		<groupId>com.intel.mtwilson</groupId>
+		<artifactId>mtwilson</artifactId>
+		<version>2.0.7</version>
+	</parent>
+  
+  <modules>
+    <module>mtwilson-env</module>
+    <module>java-backport-1.6-to-1.5</module>
+    <module>mtwilson-api</module>
+    <module>mtwilson-my</module>
+    <module>mtwilson-client-java6</module>
+    <module>mtwilson-client-java7</module>
+	<!--  we don't need to build this every time, it can be done separately for each release
+    <module>mtwilson-client-java5</module>
+    <module>mtwilson-client-dotnet</module>
+    <module>mtwilson-client-php</module>
+	-->
+    <module>mtwilson-configuration</module>
+    <module>mtwilson-launcher</module>
+    <module>mtwilson-launcher-ext</module>
+    <module>mtwilson-test</module>
+    <module>mtwilson-version</module>
+	<module>mtwilson-launcher-glassfish4</module>
+    <module>mtwilson-launcher-jetty9</module>
+	<module>mtwilson-launcher-tomcat7</module>
+    <module>mtwilson-feature-xml</module>
+	<module>mtwilson-tag-selection-xml</module>
+	<module>mtwilson-tag-selection-json</module>
+	<module>mtwilson-jetty9-util</module>
+  </modules>
+
+
+</project>

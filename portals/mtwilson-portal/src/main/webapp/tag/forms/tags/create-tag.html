@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Create Tag</title>
+        <meta name="description" content="A form to create a new tag" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    </head>
+    <body>
+        <script>
+            testingmyfoo = "bar";
+            function helloworld() { alert("baz"); }
+            </script>
+                        <script>
+                            function tag_create_form_addValue() {
+                                mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({values:[]}); // sets the values to empty array if it's not already defined (applies first time this function is called)
+                                var value = (""+$F('tag-create-values')).strip();
+                                if( value.empty() ) { return; }
+                                //        alert("add value: "+value);
+                                log.debug("uh? "+Object.toJSON(mtwilson.rivets.forms['tag-create-form']));
+                                mtwilson.rivets.forms['tag-create-form'].input.values.push($F('tag-create-values')); 
+                                $('tag-create-values').focus(); 
+                                $('tag-create-values').clear();        
+                            }
+                            function tag_create_form_removeValue(tagValue) {
+                                mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
+                                mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
+                            }
+                            // called when submitting the form... checks that at least one value was added
+                            function tag_create_form_validateValues() {
+                                return mtwilson.rivets.forms['tag-create-form'].input.values.length > 0;
+                            }
+                        </script>
+        <form data-bind-action="href" method="POST">
+            <fieldset>
+                <legend>Create Tag</legend>
+                <ul>
+                    <li><label for="tag-create-name">Tag name</label><input type="text" id="tag-create-name" data-bind-value="input.name" name="name" placeholder="Tag name" class="required"/></li>
+                    <li><label for="tag-create-oid">Tag OID</label><input type="text" id="tag-create-oid" data-bind-value="input.oid" name="oid" placeholder="Tag OID" class="required"/></li>
+                    <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
+                    <li><label for="tag-create-values">Tag values</label>
+                        <input type="text"  id="tag-create-values" placeholder="Value" class="validate-data" data-validator="tag_create_form_validateValues"/>
+                        <input type="button" value="Add" onclick="tag_create_form_addValue();"/>
+                        <span style="display: none;" class="validation-advice" id="advice-tag-create-values">You must add at least one value.</span>
+                        <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
+                            <li style="display: inline-block; border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="input.values"><span data-bind-text="item"></span> <a data-bind-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:tag_create_form_removeValue(this.getAttribute('tagValue'));">X</a></li>
+                        </ul>
+                    </li>
+                    <li><input type="button" value="Save" onclick="ws.createTag(this); return false;"/></li>
+                </ul>
+            </fieldset>
+        </form>
+
+    </body>
+</html>

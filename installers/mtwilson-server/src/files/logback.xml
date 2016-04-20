@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<configuration>
+    
+    <property name="USER_HOME" value="/opt/mtwilson/logs" />
+            
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+         
+    <appender name="AUDIT_FILE" class="ch.qos.logback.core.FileAppender">        
+        <!-- the filter element -->
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">   
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>WHITELIST_CONFIGURATION</marker>
+                <marker>HOST_CONFIGURATION</marker>
+                <marker>HOST_ATTESTATION</marker>
+                <marker>USER_CONFIGURATION</marker>                
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>ACCEPT</onMatch>
+        </filter>
+        <file>${USER_HOME}/mtwilson.log</file>        
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- example production setting with less output -->
+    <!--
+    <root level="WARN">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="AUDIT_FILE" />
+    </root>
+
+    <logger name="com.intel.mtwilson" level="INFO" />
+    -->
+    
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="AUDIT_FILE" />
+    </root>
+
+    <logger name="com.intel.mtwilson" level="INFO" />
+    
+</configuration>

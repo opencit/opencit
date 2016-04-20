@@ -1,0 +1,20 @@
+{
+    "href": "json_file_store/rdf-triples.json",
+    "meta": {
+        "type": "rdf-triple-list"
+    },
+    "rdf_triples": [
+        {
+            "uuid": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "subject": "country",
+            "predicate": "contains",
+            "object": "state"
+        },
+        {
+            "uuid": "a1f84f7a-35e7-4f57-a11e-200bbe1da831",
+            "subject": "state",
+            "predicate": "contains",
+            "object": "city"
+        }
+    ]
+}

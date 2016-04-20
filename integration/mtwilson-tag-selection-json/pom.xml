@@ -1,0 +1,74 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-tag-selection-json</artifactId>
+    <packaging>jar</packaging>
+    <name>mtwilson-tag-selection-json</name>
+    <description>
+        Jackson configuration for tag selection JSON structure.
+    </description>
+  
+    <parent> 
+        <groupId>com.intel.mtwilson.integration</groupId> 
+        <artifactId>mtwilson-integration</artifactId> 
+        <version>2.0.7</version> 
+    </parent>
+
+    <build>
+	
+        <plugins>
+            
+        </plugins>      
+      
+
+    </build>
+
+
+
+    <dependencies>
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-tag-selection-xml</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.dataformat</groupId>
+    	<artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+    <!--
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+    </dependency>
+    -->
+    
+    </dependencies>  
+
+</project>

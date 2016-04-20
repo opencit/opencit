@@ -1,0 +1,5 @@
+g++ -g   -c -o NIARL_TPM_ModuleV2.o NIARL_TPM_ModuleV2.cpp
+g++ -g   -c -o NIARL_Util_ByteBlob.o NIARL_Util_ByteBlob.cpp
+g++ -g   -c -o NIARL_Util_Mask.o NIARL_Util_Mask.cpp
+g++ -g   -c -o main.o main.cpp
+g++ -g -o"NIARL_TPM_Module"  ./NIARL_TPM_ModuleV2.o ./NIARL_Util_ByteBlob.o ./NIARL_Util_Mask.o ./main.o   -ltspi

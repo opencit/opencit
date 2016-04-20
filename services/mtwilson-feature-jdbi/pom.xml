@@ -1,0 +1,286 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-feature-jdbi</artifactId>
+    <packaging>jar</packaging>
+    <name>mtwilson-feature-jdbi</name>
+    <description>Feature metadata</description>
+    <parent>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-services</artifactId>
+		<version>2.0.7</version>
+    </parent>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jdbi-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+        </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-objectpool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-jdbc</artifactId>
+        </dependency>
+
+        <!-- mtwilson integration -->
+		<!--
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java6</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+		-->
+        <!-- end mtwilson integration -->
+
+      <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
+	  <!--
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>      
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcmail-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>      
+            -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+        </dependency>        
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+    <!--
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2</version>
+        </dependency>
+-->
+    <!-- JSON support -->
+    <!--
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-mapper-asl</artifactId>
+	<version>1.9.11</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-core-asl</artifactId>
+	<version>1.9.11</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-xc</artifactId>
+	<version>1.9.11</version>
+</dependency>
+-->
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-core</artifactId>
+    	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-annotations</artifactId>
+    	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-databind</artifactId>
+    	<scope>test</scope>
+    </dependency>
+
+<!-- jooq  database query assembly -->
+<dependency>
+  <groupId>org.jooq</groupId>
+  <artifactId>jooq</artifactId>
+  <version>3.1.0</version>
+</dependency>
+<dependency>
+  <groupId>org.jooq</groupId>
+  <artifactId>jooq-meta</artifactId>
+  <version>3.1.0</version>
+</dependency>
+<dependency>
+  <groupId>org.jooq</groupId>
+  <artifactId>jooq-codegen</artifactId>
+  <version>3.1.0</version>
+</dependency>
+
+<!--
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-bundle</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-grizzly</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+		-->
+		<!--
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-grizzly2-servlet</artifactId>
+            <version>1.17.1</version>
+        </dependency>-->
+		<!--
+        <dependency>
+                    <artifactId>jaxb-impl</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                    <version>2.2.7-b63</version>
+        </dependency>
+        
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1</version>
+		</dependency>
+        
+        -->
+
+        <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.53</version>
+        </dependency>        
+        
+        
+        <!-- apache 2.0 license,  database connection pooling system -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        
+        <!-- apache 2.0 license ,  java database system -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.10.1.1</version>
+        </dependency>
+        
+        
+        
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+                                        
+        <!--
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-core</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-beans</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context-support</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+        -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-dbcp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+    </dependencies>  
+    
+</project>

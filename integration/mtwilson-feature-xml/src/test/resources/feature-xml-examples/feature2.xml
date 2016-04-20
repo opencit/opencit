@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature xmlns="urn:mtwilson-feature">
+    <id>feature2</id>
+    <version>0.1</version>
+    <name>Feature #2</name>
+    <description>A second example feature which depends on the first feature</description>
+    <provider>
+        <name>Intel</name>
+        <url>http://www.intel.com</url>
+    </provider>
+    <license>
+        <copyright>2014 Intel Corporation. All rights reserved.</copyright>
+        <url>file:///LICENSE.TXT</url>
+    </license>
+    <requires>
+        <feature-ref>
+            <id>feature1</id>
+        </feature-ref>
+    </requires>
+</feature>
+

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faqs xmlns="http://maven.apache.org/FML/1.0.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+  title="Frequently Asked Questions"
+  toplink="false">
+
+    
+  <part id="release">
+
+    <title>Mt Wilson Releases</title>
+
+    <faq id="rc3">
+      <question>
+        Release Candidate 3 (RC3) Release
+      </question>
+      <answer>
+        <p>Tentatively Available in Dec 2012</p>
+        <p>Internal version 0.5.4</p>
+        <p>New API's, ease of use, geared toward open source hypervisors</p>
+        <p>Requires Java 1.6 for server. Java API (client) available for Java 1.5 and Java 1.6</p>
+      </answer>
+    </faq>
+
+    <faq id="rc2">
+      <question>
+        Release Candidate 2 (RC2) Release
+      </question>
+      <answer>
+        <p>Available in Oct 2012</p>
+        <p>Internal version 0.5.3</p>
+        <p>Easier installation, easier API integration, encryption of some data in database, geared toward VMWare</p>
+        <p>Requires Java 1.6 for server. Java API (client) available for Java 1.5 and Java 1.6</p>
+      </answer>
+    </faq>
+
+    <faq id="sp1">
+      <question>
+        Service Pack 1 (SP1) Release, aka Release Candidate 1 (RC1)
+      </question>
+      <answer>
+        <p>Available in Q3 2012</p>
+        <p>Internal version 0.5.2</p>
+        <p>Requires Java 1.6 for server and Java API (client).</p>
+      </answer>
+    </faq>
+
+    <faq id="beta">
+      <question>
+        Beta Release
+      </question>
+      <answer>
+        <p>Available in Q2 2012</p>
+        <p>Internal version 0.5.1</p>
+      </answer>
+    </faq>
+
+    <faq id="alpha">
+      <question>
+        Alpha Release
+      </question>
+      <answer>
+        <p>Available in Q1 2012</p>
+        <p>Internal version 0.5</p>
+      </answer>
+    </faq>
+
+  </part>
+
+
+</faqs>

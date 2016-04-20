@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         id="WebApp_ID"
+         version="3.0">
+  <display-name>Mt Wilson Portal</display-name>
+  
+  <servlet>
+    <servlet-name>ManagementConsole</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>ManagementConsole</servlet-name>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ManagementConsole</servlet-name>
+    <url-pattern>*.htm</url-pattern>
+  </servlet-mapping>
+  
+  <filter>
+    <filter-name>ManagementConsoleSecurityFilter</filter-name>
+    <filter-class>com.intel.mountwilson.security.SecurityFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>ManagementConsoleSecurityFilter</filter-name>
+    <url-pattern>*.html</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>ManagementConsoleSecurityFilter</filter-name>
+    <url-pattern>*.jsp</url-pattern>
+  </filter-mapping>
+  
+  <servlet>
+    <servlet-name>V2Proxy</servlet-name>
+    <servlet-class>com.intel.mountwilson.util.V2Proxy</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>V2Proxy</servlet-name>
+    <url-pattern>/v2proxy/*</url-pattern>
+  </servlet-mapping>
+  
+  <!--
+<filter>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+     <init-param>
+            <param-name>confPath</param-name>
+            <param-value>/WEB-INF/urlrewrite.xml</param-value>
+        </init-param>
+    <init-param>
+            <param-name>logLevel</param-name>
+            <param-value>DEBUG</param-value>
+        </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <url-pattern>/v2proxy/*</url-pattern>
+</filter-mapping>
+    -->
+    
+  <welcome-file-list>
+  	<welcome-file>Login.jsp</welcome-file>
+  </welcome-file-list>
+  
+    <listener>
+        <description>Cleans up Persistence factory.</description>
+        <listener-class>com.intel.mountwilson.common.MCPersistenceManager</listener-class>
+    </listener>
+    
+    <error-page>
+        <location>/Error.jsp</location>
+    </error-page>
+
+</web-app>

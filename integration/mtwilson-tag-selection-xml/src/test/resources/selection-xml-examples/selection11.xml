@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <selection name="California"/>
+</selections>
+<!--
+This XML file demonstrates requesting an existing selection by name
+-->

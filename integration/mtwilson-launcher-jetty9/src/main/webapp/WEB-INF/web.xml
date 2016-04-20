@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <display-name>Mt Wilson</display-name>
+<!--
+    <filter>
+        <filter-name>AuthorizationExceptionFilter</filter-name>
+        <filter-class>com.intel.mtwilson.shiro.AuthorizationExceptionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ShiroExceptionHandler</filter-name>
+        <url-pattern>/resources/*</url-pattern>
+    </filter-mapping>
+-->
+
+    <listener>
+        <description>Cleans up Persistence factory.</description>
+        <listener-class>com.intel.mtwilson.as.ASPersistenceManager</listener-class>
+    </listener>
+
+<!--
+LocalIniWebEnvironment tries to load from MTWILSON_CONF/shiro.ini first and then
+from the classpath defaults if it's not found.
+    reference: https://shiro.apache.org/static/1.2.2/apidocs/org/apache/shiro/web/env/EnvironmentLoader.html 
+    -->
+<context-param>
+    <param-name>shiroEnvironmentClass</param-name>
+    <param-value>com.intel.mtwilson.shiro.env.LocalIniWebEnvironment</param-value>
+</context-param>
+
+    <listener>
+        <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>com.intel.mtwilson.servlet.listener.BackgroundTaskRunner</listener-class>
+    </listener>
+    
+    <filter>
+        <filter-name>RepeatableRequestFilter</filter-name>
+        <filter-class>com.intel.mtwilson.servlet.RepeatableRequestFilter</filter-class>
+    </filter>
+    
+    <!--
+    <filter>
+        <filter-name>ShiroFilter</filter-name>
+        <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+    </filter>
+    -->
+    <filter>
+        <filter-name>ShiroFilter</filter-name>
+        <filter-class>com.intel.mtwilson.shiro.LoggingShiroFilter</filter-class>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>RepeatableRequestFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Filter all web requests.  This filter mapping is typically declared
+        before all others to ensure any other filters are secured as well: -->
+    <filter-mapping>
+        <filter-name>ShiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
+    <!--
+    Jersey reference: https://jersey.java.net/documentation/latest/deployment.html
+    
+    When using javax.ws.rs.core.Application as the servlet-name, the following
+    resources are found by the automatic scan:
+    
+[INFO] Webapp directory = C:\Users\jbuhacof\workspace\dcg_security-mtwilson\integration\mtwilson-launcher-jersey2\src\main\webapp
+2014-01-17 12:20:08.903:INFO:oejs.Server:main: jetty-9.1.0.RC2
+Jan 17, 2014 12:20:44 PM org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer addServletWithDefaultConfiguration
+INFO: Registering the Jersey servlet application, named javax.ws.rs.core.Application, with the following root resource and provider classes: [class com.fasterxm
+l.jackson.jaxrs.xml.JacksonJaxbXMLProvider, class com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper, class com.fasterxml.jackson.jaxrs.xml.JsonParseExce
+ptionMapper, class com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider, class org.glassfish.jersey.client.filter.HttpDigestAuthFilter, class com.intel.mtwilson.j
+ersey.provider.JacksonXmlMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider, class com.fasterxml.jackson.jaxrs.json.JsonMappingExcep
+tionMapper, class com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper, class com.intel.mtwilson.
+jersey.provider.JacksonObjectMapperProvider, class com.intel.mtwilson.as.rest.v2.resource.Hosts, class com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMappe
+r, class org.glassfish.jersey.server.wadl.internal.WadlResource, class com.intel.mtwilson.as.rest.v2.resource.Files, class com.intel.mtwilson.jersey.provider.Ja
+cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider, class com.fasterxml.jackson.jaxrs.json.JsonParseExceptionMapper]
+
+    And it works fine when doing "mvn jetty:start" on this project.  But when
+    running the mtwilson-launcher-webapp project it complains that nothing is
+    available to handle javax.ws.rs.core.Application as if the jersey2 servlet
+    container is not present, even though it is.    
+    
+    -->
+    
+    <servlet>
+        <!--
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        -->
+        <servlet-name>Jersey1</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+	    <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.intel.mtwilson.jersey2.Jersey2Application1</param-value>
+        </init-param>
+        <!--
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerRequestFilter</param-name>
+            <param-value>org.glassfish.jersey.server.filter.HttpMethodOverrideFilter,com.intel.mtwilson.as.helper.ASAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerResponseFilter</param-name>
+            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+        </init-param>
+        -->
+        <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
+        <init-param>
+            <param-name>jersey.config.server.languageMappings</param-name>
+            <param-value>en:en, fr:fr</param-value>
+        </init-param>
+        <!--        
+These are the two providers referenced below from the org.glassfish entries:        
+org.glassfish.jersey.client.filter.HttpDigestAuthFilter
+org.glassfish.jersey.server.wadl.internal.WadlResource
+The com.intel.mtwilson entry includes our provider adapters and also our 
+web resource classes.
+The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
+        -->
+        <!--
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>
+                com.intel.mtwilson;com.fasterxml.jackson.jaxrs;org.glassfish.jersey.server;org.glassfish.jersey.client
+            </param-value>        
+        </init-param>
+        -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <!--
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        -->
+        <servlet-name>Jersey1</servlet-name>
+        <url-pattern>/v1/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <!--
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        -->
+        <servlet-name>Jersey2</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+	    <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.intel.mtwilson.jersey2.LocalizableJersey2Application2</param-value>
+        </init-param>
+        <!--
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerRequestFilter</param-name>
+            <param-value>org.glassfish.jersey.server.filter.HttpMethodOverrideFilter,com.intel.mtwilson.as.helper.ASAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerResponseFilter</param-name>
+            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+        </init-param>
+        -->
+        <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
+        <init-param>
+            <param-name>jersey.config.server.mediaTypeMappings</param-name>
+            <param-value>txt:text/plain, xml:application/xml, json:application/json, jsonapi: application/vnd.api+json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml, pem:application/x-pem-file, cer:application/pkix-cert, crt:application/octet-stream, enc:message/rfc822</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jersey.config.server.languageMappings</param-name>
+            <param-value>en:en, fr:fr</param-value>
+        </init-param>
+        <!--        
+These are the two providers referenced below from the org.glassfish entries:        
+org.glassfish.jersey.client.filter.HttpDigestAuthFilter
+org.glassfish.jersey.server.wadl.internal.WadlResource
+The com.intel.mtwilson entry includes our provider adapters and also our 
+web resource classes.
+The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
+        -->
+        <!--
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>
+                com.intel.mtwilson;com.fasterxml.jackson.jaxrs;org.glassfish.jersey.server;org.glassfish.jersey.client
+            </param-value>        
+        </init-param>
+        -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <!--
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        -->
+        <servlet-name>Jersey2</servlet-name>
+        <url-pattern>/v2/*</url-pattern>
+    </servlet-mapping>
+
+    
+    <!--
+    <servlet>
+        <servlet-name>Html5</servlet-name>
+        <servlet-class>com.intel.mtwilson.servlet.FileServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Html5</servlet-name>
+        <url-pattern>/static/*</url-pattern>
+    </servlet-mapping>
+    -->
+    
+    <!--
+    <servlet>
+        <servlet-name>ServletAdaptor</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter,com.intel.mtwilson.as.helper.ASAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
+            <param-value>com.intel.mtwilson.security.jersey.RolesAllowedResourceFilterFactory</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServletAdaptor</servlet-name>
+        <url-pattern>/resources/*</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+-->
+    <!--
+    <listener>
+        <description>Configuration management</description>
+        <listener-class>com.intel.mtwilson.as.helper.ASConfiguration</listener-class>
+    </listener>
+    -->
+    <!--
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/applicationContext.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+-->
+    <mime-mapping>
+        <extension>json</extension>
+        <mime-type>application/json</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>jsonapi</extension>
+        <mime-type>application/vnd.api+json</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>yaml</extension>
+        <mime-type>application/yaml</mime-type>
+    </mime-mapping>
+
+    <!--
+    <error-page>
+        <location>/Error.jsp</location>
+    </error-page>
+    -->
+</web-app>

@@ -1,0 +1,33 @@
+{
+    "href": "json_file_store/tags.json",
+    "meta": {
+        "type": "tag-list"
+    },
+    "tags": [
+        {
+            "id": 1,
+            "uuid": "c18cebff-9075-4f59-9f0c-1ffc851ad606",
+            "name": "country",
+            "oid": "1.3.6.1.4.1.99999.1",
+            "values": ["US", "MX", "CA", "FR", "DE", "TW", "CN", "IL"]
+        }, {
+            "id": 2,
+            "uuid": "5b786f7d-b477-4720-b976-faa0fce9ddc7",
+            "name": "state",
+            "oid": "1.3.6.1.4.1.99999.2",
+            "values": ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WY", "DC"]
+        }, {
+            "id": 3,
+            "uuid": "a373da29-72f6-49d6-a8d5-ec74488b0c25",
+            "name": "city",
+            "oid": "1.3.6.1.4.1.99999.3",
+            "values": ["Folsom", "Santa Clara"]
+        }, {
+            "id": 4,
+            "uuid": "b17dd815-5621-49c7-c226-7a27fac2e211",
+            "name": "customer",
+            "oid": "1.3.6.1.4.1.99999.4",
+            "values": ["Coke", "Pepsi"]
+        }
+    ]
+}

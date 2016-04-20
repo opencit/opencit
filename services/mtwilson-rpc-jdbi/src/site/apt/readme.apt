@@ -1,0 +1,68 @@
+                ------------------------------
+                Asset Tag Service Data Access
+                ------------------------------
+
+	The provisioning service is implemented using Restlet, JDBI, JOOQ, SLF4J, and their dependencies.
+
+How to
+
+* Adding a new resource
+
+	The following procedure was used when adding the rdf-triples resource:
+
+	1. Determine the model of the resource. For RDF triples, the model should contain
+a subject, a predicate, and an object. Write class RdfTriple.java in the package
+com.intel.mtwilson.atag.model, adding standard ID (long integer) and UUID fields.
+The ID field is used in the relational database, and the UUID field is used
+in the REST service interface. Ensure you use com.intel.dcsg.cpg.io.UUID for the UUID
+field, and not java.util.UUID. The UUID class in cpg-io is a wrapper for the standard
+Java class which has better support for representing the UUID as a String or byte[]
+as needed. Write class RdfTripleSearchCriteria.java in the model package to represent
+the search capabilities to be provided for RDF Triples.
+
+Note: the database table does NOT include the URL of the resource. The web server must
+generate this automatically when creating responses.
+
+	2. Determine the the URI. The convention for resource URIs in this project is that
+they should be plural (but the table name is singular). So the URI is /rdf-triples.
+
+	3. Write class RdfTripleDAO.java in the package com.intel.mtwilson.atag.dao.jdbi.
+The minimum requirements are to define the create method for the table, and
+insert/update/delete methods to modify records, and a findByUuid method for fetching
+specific triples. Other search/fetch methods can be added later. Write the class
+RdfTripleResultMapper in the same package. The DAO should be annotated to use the 
+ResultMapper automatically.
+
+A limitation of using JDBI DAOs is that the SQL must be written in the dialect of the
+back-end server. So one set of DAOs must be created for each back-end database system
+supported.
+
+	4. Add the new dao to RepositoryTest.testCreateInMemoryDb() in the test.jdbi package.
+Run the junit test RepositoryTest.testDescribeDatabase() which will cause the new RDF_TRIPLE
+table to be created in the database and show you an abbreviated table description.
+
+	5. Delete the folder target/generated-sources/jooq and build the project again. The
+maven build will automatically re-generate the JOOQ sources using the schema updated in
+the previous step in your local Derby database.
+
+	5. Write classes RdfTripleResource.java and RdfTripleListResource.java in the 
+package com.intel.mtwilson.atag.resource. The first class will handle requests for
+specific resources for example GET /rdf-triples/{uuid}, while the second class with "List"
+in the name will handle requests for the collection such as POST /rdf-triples.
+Also add an Derby.rdfTripleDao() method in the com.intel.mtwilson.atag package for
+conveniently accessing the DAO from the resource classes.
+
+	6. Add routes to RdfTripleResource and RdfTripleListResource in the RestletApplication
+class in the com.intel.mtwilson.atag package (used in production and in junit tests). For example:
+
++---
+router.attach("rdf-triples", RdfTripleListResource.class); 
+router.attach("rdf-triples/{id}", RdfTripleResource.class);
++---
+
+
+	7. Write junit tests in the package test.restlet to cover the new resource. For example,
+write separate tests for posting (adding), updating, and searching resources using the
+list resource, and fetching a single resource using its URI and deleting a resource using
+the single resource class. Add the URIs /rdf-triple + uuid and /rdf-triples to the "At" 
+class for convenience.

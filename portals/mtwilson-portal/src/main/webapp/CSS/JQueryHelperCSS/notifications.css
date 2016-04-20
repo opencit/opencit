@@ -1,0 +1,78 @@
+/* Friendly CSS Error Messages
+   Original idea by http://www.richardoneill.com.au/tags/web_design 
+   Improved by IdleWorx @ http://blog.idleworx.com
+   http://blog.idleworx.com/2010/11/friendly-css-error-messages-for-java.html
+*/
+
+.msgOK{
+    color:#69A150;
+    cursor:pointer;
+    cursor:hand;
+    background: #E7FFD6 center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #8CD76B;
+    border-bottom: 2px solid #8CD76B;
+    border:2px solid #8CD76B;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+.msgInfo{
+    color:#5C7CA0;
+    cursor:pointer;
+    cursor:hand;
+    background: #E7F3FF center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #7BA6D6;
+    border-bottom: 2px solid #7BA6D6;
+    border:2px solid #7BA6D6;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+.msgWarn {
+    color:#BF9E1B;
+    cursor:pointer;
+    cursor:hand;
+    background: #fff6bf center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #ffd324;
+    border-bottom: 2px solid #ffd324;
+    border:2px solid #ffd324;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+.msgError {
+    color:#AD5E5C;
+    cursor:pointer;
+    cursor:hand;
+    background: #FFE7E7 center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #E77D7B;
+    border-bottom: 2px solid #E77D7B;
+    border:2px solid #E77D7B;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+#notifications {
+    font-family: "Neo Sans Intel", Geneva, Helvetica, "Calibri", Arial, sans-serif;
+    max-width: 835px;
+}

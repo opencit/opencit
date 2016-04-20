@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <selection>
+        <attribute oid="2.5.4.789.1">
+            <!-- only one child tag allowed -->
+            <text>State=TX</text>
+            <der>U3RhdGU9Q0E=</der>
+        </attribute>
+    </selection>
+</selections>

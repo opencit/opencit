@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-logback-util</artifactId>
+    <packaging>jar</packaging>
+    <name>mtwilson-logback-util</name>
+    <description>Utility classes for Logback</description>
+    <parent>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-services</artifactId>
+		<version>2.0.7</version>
+    </parent>
+
+    <build>
+        
+        <plugins>
+            
+           
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+           
+               
+        </plugins>
+    </build>
+
+
+    <dependencies>
+
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-console</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>        
+
+    </dependencies>  
+    
+</project>

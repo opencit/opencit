@@ -1,0 +1,524 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-server</artifactId>
+
+    <packaging>pom</packaging>
+    <name>Mt Wilson Server Linux Installer</name>
+    <description>Installs MySQL, Java, Glassfish, Web Services, and UI Portals</description>
+
+    <parent>
+        <groupId>com.intel.mtwilson.linux</groupId>
+        <artifactId>mtwilson-linux</artifactId>
+        <version>2.0.7</version>
+    </parent>
+  
+    <properties>
+        <makeself.basic>${project.build.directory}/${project.artifactId}-${project.version}</makeself.basic>
+        <makeself.jdk_glassfish_monit>${project.build.directory}/${project.artifactId}-${project.version}-jdk_glassfish_monit</makeself.jdk_glassfish_monit>
+    </properties>
+ 
+
+ 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/files</directory>
+            </resource>
+        </resources>
+    </build>
+ 
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+          
+            <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
+            <dependencies>
+                <!-- Java and Glassfish -->
+                <dependency>
+                    <groupId>com.oracle</groupId>
+                    <artifactId>jdk</artifactId>
+                    <version>1.7.0_51</version>
+                    <type>tar.gz</type>
+                    <classifier>linux-x64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>glassfish</artifactId>
+                    <version>4.0</version>
+                    <type>bin</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>tomcat-installer</artifactId>
+                    <version>7.0.34</version>
+                    <type>bin</type>
+                </dependency>   <!-- Monit -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>monit</artifactId>
+                    <version>5.5</version>
+                    <type>bin</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>logrotate</artifactId>
+                    <version>1.0</version>
+                    <type>bin</type>
+                </dependency>
+    
+                <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
+                <!--
+                <dependency>
+                    <groupId>com.intel.mtwilson.dist</groupId>
+                    <artifactId>mtwilson-client-java6</artifactId>
+                    <version>${project.version}</version>
+                    <type>zip</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.dist</groupId>
+                    <artifactId>mtwilson-client-java6</artifactId>
+                    <version>${project.version}</version>
+                    <type>zip</type>
+                </dependency>
+                -->
+    
+                <!-- this is the setup console -->
+                <!--
+                <dependency>
+                    <groupId>com.intel.mtwilson.desktop</groupId>
+                    <artifactId>mtwilson-console</artifactId>
+                    <version>${project.version}</version>
+                    <type>jar</type>
+                    <classifier>with-dependencies</classifier>
+                </dependency>
+                -->
+                
+                <dependency>
+                    <groupId>com.intel.mtwilson.features</groupId>
+                    <artifactId>mtwilson-server</artifactId>
+                    <version>${project.version}</version>
+                    <type>zip</type>
+                </dependency>
+
+                <!-- Web Services -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-management-service-installer</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-whitelist-service-installer</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-attestation-service-installer</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+    
+                <!-- UI Portals -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-portal-installer</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+                <!-- API Client and Linux Utils -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>    
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.version}</version>
+                    <type>sh</type>
+                </dependency>    
+            </dependencies>
+           
+            <build>
+                <plugins>
+        
+        
+        
+                    <!-- begin copy artifacts plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <id>copy-basic-artifacts</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <!-- Web services -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-management-service-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-whitelist-service-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-attestation-service-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>logrotate</artifactId>
+                                            <version>1.0</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- other -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <destFileName>functions</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- UI portals -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-portal-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- setup console --> 
+                                        <!--
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.desktop</groupId>
+                                            <artifactId>mtwilson-console</artifactId>
+                                            <classifier>with-dependencies</classifier>
+                                            <version>${project.version}</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                        -->
+                                        <!-- api client -->
+                                        <!--
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.dist</groupId>
+                                            <artifactId>mtwilson-client-java6</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                        </artifactItem>
+                                        -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.features</groupId>
+                                            <artifactId>mtwilson-server</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                        </artifactItem>
+                
+                                    </artifactItems>
+                                    <outputDirectory>${makeself.basic}</outputDirectory>
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-all-with-jdk-glassfish-monit</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <!-- Java and glassfish -->
+                                        <artifactItem>
+                                            <groupId>com.oracle</groupId>
+                                            <artifactId>jdk</artifactId>
+                                            <version>1.7.0_51</version>
+                                            <type>tar.gz</type>
+                                            <classifier>linux-x64</classifier>
+                                            <destFileName>jdk-1.7.0_51-linux-x64.tar.gz</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>glassfish</artifactId>
+                                            <version>4.0</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>tomcat-installer</artifactId>
+                                            <version>7.0.34</version>
+                                            <type>bin</type>
+                                            <!-- <outputDirectory>${makeself.directory}</outputDirectory> -->
+                                        </artifactItem>
+                                        <!-- Monit -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>monit</artifactId>
+                                            <version>5.5</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- Web services -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-management-service-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-whitelist-service-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-attestation-service-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- other -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <destFileName>functions</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- UI portals -->
+                                        <!-- 
+                                        <artifactItem>
+                                          <groupId>com.intel.mtwilson.linux</groupId>
+                                          <artifactId>mtwilson-portal-installer</artifactId>
+                                          <version>${project.version}</version>
+                                          <type>bin</type>
+                                        </artifactItem>
+                                        -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>logrotate</artifactId>
+                                            <version>1.0</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-portal-installer</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <!-- setup console --> 
+                                        <!--
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.desktop</groupId>
+                                            <artifactId>mtwilson-console</artifactId>
+                                            <classifier>with-dependencies</classifier>
+                                            <version>${project.version}</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                        -->
+                                        <!-- api client -->
+                                        <!--
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.dist</groupId>
+                                            <artifactId>mtwilson-client-java6</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                        </artifactItem>       
+                                        -->         
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.features</groupId>
+                                            <artifactId>mtwilson-server</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${makeself.jdk_glassfish_monit}</outputDirectory>
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>	
+                    <!-- end copy artifacts plugin -->
+
+                    <!-- begin copy other resources plugin -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources-basic</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.basic}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/files</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                            <execution>
+                                <id>copy-resources-jdk_glassfish_monit</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.jdk_glassfish_monit}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/files</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy other resources plugin -->
+
+                    <!-- begin create self-extracting installer plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>create-single-installer-basic</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>makebin-auto.sh</argument>
+                                        <argument>${makeself.basic}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>create-single-installer-jdk_glassfish_monit</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>makebin-auto.sh</argument>
+                                        <argument>${makeself.jdk_glassfish_monit}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end create self-extracting installer plugin -->
+                    <!-- begin deploy installers to repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                    </plugin>
+                    <!-- end deploy installers to repository -->
+      
+                    <!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                        <version>2.1.4</version>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>revision</goal>
+                                </goals>
+                                <inherited>true</inherited>
+                                <configuration>
+                                    <prefix>git</prefix>
+                                    <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+      
+                </plugins>
+
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>build-helper-maven-plugin</artifactId>
+                            <version>1.5</version>
+                            <executions>                      
+                                <execution>
+                                    <id>attach-artifacts</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>attach-artifact</goal>
+                                    </goals>
+                                    <configuration>
+                                        <artifacts>
+                                            <artifact>
+                                                <file>${makeself.basic}.bin</file>
+                                                <type>bin</type>
+                                            </artifact>
+                                            <artifact>
+                                                <file>${makeself.jdk_glassfish_monit}.bin</file>
+                                                <type>bin</type>
+                                                <classifier>jdk_glassfish_monit</classifier>
+                                            </artifact>
+                                        </artifacts>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+  
+  
+            </build>
+        </profile>
+    </profiles>
+
+</project>

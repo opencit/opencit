@@ -1,0 +1,101 @@
+{
+    "app": {
+        "title": "Mt. Wilson (es-MX)",
+        "login": "Login (es-MX)",
+        "logout": "Logout (es-MX)",
+        "loading": "Loading... (es-MX)",
+        "version": "Version (es-MX)",
+        "branch": "Branch (es-MX)",
+        "build_timestamp": "Built on (es-MX)"
+    },
+    "nav": {
+        "first": "First (es-MX)",
+        "last": "Last (es-MX)"
+    },
+    "title": {
+        "bulk_refresh": "Bulk Trust Status Update (es-MX)",
+        "reports": "Host Trust Report Status (es-MX)",
+        "register_host": "Host Registration (es-MX)",
+        "vcenter_details": "vCenter Details (es-MX)",
+        "trust_dashboard": "Trust Dashboard (es-MX)",
+        "host_management": "Host Management (es-MX)"
+    },
+    "link": {
+        "import": "Import... (es-MX)",
+        "trust": "Trust (es-MX)",
+        "dashboard": "Dashboard (es-MX)",
+        "bulk_refresh": "Bulk Refresh (es-MX)",
+        "reports": "Report (es-MX)",
+        "host_management": "Host Management (es-MX)",
+        "host": "Host (es-MX)",
+        "add_host": "Add Host (es-MX)",
+        "edit_host": "Edit Host (es-MX)",
+        "view_host": "View Host (es-MX)",
+        "whitelist": "Whitelist (es-MX)",
+        "import_from_trusted_host": "Import from Trusted Host (es-MX)",
+        "edit_mle": "Edit MLE (es-MX)",
+        "edit_os": "Edit OS (es-MX)",
+        "edit_oem": "Edit OEM (es-MX)",
+        "asset_tag_management": "Asset Tag Management (es-MX)",
+        "create_asset_tag": "Tag Creation (es-MX)",
+        "select_asset_tag": "Tag Selection (es-MX)",
+        "certificate_management": "Certificate Management (es-MX)",
+        "tag_provisioning": "Provision Tags (es-MX)",
+        "administration": "Administration (es-MX)",
+        "pending_requests": "Pending Requests (es-MX)",
+        "list_users": "List Users (es-MX)",
+        "delete_user": "Delete User (es-MX)",
+        "extend_user": "Extend User (es-MX)",
+        "view_certificates": "View Certificates (es-MX)",
+        "hostname": "Host Name (es-MX)",
+        "asset_tag": "Asset Tag (es-MX)",
+        "trust_status": "Trust Status (es-MX)",
+        "bios_trust_status": "BIOS Trust Status (es-MX)",
+        "vmm_trust_status": "VMM Trust Status (es-MX)",
+        "overall_trust_status": "Overall Trust Status (es-MX)",
+        "updated_on": "Updated On (es-MX)",
+        "trust_assertion": "Trust Assertion (es-MX)",
+        "trust_report": "Trust Report (es-MX)",
+        "status": "Status (es-MX)",
+        "bios_name": "BIOS Name (es-MX)",
+        "bios_version": "BIOS Build (es-MX)",
+        "vmm_name": "VMM Name (es-MX)",
+        "vmm_version": "VMM Build (es-MX)",
+        "email": "Email Address (es-MX)",
+        "connection_url": "Connection Details (es-MX)",
+        "port": "Port (es-MX)",
+        "description": "Description (es-MX)"
+
+    },
+    "button": {
+        "update_trust_status": "Update Trust Status (es-MX)",
+        "get_report": "Get Report (es-MX)",
+        "import_hosts": "Retrieve Hosts (es-MX)",
+        "import_clusters": "Retrieve Clusters (es-MX)",
+        "add_host": "Add Host (es-MX)",
+        "cancel": "Cancel (es-MX)",
+        "clear": "Clear (es-MX)"
+    },
+    "select": {
+        "flat_file": "Flat File (es-MX)",
+        "vmware_cluster": "VMware Cluster (es-MX)"
+    },
+    "input": {
+        "host_import_source": "Import hosts from (es-MX):",
+        "host_import_file": "Host(s) File (es-MX):",
+        "vcenter_server": "vCenter Server (es-MX):",
+        "login_id": "Login ID (es-MX):",
+        "username": "Username (es-MX):",
+        "password": "Password (es-MX):",
+        "vmware_cluster": "VMware Cluster (es-MX):",
+        "hostname": "Host Name (es-MX):",
+        "oem_vendor": "OEM Vendor (es-MX):",
+        "bios": "BIOS Info (es-MX):",
+        "os_vmm": "OS-VMM Info (es-MX):",
+        "description": "Description (es-MX):",
+        "email": "Email Address (es-MX):"
+    },
+    "error": {
+        "login_expired": "Your Login Session is Expired. Please Login again. (es-MX)"
+    }
+}

@@ -1,0 +1,126 @@
+{
+    "href": "json_file_store/resources.json",
+    "meta": {
+        "content_type": "application/vnd.api+json",
+        "data": "resources"
+    },
+    "resources": [
+        {
+            "meta": {
+                "model": "MWResource",
+                "code": "js/mw_resource.js"
+            },
+            "one": "host",
+            "many": "hosts",
+            "label_one": "Host",
+            "label_many": "Hosts",
+            "uri":  "json_file_store/hosts.json",
+            "links": {
+                "forms": [ "register_host", "search_hosts" ]
+            }
+        },
+        {
+            "one": "notice",
+			"many": "notices",
+            "uri": "/notices",
+			"label_one": "Notice",
+			"label_many": "Notices",
+            "links": {
+                "forms": [ "create_notice", "search_notices" ]
+            }
+        },
+        {
+            "one": "tag",
+			"many": "tags",
+            "uri": "/tags",
+            "links": {
+                "forms": [ "create_tag", "search_tags" ]
+            }
+        },
+        {
+            "one": "rdf_triple",
+            "many": "rdf_triples",
+            "uri": "/rdf-triples",
+            "links": {
+                "forms": [ "create_rdf_triple", "search_rdf_triples" ]
+            }
+        },
+        {
+            "one": "tag_certificate",
+            "many": "tag_certificates",
+            "uri": "/tag-certificates",
+            "links": {
+                "forms": [ "create_tag_certificate", "search_tag_certificates" ]
+            }
+        },
+        {
+            "one": "tag_certificate_request",
+            "many": "tag_certificate_requests",
+            "uri": "/tag-certificate-requests",
+            "links": {
+                "forms": [ "create_tag_certificate_request", "search_tag_certificate_requests" ]
+            }
+        },
+        {
+            "one": "tag_attribute_selection",
+            "many": "tag_attribute_selections",
+            "uri": "/tag-attribute-selections",
+            "links": {
+                "forms": [ "create_tag_attribute_selection", "search_tag_attribute_selections" ]
+            }
+        },
+        {
+            "one": "configuration",
+            "many": "configurations",
+            "uri": "/configurations",
+            "links": {
+                "forms": [ "create_configuration", "search_configurations" ]
+            }
+        },
+        {
+            "one": "user",
+            "many": "users",
+            "uri": "/users",
+            "links": {
+                "forms": [ "register_user", "search_users" ]
+            }
+        },
+        {
+            "one": "role",
+            "many": "roles",
+            "uri": "/roles",
+            "links": {
+                "forms": [ "create_role", "search_roles" ]
+            }
+        },
+        {
+            "one": "file",
+            "many": "files",
+            "uri": "/files",
+            "links": {
+                "forms": [ "create_file", "search_files" ]
+            }
+        }
+    ],
+    "linked": {
+        "forms": [
+            { 
+                "id": "register_host",
+                "href": "forms/register_host.html",
+                "title": "Register Host",
+                "meta": {
+                    "alternatives": [ "html" ]
+                }
+            },
+            {
+                "id": "search_hosts",
+                "href": "forms/search_hosts.html",
+                "title": "Search Hosts",
+                "meta": {
+                    "alternatives": [ "html" ]
+                }
+            }
+        ]
+    }
+            
+}

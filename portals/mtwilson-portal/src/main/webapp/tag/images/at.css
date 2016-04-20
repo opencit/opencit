@@ -1,0 +1,285 @@
+* { margin: 0; padding: 0; outline: 0 }
+
+body, html {
+/*	text-align: center; */
+        height: 95%;
+}
+#wrap {
+	margin-left: 5px;
+	margin-right: 5px;
+        height: 100%;
+/*
+	display: inline;
+	text-align: left;
+	*/
+}
+h1, h2, h3 {
+    	font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+
+}
+h1, h2, h3, form {
+	margin-top: 5px;
+	padding: 0px;
+}
+p {
+	margin: 2px;
+	padding: 1px;
+}
+input[type="button"], input[type="submit"] {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#header {
+	clear: both;	
+	padding: 0;			
+	width: 850px;		
+	padding: 0;	margin: 0 0 0 0px;
+}
+#header-links {
+	text-align: right;
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+#header-caption h1 {
+    text-align: center;
+	font: bold 45px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+#footer {
+	clear: both;	
+	padding: 0;			
+	width: 850px;		
+	padding: 0;	margin: 0 0 0 0px;
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+#footer p {
+	text-align: center;
+}
+
+/* Navigation */
+nav {
+	clear: both;	
+	padding: 0;			
+}
+nav ul {
+	float: left;
+	list-style: none;
+	background: #E4E4E4 url(nav.jpg) repeat-x;	
+	width: 850px;		
+	padding: 0;	margin: 0 0 0 0px;
+	height: 45px;
+	display: inline;
+	text-transform: uppercase;
+}
+nav ul li {
+	display: inline;
+	margin: 0; padding: 0;
+}
+nav ul li a {
+	display: block;
+	float: left;
+	width: auto;
+	margin: 0;
+	padding: 0 15px;	
+	border-right: 1px solid #dadada;
+	border-left: 1px solid #fafafa;	
+	border-bottom: none;
+	color: #555;
+	font: bold 14px/45px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+	text-transform: uppercase;
+	text-decoration: none;	
+	letter-spacing: 1px;
+}
+nav ul li a:hover, 
+nav ul li a:active {
+	color: #326ea1;
+}
+
+/* jonathan changed #currrent to .curren so it can be moved to another tab  without reloading page */
+nav ul li.current a {	
+	background: #DBDBDB url(nav-current.jpg) repeat-x;		
+}
+
+label, input, select, textarea {
+	margin-left: 3px;
+	margin-right: 3px;
+}
+label {
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;    
+}
+form fieldset p {
+    color: #000;
+    border-bottom: 1px solid #aaa;
+    margin-bottom: 10px;
+/*    background-color: #f2f2f2; */
+}
+
+/* for use with input.js */
+input.empty {
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+    color: #aaa;
+}
+
+/* for use with validation.js */
+input.error {
+    border: 1px solid red;
+}
+input.required { }
+span.validation-advice {
+    color: red;
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+/*  you can't use :after with input elements, you have to wrap with span like this:  <span class="required-input"><input.../></span>  */
+span.input-required:after {
+    content: "*";
+    color: red;
+    margin-left: 5px;
+}
+
+#content-wrap {
+    width: 850px;
+    padding: 0;
+    margin-left: 5px;
+    margin-right: 5px;
+    clear: both;
+    height: calc(100% - 100px);
+    overflow-y: auto;
+}
+#content-wrap { margin: 2; padding: 1; outline: 0 }
+
+#ajaxstatus {
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+	border: none;
+}
+.wait {
+	background: #ffffee url(ajax-loader.gif) no-repeat right center;	
+	border: 1px solid #555555;
+}
+
+#main table {
+	border-collapse: collapse;
+}
+#main caption {
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+	border: 1px solid black;
+	text-align: center;
+	padding: 2px;
+	background-color: #dddddd;
+}
+#main tfoot td {
+	border: 1px solid black;
+	text-align: center;
+	padding: 2px;
+	background-color: #eeeeee;
+}
+#main th {
+	border: 1px solid black;
+	text-align: center;
+	padding: 2px;
+	background-color: #eeeeee;
+}
+#main td {
+	border: 1px solid black;
+	text-align: left;
+	padding: 2px;
+}
+
+fieldset {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+fieldset legend {
+    text-align: center;
+	font: bold 16px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+fieldset h2 {
+    text-align: left;
+	font: bold 14px "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+fieldset ul {
+	list-style: none;    
+}
+
+/* Friendly CSS Error Messages
+   Original idea by http://www.richardoneill.com.au/tags/web_design 
+   Improved by IdleWorx @ http://blog.idleworx.com
+   http://blog.idleworx.com/2010/11/friendly-css-error-messages-for-java.html
+*/
+
+.msgOK{
+    color:#69A150;
+    cursor:pointer;
+    cursor:hand;
+    background: #E7FFD6 center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #8CD76B;
+    border-bottom: 2px solid #8CD76B;
+    border:2px solid #8CD76B;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+.msgInfo{
+    color:#5C7CA0;
+    cursor:pointer;
+    cursor:hand;
+    background: #E7F3FF center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #7BA6D6;
+    border-bottom: 2px solid #7BA6D6;
+    border:2px solid #7BA6D6;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+.msgWarn {
+    color:#BF9E1B;
+    cursor:pointer;
+    cursor:hand;
+    background: #fff6bf center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #ffd324;
+    border-bottom: 2px solid #ffd324;
+    border:2px solid #ffd324;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+.msgError {
+    color:#AD5E5C;
+    cursor:pointer;
+    cursor:hand;
+    background: #FFE7E7 center no-repeat;
+    background-position: 15px 50%;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    border-top: 2px solid #E77D7B;
+    border-bottom: 2px solid #E77D7B;
+    border:2px solid #E77D7B;
+    border-radius: 7px;
+    overflow:auto;
+    font-size:.7em;
+    font-weight:bold;
+}
+
+#notifications {
+    font-family: "Neo Sans Intel", Geneva, Helvetica, "Calibri", Arial, sans-serif;
+    max-width: 835px;
+}
+
+/****************************************************************************/

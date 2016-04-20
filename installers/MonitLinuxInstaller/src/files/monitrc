@@ -1,0 +1,27 @@
+## Monit Process Monitor Config File
+## Configuration options and examples can be found here:
+## http://mmonit.com/monit/documentation/monit.html
+
+# Start monit in background (run as daemon) and check the services at x-second
+# intervals.  This defines the length of time of a single 'cycle' as used in 
+# the process monitor triggers
+
+set daemon 120
+
+# Set path to log file
+set logfile /var/log/monit.log
+
+# Monit has an embedded webserver, which can be used to view the
+# configuration, actual services parameters or manage the services using the
+# web interface.  This is disabled by default.
+
+# set httpd port <port number>  
+# use address <IP address of monit server> 
+# allow localhost # allow localhost to connect to the server 
+# allow <IP network>/<subnet mask> #allows connections only from specified IP ranges
+# allow <username>:<password> # require username and password for authentication
+
+# ssl enable
+# pemfile <pemfile>.pem
+# clientpemfile <pemfile>.pem
+

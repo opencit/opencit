@@ -1,0 +1,639 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mtwilson-client-java7</artifactId>
+    <packaging>jar</packaging>
+    <name>mtwilson-client-java7</name>
+    <description>
+        The API Client provides an easy-to-use programming interface to access 
+        Mt Wilson services. Using the API Client, you can manage the Whitelist,
+        manage the list of hosts being monitored, obtain attestation on the
+        status of those hosts in SAML format, and more. Please see the documentation
+        for complete details.
+    </description>
+  
+    <parent> 
+        <groupId>com.intel.mtwilson.integration</groupId> 
+        <artifactId>mtwilson-integration</artifactId> 
+        <version>2.0.7</version> 
+    </parent>
+
+    <build>
+	
+<!--
+        <testResources>
+            <testResource>
+                <directory>src/test/json</directory>
+                <includes>
+                    <include>**/*.json</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/env</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>**/*.jks</include>
+                    <include>**/cacerts</include>
+                    <include>**/*.html</include>
+                    <include>**/*.xml</include>
+                </includes>
+            </testResource>
+        </testResources>
+	-->
+	
+        <plugins>
+            
+                            <!--  REMOVED THIS CONFIGURATION FROM MAVEN-JAR-PLUGIN BELOW 
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            -->
+                            <!--
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.intel.mtwilson.client.TextConsole</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            -->
+            <!--
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>regular-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>with-dependencies</shadedClassifierName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                            -->            
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <configuration>
+                            <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
+                            <noqualifier>all</noqualifier>
+                            <tags>
+                                <tag>
+                                  <name>mtwRequiresPermissions</name>
+                                  <placement>aoptcmf</placement>
+                                  <head>Requires permissions:</head>
+                                </tag>
+                                <tag>
+                                  <name>mtwContentTypeReturned</name>
+                                  <placement>aoptcmf</placement>
+                                  <head>Content type returned:</head>
+                                </tag>
+                                <tag>
+                                  <name>mtwMethodType</name>
+                                  <placement>aoptcmf</placement>
+                                  <head>Method Type:</head>
+                                </tag>
+                                <tag>
+                                  <name>mtwSampleRestCall</name>
+                                  <placement>aoptcmf</placement>
+                                  <head>Sample REST call:</head>
+                                </tag>
+                                <tag>
+                                  <name>mtwSampleApiCall</name>
+                                  <placement>aoptcmf</placement>
+                                  <head>Sample API call:</head>
+                                </tag>
+                                <tag>
+                                  <name>mtwPreRequisite</name>
+                                  <placement>aoptcmf</placement>
+                                  <head>Pre-requisite:</head>
+                                </tag>                                
+                             </tags>
+                        </configuration>
+                    </plugin>
+                    
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>java.util.logging.config.file</name>
+                            <value>${project.build.directory}/test-classes/logging.properties</value> <!-- copied there by the <resources> tag above, it's in src/test/env -->
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>	    
+		
+      
+
+
+        </plugins>      
+      
+
+    </build>
+
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-i18n</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-xml</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-configuration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-crypto</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+		</dependency>
+        <!--
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-rfc822</artifactId>
+		</dependency>
+        -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-saml-verifier</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		
+        <!--
+       	<dependency>
+          		<groupId>org.glassfish</groupId>
+          		<artifactId>maven-embedded-glassfish-plugin</artifactId>
+          		<version>3.1.1</version>
+          		<type>maven-plugin</type>
+       	</dependency>    
+       	-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		
+        <!--
+            <dependency>
+                    <groupId>com.jayway.restassured</groupId>
+                    <artifactId>rest-assured</artifactId>
+                    <version>1.5</version>
+            </dependency>        
+       	-->
+		<!--
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+		-->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    
+        <!-- begin httpclient  -->
+        <!--
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+        </dependency>
+        -->
+        <!-- end httpclient -->
+        
+        
+        <!--
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        -->
+        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- begin jersey  -->
+    
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+<!--            <version>2.5.1</version> -->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+<!--            <version>2.5.1</version> -->
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+<dependency>
+    <groupId>com.intel.mtwilson.services</groupId>
+    <artifactId>mtwilson-jersey2-util</artifactId>
+    <version>${project.version}</version>
+</dependency>
+    -->
+
+        <!-- end jersey  -->
+        
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+    </dependency>
+    <!--
+    <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+    -->
+        <!--
+           	<dependency>
+         			<groupId>org.bouncycastle</groupId>
+         			<artifactId>bcprov-jdk15on</artifactId>
+         			<version>1.47</version>
+      		</dependency>
+      		-->
+        <!-- start saml verification -->
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>2.5.1-1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <!-- this exclusion is here because we are providing our own patched version of xmltooling, see below and the "other" projects folder -->
+                <exclusion>
+                    <groupId>org.opensaml</groupId>
+                    <artifactId>xmltooling</artifactId>
+                </exclusion>
+            </exclusions>	
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>xmltooling</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+        <!-- solves java.lang.ClassNotFoundException: org/jcp/xml/dsig/internal/dom/XMLDSigRI when verifying SAML signatures -->
+        <!-- vesrion must be 1.4.3, after this the class org.jcp.xml.dsig.internal.dom.XMLDsigRI is moved to org.apache.jcp  so opensaml doesn't find it -->
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+            	    
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <!-- end saml verification -->
+        
+        <!-- clients for mtwilson features -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-user-management-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-privacyca-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- end clients for mtwilson features -->
+        
+    </dependencies>  
+
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>  <!-- activate this profile with  -Drelease on the command line -->
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                    <goal>javadoc</goal>
+                                </goals>
+                                <configuration>
+                                    <attach>true</attach>
+                                    <includeDependencySources>true</includeDependencySources>
+                                    <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+                                    <dependencySourceIncludes>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-model</dependencySourceInclude>
+                                    </dependencySourceIncludes>
+                                    <excludePackageNames>generated:com.intel.mountwilson.as.hostmanifestreport.data:com.intel.mountwilson.as.hosttrustreport.data</excludePackageNames> 
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+            <!-- begin copy dependencies plugin (to create zip file) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase> <!-- was: install -->
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- end copy dependencies plugin -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+                                    <fileset dir="${project.build.directory}/jars" />
+                                    <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
+                                    <fileset dir="${basedir}" includes="pom.xml" />
+                                </zip>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant</artifactId>
+                        <version>1.8.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>	    
+      
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>                      
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+                                    <type>zip</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+                    
+                    <!-- create a shaded jar-with-dependencies.  see also:
+                    http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
+                    -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>regular-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>with-dependencies</shadedClassifierName>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                            <resource>META-INF/BCKEY.SF</resource>
+                                            <resource>META-INF/BCKEY.DSA</resource>
+                                        </transformer>
+                                    </transformers>
+                                </configuration>
+                            </execution>                            
+                            <execution>
+                                <id>shaded-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>with-dependencies-shaded</shadedClassifierName> <!-- Any name that makes sense -->
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                            <resource>META-INF/BCKEY.SF</resource>
+                                            <resource>META-INF/BCKEY.DSA</resource>
+                                        </transformer>
+                                    </transformers>
+                                    <relocations>
+                                        <relocation>
+                                            <pattern>org</pattern>
+                                            <shadedPattern>com.intel.shaded.org</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>net</pattern>
+                                            <shadedPattern>com.intel.shaded.net</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>javax.activation</pattern>
+                                            <shadedPattern>com.intel.shaded.javax.activation</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>javax.ws</pattern>
+                                            <shadedPattern>com.intel.shaded.javax.ws</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>javax.xml</pattern>
+                                            <shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
+                                        </relocation>
+                                        <!--
+                                            <relocation>
+                                                <pattern>com.sun</pattern>
+                                                <shadedPattern>com.intel.shaded.com.sun</shadedPattern>
+                                            </relocation>
+                                        -->
+                                    </relocations>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

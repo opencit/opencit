@@ -1,0 +1,113 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-dist-java-zip</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Mt Wilson Distribution of Java Zip File</name>
+
+  <description>
+  Projects that inherit this pom and need to generate a zip file with all jars simply have to contain a folder named "dist"
+  and an empty file named "dist/zip"  in order to activate the zip generation.
+  </description>
+  
+	<parent>
+		<groupId>com.intel.mtwilson</groupId>
+		<artifactId>mtwilson</artifactId>
+		<version>2.0.7</version>
+		<relativePath />
+	</parent>
+  
+	<profiles>
+	<profile>
+	<id>zip</id>
+	<activation>
+	<file>
+	<exists>dist/zip</exists>
+	</file>
+	</activation>
+	
+	<build>
+		<plugins>
+            <!-- begin copy dependencies plugin (to create zip file) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase> <!-- was: install -->
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- end copy dependencies plugin -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+                                    <fileset dir="${project.build.directory}/jars" />
+                                    <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
+                                    <fileset dir="${basedir}" includes="pom.xml" />
+                                </zip>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant</artifactId>
+                        <version>1.8.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>	    
+      
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>                      
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+                                    <type>zip</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+	</profile>
+	</profiles>
+	
+</project>

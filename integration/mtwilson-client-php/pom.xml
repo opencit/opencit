@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>mtwilson-client-php</artifactId>
+  <packaging>pom</packaging>
+  <name>mtwilson-client-php</name>
+  <description>
+      The PHP API Client provides an easy-to-use programming interface to access 
+      Mt Wilson services. Using the API Client, you can manage the Whitelist,
+      manage the list of hosts being monitored, obtain attestation on the
+      status of those hosts in SAML format, and more. Please see the documentation
+      for complete details.
+  </description>
+    <parent>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-integration</artifactId>
+		<version>2.0-SNAPSHOT</version>
+    </parent>
+
+    <build>
+		
+		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+		    <skip>true</skip>
+                </configuration>
+            </plugin>
+	    
+      </plugins>
+
+    </build>
+
+
+
+</project>

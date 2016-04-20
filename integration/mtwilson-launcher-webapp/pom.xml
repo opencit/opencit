@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mtwilson-launcher-webapp</artifactId>
+    <packaging>war</packaging>
+    <name>mtwilson-launcher-webapp</name>
+
+    <parent>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-integration</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    
+    <properties />
+
+    <build>
+	
+        <plugins>
+		    
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+
+<!--
+To test the application:
+    mvn jetty:start
+    http://localhost:8080/v1/
+    http://localhost:8080/v1/resources/application.wadl
+    http://localhost:8080/v1/resources/hosts
+    http://localhost:8080/v2/
+    http://localhost:8080/v2/application.wadl
+    http://localhost:8080/v2/files
+    http://localhost:8080/v2/files.json
+    http://localhost:8080/v2/files.yaml
+    http://localhost:8080/v2/files.xml
+    
+            -->
+            <plugin>
+                <!-- reference: 
+                http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin
+                http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin
+                -->
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.1.0.RC2</version>
+                <configuration>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                        <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
+                        <!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
+                    </webAppConfig>
+                    <!-- for running multiple separate apps -->
+                    <contextHandlers>           
+                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+                            <war>${basedir}/../mtwilson-launcher-jersey/target/mtwilson-launcher-jersey-${project.version}.war</war>
+                            <contextPath>/v1</contextPath>
+                        </contextHandler>
+                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+                            <war>${basedir}/../mtwilson-launcher-jersey2/target/mtwilson-launcher-jersey2-${project.version}.war</war>
+                            <contextPath>/v2</contextPath>
+                        </contextHandler>
+                    </contextHandlers>         
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+    <dependencies>
+
+        <!-- for overlaid wars ... this might work only for static resources -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-jersey</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-jersey2</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        -->
+
+        <!-- for jersey 2.x ... it's already declared in mtwilson-launcher-jersey2 so not clear why need to do it again here, but was getting the error javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application  which means this dependency is missing -->
+        <!--
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.4.1</version>
+        </dependency>        
+        -->
+                
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+                
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        
+    </dependencies>
+    
+</project>

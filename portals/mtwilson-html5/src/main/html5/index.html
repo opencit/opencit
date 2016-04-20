@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--
+    HTML5 documentation:
+    http://www.w3.org/html/wg/drafts/html/master/
+    http://www.w3.org/TR/2010/WD-html5-20100624/
+    http://dev.w3.org/html5/html-author/
+    
+    Documentation on properties of HTA:APPLICATION: 
+    http://www.htmlgoodies.com/beyond/reference/article.php/3472841/HTML-Applications.htm
+    http://msdn.microsoft.com/library/default.asp?url=/workshop/author/hta/overview/htaoverview.asp
+    
+    It's possible to pack all the resources into a single executable with a custom icon using WinRAR:
+    http://stackoverflow.com/questions/4592410/is-it-possible-to-add-custom-icon-to-hta
+    http://www.rarlab.com/shop2rarlab-index.php?prod=winrar&x-source=winraronly
+    
+    <h1>Credits</h1>
+    <p>Javascript libraries <a href="http://prototypejs.org/" target="_blank">prototype.js</a> (<a href="http://prototypejs.org/license.html" target="_blank">MIT License</a>), <a href="http://script.aculo.us/" target="_blank">scriptaculous.js</a> (<a href="http://madrobby.github.io/scriptaculous/license/" target="_blank">MIT License</a>), <a href="http://livepipe.net/" target="_blank">livepipe.js</a> (<a href="http://livepipe.net/#MIT" target="_blank">MIT License</a>), and <a href="https://github.com/atetlaw/Really-Easy-Field-Validation" target="_blank">validation</a> (<a href="http://opensource.org/licenses/MIT" target="_blank">MIT License</a>).</p>
+    http://ajaxload.info/  for the ajax loading icon. license: "generated gifs are totally free for use"
+    
+    -->
+    <head>
+        <title>Mt Wilson JSON API Generic Client</title>
+        <meta name="application-name" content="Mt Wilson"/>
+        <meta name="description" content="A generic web-based tool for interacting with available server resources"/>
+        <meta name="keywords" content="Mt Wilson, JSON API, jsonapi.org, HTML5" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+        <link rel="resources" type="application/vnd.api+json" href="json_file_store/resources.json">
+        
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+        <link rel="stylesheet" href="images/jsonapiclient.css" type="text/css" />
+        <link rel="stylesheet" href="style/windows/window.css" type="text/css" />
+        <link rel="stylesheet" href="style/navtabs/nav.css" type="text/css" />
+
+		<script src="js/libs/handlebars-v1.1.2.js" type="text/javascript"></script>
+        <script src="js/libs/prototype-1.7.1-mod.js" type="text/javascript"></script> <!-- required by log.js -->
+		<!-- ui widgets -->
+        <script src="js/libs/scriptaculous-1.9.0/scriptaculous.js" type="text/javascript"></script> 
+        <script src="js/libs/livepipe/livepipe.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/contextmenu.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/cookie.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/event_behavior.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/hotkey.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/progressbar.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/rating.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/resizable.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/scrollbar.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/selection.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/selectmultiple.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/tabs.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/textarea.js" type="text/javascript"></script>
+        <script src="js/libs/livepipe/window.js" type="text/javascript"></script>
+		
+        <!-- stand-alone libraries -->
+        <script src="js/libs/uuid.js" type="text/javascript"></script>
+        <script src="js/libs/base64.js" type="text/javascript"></script>
+        <script src="js/libs/URI.js" type="text/javascript"></script>
+        <script src="js/libs/array.js" type="text/javascript"></script>
+        <script src="js/libs/merge.js" type="text/javascript"></script>
+        <script src="js/libs/findx.js" type="text/javascript"></script>
+        <script src="js/libs/date.js" type="text/javascript"></script> <!-- required by log.js -->
+        <!-- ui tools -->
+        <script src="js/libs/validation.js" type="text/javascript"></script>
+        <script src="js/libs/input.js" type="text/javascript"></script>
+        <script src="js/libs/log.js" type="text/javascript"></script> <!-- requires prototype.js, date.js -->
+        <script src="js/handlebars.util.js" type="text/javascript"></script> <!-- requires prototype.js, handlebars.js, log.js -->
+        <script src="js/libs/form.js" type="text/javascript"></script>
+        <script src="js/libs/wgxpath.install.js" type="text/javascript"></script>  <!-- installs document.evaluate on IE -->
+        <script src="js/libs/wadl.js" type="text/javascript"></script> <!-- requires wgxpath.install.js on IE -->
+        <script src="js/jsonapi.js" type="text/javascript"></script>
+
+<script id="custom-resourcenav-template" type="text/x-handlebars-template">
+{{#each resources}}
+<li class="tab"><a href="#view_{{many}}">{{label_many}}</a></li>			
+{{/each}}
+</script>
+
+<script id="resource-links-template" type="text/x-handlebars-template">
+{{#each links}}
+<li><a href="#{{href}}">{{rel}}: {{title}}</a></li>			
+{{/each}}
+</script>
+
+<script id="resource-views-template" type="text/x-handlebars-template">
+{{#each resources}}
+<section id="view_{{many}}" class="resource-view" data-model="{{many}}">
+  {{! meta.links section... for arbitrary links }}
+  {{#if meta.links}}
+    <nav class="resource-links">
+    <ul>
+    {{#each meta.links}}
+    <li><a href="{{href}}" {{#if rel}}rel="{{rel}}"{{/if}} {{#if title}}title="{{title}}"{{/if}} {{#if onclick}}onclick="javascript:{{onclick}}(this); return false;"{{/if}} data-model="{{../many}}">{{title}}</a></li>			
+    {{/each}}
+    </ul>
+    </nav>
+  {{/if}}
+  {{! linked.forms section is for forms like create, edit, search, etc }}
+  {{#if linked.forms}}
+    <nav class="resource-links">
+    <ul>
+    {{#each linked.forms}}
+    <li><a href="{{href}}" rel="form" {{#if title}}title="{{title}}"{{/if}} onclick="javascript:jsonapi.displayFormWindow(this); return false;" data-model="{{../many}}">{{title}}</a></li>			
+    {{/each}}
+    </ul>
+    </nav>
+  {{/if}}
+  <div class="data-view"></div>
+</section>
+{{/each}}
+</script>
+<script id="resource-data-template" type="text/x-handlebars-template">
+  {{! the 'data' section is not part of what we get from the server; we add the jsonapi data section for this resource dynamically}}
+  <table>
+  <thead>
+  <tr>
+    {{#each header.columns}}
+    <th>{{this}}</th>
+    {{/each}}
+  </tr>
+  </thead>
+  <tbody>
+    {{#each body}}
+    <tr>
+        {{#each this}}
+        <td>{{this}}</td>
+        {{/each}}
+    </tr>
+    {{/each}}
+  </tbody>
+  <tfoot>
+  </tfoot>
+  </table>
+</script>
+<script id="wadl-resource-template" type="text/x-handlebars-template">
+    {{#each resources}}
+    <h1>{{path}}</h1>
+    <ul>
+        {{#each methods}}
+        <li>
+        {{httpMethod}} {{name}}
+        request params? {{request.params}} accepts 
+            {{#each request.representations}} {{this}} {{/each}}
+        response returns 
+            {{#each response.representations}} {{this}} {{/each}}
+        </li>
+        {{/each}}
+    </ul>
+    {{/each}}
+</script>
+<script id="jsonapi-resource-template" type="text/x-handlebars-template">
+    {{#each resources}}
+    <h1>{{relativePath}}</h1>
+    <ul>
+        {{#each links}}
+        <li><a href="{{href}}">{{rel}}</a></li>
+        {{/each}}
+    </ul>
+    <ul>
+        {{#each methods}}
+        <li>
+        {{httpMethod}} {{name}}
+        </li>
+        {{/each}}
+    </ul>
+    {{/each}}
+</script>
+    </head>
+    <body>
+            <!-- navigation starts-->	
+            <nav id="topnav">
+                <ul id="navtabs">
+                    <!--
+                    <li class="tab"><a href="#resourcesCustom">Test Custom Resources</a></li>			
+                    -->
+                    <li class="tab"><a href="#resourcesCustom">Test Custom Resources</a></li>			
+                    <li class="tab"><a href="#resources">Resources</a></li>			
+                    <li class="tab"><a href="#rpc">RPC</a></li>			
+                    <li class="tab"><a href="#wadl">WADL</a></li>
+                    <li class="tab"><a href="#log">Log</a></li>			
+                </ul>
+                <!-- navigation ends-->	
+            </nav>				
+            <div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+            </div>
+            <!--
+            <div id="notifications" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+                <ul style="margin-left: 0px; padding-left: 0px; list-style: none;">
+                    <li style="border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="notices"><span data-bind-text="item.text"></span> <a href="#" style="color: black; font-weight: bold;" onclick="javascript:$(this).up('li').remove();">X</a></li>                    
+                </ul>
+            </div>
+            -->
+
+            <div id="resourcesCustom" style="display: none;">
+                <nav id="resourcenav">
+                    <ul id="resourcenavtabs"></ul>
+                </nav>				
+                <div id="resource-views" style="float:left;"></div>
+            </div>
+
+            <div id="resources" style="display: none;">
+                <div id="jsonapi-resources"></div>
+            </div>
+
+            <div id="rpc" style="display: none;">
+                <div id="rpc-list">
+                    <form method="POST" action="/v2/rpc/test_rpc_method">
+                        <input type="text" name="try html form" value="works!"/>
+                        <input type="submit"/>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="wadl" style="display: none;">
+                <div id="wadl-resources"></div>
+            </div>
+            
+                <div id="log" style="display: none;">
+                    <h1>Application Log</h1>
+                    <div id="logwindow" style="height: 250px; max-height: 250px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
+                    </div>
+                    <!-- end log tab -->
+                </div>
+            
+            <!-- footer starts -->			
+            <div id="footer-wrap"><div id="footer">				
+
+                    <p>
+                        &copy; 2013 Intel Corporation
+                    </p>
+
+                </div></div>
+            <!-- footer ends-->	
+
+            <!-- wrap ends here -->
+
+        <!-- configure javascript logging -->								
+        <script>
+            Log.attach("logwindow");
+        </script>
+
+        <script>
+
+            document.observe('dom:loaded', function() {
+                jsonapi.configure({
+                    //baseurl: 'http://localhost:8080'
+                });
+                // this section initializes the user interface   
+                jsonapi.navTabs = new Control.Tabs('navtabs', {
+                    activeClassName: 'current',
+                    setClassOnContainer: true,
+                    afterChange: function(new_container) {
+                        Log.debug("afterChange: "+new_container);
+                    }
+                });
+                
+                // load WADL
+                WADL.loadWADL("/v2/application.wadl"); // fires "wadl:ready" when done
+                
+                Log.debug("done initializing ws");
+            });
+            
+            /*
+            Looks through the resource array for resources that have an output
+            representation matching the given content type, and returns an
+            array of matching resources where each item in the array is a
+            cloned resource descriptor so you can make changes to it and
+            rearrange as needed without affecting the original array.
+            */
+            function cloneResourcesWithRepresentation(resourceArray, contentType) {
+                var matchingResources = [];
+                for(var r=0; r<resourceArray.length; r++) {
+                    var match = false;
+                    for(var m=0; m<resourceArray[r].methods.length; m++) {
+                        if( resourceArray[r].methods[m].response.representations.contains(contentType) ) {
+                            match = true;
+                        }
+                    }
+                    if( match ) {
+                        matchingResources.push(resourceArray[r].clone());
+                    }
+                }
+                return matchingResources;
+            }
+            
+            /*
+            Given a resource array (of jsonapi resources), looks for resources that have a GET method
+            and adds a link element.
+            */
+            function markSearchableResources(resourceArray) {
+                for(var r=0; r<resourceArray.length; r++) {
+                    var match = false;
+                    for(var m=0; m<resourceArray[r].methods.length; m++) {
+                        if( resourceArray[r].methods[m].httpMethod === "GET" ) {
+                            match = true;
+                        }
+                    }
+                    if( match ) {
+                        if( !resourceArray[r].links ) { resourceArray[r].links = []; }
+                        resourceArray[r].links.push({ rel:"search", href:resourceArray[r].path });
+                    }
+                }
+            }
+            
+            document.observe('wadl:ready', function(event) {
+                HandlebarUtil.template('wadl-resource-template').data(event.memo).replace('wadl-resources');
+                // now identify all the resources that support application/vnd.api+json output
+                var jsonapiResources = cloneResourcesWithRepresentation(event.memo.resources, "application/vnd.api+json");
+                markSearchableResources(jsonapiResources);
+                HandlebarUtil.template('jsonapi-resource-template').data({resources:jsonapiResources}).replace('jsonapi-resources');
+            });
+            
+            // wait for the webservice library to initialize, then populate the UI with some data from the server. 
+            document.observe('jsonapi:ready', function() {
+                Log.debug("after init (jsonapiclient:ready), data: "+Object.toJSON(ws.data));
+				/*
+                ws.searchTags('tag-search-form');
+                ws.searchRdfTriples('rdf-triple-search-form');
+                ws.searchSelections('selection-search-form');
+                ws.searchConfigurations('configuration-search-form');
+                ws.loadCaCerts();
+//                ws.retrieveMainConfiguration();
+*/
+            
+            });
+        </script>
+
+    </body>
+</html>

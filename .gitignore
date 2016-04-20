@@ -1,0 +1,16 @@
+.svn
+target
+/trust-agent/PrivacyCA/bin
+.settings
+.project
+.classpath
+/trust-agent/HisPrivacyCAWebServices2/WEB-INF/classes
+pom.xml.versionsBackup
+pom.xml.releaseBackup
+/services/asset-tag-service/derby.log
+/services/asset-tag-model/src/main/resources/html5/nbproject/private/
+/services/asset-tag-dao/src/main/resources/html5/nbproject/private/
+derby.log
+/services/asset-tag-service/src/main/resources/html5/nbproject/private/retriever
+/services/asset-tag-service/derby
+/portals/mtwilson-portal/src/main/webapp/tag/nbproject/private/

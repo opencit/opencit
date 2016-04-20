@@ -1,0 +1,341 @@
+## YAML Template.  Keystore filename should be same as key alias but with .jks extension. keystore and key passwords should be the same.
+---
+mtwilson.api.baseurl: https://10.1.71.103:8181
+mtwilson.api.keystore: C:/Intel/CloudSecurity/jonathan.jks
+mtwilson.api.keystore.password: changeit
+mtwilson.api.key.alias: jonathan
+mtwilson.api.key.password: changeit
+mtwilson.api.ssl.verifyHostname: true
+mtwilson.api.ssl.requireTrustedCertificate: true
+whitelist:
+  OEM:
+    - &oem_generic
+      name: GENERIC
+      description: default oem for testing
+    - &oem_epsd
+      name: EPSD
+      description: intel white boxes
+    - &oem_hp
+      name: HP
+      description: HP systems
+    - &oem_intel
+      name: Intel Corp.
+      description: Intel Corp.
+    - &oem_dell
+      name: Dell Inc.
+      description: Dell
+  OS:
+    - &os_rhel_61
+      name: RHEL
+      version: "6.1"
+      description: RedHat 6.1
+    - &os_rhel_62
+      name: RHEL
+      version: "6.2"
+      description: RedHat 6.2
+    - &os_xen_602
+      name: XenServer
+      version: 6.0.2-53456p
+      description: Xen 6.0.2
+    - &os_ubuntu_11
+      name: UBUNTU
+      version: "11.10"
+      description: Ubuntu 11.10
+    - &os_suse_11
+      name: SUSE
+      version: "11 P2"
+      description: SuSE 11 P2
+    - &os_vmware_50
+      name: VMWare
+      version: "5.0"
+      description: VMWare 5.0
+    - &os_vmware_esxi_500
+      name: VMware_ESXi
+      version: "5.0.0"
+      description: VMWare ESXi 5.0.0
+    - &os_vmware_esxi_510
+      name: VMware_ESXi
+      version: "5.1.0"
+      description: VMWare ESXi 5.1.0
+    - &os_sos_12
+      name: SOS
+      version: SOS12
+      description: SOS 12      
+  MLE:
+    - &bios_intel_suse
+      name: Intel_SUSE
+      version: T060
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        0: '891EB0B556B83FCEF1C10F3FA6464345E34F8F91'
+      description: a test BIOS MLE with Ubuntu
+      OEM: *oem_intel
+    - &bios_dell
+      name: Dell_XenServer
+      version: 6.1.0
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        0: 'EFD98869C7AF53B34876F8E73EE60958CD233A49'
+      description: a test BIOS MLE
+      OEM: *oem_dell
+    -
+      name: QEMU
+      version: 11.10-0.14.1
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        # 17 ?
+        18: '2D961A1D62E36A7557417C18FB1ED93A95B213B2'
+        19: 'B9A2A0F1D914BFC164CC7AAB3123C59AB40B7144' 
+        20: '0000000000000000000000000000000000000000'
+      description: a test VMM MLE with QEMU
+      OS: *os_ubuntu_11
+    - &bios_epsd
+      name: EPSD
+      version: v60
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        ? 1
+      description: a test BIOS MLE with EPSD
+      OEM: *oem_epsd
+    -
+      name: EPSD
+      version: 60p
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        ? 0
+      description: a test BIOS MLE with EPSD
+      OEM: *oem_epsd
+    -
+      name: HP_VMware
+      version: P67
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        ? 0
+      description: a test BIOS MLE with EPSD
+      OEM: *oem_hp
+    -
+      name: KVM
+      version: QEMU_0.14.1
+      attestation type: PCR        
+      MLE type: VMM
+      required manifest list:
+        ? 17
+      description: a test VMM MLE with KVM
+      OS: *os_ubuntu_11
+    - &vmm_qemu0121_rhel62
+      name: QEMU
+      version: 6.2-0.12.1
+      attestation type: PCR        
+      MLE type: VMM
+      required manifest list:
+        18: 'DC3831D76DBB34F8906C1F9E14FC99ED227BB817'
+        19: '064D4C4F0EECB20A1D2B512AE80D7DF6AF612D01'
+        20: '0000000000000000000000000000000000000000'
+      description: a test VMM MLE with KVM
+      OS: *os_rhel_62
+    - &vmm_xen_suse
+      name: Xen SuSE
+      version: 11-4.1.0
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        # 17
+        18: 'AC6C96D73C29A40E264BDA6E4218819833BA2EB5'
+        19: '18E6853DA7A445997C014A752D10D1C20A52702B'
+        20: '0000000000000000000000000000000000000000'
+      description: a test VMM MLE with Xen
+      OS: *os_suse_11
+    - &vmm_xen_ubuntu
+      name: Xen Ubuntu
+      version: 11.10-4.1.0
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        # 17
+        18: 'A713C53FD7D684F0C635432BBEEFF6235CED4EC3'
+        19: 'E2724C0CDDEB0DDFE875A8F3A15F8AF25FA01396'
+        20: '0000000000000000000000000000000000000000'
+      description: a test VMM MLE with Xen
+      OS: *os_ubuntu_11
+    - &vmm_qemu_15
+      name: QEMU
+      version: 11-0.15.1
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        # 17
+        18: '450D3D3EA64ED7CB24C78735CFC07A97182EBCF6'
+        19: '53B06128981202C365551244122EE7426B80BA65'
+        20: '0000000000000000000000000000000000000000'
+      description: a test VMM MLE with Xen
+      OS: *os_suse_11
+    - &vmm_xen_602
+      name: XenServer
+      version: 6.0.2-53456p
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        18: 'EB5262BBB9E6AFB8B743B9DC991DA15C3D9514AE'
+        19: '641AEFB6E7B0E53E92A065229C0B71DA6017CF98'
+        20: '0000000000000000000000000000000000000000'
+      description: XenServer 6.0.2
+      OS: *os_xen_602
+    -
+      name: ESXi
+      version: 5.0.0-469512
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        ? 17
+        ? 18
+        ? 20
+      description: a test VMM MLE with VMWare
+      OS: *os_vmware_esxi_500
+    -
+      name: ESXi
+      version: 5.1-12345
+      attestation type: MODULE
+      MLE type: VMM
+      required manifest list:
+        ? 17
+        ? 18
+        ? 19
+        ? 20
+      description: a test VMM MLE with VMWare
+      OS: *os_vmware_esxi_510
+    -
+      name: Intel_VMware
+      version: "T060"
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        0: '891EB0B556B83FCEF1C10F3FA6464345E34F8F91'
+      description: a test BIOS MLE with VMWare
+      OEM: *oem_intel
+    -
+      name: VMware_ESXi
+      version: 5.1.0-613838
+      attestation type: MODULE
+      MLE type: VMM
+      required manifest list:
+        ? 17
+        ? 18
+        ? 19
+        ? 20
+      description: a test VMM MLE with VMWare
+      OS: *os_vmware_esxi_510
+    -
+      name: VMware_ESXi
+      version: 5.1.0-799733
+      attestation type: MODULE
+      MLE type: VMM
+      required manifest list:
+        18: 'F6FD306D2FA33E21C69CA598330B64DF1ED0D002'
+        19: ''
+        20: '7F824EA48E5D50A4B236152223206B00620BC74B'
+      description: a test VMM MLE with VMWare
+      OS: *os_vmware_esxi_510
+    -
+      name: VMware_ESXi
+      version: 5.0.0-469512
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        ? 17
+        ? 18
+        ? 20
+      description: a test VMM MLE with VMWare
+      OS: *os_vmware_esxi_500
+    - &bios_intel_ubuntu
+      name: Intel_Ubuntu
+      version: T060
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        0: '891EB0B556B83FCEF1C10F3FA6464345E34F8F91'
+      description: a test BIOS MLE
+      OEM: *oem_intel
+    - &bios_intel_rhel
+      name: Intel_RHEL
+      version: T060
+      attestation type: PCR
+      MLE type: BIOS
+      required manifest list:
+        0: '891EB0B556B83FCEF1C10F3FA6464345E34F8F91'
+      description: a test BIOS MLE
+      OEM: *oem_intel
+    - &vmm_qemu
+      name: QEMU
+      version: 11.10-0.14.1
+      attestation type: PCR
+      MLE type: VMM
+      required manifest list:
+        ? 17
+        ? 18
+        ? 19
+        ? 20
+      description: a test VMM MLE for QEMU
+      OS: *os_rhel_62
+hosts:
+  -
+    Name: 10.1.71.149
+    IPAddress: 10.1.71.149
+    Port: 9999
+    Description: 10.1.71.149 SUSE	
+    BIOS: *bios_epsd
+    VMM: *vmm_xen_suse
+  -
+    Name: 10.1.71.172
+    IPAddress: 10.1.71.172
+    Port: 9999
+    Description: 10.1.71.172	
+    BIOS: *bios_intel_ubuntu
+    VMM: *vmm_qemu
+  -
+    Name: 10.1.71.201
+    IPAddress: 10.1.71.201
+    Port: 9999
+    Description: 10.1.71.201
+    BIOS: *bios_dell
+    VMM: *vmm_xen_602
+  -
+    Name: 10.1.71.169
+    IPAddress: 10.1.71.169
+    Port: 9999
+    Description: 10.1.71.169
+    BIOS: *bios_intel_suse
+    VMM: *vmm_xen_suse
+  -
+    Name: 10.1.71.170
+    IPAddress: 10.1.71.170
+    Port: 9999
+    Description: 10.1.71.170
+    BIOS: *bios_intel_suse
+    VMM: *vmm_qemu_15
+  -
+    Name: 10.1.71.171
+    IPAddress: 10.1.71.171
+    Port: 9999
+    Description: 10.1.71.171
+    BIOS: *bios_intel_ubuntu
+    VMM: *vmm_xen_ubuntu
+  -
+    Name: 10.1.71.167
+    IPAddress: 10.1.71.167
+    Port: 9999
+    Description: 10.1.71.167
+    BIOS: *bios_intel_rhel
+    VMM: *vmm_qemu0121_rhel62
+script:
+  - add OEM
+  - add OS
+  - add MLE
+  - add host
+  - get host trust status
+

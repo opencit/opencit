@@ -1,0 +1,198 @@
+{
+  "policy" : {
+    "checks" : [ {
+      "policy" : {
+        "checks" : [ {
+          "policy" : {
+            "checks" : [ {
+              "policy" : {
+                "expectedPcr" : {
+                  "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+                  "index" : "0"
+                }
+              },
+              "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+            } ]
+          },
+          "policyName" : "com.intel.mtwilson.policy.impl.TrustedBios"
+        }, {
+          "policy" : {
+            "checks" : [ {
+              "policy" : {
+                "expectedPcr" : {
+                  "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+                  "index" : "17"
+                }
+              },
+              "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+            }, {
+              "policy" : {
+                "expectedPcr" : {
+                  "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+                  "index" : "18"
+                }
+              },
+              "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+            }, {
+              "policy" : {
+                "expectedPcr" : {
+                  "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+                  "index" : "19"
+                }
+              },
+              "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+            } ]
+          },
+          "policyName" : "com.intel.mtwilson.policy.impl.TrustedVmm"
+        } ]
+      },
+      "policyName" : "com.intel.mtwilson.policy.RequireAll"
+    } ]
+  },
+  "marks" : [ {
+    "policy" : {
+      "checks" : [ {
+        "policy" : {
+          "checks" : [ {
+            "policy" : {
+              "expectedPcr" : {
+                "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+                "index" : "0"
+              }
+            },
+            "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+          } ]
+        },
+        "policyName" : "com.intel.mtwilson.policy.impl.TrustedBios"
+      }, {
+        "policy" : {
+          "checks" : [ {
+            "policy" : {
+              "expectedPcr" : {
+                "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+                "index" : "17"
+              }
+            },
+            "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+          }, {
+            "policy" : {
+              "expectedPcr" : {
+                "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+                "index" : "18"
+              }
+            },
+            "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+          }, {
+            "policy" : {
+              "expectedPcr" : {
+                "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+                "index" : "19"
+              }
+            },
+            "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+          } ]
+        },
+        "policyName" : "com.intel.mtwilson.policy.impl.TrustedVmm"
+      } ]
+    },
+    "marks" : [ {
+      "policy" : {
+        "checks" : [ {
+          "policy" : {
+            "expectedPcr" : {
+              "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+              "index" : "0"
+            }
+          },
+          "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+        } ]
+      },
+      "marks" : [ {
+        "policy" : {
+          "expectedPcr" : {
+            "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+            "index" : "0"
+          }
+        },
+        "marks" : [ ],
+        "faults" : [ ],
+        "trusted" : true,
+        "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+      } ],
+      "faults" : [ ],
+      "trusted" : true,
+      "policyName" : "com.intel.mtwilson.policy.impl.TrustedBios"
+    }, {
+      "policy" : {
+        "checks" : [ {
+          "policy" : {
+            "expectedPcr" : {
+              "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+              "index" : "17"
+            }
+          },
+          "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+        }, {
+          "policy" : {
+            "expectedPcr" : {
+              "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+              "index" : "18"
+            }
+          },
+          "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+        }, {
+          "policy" : {
+            "expectedPcr" : {
+              "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+              "index" : "19"
+            }
+          },
+          "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+        } ]
+      },
+      "marks" : [ {
+        "policy" : {
+          "expectedPcr" : {
+            "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+            "index" : "17"
+          }
+        },
+        "marks" : [ ],
+        "faults" : [ ],
+        "trusted" : true,
+        "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+      }, {
+        "policy" : {
+          "expectedPcr" : {
+            "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+            "index" : "18"
+          }
+        },
+        "marks" : [ ],
+        "faults" : [ ],
+        "trusted" : true,
+        "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+      }, {
+        "policy" : {
+          "expectedPcr" : {
+            "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+            "index" : "19"
+          }
+        },
+        "marks" : [ ],
+        "faults" : [ ],
+        "trusted" : true,
+        "policyName" : "com.intel.mtwilson.policy.PcrMatchesConstant"
+      } ],
+      "faults" : [ ],
+      "trusted" : true,
+      "policyName" : "com.intel.mtwilson.policy.impl.TrustedVmm"
+    } ],
+    "faults" : [ ],
+    "trusted" : true,
+    "policyName" : "com.intel.mtwilson.policy.RequireAll"
+  } ],
+  "faults" : [ ],
+  "trusted" : true,
+  "policyName" : "com.intel.mtwilson.policy.RequireAll"
+}

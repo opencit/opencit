@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <selection>
+        <attribute oid="2.5.4.6"><text>US</text></attribute>
+        <attribute oid="2.5.4.8"><text>CA</text></attribute>
+        <attribute oid="2.5.4.8"><text>TX</text></attribute>
+        <attribute oid="2.5.4.7"><text>Folsom</text></attribute>
+        <attribute oid="2.5.4.7"><text>El Paso</text></attribute>
+    </selection>
+</selections>
+<!--
+This XML file demonstrates a custom selection specifying internet-standard attributes
+Country: http://oid-info.com/get/2.5.4.6
+Locality: http://oid-info.com/get/2.5.4.7
+State or Province: http://oid-info.com/get/2.5.4.8
+Handy reference of some common OIDs:
+http://simplesamlphp.googlecode.com/svn/branches/simplesamlphp-1.8/attributemap/name2oid.php
+-->

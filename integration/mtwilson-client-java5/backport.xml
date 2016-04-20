@@ -1,0 +1,99 @@
+<project default="all">
+
+    <!-- In order to test the backported code, you need to specify the path to the JRE version 1.5 -->
+    <condition property="jvm1.5" value="C:\Program Files (x86)\Java\jdk1.5.0_22\bin\java.exe">
+            <os family="windows" />
+    </condition>
+
+    <condition property="jvm1.5" value="/usr/share/jdk1.5.0_22/bin/java">
+            <os family="unix" />
+    </condition>    
+    
+    <property name="lib.folder" value="${basedir}/lib"/>
+    <property name="input.folder" value="${basedir}/target/jars"/>
+    <property name="output.folder" value="${basedir}/target/jdk15"/>
+    <property name="test.folder" value="${basedir}/target/test"/>
+    
+    <path id="lib.path">
+	<fileset dir="${lib.folder}"><include name="**/*.jar"/></fileset>
+	<fileset dir="${input.folder}"><include name="**/*.jar"/></fileset>
+    </path>
+    
+    <property name="lib.path.text" refid="lib.path"/>
+    
+    <path id="lib.jdk15.path">
+	<fileset dir="${output.folder}"><include name="**/*.jar"/></fileset>
+    </path>
+    
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${maven.plugin.classpath}"/>
+    
+              <target name="all">
+		    <mkdir dir="${output.folder}"/>
+
+			   <foreach param="jarfile" target="backport">
+			       <path>
+                                   <fileset dir="${input.folder}">
+	                                <filename name="**/*.jar" />
+	                            </fileset>
+			       </path>
+                            </foreach>
+			   
+			<zip destfile="${basedir}/target/api-client-jdk15.zip" basedir="${output.folder}" includes="**/*.jar"/>
+              </target>
+	      
+	      <target name="backport">
+		  <basename property="jarname" file="${jarfile}"/>
+		  <echo>Backporting ${jarname}</echo>
+
+		<!--<java classname="net.sf.retrotranslator.transformer.Retrotranslator" classpathref="lib.path">-->
+		<!-- only backport out of date files, because if we do it all every time it takes a while -->
+		<outofdate>
+		    <sourcefiles>
+			<fileset dir="${input.folder}">
+			    <filename name="${jarname}"/>
+			</fileset>
+		    </sourcefiles>
+		    <targetfiles>
+			<fileset dir="${output.folder}">
+			    <filename name="${jarname}"/>
+			</fileset>
+		    </targetfiles>
+		    <sequential>
+			<java jar="${lib.folder}/retrotranslator-transformer-1.2.9.jar" fork="true">
+			<arg line="-classpath ${lib.path.text} -srcjar ${jarfile} -target 1.5 -destjar ${output.folder}/${jarname} -backport java.lang.String.isEmpty:com.intel.backport.java.lang.String.isEmpty -verify"/>
+			</java>			
+		    </sequential>
+		</outofdate>
+		  
+	      </target>
+	      
+	      <target name="test">
+		 <mkdir dir="${test.folder}"/>
+		 
+		 <!-- Confirm Java version -->
+		<java jvm="${jvm1.5}" fork="true" classname="n/a">
+		  <jvmarg line="-version"/>
+		</java>
+
+		<java jvm="${jvm1.5}" fork="true" classname="com.intel.mtwilson.crypto.RsaCommand" classpathref="lib.jdk15.path">
+		  <arg line="EncodeUsername test"/>
+		</java>
+
+		<java jvm="${jvm1.5}" fork="true" classname="com.intel.mtwilson.crypto.RsaCommand" classpathref="lib.jdk15.path">
+		  <arg line="CreateSSLCertificate 10.1.71.103 ip:10.1.71.103 ${test.folder}/serverssl.jks 10.1.71.103 password"/>
+		</java>
+		<!-- keytool -list -keystore target/test/serverssl.jks -storepass password -->
+		  <!--
+		<java jvm="${jvm1.5}" fork="true" classname="com.intel.mtwilson.ApiCommand" classpathref="lib.jdk15.path">
+		  <arg line="BootstrapUser ${test.folder} https://10.1.71.103:8181 jonathan password"/>
+		</java>		
+		-->
+		<!-- keytool -list -keystore target/test/jonathan.jks -storepass password -->
+
+		<java jvm="${jvm1.5}" fork="true" classname="com.intel.mtwilson.test.Main" classpathref="lib.jdk15.path">
+		  <jvmarg line="-Djava.endorsed.dirs=${output.folder}"/>
+		  <arg line="${basedir}/etc/test-0.5.2.yml"/>
+		</java>		
+		
+	      </target>
+</project>

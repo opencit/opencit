@@ -1,0 +1,48 @@
+<!--
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Search Hosts</title>
+        <meta name="description" content="Search hosts" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    </head>
+    <body>
+-->
+<!-- implied form action is the resource collection url -->
+        <form method="POST" class="search">
+            <fieldset>
+                <legend>Search Hosts</legend>
+                <ul>
+                    <li>
+                        <label>
+                            <span>Host UUID</span>
+                            <input type="text" name="uuid" placeholder="UUID"/>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <span>Host Address</span>
+                            <input type="text" name="internet_address" placeholder="Hostname or IP Address"/>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <span>Host Type</span>
+                            <select name="host_type">
+                                <option>Hyper-V</option>
+                                <option>KVM</option>
+                                <option>Vmware</option>
+                                <option>Xen</option>
+                            </select>
+                        </label>
+                    </li>
+                    <li>
+                        <input type="submit" value="Search"/>
+                    </li>
+                </ul>
+            </fieldset>
+        </form>
+<!--
+    </body>
+</html>
+-->

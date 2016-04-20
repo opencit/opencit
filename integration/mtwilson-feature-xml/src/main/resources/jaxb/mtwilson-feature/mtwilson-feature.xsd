@@ -1,0 +1,95 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           targetNamespace="urn:mtwilson-feature"
+           xmlns="urn:mtwilson-feature"
+           elementFormDefault="qualified">
+
+    <xs:element name="feature" type="featureType" />
+
+    <xs:complexType name="featureType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="version" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="provider" type="providerType" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="license" type="licenseType" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="includes" type="includesType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="requires" type="requiresType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="conflicts" type="conflictsType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="links" type="linksType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="providerType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="url" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <xs:complexType name="licenseType">
+        <xs:sequence>
+            <xs:element name="copyright" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="url" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <xs:complexType name="includesType">
+        <xs:choice minOccurs="1">
+        <xs:sequence>
+            <xs:element name="components" type="componentsType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+        </xs:choice>	 
+    </xs:complexType>
+
+    <xs:complexType name="componentsType">
+        <xs:sequence>
+            <xs:element name="component" type="featureType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <xs:complexType name="requiresType">
+        <xs:sequence>
+            <xs:element name="feature-ref" type="featureRefType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <xs:complexType name="conflictsType">
+        <xs:sequence>
+            <xs:element name="feature-ref" type="featureRefType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <xs:complexType name="featureRefType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="version" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <xs:complexType name="linksType">
+        <xs:sequence>
+            <xs:element name="link" type="linkType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>        
+    </xs:complexType>
+
+    <!--
+    <xs:complexType name="linkType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="href" type="xs:string" use="required"/>
+                <xs:attribute name="rel" type="xs:string" use="required"/>
+                <xs:attribute name="type" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    -->
+    <xs:complexType name="linkType">
+        <xs:sequence>
+            <xs:element name="href" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="rel" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="type" type="xs:string" minOccurs="0" maxOccurs="1"/>
+       </xs:sequence>        
+     </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <options>
+        <cache mode="off"/>
+    </options>
+    <default>
+        <selection>
+            <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
+            <attribute oid="2.5.4.789.1"><text>State=NY</text></attribute>
+            <attribute oid="2.5.4.789.1"><text>City=New York</text></attribute>
+        </selection>
+    </default>
+    <selection id="8ed9140b-e6a1-41b2-a8d4-258948633153" name="California">
+        <subject><ip>192.168.1.101</ip></subject>
+    </selection>
+    <selection id="24e7d7be-f337-47f7-a1af-9a4dbdaeb69d">
+        <subject><ip>192.168.1.102</ip></subject>
+        <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>State=TX</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=El Paso</text></attribute>
+    </selection>
+    <selection name="Canada">
+        <subject><ip>192.168.1.103</ip></subject>
+        <subject><ip>192.168.1.104</ip></subject>
+        <subject><ip>192.168.1.105</ip></subject>
+        <attribute oid="2.5.4.789.1"><text>Country=CA</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>Province=Quebec</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=Quebec City</text></attribute>
+    </selection>
+</selections>
+<!--
+Demonstrates the default and options elements. 
+The "default" element may contain one or more selection elements. 
+Selection elements inside the "default" section can be differentiated by
+date using notBefore/notAfter. 
+Selection elements inside the "default" section must have any "subject" 
+elements - if they do the server will ignore them or deny the request.
+The "options" element supports only one option at this time, the "cache" option.
+The "cache" element must have a "mode" attribute with a value of "on" or "off"
+(these are NOT case sensitive). The default value is "on".
+Any provided options apply only to the current request and are not applicaable to 
+other requests. 
+In this example, if a server is provided as the subject of the request which
+does not match any of the included selections, the default selection would
+be used to populate attributes in the certificate. Also, the cache is turned
+off so the server will always generate a new certificate in response to this
+xml and never use any previously existing certificate. If a new certificate
+cannot be generated for any reason the server will reject the request. 
+-->
