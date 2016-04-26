@@ -164,8 +164,9 @@ public class Selections extends MtWilsonClient {
      * @mtwContentTypeReturned XML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <pre><xmp>
      * https://server.com:8181/mtwilson/v2/tag-selections/f9dfff4f-ac19-4c71-9b95-116e2f0dabc2
+     * 
      * Output: 
      * <?xml version="1.0" encoding="UTF-8" standalone="yes"?><selections xmlns="urn:mtwilson-tag-selection">
      * <default><selection><attribute oid="2.5.4.789.1"><text>city=Folsom</text></attribute>
@@ -175,7 +176,7 @@ public class Selections extends MtWilsonClient {
      *                     <attribute oid="2.5.4.789.1"><text>city=Santa Clara</text></attribute>
      *                     <attribute oid="2.5.4.789.1"><text>customer=Pepsi</text></attribute>
      * </selection></default></selections>
-     * </pre>
+     * </xmp></pre>
      * @mtwSampleApiCall
      * <pre>
      *  Selections client = new Selections(My.configuration().getClientProperties());

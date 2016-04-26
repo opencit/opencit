@@ -53,20 +53,21 @@ public class HostTpmPassword extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tpm-passwords
+     * 
      * Input: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","password":"Password"}
-     * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","etag":"52bfe4be78b4f7e83afcc516311450dd18d89e8c",
-     * "modified_on":1401305674274,"password":"Password"}
-     * </pre>
+     * 
+     * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","etag":"52bfe4be78b4f7e83afcc516311450dd18d89e8c","modified_on":1401305674274,"password":"Password"}
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
      *  TpmPassword obj = new TpmPassword();
      *  obj.setId("07217f9c-f625-4c5a-a538-73f1880abdda");
      *  obj.setPassword("Password");
      *  obj = client.storeTpmPassword(obj);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public String storeTpmPassword(UUID hostHardwareId, String tpmOwnerSecretHex) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -96,17 +97,18 @@ public class HostTpmPassword extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tpm-passwords?id=07217f9c-f625-4c5a-a538-73f1880abdda
+     * 
      * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
      *  TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
      *  criteria.id = UUID.valueOf("07217f9c-f625-4c5a-a538-73f1880abdda");
      *  TpmPassword obj = client.searchTpmPasswords(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public TpmPassword searchTpmPasswords(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection collection = getTargetPathWithQueryParams("/host-tpm-passwords", criteria).request(MediaType.APPLICATION_JSON).get(TpmPasswordCollection.class);
@@ -125,15 +127,16 @@ public class HostTpmPassword extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tpm-passwords/07217f9c-f625-4c5a-a538-73f1880abdda
+     * 
      * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","password":"Password"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
      *  TpmPassword obj = client.retrieveTpmPassword(UUID.valueOf("07217f9c-f625-4c5a-a538-73f1880abdda"));
-     * </pre>
+     * </xmp></pre></div>
      */    
     public TpmPassword retrieveTpmPassword(UUID hardwareUuid) {
         HashMap<String,Object> map = new HashMap<>();

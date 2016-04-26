@@ -46,20 +46,22 @@ public class Oems extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oems
+     * 
      * Input: {"name":"Intel","description":"Intel OEM"}
+     * 
      * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties();
      *  Oems client = new Oems(prop);
      *  Oem oem = new Oem();
      *  oem.setName("Intel");
      *  oem.setDescription("Intel OEM");
      *  Oem createOem = client.createOem(oem);
-     * </pre>
+     * </xmp></pre></div>
      */
     public Oem createOem(Oem oem) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -75,15 +77,15 @@ public class Oems extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oems/31741556-f5c7-4eb6-a713-338a23e43b93
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties(); 
      *  Oems client = new Oems(prop);
      *  client.deleteOem("31741556-f5c7-4eb6-a713-338a23e43b93");
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteOem(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -104,16 +106,16 @@ public class Oems extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/oems?nameContains=admin
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Oems client = new Oems(My.configuration().getClientProperties());
      *  OemFilterCriteria criteria = new OemFilterCriteria();
      *  criteria.nameContains = "admin";
      *  client.deleteOem(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteOem(OemFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -132,20 +134,22 @@ public class Oems extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oems/31741556-f5c7-4eb6-a713-338a23e43b93
+     * 
      * Input: {"description":"Intel OEM updated"}
+     * 
      * Output: {"id": "31741556-f5c7-4eb6-a713-338a23e43b93","description": "Intel OEM updated" }
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties();
      *  Oems client = new Oems(prop);  
      *  Oem oem = new Oem();
      *  oem.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
      *  oem.setDescription("Intel OEM updated");
      *  oem = client.editOem(oem);
-     * </pre>
+     * </xmp></pre></div>
      */
     public Oem editOem(Oem oem) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -164,16 +168,17 @@ public class Oems extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oems/31741556-f5c7-4eb6-a713-338a23e43b93
+     * 
      * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties();
      *  Oems client = new Oems(prop);
      *  Oem retrieveOem = client.retrieveOem("31741556-f5c7-4eb6-a713-338a23e43b93");
-     * </pre>
+     * </xmp></pre></div>
      */
     public Oem retrieveOem(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -194,18 +199,19 @@ public class Oems extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oems?nameContains=Intel
+     * 
      * Output: {"oems":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties();
      *  Oems client = new Oems(prop);
      *  OemFilterCriteria criteria = new OemFilterCriteria();
      *  criteria.nameContains = "intel";
      *  OemCollection oems = client.searchOems(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public OemCollection searchOems(OemFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
