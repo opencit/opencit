@@ -1,7 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.integration</groupId>
     <artifactId>mtwilson-test</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-test</name>
     <description>
@@ -13,14 +15,13 @@
         Environment to test is defined in local file(s)
         TODO: add ability to download environment definition from a URL for testing (do not save it, just use it for the current tests)
     </description>
-  
+    
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
-
-
+    
     <build>
         <plugins>
             <plugin>
@@ -43,35 +44,35 @@
                 </executions>
             </plugin>
             <!--
-                  <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>1.5</version>
-                    <executions>
-                        <execution>
-                            <id>mtwilson-test</id>
-                            <phase>package</phase>
-                            <goals><goal>shade</goal></goals>
-                            <configuration>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>mtwilson-test</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                                <shadedClassifierName>with-dependencies</shadedClassifierName>
-                                    <transformers>
-                                      <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <manifestEntries>
-                                            <Main-Class>com.intel.mtwilson.autotest.Main</Main-Class>
-                                        </manifestEntries>
-                                      </transformer>
-                                    </transformers>
-                            </configuration>
-                        </execution>
-                        </executions>
-                  </plugin>
-            -->                
-                      
+                            <shadedClassifierName>with-dependencies</shadedClassifierName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>com.intel.mtwilson.autotest.Main</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
         </plugins>
     </build>
-
-
+    
     <dependencies>
         <dependency>
             <!-- Purpose: enables storing test environment info outside test sources -->
@@ -104,42 +105,109 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
         </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
         
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-repository-api</artifactId>
-            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-rpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-rpc-model</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-extensions-cache</artifactId>
-            <version>${project.version}</version>        
         </dependency>
-
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher</artifactId>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto-password</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-shiro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-classpath</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-extensions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-module</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbi</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
-            <version>${project.version}</version>        
+            <version>${project.version}</version>
         </dependency>
-                
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>
-            <version>${project.version}</version>        
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java7</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -161,15 +229,6 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -197,24 +256,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-util</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto-password</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-shiro</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-ws-v2</artifactId>
             <version>${project.version}</version>        
@@ -233,27 +274,6 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-saml</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-classpath</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-extensions</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-module</artifactId>
-            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -297,21 +317,6 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-rpc</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-rpc-model</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-audit-handler</artifactId>
             <version>${project.version}</version>        
         </dependency>
@@ -341,11 +346,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>        
@@ -365,11 +365,12 @@
             <artifactId>mtwilson-user-management-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-    
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-performance</artifactId>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        
         <!--
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -400,12 +401,6 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.glassfish.hk2</groupId>
             <artifactId>hk2-api</artifactId>
         </dependency>
@@ -413,26 +408,22 @@
             <groupId>org.glassfish.hk2</groupId>
             <artifactId>hk2-utils</artifactId>
         </dependency>
-
+        
         <!-- jersey specific dependencies, maybe should go in a different extension -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
+        
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
-            <version>${project.version}</version>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
         </dependency>
-        <dependency>
-                <groupId>javax</groupId>
-                <artifactId>javaee-api</artifactId>
-            </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
-            <version>2.4.1</version>
+            <!--<version>2.4.1</version>-->
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
         <!-- for multipart, see https://jersey.java.net/documentation/latest/media.html  -->
@@ -456,8 +447,7 @@
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-xml-provider</artifactId>
         </dependency>
-
-
+        
         <!-- jetty ,  see complete list of available modules at http://mvnrepository.com/artifact/org.eclipse.jetty -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -517,9 +507,8 @@
             <artifactId>jetty-xml</artifactId>
             <version>9.1.0.RC2</version>
         </dependency>
-                                                            
         <!-- end jetty -->
-
+        
         <!--
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
@@ -527,7 +516,8 @@
             <version>2.2-M4</version>
         </dependency>
         -->
-
+        
         <!-- end restlet (for test client) -->
-    </dependencies>  
+    </dependencies>
+    
 </project>
