@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature xmlns="urn:mtwilson:feature:1.0">
 <id>mtwilson-export-data-bundle</id>
-<version>3.0.1-SNAPSHOT</version>
+<version>3.0-SNAPSHOT</version>
 <name>Export Configuration Data Bundle</name>
 <provider><name>Intel Corporation</name></provider>
 <description>Creates a data bundle with SAML issuer and PCA AIK issuer certificates, suitable for importing to Key Broker</description>

@@ -3,7 +3,7 @@
     
     <artifactId>mtwilson-server-zip</artifactId>
     <groupId>com.intel.mtwilson.packages</groupId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <name>mtwilson-server-zip</name>
