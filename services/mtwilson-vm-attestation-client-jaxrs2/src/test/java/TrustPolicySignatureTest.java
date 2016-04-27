@@ -6,7 +6,7 @@
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.services.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
+import com.intel.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import java.util.Properties;

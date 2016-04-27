@@ -46,19 +46,21 @@ public class MleSources extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source
+     * 
      * Input: {"name":"Server 01"}
+     * 
      * Output: {"mle_sources":[{"id":"89a46064-c831-4c9b-acd7-1f0c8d1984de","name":"Server 01","mle_uuid":"9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleSources client = new MleSources(My.configuration().getClientProperties());
      *      MleSource obj = new MleSource();
      *      obj.setMleUuid("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1");
      *      obj.setName("Server 01");
      *      MleSource newObj = client.createMleSource(obj);
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleSource createMleSource(MleSource obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -77,14 +79,14 @@ public class MleSources extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source/89a46064-c831-4c9b-acd7-1f0c8d1984de
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleSources client = new MleSources(My.configuration().getClientProperties());
      *      client.deleteMleSource("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1", "89a46064-c831-4c9b-acd7-1f0c8d1984de");        
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMleSource(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -105,16 +107,16 @@ public class MleSources extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source/
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  MleSource client = new MleSource(My.configuration().getClientProperties());
      *  MleSourceFilterCriteria criteria = new MleSourceFilterCriteria();
      *  criteria.mleUuid = UUID.valueOf("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1");
      *  client.deleteMle(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMleSource(MleSourceFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -135,20 +137,22 @@ public class MleSources extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source/89a46064-c831-4c9b-acd7-1f0c8d1984de
+     * 
      * Input: {"name":"Server 02"}
+     * 
      * Output: {"id":"89a46064-c831-4c9b-acd7-1f0c8d1984de","name":"Server 02","mle_uuid":"9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleSources client = new MleSources(My.configuration().getClientProperties());
      *      MleSource obj = new MleSource();
      *      obj.setId(UUID.valueOf("89a46064-c831-4c9b-acd7-1f0c8d1984de"));
      *      obj.setMleUuid("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1");
      *      obj.setName("Server 02");
      *      MleSource newObj = client.editMleSource(obj);
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleSource editMleSource(MleSource obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -169,15 +173,16 @@ public class MleSources extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source/89a46064-c831-4c9b-acd7-1f0c8d1984de
+     * 
      * Output: {"id":"89a46064-c831-4c9b-acd7-1f0c8d1984de","name":"192.168.0.2","mle_uuid":"9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleSources client = new MleSources(My.configuration().getClientProperties());
      *      MleSource obj = client.retrieveMleSource("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1", "89a46064-c831-4c9b-acd7-1f0c8d1984de");
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleSource retrieveMleSource(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -198,17 +203,18 @@ public class MleSources extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source
+     * 
      * Output:{"mle_sources":[{"id":"89a46064-c831-4c9b-acd7-1f0c8d1984de","name":"Server 02","mle_uuid":"9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleSources client = new MleSources(My.configuration().getClientProperties());
      *      MleSourceFilterCriteria criteria = new MleSourceFilterCriteria();
      *      criteria.mleUuid = UUID.valueOf("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1");
      *      MleSourceCollection searchMleSources = client.searchMleSources(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleSourceCollection searchMleSources(MleSourceFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());

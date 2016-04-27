@@ -45,20 +45,22 @@ public class Oss extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oss
+     * 
      * Input: {"name":"TestOS 1","description":"","version":"1.2.3"}
+     * 
      * Output: {"id":"e946ccec-4a55-4913-bdb6-5878c88a9e81","name":"TestOS1","version":"1.2.3","description":""}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Oss client = new Oss(My.configuration().getClientProperties());
      *  Os newOs = new Os();
      *  newOs.setName("TestOS1");
      *  newOs.setVersion("1.2.3");
      *  newOs.setDescription("");
      *  newOs = client.createOs(newOs);
-     * </pre>
+     * </xmp></pre></div>
      *      
     */
     public Os createOs(Os os) {
@@ -75,14 +77,14 @@ public class Oss extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Oss client = new Oss(My.configuration().getClientProperties());
      *  client.deleteOs("e946ccec-4a55-4913-bdb6-5878c88a9e81");
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteOs(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -103,16 +105,16 @@ public class Oss extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/oss?nameContains=admin
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Oss client = new Oss(My.configuration().getClientProperties());
      *  OsFilterCriteria criteria = new OsFilterCriteria();
      *  criteria.nameContains = "admin";
      *  client.deleteOs(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteOs(OsFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -131,19 +133,21 @@ public class Oss extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
+     * 
      * Input: {"description":"Added description"}
+     * 
      * Output: {"id":"e946ccec-4a55-4913-bdb6-5878c88a9e81","description":"Added description"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * Oss client = new Oss(My.configuration().getClientProperties());
      * Os os = new Os();
      * os.setId(UUID.valueOf("e946ccec-4a55-4913-bdb6-5878c88a9e81"));
      * os.setDescription("Added description");
      * os = client.editOs(os);
-     * </pre>     
+     * </xmp></pre></div>     
      */
     public Os editOs(Os obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -162,16 +166,17 @@ public class Oss extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
+     * 
      * Output: {"id":"e946ccec-4a55-4913-bdb6-5878c88a9e81","name":"TestOS1","version":"1.2.3","description":"Added description"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * Properties prop = My.configuration().getClientProperties();
      * Oss client = new Oss(prop);  
      * Os retrieveOs = client.retrieveOs("e946ccec-4a55-4913-bdb6-5878c88a9e81");
-     * </pre>
+     * </xmp></pre></div>
      */
     public Os retrieveOs(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -192,18 +197,19 @@ public class Oss extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/oss?nameContains=VMWare
+     * 
      * Output: {"oss":[{"id":"2ffa07cf-ca9f-11e3-8449-005056b5643f","name":"VMWare","version":"5.0"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * Properties prop = My.configuration().getClientProperties();
      * Oss client = new Oss(prop);  
      * OsFilterCriteria criteria = new OsFilterCriteria();
      * criteria.nameContains = "VMWare";
      * OsCollection oss = client.searchOss(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public OsCollection searchOss(OsFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());

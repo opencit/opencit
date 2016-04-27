@@ -54,17 +54,19 @@ public class MleModules extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules
+     * 
      * Input: {"module_name":"New Module 1","module_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC","extended_to_pcr":"19",
      * "package_vendor":"VMware","package_name":"PackageName","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
      * "use_host_specific_digest":"false","description":"Module addition testing"}
+     * 
      * Output: {"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"9a16973b-5b17-49a8-b508-3f5436c8f944","module_name":"New Module 1",
      * "module_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
      * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","use_host_specific_digest":false,"description":"Module addition testing"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleModules client = new MleModules(My.configuration().getClientProperties());
      *      MleModule obj = new MleModule();
      *      obj.setModuleName("New Module 1");
@@ -77,7 +79,7 @@ public class MleModules extends MtWilsonClient {
      *      obj.setUseHostSpecificDigest(Boolean.FALSE);
      *      obj.setDescription("Module addition testing");
      *      MleModule createMleModule = client.createMleModule(obj);
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleModule createMleModule(MleModule obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -97,14 +99,14 @@ public class MleModules extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules/f4b25e23-9114-46f1-b0cb-8e2654514f5d
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleModules client = new MleModules(My.configuration().getClientProperties());
      *      client.deleteMleModule("66e999af-e9eb-43cc-9cbf-dcb73af1963b", "5ae636d0-e748-4d30-9660-f797956d4bb7");             * 
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMleModule(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -124,17 +126,17 @@ public class MleModules extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules?nameContains=New
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MleModules client = new MleModules(My.configuration().getClientProperties());
      *   MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
      *   criteria.mleUuid = UUID.valueOf("9a16973b-5b17-49a8-b508-3f5436c8f944");
      *   criteria.nameContains = "New";
      *  client.deleteMleModule(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMleModule(MleModuleFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -155,13 +157,15 @@ public class MleModules extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules/f4b25e23-9114-46f1-b0cb-8e2654514f5d
+     * 
      * Input: {"description":"Module update testing"}
+     * 
      * Output: {"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"9a16973b-5b17-49a8-b508-3f5436c8f944","description":"Module update testing"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleModules client = new MleModules(My.configuration().getClientProperties()); 
      *      MleModule obj = new MleModule();
      *      obj.setMleUuid("9a16973b-5b17-49a8-b508-3f5436c8f944");
@@ -169,6 +173,7 @@ public class MleModules extends MtWilsonClient {
      *      obj.setDescription("Module update testing");
      *      MleModule newObj = client.editMleModule(obj);
      *  }
+     * </xmp></pre></div>
      */
     public MleModule editMleModule(MleModule obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -188,17 +193,18 @@ public class MleModules extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules/f4b25e23-9114-46f1-b0cb-8e2654514f5d
+     * 
      * Output: {"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"f4b25e23-9114-46f1-b0cb-8e2654514f5d",
      * "module_name":"componentName.New Module 1","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
      * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","description":"Module update testing"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *      MleModules client = new MleModules(My.configuration().getClientProperties());
      *      MleModule obj = client.retrieveMleModule("9a16973b-5b17-49a8-b508-3f5436c8f944", "f4b25e23-9114-46f1-b0cb-8e2654514f5d");
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleModule retrieveMleModule(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -220,20 +226,21 @@ public class MleModules extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules?nameContains=New
+     * 
      * Output: {"mle_modules":[{"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"9a16973b-5b17-49a8-b508-3f5436c8f944",
      * "module_name":"componentName.New Module 1","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
      * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","description":"Module update testing"}]} 
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MleModules client = new MleModules(My.configuration().getClientProperties());
      *   MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
      *   criteria.mleUuid = UUID.valueOf("9a16973b-5b17-49a8-b508-3f5436c8f944");
      *   criteria.nameContains = "New";
      *   MleModuleCollection searchMleModules = client.searchMleModules(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleModuleCollection searchMleModules(MleModuleFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
