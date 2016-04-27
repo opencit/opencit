@@ -41,8 +41,9 @@ public class HostAikCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML 
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/d24dd52f-524e-43aa-8673-4013ecf64a4a/aik-certificates
+     * 
      * Input: {"certificate":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpNSUlDdlRDQ0FhV2dBd0lCQWdJR0FVZWE0TWt2TUEwR0NTcUdTSWIz
      *          RFFFQkJRVUFNQnN4R1RBWEJnTlZCQU1URUcxMGQybHNjMjl1DQpMWEJqWVMxaGFXc3dIaGNOTVRRd09EQXpNRGMxT0RRNFdoY05NalF3T0
      *          RBeU1EYzFPRFE0V2pBQU1JSUJJakFOQmdrcWhraUc5dzBCDQpBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF6amZLQTJxWXVaakc2anIvcTVX
@@ -71,15 +72,15 @@ public class HostAikCertificates extends MtWilsonClient {
      *          1dUNy9FUlNEQVBTZWFnOE10RTBKRThDMVkydlBDdE9raFA0bWVnR0F3ZWQxcXpPbVNrWHBVdVJJczNxcXFScWFrTldtDQpFVTJubURCZWwzTH
      *          FNRFE3NTl4NCszRTNUOWMvNkdDcThKMlN6N1pwcWRjSFhvVDN1aDRlRSszWEpjS3pWYyszSkFhNDd4Z2o2VnpODQppbEhhVXJIRk1ER3ROcDJ
      *          jb3JnYUxEeFFGVC9kDQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tDQo="
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAikCertificates client = new HostAikCertificates(getClientProperties());
      *   HostAikCertificate aikCert = new HostAikCertificate();
      *   aikCert.setHostUuid("d24dd52f-524e-43aa-8673-4013ecf64a4a");
      *   aikCert.setCertificate(certificate);
      *   client.createHostAikCertificate(aikCert);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public HostAikCertificate createHostAikCertificate(HostAikCertificate obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -100,10 +101,12 @@ public class HostAikCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned application/json OR application/x-pem-file (just Certificate in the PEM format would be returned)
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/d24dd52f-524e-43aa-8673-4013ecf64a4a/aik-certificates
+     * 
      * Output: {"aik_certificates":[{"id":"d24dd52f-524e-43aa-8673-4013ecf64a4a","aik_sha1":"0dfa39952dec39848990acac56a7ec8787bef1d4",
      *          "certificate":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpNSUlDdlRDQ0FhV2dBd0lCQWdJR0FV.....RCBDRVJUSUZJQ0FURS0tLS0tDQo="}]}
+     * 
      * Output (ContentType- application/x-pem-file): -----BEGIN CERTIFICATE-----
      *          MIICvTCCAaWgAwIBAgIGAUea4MkvMA0GCSqGSIb3DQEBBQUAMBsxGTAXBgNVBAMTEG10d2lsc29u
      *          LXBjYS1haWswHhcNMTQwODAzMDc1ODQ4WhcNMjQwODAyMDc1ODQ4WjAAMIIBIjANBgkqhkiG9w0B
@@ -119,14 +122,14 @@ public class HostAikCertificates extends MtWilsonClient {
      *          EU2nmDBel3LqMDQ759x4+3E3T9c/6GCq8J2Sz7ZpqdcHXoT3uh4eE+3XJcKzVc+3JAa47xgj6VzN
      *          ilHaUrHFMDGtNp2corgaLDxQFT/d
      *          -----END CERTIFICATE-----
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAikCertificates client = new HostAikCertificates(getClientProperties());
      *   HostAikCertificateFilterCriteria criteria = new HostAikCertificateFilterCriteria();
      *   criteria.hostUuid = "d24dd52f-524e-43aa-8673-4013ecf64a4a";
      *   HostAikCertificateCollection searchHostAikCertificates = client.searchHostAikCertificates(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public HostAikCertificateCollection searchHostAikCertificates(HostAikCertificateFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -146,8 +149,9 @@ public class HostAikCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned application/json OR application/x-pem-file (just Certificate in the PEM format would be returned)
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/hosts/d24dd52f-524e-43aa-8673-4013ecf64a4a/aik-certificates
+     * 
      * Output (ContentType- application/x-pem-file): -----BEGIN CERTIFICATE-----
      *          MIICvTCCAaWgAwIBAgIGAUea4MkvMA0GCSqGSIb3DQEBBQUAMBsxGTAXBgNVBAMTEG10d2lsc29u
      *          LXBjYS1haWswHhcNMTQwODAzMDc1ODQ4WhcNMjQwODAyMDc1ODQ4WjAAMIIBIjANBgkqhkiG9w0B
@@ -163,12 +167,12 @@ public class HostAikCertificates extends MtWilsonClient {
      *          EU2nmDBel3LqMDQ759x4+3E3T9c/6GCq8J2Sz7ZpqdcHXoT3uh4eE+3XJcKzVc+3JAa47xgj6VzN
      *          ilHaUrHFMDGtNp2corgaLDxQFT/d
      *          -----END CERTIFICATE-----
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAikCertificates client = new HostAikCertificates(getClientProperties());
      *   HostAikCertificate retrieveHostAikCertificate = client.retrieveHostAikCertificate("d24dd52f-524e-43aa-8673-4013ecf64a4a");
-     * </pre>
+     * </xmp></pre></div>
     */    
     public HostAikCertificate retrieveHostAikCertificate(String hostUuid) {
         log.debug("target: {}", getTarget().getUri().toString());

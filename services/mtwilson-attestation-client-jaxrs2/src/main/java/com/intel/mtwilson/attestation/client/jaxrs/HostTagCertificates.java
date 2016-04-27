@@ -49,19 +49,21 @@ public class HostTagCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tag-certificates
+     * 
      * Input: {"certificate":"MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkEEAZIZupiDRHgsakAHmcQQ8SgIDAepBwwGjEYMBYG....ic="} 
+     * 
      * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","certificate":"MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkEEAZIZupiDRHgsakAHmcQQ8SgIDAepBwwGjEYMBYG....ic="}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * HostTagCertificates client = new HostTagCertificates(My.configuration().getClientProperties());
      * TagCertificate obj = new TagCertificate();
      * String attrCert = "MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkEEAZIZupiDRHgsakAHmcQQ8SgIDAepBwwGjEYMBYG....ic=";
      * obj.setCertificate((Base64.decodeBase64(attrCert.getBytes())));
      * TagCertificate createTagCertificate = client.createHostTagCertificate(obj);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public TagCertificate createHostTagCertificate(TagCertificate obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -77,14 +79,14 @@ public class HostTagCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tag-certificates/e43424ca-9e00-4cb9-b038-9259d0307888
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * HostTagCertificates client = new HostTagCertificates(My.configuration().getClientProperties());
      * client.deleteHostTagCertificate("e43424ca-9e00-4cb9-b038-9259d0307888");
-     * </pre>
+     * </xmp></pre></div>
      */    
     public void deleteHostTagCertificate(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -103,15 +105,16 @@ public class HostTagCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tag-certificates/e43424ca-9e00-4cb9-b038-9259d0307888
+     * 
      * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","certificate":"MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkEEAZIZupiDRHgsakAHmcQQ8SgIDAepBwwGjEYMBYG....ic="}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * HostTagCertificates client = new HostTagCertificates(My.configuration().getClientProperties());
      * TagCertificate retrieveTagCertificate = client.retrieveHostTagCertificate("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
-     * </pre>
+     * </xmp></pre></div>
     */    
     public TagCertificate retrieveHostTagCertificate(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -131,18 +134,18 @@ public class HostTagCertificates extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-tag-certificates?hostUuid=064866ea-620d-11e0-b1a9-001e671043c4
-     * Output: {"tag_certificates":[{"id":"921d9ff7-33d8-425c-8164-c1fd8fa33f19",
-     * "certificate":"MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkEEAZIZupiDRHgsakAHmcQQ8...n3GG0BVGDoIg="}]}
-     * </pre>
+     * 
+     * Output: {"tag_certificates":[{"id":"921d9ff7-33d8-425c-8164-c1fd8fa33f19","certificate":"MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkEEAZIZupiDRHgsakAHmcQQ8...n3GG0BVGDoIg="}]}
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * HostTagCertificates client = new HostTagCertificates(My.configuration().getClientProperties());
      * TagCertificateFilterCriteria criteria = new TagCertificateFilterCriteria();
      * criteria.hostUuid = UUID.valueOf("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
      * TagCertificateCollection objCollection = client.searchHostTagCertificates(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public TagCertificateCollection searchHostTagCertificates(TagCertificateFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
