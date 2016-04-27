@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.integration</groupId>
+    <artifactId>mtwilson-measurement-xml</artifactId>
+    
+    <packaging>jar</packaging>
+    <name>mtwilson-measurement-xml</name>
+    
     <parent>
         <groupId>com.intel.mtwilson.integration</groupId>
         <artifactId>mtwilson-integration</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
     
-    <name>mtwilson-measurement-xml</name>
-    <packaging>jar</packaging>
-    <artifactId>mtwilson-measurement-xml</artifactId>   
+    <properties>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss.SSSZ</maven.build.timestamp.format>
+        <!-- format examples, see http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html for complete documentation:
+     "EEE, d MMM yyyy HH:mm:ss Z"	Wed, 4 Jul 2001 12:08:56 -0700
+     "yyyy-MM-dd'T'HH:mm:ss.SSSZ"	2001-07-04T12:08:56.235-0700   
+        -->
+    </properties>
     
-    
-<properties>
-   <timestamp>${maven.build.timestamp}</timestamp>
-   <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss.SSSZ</maven.build.timestamp.format>
-   <!-- format examples, see http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html for complete documentation:
-"EEE, d MMM yyyy HH:mm:ss Z"	Wed, 4 Jul 2001 12:08:56 -0700
-"yyyy-MM-dd'T'HH:mm:ss.SSSZ"	2001-07-04T12:08:56.235-0700   
-   -->
-</properties>
-<build>
-    <plugins>
+    <build>
+        <plugins>
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
@@ -52,16 +55,15 @@
                     <verbose>true</verbose>
                 </configuration>
             </plugin>
-            
         </plugins>
     </build>
-
+    
     <dependencies>
         <!-- was: 2.2.7-b63 -->
         <dependency>
-                    <artifactId>jaxb-impl</artifactId>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <version>2.2.7</version>
+            <artifactId>jaxb-impl</artifactId>
+            <groupId>com.sun.xml.bind</groupId>
+            <version>2.2.7</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -111,9 +113,8 @@
             <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
-        
         <!-- end testing -->
-
+        
         <!-- logging -->        
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -124,9 +125,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
         <!-- end logging -->
+    </dependencies>
     
-
-    </dependencies>  
 </project>

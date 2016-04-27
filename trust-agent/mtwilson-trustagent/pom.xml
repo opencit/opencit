@@ -1,11 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
     <groupId>com.intel.mtwilson.trustagent</groupId>
     <artifactId>mtwilson-trustagent</artifactId>
+    <version>3.0-SNAPSHOT</version>
+    
     <packaging>jar</packaging>
     <name>mtwilson-trustagent</name>
     <description>Mt Wilson Trust Agent</description>
+    
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-core-application-zip</artifactId>
@@ -55,7 +58,7 @@
                             </dependency>
                         </dependencies>
                     </plugin>
-            
+                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -69,14 +72,14 @@
                                 <configuration>
                                     <target>
                                         <mkdir dir="${project.build.directory}/application/bin"/>
-                                
+                                        
                                         <!-- extract mtwilson-tpm-commands.zip -->
                                         <unzip dest="${project.build.directory}/application/bin">
                                             <fileset dir="${project.build.directory}">
                                                 <include name="mtwilson-tpm-commands.zip"/>
                                             </fileset>
                                         </unzip>
-                                
+                                        
                                         <!-- permissions -->
                                         <chmod perm="700">
                                             <fileset dir="${project.build.directory}/application/bin">
@@ -100,26 +103,42 @@
                             </dependency>
                         </dependencies>
                     </plugin>
-            
                 </plugins>
             </build>
         </profile>
     </profiles>
     
     <dependencies>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-extensions-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-servlets</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-password-vault</artifactId>
+        </dependency>
+        
+        <!-- trustagent -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -144,29 +163,9 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-servlets</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey2-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-webservice-util</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-password-vault</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
-
+    
 </project>

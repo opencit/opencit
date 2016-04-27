@@ -1,232 +1,234 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.intel.mtwilson.linux</groupId>
-  <artifactId>mtwilson-management-service-installer</artifactId>
-
-  <packaging>pom</packaging>
-  <name>Management Service Linux Installer</name>
-  <description>Self-extracting executable that installs Management Service and its bundled requirements</description>
-
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.linux</groupId>
+    <artifactId>mtwilson-management-service-installer</artifactId>
+    
+    <packaging>pom</packaging>
+    <name>Management Service Linux Installer</name>
+    <description>Self-extracting executable that installs Management Service and its bundled requirements</description>
+    
     <parent>
-	<groupId>com.intel.mtwilson.linux</groupId>
-	<artifactId>mtwilson-linux</artifactId>
-	<version>3.0-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.linux</groupId>
+        <artifactId>mtwilson-linux</artifactId>
+        <version>3.0-SNAPSHOT</version>
     </parent>
-  
-  <properties>
-    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
-  </properties>
-  
-
-
-  <build>
-      <resources>
-          <resource>
-              <directory>src/files</directory>
-          </resource>
-      </resources>
-  </build>
-
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
-  <dependencies>
-      <!--
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-management-service</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>	
-    -->
-    <dependency>
-      <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>mtwilson-launcher-glassfish4</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
-      <version>${project.version}</version>
-      <type>sh</type>
-    </dependency>
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.1.0</version>
-        <scope>provided</scope>
-    </dependency>
-    <!--
-    <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>glassfish</artifactId>
-      <version>3.1.1</version>
-      <type>zip</type>
-    </dependency>	
-    <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>jdk</artifactId>
-      <version>1.7.0_51</version>
-      <type>bin</type>
-      <classifier>linux-x64</classifier>
-    </dependency>	
-    -->
-  </dependencies>
-
-          <build>
-    <plugins>
-       <!-- begin copy rpm artifact  plugin -->
-     <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.integration</groupId>
-                  <artifactId>mtwilson-launcher-glassfish4</artifactId>
+    
+    <properties>
+        <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
+    </properties>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/files</directory>
+            </resource>
+        </resources>
+    </build>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            
+            <dependencies>
+                <!--
+                <dependency>
+                  <groupId>com.intel.mtwilson.services</groupId>
+                  <artifactId>mtwilson-management-service</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>ManagementService.war</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
-                  <version>${project.version}</version>
-                  <type>sh</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>functions</destFileName>
-                </artifactItem>
-              </artifactItems>
-              <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>	
-      <!-- end copy rpm artifact plugin -->
-      <!-- begin copy other resources plugin -->
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${makeself.directory}</outputDirectory>
-		<resources>
-		    <resource>
-			<directory>src/etc</directory>
-			<includes>
-			    <include>version</include>
-			</includes>
-			<filtering>true</filtering>
-		    </resource>
-		    <resource>
-			<directory>src/files</directory>
-			<includes>
-			    <include>**/*</include>
-			</includes>
-			<filtering>false</filtering>
-		    </resource>
-		</resources>
-            </configuration>            
-          </execution>
-        </executions>
-      </plugin>
-      <!-- end copy other resources plugin -->
-      <!-- begin create self-extracting installer plugin -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>create-combined-installer</id>
-	    <phase>compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-	    <configuration>
-	    <executable>bash</executable>
-	    <arguments>
-		<argument>makebin-auto.sh</argument>
-		<argument>${makeself.directory}</argument>
-	    </arguments>
-	    </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- end create self-extracting installer plugin -->
-      <!-- begin deploy installers to repository -->
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-        </plugin>
-      <!-- end deploy installers to repository -->
-    </plugins>
-
-<pluginManagement>
-    <plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.5</version>
-            <executions>
-                <execution>
-                    <id>attach-artifacts</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>attach-artifact</goal>
-                    </goals>
-                    <configuration>
-                        <artifacts>
-			    <!--
-                            <artifact>
-                                <file>${project.build.directory}/ms-0.5.2-debian.bin</file>
-                                <type>bin</type>
-				<classifier>debian</classifier>
-                            </artifact>
-                            <artifact>
-                                <file>${project.build.directory}/ms-0.5.2-redhat.bin</file>
-                                <type>bin</type>
-				<classifier>redhat</classifier>
-                            </artifact>
-			    -->
-                            <artifact>
-                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
-                                <type>bin</type>
-				<!-- this is the combined debian and redhat installer -->
-                            </artifact>
-                        </artifacts>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</pluginManagement>
-  
-  
-  </build>
-      </profile>
-  </profiles>
-
+                </dependency>	
+                -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.integration</groupId>
+                    <artifactId>mtwilson-launcher-glassfish4</artifactId>
+                    <version>${project.version}</version>
+                    <type>war</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.version}</version>
+                    <type>sh</type>
+                </dependency>
+                <dependency>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                    <version>3.1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+                <!--
+                <dependency>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>glassfish</artifactId>
+                  <version>3.1.1</version>
+                  <type>zip</type>
+                </dependency>	
+                <dependency>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>jdk</artifactId>
+                  <version>1.7.0_51</version>
+                  <type>bin</type>
+                  <classifier>linux-x64</classifier>
+                </dependency>	
+                -->
+            </dependencies>
+            
+            <build>
+                <plugins>
+                    <!-- begin copy rpm artifact plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.integration</groupId>
+                                            <artifactId>mtwilson-launcher-glassfish4</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>war</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>ManagementService.war</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>functions</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy rpm artifact plugin -->
+                    
+                    <!-- begin copy other resources plugin -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.directory}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/etc</directory>
+                                            <includes>
+                                                <include>version</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                        <resource>
+                                            <directory>src/files</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy other resources plugin -->
+                    
+                    <!-- begin create self-extracting installer plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>create-combined-installer</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>makebin-auto.sh</argument>
+                                        <argument>${makeself.directory}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end create self-extracting installer plugin -->
+                    
+                    <!-- begin deploy installers to repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                    </plugin>
+                    <!-- end deploy installers to repository -->
+                </plugins>
+                
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>build-helper-maven-plugin</artifactId>
+                            <version>1.5</version>
+                            <executions>
+                                <execution>
+                                    <id>attach-artifacts</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>attach-artifact</goal>
+                                    </goals>
+                                    <configuration>
+                                        <artifacts>
+                                            <!--
+                                            <artifact>
+                                                <file>${project.build.directory}/ms-0.5.2-debian.bin</file>
+                                                <type>bin</type>
+                                                <classifier>debian</classifier>
+                                            </artifact>
+                                            <artifact>
+                                                <file>${project.build.directory}/ms-0.5.2-redhat.bin</file>
+                                                <type>bin</type>
+                                                <classifier>redhat</classifier>
+                                            </artifact>
+                                            -->
+                                            <artifact>
+                                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
+                                                <type>bin</type>
+                                                <!-- this is the combined debian and redhat installer -->
+                                            </artifact>
+                                        </artifacts>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                
+            </build>
+        </profile>
+    </profiles>
+    
 </project>
