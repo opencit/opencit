@@ -1,52 +1,56 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <artifactId>mtwilson-mysql</artifactId>
-  <groupId>com.intel.mtwilson.database</groupId>
-  <packaging>jar</packaging>
-  <name>MySQL Support</name>
-  <description>
-SQL and Java code to support MySQL storage. SQL should be MySQL-specific.
-Java code might be a Repository implementation backed by JPA/Hibernate/etc. 
-      
-The files are organized by date, and each file adds a record into a mw_changelog
-table so that it's possible to know the "version" of the schema by examining
-that table.
-
-To dump all the tables into one script, you can use this command:
-      mysqldump --no-data --skip-comments -p mw_as &gt; mw.sql
-</description>
-
-    <parent>
-    <groupId>com.intel.mtwilson.maven</groupId>
-    <artifactId>mtwilson-maven-java</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.database</groupId>
+    <artifactId>mtwilson-mysql</artifactId>
     <version>3.0-SNAPSHOT</version>
-    <relativePath/>
+    
+    <packaging>jar</packaging>
+    <name>MySQL Support</name>
+    <description>
+        SQL and Java code to support MySQL storage. SQL should be MySQL-specific.
+        Java code might be a Repository implementation backed by JPA/Hibernate/etc. 
+      
+        The files are organized by date, and each file adds a record into a mw_changelog
+        table so that it's possible to know the "version" of the schema by examining
+        that table.
+
+        To dump all the tables into one script, you can use this command:
+        mysqldump --no-data --skip-comments -p mw_as &gt; mw.sql
+    </description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-maven-java</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath/>
     </parent>
   
-  <!--
-  <dependencies>
-	<dependency>
-		<groupId>mysql</groupId>
-		<artifactId>mysql-connector-java</artifactId>
-        <scope>provided</scope>
-	</dependency>
-  </dependencies>
--->
-  <build><!--
-      <resources>
-          <resource>
-              <directory>src/sql</directory>
-          </resource>
-      </resources>-->
-
+    <!--
+    <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    -->
+    
+    <build>
+        <!--
+        <resources>
+            <resource>
+                <directory>src/sql</directory>
+            </resource>
+        </resources>
+        -->
+        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
         </plugins>
-
-  </build>
-
+    </build>
+    
 </project>

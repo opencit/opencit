@@ -72,13 +72,15 @@ public class Mles extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/mles
+     * 
      * Input: {"name":"vmmmle","version":"1.2.3","description":"Test","attestation_type":"MODULE","mle_type":"VMM","os_uuid":"2ffa05bd-ca9f-11e3-8449-005056b5643f","mle_manifests":[{"name": "18", "value": "BDC83B19E793491B1C6EA0FD8B46CD9F32E592FC"}]}
+     * 
      * Output: {"id":"4804cb83-5319-423f-8944-c687145dd5eb","name":"vmmmle","version":"1.2.3","attestation_type":"MODULE","mle_type":"VMM","description":"Test","os_uuid":"2ffa05bd-ca9f-11e3-8449-005056b5643f","mle_manifests":[{"name":"18","value":"BDC83B19E793491B1C6EA0FD8B46CD9F32E592FC"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * Properties prop = My.configuration().getClientProperties();
      * Oss osClient = new Oss(prop);
      * Mles mleClient = new Mles(prop);
@@ -103,6 +105,7 @@ public class Mles extends MtWilsonClient {
      *  vmmPcrs.add(new ManifestData("19", "");
      *  vmmMle.setMleManifests(vmmPcrs);
      *  vmmMle = mleClient.createMle(vmmMle);
+     * </xmp></pre></div>
      *      
      */
     public Mle createMle(Mle obj) {
@@ -119,15 +122,15 @@ public class Mles extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/mles/4804cb83-5319-423f-8944-c687145dd5eb
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties(); 
      *  Mles client = new Mles(prop);
      *  client.deleteMles("4804cb83-5319-423f-8944-c687145dd5eb");
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMle(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -148,16 +151,16 @@ public class Mles extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles?nameContains=mle
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Mles client = new Mles(My.configuration().getClientProperties());
      *  MleFilterCriteria criteria = new MleFilterCriteria();
      *  criteria.nameContains = "mle";
      *  client.deleteMle(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMle(MleFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -178,13 +181,15 @@ public class Mles extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/mles/4804cb83-5319-423f-8944-c687145dd5eb
+     * 
      * Input: {"description":"Added description"}
+     * 
      * Output: {"id":"4804cb83-5319-423f-8944-c687145dd5eb","description":"Updated description"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * Properties prop = My.configuration().getClientProperties();
      * Mles client = new Mles(prop);
      * Mle vmmMle = new Mle();
@@ -210,17 +215,18 @@ public class Mles extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/mles/4804cb83-5319-423f-8944-c687145dd5eb
+     * 
      * Output: {"id":"4804cb83-5319-423f-8944-c687145dd5eb","name":"vmmmle","version":"1.2.3","attestation_type":"MODULE",
      * "mle_type":"VMM","description":"Updated description","os_uuid":"2ffa05bd-ca9f-11e3-8449-005056b5643f"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  Properties prop = My.configuration().getClientProperties();
      *  Mles client = new Mles(prop);
      *  Mle retrieveMle = client.retrieveMle("4804cb83-5319-423f-8944-c687145dd5eb");
-     * </pre>
+     * </xmp></pre></div>
      */
     public Mle retrieveMle(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -241,19 +247,20 @@ public class Mles extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8443/mtwilson/v2/mles?nameContains=mle
+     * 
      * Output: {"mles":[{"id":"4804cb83-5319-423f-8944-c687145dd5eb","name":"vmmmle","version":"1.2.3","attestation_type":"MODULE","mle_type":"VMM",
      * "description":"Updated description","os_uuid":"2ffa05bd-ca9f-11e3-8449-005056b5643f"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * Properties prop = My.configuration().getClientProperties();
      * Mles client = new Mles(prop);
      * MleFilterCriteria criteria = new MleFilterCriteria();
      * criteria.nameContains = "mle";
      * MleCollection mles = client.searchMles(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public MleCollection searchMles(MleFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());

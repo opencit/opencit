@@ -47,21 +47,23 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs
+     * 
      * Input: {"pcr_index":"20","pcr_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"}
+     * 
      * Output: {"id":"2100fc61-921f-405a-91af-b01dbeaf5c69","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
      *   "pcr_index":"20","pcr_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   MlePcr obj = new MlePcr();
      *   obj.setMleUuid("31021a8a-de64-4c5f-b314-8d3f077a55e5");
      *   obj.setPcrIndex("20");
      *   obj.setPcrValue("CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC");
      *   client.createMlePcr(obj);     * 
-     * </pre>
+     * </xmp></pre></div>
      */
     public MlePcr createMlePcr(MlePcr obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -81,14 +83,14 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   client.deleteMlePcr("31021a8a-de64-4c5f-b314-8d3f077a55e5", "18");        
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMlePcr(String mleUuid, String pcrIndex) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -108,17 +110,17 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwContentTypeReturned N/A
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs?indexEqualTo=18
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *  MlePcr client = new MlePcr(My.configuration().getClientProperties());
      *  MlePcrFilterCriteria criteria = new MlePcrFilterCriteria();
      *  criteria.mleUuid = UUID.valueOf("31021a8a-de64-4c5f-b314-8d3f077a55e5");
      *  criteria.indexEqualTo = "18";
      *  client.deleteMlePcr(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteMlePcr(MlePcrFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -139,14 +141,16 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
+     * 
      * Input: {"pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
+     * 
      * Output: {"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
      *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   MlePcr obj = new MlePcr();
      *   obj.setMleUuid("31021a8a-de64-4c5f-b314-8d3f077a55e5");
@@ -154,6 +158,7 @@ public class MlePcrs extends MtWilsonClient {
      *   obj.setPcrValue("AAAB6F19330613513101F04B88BCB7B79A8F250E");
      *   MlePcr newObj = client.editMlePcr(obj);     * 
      * }
+     * </xmp></pre></div>
      */
     public MlePcr editMlePcr(MlePcr obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -174,16 +179,17 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
+     * 
      * Output: {"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
      *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   MlePcr obj = client.retrieveMlePcr("31021a8a-de64-4c5f-b314-8d3f077a55e5", "18");
-     * </pre>
+     * </xmp></pre></div>
      */
     public MlePcr retrieveMlePcr(String mleUuid, String pcrIndex) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -205,19 +211,20 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs?indexEqualTo=18
+     * 
      * Output: {"mle_pcrs":[{"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
      *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   MlePcrFilterCriteria criteria = new MlePcrFilterCriteria();
      *   criteria.mleUuid = UUID.valueOf("31021a8a-de64-4c5f-b314-8d3f077a55e5");
      *   criteria.indexEqualTo = "18";
      *   MlePcrCollection searchMlePcrs = client.searchMlePcrs(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */
     
     public MlePcrCollection searchMlePcrs(MlePcrFilterCriteria criteria) {

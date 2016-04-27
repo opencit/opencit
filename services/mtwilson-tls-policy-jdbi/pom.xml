@@ -1,40 +1,48 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-tls-policy-jdbi</artifactId>
+    
     <packaging>jar</packaging>
     <name>mtwilson-tls-policy-jdbi</name>
     <description>Data access layer for mtwilson-tls-policy using JDBI</description>
+    
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
-
+    
     <build>
-        
         <plugins>
-            
-           
-            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-               
         </plugins>
     </build>
-
-
+    
     <dependencies>
+        <!-- common-java -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-api</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbi</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
+        </dependency>
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>        
         </dependency>
         <!--
         <dependency>
@@ -43,17 +51,7 @@
             <version>${project.version}</version>
         </dependency>
         -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-
+        
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -67,12 +65,13 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>        
-
+        </dependency>
+        
         <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
         <dependency>
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi</artifactId>
-        </dependency>        
+        </dependency>
     </dependencies>
+    
 </project>
