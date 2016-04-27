@@ -26,6 +26,18 @@
     
     <dependencies>
         <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
         <!-- for Filter -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -76,6 +88,14 @@
             <artifactId>mtwilson-util-performance</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jooq</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher</artifactId>
         </dependency>
@@ -86,16 +106,6 @@
         </dependency>
         
         <!-- mtwilson -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jooq</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-dao-jooq</artifactId>
@@ -114,11 +124,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-jdbi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -145,11 +150,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-management-jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -183,11 +183,6 @@
             <version>${project.version}</version>
         </dependency>
         <!-- webservice-util is required when using "my" because of the reference to ASDataCipher; but it must be a separate package to avoid circular dependencies between attestation service, asdata, and "my" -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-hostagent-ext</artifactId>

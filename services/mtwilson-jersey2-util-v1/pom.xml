@@ -56,6 +56,10 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-server</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
         
         <!-- mtwilson -->
         <dependency>
@@ -68,11 +72,6 @@
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>
         </dependency>
         
         <dependency>

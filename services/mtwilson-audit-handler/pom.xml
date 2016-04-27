@@ -25,6 +25,10 @@
     <dependencies>
         <!-- common-java -->
         <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jpa</artifactId>
         </dependency>
@@ -38,11 +42,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-audit-data</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

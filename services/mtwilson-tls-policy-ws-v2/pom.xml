@@ -56,6 +56,10 @@
             <artifactId>mtwilson-util-shiro</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
         
         <!-- mtwilson -->
         <dependency>
@@ -76,11 +80,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tls-policy-jdbi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

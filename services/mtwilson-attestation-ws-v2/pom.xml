@@ -60,6 +60,10 @@
             <artifactId>mtwilson-util-shiro</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
         
         <!-- mtwilson -->
         <dependency>
@@ -96,11 +100,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-management-jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

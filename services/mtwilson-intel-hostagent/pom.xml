@@ -64,6 +64,10 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
         
         <!-- mtwilson -->
         <dependency>
@@ -74,11 +78,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

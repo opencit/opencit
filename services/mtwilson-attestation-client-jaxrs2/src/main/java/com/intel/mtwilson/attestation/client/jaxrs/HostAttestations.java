@@ -58,13 +58,13 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwContentTypeReturned JSON
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-attestations
+     * 
      * Input: {"host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681"} 
-     * Output: 
-     * {"id":"77b20374-4ae7-4bd5-a1bd-1870d3950ec7","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681","host_name":"192.168.0.2",
-     * "trust_report":{"host_report":
-     *  {"variables":{},"pcr_manifest":"0: 5e724d834fec48c62d523d95d08884dcac7f4f98\n1: 3a3f780f11a4b49969fcaa80cd6e3957c33b2275\n
+     * 
+     * Output:  {"id":"77b20374-4ae7-4bd5-a1bd-1870d3950ec7","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681","host_name":"192.168.0.2",
+     * "trust_report":{"host_report": {"variables":{},"pcr_manifest":"0: 5e724d834fec48c62d523d95d08884dcac7f4f98\n1: 3a3f780f11a4b49969fcaa80cd6e3957c33b2275\n
      * 2: cae02cde18cfd267a5b3dbeee532a459c2cc3fa4\n3: 3a3f780f11a4b49969fcaa80cd6e3957c33b2275\n4: 1508b83d473be8eca3385230a3e763ccd42985d5\n
      * 5: 82e9ebba44862bba9cc3dd3bfd0b3be5aa102cbd\n6: 3a3f780f11a4b49969fcaa80cd6e3957c33b2275\n7: 3a3f780f11a4b49969fcaa80cd6e3957c33b2275\n
      * 8: 0000000000000000000000000000000000000000\n9: 0000000000000000000000000000000000000000\n10: 0000000000000000000000000000000000000000\n
@@ -73,8 +73,7 @@ public class HostAttestations extends MtWilsonClient {
      * 17: 496c8530d2b4ba6a6f3901455c8c240bbb482d85\n18: f6fd306d2fa33e21c69ca598330b64df1ed0d002\n19: eeddcdd0a2a54ba3791f534884b9536fada66fd1\n
      * 20: 7f824ea48e5d50a4b236152223206b00620bc74b\n21: 0000000000000000000000000000000000000000\n22: 654c7c9cf8fa01d03e61d2c649b16417e9965b71\n
      * 23: 0000000000000000000000000000000000000000\n",
-     * "tpm_quote":null,"aik":null,"tag_certificate":null},
-     * "policy_name":"Host trust policy for host with AIK 192.168.0.2",
+     * "tpm_quote":null,"aik":null,"tag_certificate":null},"policy_name":"Host trust policy for host with AIK 192.168.0.2",
      * "results":[{"rule":{"markers":["VMM"],"expected_pcr":{"value":"7f824ea48e5d50a4b236152223206b00620bc74b","index":"20"}},
      *          "faults":[],"rule_name":"com.intel.mtwilson.policy.rule.PcrMatchesConstant","trusted":true},
      *      {"rule":{"markers":["VMM"],"pcr_module_manifest":{"pcr_index":"19",
@@ -91,14 +90,14 @@ public class HostAttestations extends MtWilsonClient {
      *          "faults":[],"rule_name":"com.intel.mtwilson.policy.rule.PcrMatchesConstant","trusted":true},
      *      {"rule":{"markers":["BIOS"],"expected_pcr":{"value":"496c8530d2b4ba6a6f3901455c8c240bbb482d85","index":"17"}},
      *          "faults":[],"rule_name":"com.intel.mtwilson.policy.rule.PcrMatchesConstant","trusted":true}],"trusted":true}}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestation hostAttestation = new HostAttestation();
      *   hostAttestation.setHostUuid("de07c08a-7fc6-4c07-be08-0ecb2f803681");
      *   HostAttestation createHostAttestation = client.createHostAttestation(hostAttestation);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public HostAttestation createHostAttestation(HostAttestation obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -122,9 +121,11 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwContentTypeReturned SAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-attestations
+     * 
      * Input: {"host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681"} 
+     * 
      * Output (SAML): <?xml version="1.0" encoding="UTF-8" ?>
      * <saml2:Assertion ID="HostTrustAssertion" IssueInstant="2014-05-03T01:51:40.924Z" Version="2.0">
      * <saml2:Issuer>https://192.168.0.234:8181</saml2:Issuer>
@@ -169,14 +170,14 @@ public class HostAttestations extends MtWilsonClient {
      * <saml2:Attribute Name="VMM_OSVersion"><saml2:AttributeValue xsi:type="xs:string">5.1.0</saml2:AttributeValue></saml2:Attribute>
      * </saml2:AttributeStatement>
      * </saml2:Assertion>
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestation hostAttestation = new HostAttestation();
      *   hostAttestation.setHostUuid("de07c08a-7fc6-4c07-be08-0ecb2f803681");
      *   String hostSaml = client.createHostAttestationSaml(hostAttestation);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public String createHostAttestationSaml(HostAttestation obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -192,14 +193,14 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-attestations/32923691-9847-4493-86ee-3036a4f24940
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   client.deleteHostAttestation("32923691-9847-4493-86ee-3036a4f24940");
-     * </pre>
+     * </xmp></pre></div>
      */
     public void deleteHostAttestation(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -227,18 +228,17 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-attestations/32923691-9847-4493-86ee-3036a4f24940
-     * Output: {"id":"32923691-9847-4493-86ee-3036a4f24940",
-     * "host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
-     * "host_name":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
-     * "host_trust_response":{"hostname":"de07c08a-7fc6-4c07-be08-0ecb2f803681","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}
-     * </pre>
+     * 
+     * Output: {"id":"32923691-9847-4493-86ee-3036a4f24940","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
+     * "host_name":"de07c08a-7fc6-4c07-be08-0ecb2f803681","host_trust_response":{"hostname":"de07c08a-7fc6-4c07-be08-0ecb2f803681","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   client.retrieveHostAttestation("32923691-9847-4493-86ee-3036a4f24940");
-     * </pre>
+     * </xmp></pre></div>
     */    
     public HostAttestation retrieveHostAttestation(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -272,21 +272,22 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML/SAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2&limit=2
+     * 
      * Output: {"host_attestations":[{"id":"39cd1143-4f74-4767-8d82-9cb93d202115","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e",
      * "host_name":"192.168.0.2","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}},
      * {"id":"351408fd-53d4-4b65-8488-59e9867d091f","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e","host_name":"192.168.0.2",
      * "host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestationFilterCriteria criteria = new HostAttestationFilterCriteria();
      *   criteria.nameEqualTo = "192.168.0.2";
      *   criteria.limit = 2;
      *   HostAttestationCollection objCollection = client.searchHostAttestations(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public HostAttestationCollection searchHostAttestations(HostAttestationFilterCriteria criteria) {        
         log.debug("target: {}", getTarget().getUri().toString());
@@ -305,8 +306,9 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwContentTypeReturned SAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2
+     * 
      * Output (SAML): <?xml version="1.0" encoding="UTF-8" ?>
      * <saml2:Assertion ID="HostTrustAssertion" IssueInstant="2014-05-03T01:51:40.924Z" Version="2.0">
      * <saml2:Issuer>https://192.168.0.234:8181</saml2:Issuer>
@@ -351,14 +353,14 @@ public class HostAttestations extends MtWilsonClient {
      * <saml2:Attribute Name="VMM_OSVersion"><saml2:AttributeValue xsi:type="xs:string">5.1.0</saml2:AttributeValue></saml2:Attribute>
      * </saml2:AttributeStatement>
      * </saml2:Assertion>
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestationFilterCriteria criteria = new HostAttestationFilterCriteria();
      *   criteria.nameEqualTo = "192.168.0.2";
      *   String hostSaml = client.searchHostAttestationsSaml(criteria);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public String searchHostAttestationsSaml(HostAttestationFilterCriteria criteria) {        
         log.debug("target: {}", getTarget().getUri().toString());
@@ -373,13 +375,13 @@ public class HostAttestations extends MtWilsonClient {
      * @return TrustAssertion object having the status of verification.
      * @since Mt.Wilson 2.0
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestation hostAttestation = new HostAttestation();
      *   hostAttestation.setHostUuid("de07c08a-7fc6-4c07-be08-0ecb2f803681");
      *   String hostSaml = client.createHostAttestationSaml(hostAttestation);
      *   TrustAssertion verifyTrustAssertion = attestationClient.verifyTrustAssertion(createHostAttestationSaml);
-     * </pre>
+     * </xmp></pre></div>
      */        
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
         if (properties != null && properties.getProperty("mtwilson.api.keystore") != null && !properties.getProperty("mtwilson.api.keystore").isEmpty()

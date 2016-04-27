@@ -39,18 +39,20 @@ public class PollHosts extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      * https://server.com:8181/mtwilson/v2/integrations/openstack/PollHosts
+     * 
      * Input: {"hosts":["192.168.0.2"]} 
+     * 
      * Output: {"hosts":[{"host_name":"192.168.0.2","trust_lvl":"trusted","vtime":"Sat May 3 13:05:38 2014"}]}
-     * </pre>
+     * </xmp></pre></div>
      * @mtwSampleApiCall
-     * <pre>
+     * <div style="word-wrap: break-word; width: 1024px"><pre><xmp>
      *   PollHosts client = new PollHosts(My.configuration().getClientProperties());
      *   OpenStackHostTrustLevelQuery input = new OpenStackHostTrustLevelQuery();
      *   input.setHosts(new String[] {"192.168.0.2"});
      *   OpenStackHostTrustLevelReport openStackHostTrustReport = client.getOpenStackHostTrustReport(input);
-     * </pre>
+     * </xmp></pre></div>
      */    
     public OpenStackHostTrustLevelReport getOpenStackHostTrustReport(OpenStackHostTrustLevelQuery obj) {
         log.debug("target: {}", getTarget().getUri().toString());

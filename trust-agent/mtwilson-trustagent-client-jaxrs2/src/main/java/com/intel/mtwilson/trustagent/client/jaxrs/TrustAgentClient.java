@@ -172,10 +172,11 @@ public class TrustAgentClient extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML
      * @mtwMethodType POST
      * @mtwSampleRestCall
-     * <pre>
+     * <pre><xmp>
      * https://server.com:1443/v2/tpm/quote
      * https://server.com:1443/v2/tpm/quote.json
      * Input: {"nonce":"1aQNqvIIgf1kY2cO5DZ68FYE7H0=","pcrs":[0,17,18,19]}
+     * 
      * Output: <tpm_quote_response>
      * <timestamp>1396871823858</timestamp>
      * <client_ip>192.168.122.1</client_ip>
@@ -218,7 +219,7 @@ public class TrustAgentClient extends MtWilsonClient {
      * MeMZbGB9gIXcHUX+GtsyTRPerd/81VmIWM3XHPh4SJfPoi8nYddWCIEVzS5DzujpzvSRfgGB8hbp
      * nLH3YgnKwWYLbQq46M60TB1P4Q==</aik>
      * </tpm_quote_response>
-     * </pre>
+     * </xmp></pre>
      */      
     public TpmQuoteResponse getTpmQuote(byte[] nonce, int[] pcrs) {
         TpmQuoteRequest tpmQuoteRequest = new TpmQuoteRequest();

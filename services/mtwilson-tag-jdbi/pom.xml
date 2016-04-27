@@ -119,18 +119,16 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-dbcp</artifactId>
         </dependency>
-        
-        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jooq</artifactId>
-            <version>${project.version}</version>        
         </dependency>
+        
+        <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-model</artifactId>

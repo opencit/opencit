@@ -423,8 +423,48 @@
             <artifactId>joda-time</artifactId>
         </dependency>
         <!-- end saml verification -->
-    </dependencies>
-    
+        
+        <!-- clients for mtwilson features -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-user-management-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-privacyca-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-vm-attestation-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- end clients for mtwilson features -->
+        
+    </dependencies>  
+
     <profiles>
         <profile>
             <activation>
@@ -451,6 +491,7 @@
                                     <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                                     <dependencySourceIncludes>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-vm-attestation-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-client-jaxrs2</dependencySourceInclude>

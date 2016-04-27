@@ -35,6 +35,11 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
         </dependency>
+        <!-- webservice-util is required when using "my" because of the reference to ASDataCipher; but it must be a separate package to avoid circular dependencies between attestation service, asdata, and "my" -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-configuration</artifactId>
@@ -114,12 +119,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- webservice-util is required when using "my" because of the reference to ASDataCipher; but it must be a separate package to avoid circular dependencies between attestation service, asdata, and "my" -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- mt wilson api client is used to register the host with mtwilson during setup -->
