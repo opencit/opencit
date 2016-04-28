@@ -11,6 +11,6 @@ package com.intel.mtwilson.datatypes;
 public enum Vendor {
     INTEL,
     CITRIX,
-    VMWARE;
-    
+    VMWARE,
+    MICROSOFT;
 }

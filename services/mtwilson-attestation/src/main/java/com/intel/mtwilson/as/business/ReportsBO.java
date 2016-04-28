@@ -40,6 +40,8 @@ import java.io.IOException;
 public class ReportsBO {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ReportsBO.class);
     private static String ASSET_TAG_PCR = "22";
+    private static String ASSET_TAG_PCR_WINDOWS = "23";
+    private String assetTagPCR = ASSET_TAG_PCR;
     
 
     public ReportsBO() {
@@ -239,12 +241,20 @@ public class ReportsBO {
             List<TblTaLog> logs = tblTaLogJpaController.findLogsByHostId(tblHosts.getId(), lastStatusTs);
             com.intel.mountwilson.as.hostmanifestreport.data.HostType hostType = new com.intel.mountwilson.as.hostmanifestreport.data.HostType();
             hostType.setName(hostName.toString()); // datatype.Hostname
+            //logger.debug("host info: " + getMleInfo(tblHosts) + "hostType" + hostType.getName());
+            
+            if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
+                assetTagPCR = ASSET_TAG_PCR_WINDOWS;
+            }
+            else
+                assetTagPCR = ASSET_TAG_PCR;
+            
             if (logs != null) {
                 for (TblTaLog log : logs) {
                     logger.debug("getAttestationReport - Processing the PCR {} with trust status {}.", log.getManifestName(), log.getTrustStatus());
                     boolean value = (failureOnly && log.getTrustStatus() == false);
                     if (!failureOnly || value) {
-                        if (log.getManifestName().equalsIgnoreCase(ASSET_TAG_PCR)) {
+                        if (log.getManifestName().equalsIgnoreCase(assetTagPCR)) {
                             attestationReport.getPcrLogs().add(getPcrLogReportForAssetTag(log, tblHosts.getId()));
                         } else {
                             attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
@@ -448,7 +458,7 @@ public class ReportsBO {
         if (atagCert != null) {  
             logger.debug("getPcrLogReportForAssetTag : Found a valid asset tag certificate for the host with white list value {}", atagCert.getPCREvent().toString());
             PcrLogReport manifest = new PcrLogReport();
-            manifest.setName(Integer.parseInt(ASSET_TAG_PCR));
+            manifest.setName(Integer.parseInt(assetTagPCR));
             manifest.setValue(taLog.getManifestValue());
             manifest.setWhiteListValue(new  Sha1Digest(atagCert.getPCREvent()).toString());
             if(manifest.getValue().equals(manifest.getWhiteListValue())) {

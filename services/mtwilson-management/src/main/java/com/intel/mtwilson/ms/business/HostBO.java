@@ -80,10 +80,13 @@ public class HostBO {
 
     private static int MAX_BIOS_PCR = 17;
     private static int LOCATION_PCR = 22;
+    private static int LOCATION_PCR_WINDOWS = 23;
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18";
     private static String CITRIX_PCRs = "18"; //"17,18";
+    private static String WINDOWS_BIOS_PCRs = "0";
+    private static String WINDOWS_PCRs = "13,14";
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
 
@@ -634,7 +637,9 @@ public class HostBO {
                 if (connString.getVendor().equals(Vendor.VMWARE)) {
                     vmmPCRs = VMWARE_PCRs;
                 } else if (connString.getVendor().equals(Vendor.CITRIX)) {
-                    vmmPCRs = CITRIX_PCRs;                    
+                    vmmPCRs = CITRIX_PCRs;
+                } else if (connString.getVendor().equals(Vendor.MICROSOFT)) {
+                    vmmPCRs = WINDOWS_PCRs;
                 } else {
                     vmmPCRs = OPENSOURCE_PCRs;                    
                 }
@@ -649,7 +654,11 @@ public class HostBO {
                 hostConfigObj.setOverWriteWhiteList(false);
                 hostConfigObj.setRegisterHost(false);
 
-                hostConfigObj.setBiosPCRs(BIOS_PCRs);
+                if (vmmPCRs == WINDOWS_PCRs) {
+                    hostConfigObj.setBiosPCRs(WINDOWS_BIOS_PCRs);
+                } else {
+                    hostConfigObj.setBiosPCRs(BIOS_PCRs);
+                }
                 hostConfigObj.setVmmPCRs(vmmPCRs);
             }
 
@@ -729,6 +738,7 @@ public class HostBO {
 
                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
                 
+                log.debug("configWhiteListFromCustom vmmPCRs: " + hostConfigObj.getVmmPCRs());
 //        // debug only
 //        try {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -1476,17 +1486,31 @@ public class HostBO {
         // Since the attestation report has all the PCRs we need to upload only the required PCR values into the white list tables.
         // Location PCR (22) is added by default. We will check if PCR 22 is configured or not. If the digest value for PCR 22 exists, then
         // we will configure the location table as well.
-        List<String> pcrsToWhiteList = Arrays.asList((hostConfigObj.getBiosPCRs() + "," + hostConfigObj.getVmmPCRs() + "," + "22").split(","));
+       
+        //define a local int variable for location since different host/OS may use different PCR - hxia
+        TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+
+        int locationPCR = LOCATION_PCR;
+        if (hostObj.VMM_OSName.toLowerCase().contains("windows"))
+            locationPCR = LOCATION_PCR_WINDOWS;
+        log.debug("locationPCR: " + locationPCR);
+        
+        //List<String> pcrsToWhiteList = Arrays.asList((hostConfigObj.getBiosPCRs() + "," + hostConfigObj.getVmmPCRs() + "," + "22").split(","));
+        List<String> pcrsToWhiteList = Arrays.asList((hostConfigObj.getBiosPCRs() + "," + hostConfigObj.getVmmPCRs() + "," + Integer.toString(locationPCR)).split(","));
+
+        List<String> biosPCRList = Arrays.asList(hostConfigObj.getBiosPCRs().split(","));
+        List<String> vmmPCRList = Arrays.asList(hostConfigObj.getVmmPCRs().split(","));
+
         try {
 
-            TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+            //TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
 
             log.info("Starting the white list upload to database");
 
             XMLInputFactory xif = XMLInputFactory.newInstance();
             StringReader sr = new StringReader(attestationReport);
             XMLStreamReader reader = xif.createXMLStreamReader(sr);
-
+            
             TblMle mleSearchObj = mleJpa.findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
             TblMle mleBiosSearchObj = mleJpa.findBiosMle(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
             // Process all the Event and PCR nodes in the attestation report.
@@ -1556,7 +1580,8 @@ public class HostBO {
 
                             if (pcrObj.getPcrName() == null) {
                                 log.error("uploadToDB: PCR name is null: " + hostObj.toString());
-                            } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) <= MAX_BIOS_PCR)) {
+//                            } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) <= MAX_BIOS_PCR)) {
+                            } else if (biosPCRList.contains(reader.getAttributeValue(null, "ComponentName"))) {
 
                                 if (hostConfigObj.addBiosWhiteList() == true) {
                                     pcrObj.setMleName(hostObj.BIOS_Name);
@@ -1577,7 +1602,7 @@ public class HostBO {
                                     }
                                 }
 
-                            } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) == LOCATION_PCR)) {
+                            } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) == locationPCR)) {
                                 // We will add the location white list only if it is valid. If now we will skip it. Today only VMware supports PCR 22
                                 if (!reader.getAttributeValue(null, "DigestValue").equals(Sha1Digest.ZERO.toString())) {
                                     //  Here we need update the location table. Since we won't know what the readable location string for the hash value we will just add it with host  name
@@ -1595,7 +1620,7 @@ public class HostBO {
                                         log.info("White list location entry using PCR 22 for location: {} with PCR value: {} already exists.", tblLoc.getLocation(), tblLoc.getPcrValue());
                                     }
                                 }
-                            } else if (hostConfigObj.addVmmWhiteList() == true) {
+                            } else if (vmmPCRList.contains(reader.getAttributeValue(null, "ComponentName")) && hostConfigObj.addVmmWhiteList() == true) {
                                 //log.info(String.format("Adding VMM white list: Name=%s Version=%s OsName=%s OsVersion=%s mleID=%s", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
                                 pcrObj.setMleName(hostObj.VMM_Name);
                                 pcrObj.setMleVersion(hostObj.VMM_Version);

@@ -5,6 +5,7 @@
 package com.intel.mtwilson.trustagent.niarl;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.IOException;
 import org.apache.commons.codec.binary.Hex;
@@ -24,27 +25,37 @@ public class Util {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Util.class);
     
     public static boolean isOwner(byte[] secret) {
-        try {
-            //TpmModule.getCredential(secret, "EC");
-            byte[] ekModulus = TpmModule.getEndorsementKeyModulus(secret, RandomUtil.randomByteArray(20));
-            if( ekModulus != null ) { log.debug("EK modulus: {}", Hex.encodeHexString(ekModulus)); }
+        
+        /* Dertermine based on the OS type and TPM version */
+        if (IdentityOS.isWindows()) { 
+            /* return true for now since Windows usually take the ownership of TPM be default 
+             * need to check later for exceptions
+            */
             return true;
         }
-        catch(IOException | NoSuchElementException e) {
-            log.debug("Failed ownership test (get endorsement credential)", e);
-            return false;
-        }
-        catch(TpmModule.TpmModuleException e) {
-            if( e.getErrorCode() != null && e.getErrorCode() == 2 ) {
-                // error code 2 is TPM_BADINDEX which in this case means the EC
-                // is not present; but the ownership test succeeded
+        else { /* this should also branch based on if it is TPM 1.2 or TPM 2.0 since the interaction with them is different */
+            try {
+                //TpmModule.getCredential(secret, "EC");
+                byte[] ekModulus = TpmModule.getEndorsementKeyModulus(secret, RandomUtil.randomByteArray(20));
+                if( ekModulus != null ) { log.debug("EK modulus: {}", Hex.encodeHexString(ekModulus)); }
                 return true;
             }
-            // error code 1 is TPM_AUTHFAIL which is the expected case when
-            // we don't have ownership; and we'll also fail the test on any
-            // other error
-            log.debug("Failed ownership test (get endorsement credential) with error code {}", e.getErrorCode());
-            return false;
+            catch(IOException | NoSuchElementException e) {
+                log.debug("Failed ownership test (get endorsement credential)", e);
+                return false;
+            }
+            catch(TpmModule.TpmModuleException e) {
+                if( e.getErrorCode() != null && e.getErrorCode() == 2 ) {
+                    // error code 2 is TPM_BADINDEX which in this case means the EC
+                    // is not present; but the ownership test succeeded
+                    return true;
+                }
+                // error code 1 is TPM_AUTHFAIL which is the expected case when
+                // we don't have ownership; and we'll also fail the test on any
+                // other error
+                log.debug("Failed ownership test (get endorsement credential) with error code {}", e.getErrorCode());
+                return false;
+            }
         }
     }
     
