@@ -173,6 +173,36 @@ public class HostInfoCmd implements ICommand {
     private void getVmmAndVersion() throws TAException, IOException {
         Result result = null;
         try {
+            // Since running the docker command does not need root privileges, we are not adding the "system-info" argument.
+            CommandLine dockerCommand = new CommandLine("docker");
+            dockerCommand.addArgument("-v", false);
+            result = ExecUtil.execute(dockerCommand);
+            if (result.getExitCode() != 0 || result == null || result.getStdout() == null || result.getStdout().isEmpty()) {
+                // If Docker is not installed the exitcode is 127
+                log.info("Error running command [{}]: {}", dockerCommand.getExecutable(), result.getStderr());
+                log.info("Docker might not be installed. Will check for the hypervisor installed.");
+            } else {
+                // Sample output would be
+                // Docker version 1.9.1, build a34a1d5
+                String cmdOutput = result.getStdout();
+                log.debug("getVmmAndVersion: output of docker -v command is {}.", cmdOutput);
+                String[] resultArray = cmdOutput.split("\n");
+                if (resultArray.length > 0) {
+                    if (resultArray[0].startsWith("Docker")) {
+                        String[] versionInfo = resultArray[0].split(" ");
+                        if (versionInfo[0] != null)
+                            context.setVmmName(versionInfo[0]);
+                        if (versionInfo[2] != null)
+                            context.setVmmVersion(versionInfo[2].substring(0, versionInfo[2].length()-1)); // to remove the comma character
+                        
+                        log.debug("VMM Name: " + context.getVmmName());
+                        log.debug("VMM Version: " + context.getVmmVersion());
+                        
+                        return;
+                    }
+                }                
+            }
+
             CommandLine command = new CommandLine("/opt/trustagent/bin/tagent");
             command.addArgument("system-info");
             command.addArgument("virsh version", false);
