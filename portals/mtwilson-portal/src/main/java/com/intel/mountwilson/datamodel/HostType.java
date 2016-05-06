@@ -13,7 +13,8 @@ public class HostType {
         SUSE("suse","suse.png","true"),
         RHEL("rhel","rhel.png","true"),
         RED_HAT("redhat","rhel.png","true"),
-        CITRIX_XENSERVER("xenserver","citrix.png","false");
+        CITRIX_XENSERVER("xenserver","citrix.png","false"),
+        DOCKER("docker","docker.png","false");
         
         private String value;
         private String imageName;
