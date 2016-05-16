@@ -16,6 +16,7 @@ import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -160,6 +161,9 @@ public class TrustagentConfiguration {
     public File getAikBlobFile() {
         return new File(Folders.configuration() + File.separator + "aik.blob");        
     }
+    public File getAikOpaqueFile() {
+        return new File(Folders.configuration() + File.separator + "aik.opaque");        
+    }
     
     public int getTrustagentHttpTlsPort() {
         return Integer.valueOf(conf.get(TRUSTAGENT_HTTP_TLS_PORT, "1443"));
@@ -275,7 +279,8 @@ public class TrustagentConfiguration {
                     return new TrustagentConfiguration(configuration);
                 }
                 Properties properties = new Properties();
-                properties.load(in);
+                //should not use properties.load(in) here since the line String content = IOUtils.toString(in) above already move the inputstream to the end of stream
+                properties.load(new StringReader(content));
                 TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration(properties));
                 return configuration;
             }
