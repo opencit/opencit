@@ -51,7 +51,7 @@ public class HostTrustPolicyManager {
         vendorFactoryMap.put("intel", new IntelHostTrustPolicyFactory(reader));
         vendorFactoryMap.put("citrix", new CitrixHostTrustPolicyFactory(reader));
         vendorFactoryMap.put("vmware", new VmwareHostTrustPolicyFactory(reader));
-        
+        vendorFactoryMap.put("microsoft", new MicrosoftHostTrustPolicyFactory(reader));
         this.entityManagerFactory = entityManagerFactory;
     }
     

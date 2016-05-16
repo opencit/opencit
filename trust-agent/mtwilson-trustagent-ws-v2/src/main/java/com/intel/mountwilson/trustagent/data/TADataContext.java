@@ -42,7 +42,7 @@ public class TADataContext {
     private String processorInfo;
     private String hostUUID;
     private String ipaddress;  // localhost ip address
-    private String assetTagHash;
+    private String assetTagHash = null;
     private TpmQuoteResponse tpmQuoteResponse;
     private String sessionId;
     private String tcbMeasurement;
@@ -319,5 +319,4 @@ public class TADataContext {
     public void setAssetTagHash(String assetTagHash) {
         this.assetTagHash = assetTagHash;
     }
-
 }

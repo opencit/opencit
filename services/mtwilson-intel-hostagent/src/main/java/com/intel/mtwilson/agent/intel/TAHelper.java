@@ -41,9 +41,11 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.HostInfo;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.StringReader;
@@ -103,7 +105,10 @@ public class TAHelper {
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
     private String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
-    
+    private TxtHostRecord host = null;
+    boolean isHostWindows = false;
+
+
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
@@ -148,6 +153,66 @@ public class TAHelper {
         //        this.setEntityManagerFactory(entityManagerFactory);
     }
 
+    /* We need host info to be passed so we can verify the host quote based on the OS and TPM version
+     * Based on the host information, the command to call for quote verification will be different
+     * These are the 4 combination: Linux/TPM 1.2, Linux/TPM2.0, Windows/TPM1.2, Windows/TPM2.0
+     *    
+    */
+    public TAHelper(TxtHostRecord hostBeingVerified) throws IOException {
+
+        this.host = hostBeingVerified;
+        
+        log.debug("TA Helper getOsName: " + host.VMM_OSName);
+        
+        //check if the host is Microsoft Windows
+        isHostWindows = host.VMM_OSName.toLowerCase().contains("microsoft");
+
+        
+        // check mtwilson 2.0 configuration first
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data"; //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        File bin = new File(binPath);
+        File var = new File(varPath);
+        if (bin.exists() && var.exists()) {
+            aikverifyhomeBin = binPath;
+            aikverifyhomeData = varPath;
+//            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
+            if (isHostWindows)
+                aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
+            else
+                aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+        } else {
+            // mtwilson 1.2 configuration
+            Configuration config = ASConfig.getConfiguration();
+            String aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
+            aikverifyhomeData = aikverifyhome + File.separator + "data";
+            aikverifyhomeBin = aikverifyhome + File.separator + "bin";
+//            opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
+            aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
+        }
+        quoteWithIPAddress = My.configuration().getConfiguration().getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
+        boolean foundAllRequiredFiles = true;
+        String required[] = new String[]{aikverifyCmd, aikverifyhomeData};
+        for (String filename : required) {
+            File file = new File(filename);
+            if (!file.exists()) {
+                log.warn(String.format("Invalid service configuration: Cannot find %s", filename));
+                foundAllRequiredFiles = false;
+            }
+        }
+        if (!foundAllRequiredFiles) {
+            throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, "Cannot find aikverify files");
+        }
+
+        // we must be able to write to the data folder in order to save certificates, nones, public keys, etc.
+        File datafolder = new File(aikverifyhomeData);
+        if (!datafolder.canWrite()) {
+            throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));
+        }
+
+        //        this.setEntityManagerFactory(entityManagerFactory);
+    }
+    
     public void setTrustedAik(String pem) {
         trustedAik = pem;
     }
@@ -169,7 +234,7 @@ public class TAHelper {
             //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497
             com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory tlsPolicyFactory = com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory.createFactory(tblHosts);//getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
             TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicy();
-            
+
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {
                 if (tblHosts.getName() != null) {
@@ -196,7 +261,7 @@ public class TAHelper {
             try(FileOutputStream outSecret = new FileOutputStream(new File(getDaaSecretFileName(sessionId)))) {
             IOUtils.write(secret, outSecret);
             }
-            
+
             // encrypt DAA challenge secret using AIK public key so only TPM can read it
             CommandUtil.runCommand(String.format("aikchallenge %s %s %s %s",
                     EscapeUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
@@ -231,7 +296,7 @@ public class TAHelper {
     public PcrManifest getQuoteInformationForHost(TblHosts tblHosts) {
 
         try {
-            // going to IntelHostAgent directly because 1) we are TAHelper so we know we need intel trust agents,  2) the HostAgent interface isn't ready yet for full generic usage,  
+            // going to IntelHostAgent directly because 1) we are TAHelper so we know we need intel trust agents,  2) the HostAgent interface isn't ready yet for full generic usage,
             // 3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
 //            HostAgentFactory factory = new HostAgentFactory();
 
@@ -303,7 +368,7 @@ public class TAHelper {
     
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client, Nonce challenge) throws NoSuchAlgorithmException, PropertyException, JAXBException,
             UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
-        //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT
         File q;
         File n;
         File c;
@@ -354,7 +419,7 @@ public class TAHelper {
             c = saveCertificate(aikCertificate, sessionId);
             log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
-            c = saveCertificate(trustedAik, sessionId); 
+            c = saveCertificate(trustedAik, sessionId);
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
@@ -369,7 +434,7 @@ public class TAHelper {
         // Verify if there is TCBMeasurement Data. This data would be available if we are extending the root of trust to applications and data on the OS
         String tcbMeasurementString = clientRequestType.getTcbMeasurement();
         log.debug("TCB Measurement XML is {}", tcbMeasurementString);
-        
+
         log.debug("Event log: {}", clientRequestType.getEventLog()); // issue #879
         byte[] eventLogBytes = Base64.decodeBase64(clientRequestType.getEventLog());// issue #879
         log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
@@ -382,7 +447,7 @@ public class TAHelper {
              * <pre>
              2014-05-27 11:40:49,089 DEBUG [http-listener-2(15)] c.i.m.a.i.TAHelper [TAHelper.java:464] Event log retrieved from the host consists of: <measureLog><txt><txtStatus>1</txtStatus><osSinitDataCapabilities>00000000</osSinitDataCapabilities><sinitMleData><version>8</version><sinitHash>fee3650237e216da2159d6f4ef85d33b3b8d3bbe</sinitHash><mleHash>03721dc24915743302f9648b7e82c559d5bdfc6b</mleHash><biosAcmId>800000002010120400003400ffffffffffffffff</biosAcmId><msegValid>0</msegValid><stmHash>0000000000000000000000000000000000000000</stmHash><policyControl>00000000</policyControl><lcpPolicyHash>0000000000000000000000000000000000000000</lcpPolicyHash><processorSCRTMStatus>00000001</processorSCRTMStatus><edxSenterFlags>00000000</edxSenterFlags></sinitMleData><modules><module><pcrNumber>17</pcrNumber><name>tb_policy</name><value>c3438497fda827be3b321c5309a204f0c9e53943</value></module><module><pcrNumber>18</pcrNumber><name>xen.gz</name><value>7a7262b37b255ec484c274a6b2e6a94591e2fdce</value></module><module><pcrNumber>19</pcrNumber><name>vmlinuz</name><value>d70e9875afa574c58348f25ef1249671e396cbc6</value></module><module><pcrNumber>19</pcrNumber><name>initrd</name><value>06c2db1b1050a3347f3f69616f9735da2089effa</value></module><module><pcrNumber>22</pcrNumber><name>asset-tag</name><value>4fd9fdab06ce10c7360b87478232cc3fc1a45249</value></module></modules></txt></measureLog>]]
              *          * </pre>
-             * 
+             *
              */
 
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
@@ -390,7 +455,7 @@ public class TAHelper {
             log.info("Got PCR map");
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
                 pcrManifest.setMeasurementXml(tcbMeasurementString);
-            
+
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -404,7 +469,7 @@ public class TAHelper {
             log.info("Got PCR map");
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
                 pcrManifest.setMeasurementXml(tcbMeasurementString);
-            
+
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -423,11 +488,11 @@ public class TAHelper {
     }
     
     // NOTE:  this v2 client method is a little different from the getQuoteInformationForHost for the v1 trust agent because
-    //        it hashes the nonce and the ip address together  (instead of replacing the last 4 bytes of the nonce 
+    //        it hashes the nonce and the ip address together  (instead of replacing the last 4 bytes of the nonce
     //        with the ip address like the v1 does)
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentClient client, Nonce challenge) throws NoSuchAlgorithmException, PropertyException, JAXBException,
             UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
-        //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT
         File q;
         File n;
         File c;
@@ -476,10 +541,16 @@ public class TAHelper {
             c = saveCertificate(aikCertificate, sessionId);
             log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
-            c = saveCertificate(trustedAik, sessionId); 
+            c = saveCertificate(trustedAik, sessionId);
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
+        // for Windows host, we generate a new nonce by sha1(nonce | tag)
+        if (tpmQuoteResponse.isTagProvisioned) {
+            log.debug("tpmQuoteResponse.isTagProvisioned is true");
+            verifyNonce = Sha1Digest.digestOf(verifyNonce).extend(tpmQuoteResponse.assetTag).toByteArray();
+        }
+        
         n = saveNonce(verifyNonce, sessionId);
 
         log.debug("saved nonce with session id: " + sessionId);
@@ -511,13 +582,14 @@ public class TAHelper {
                 c.delete();
                 r.delete();
             }
+            pcrManifest.setProvisionedTag(tpmQuoteResponse.assetTag);
             return pcrManifest;
         } else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
                 pcrManifest.setMeasurementXml(tcbMeasurementString);
-            
+
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -525,6 +597,7 @@ public class TAHelper {
                 c.delete();
                 r.delete();
             }
+            pcrManifest.setProvisionedTag(tpmQuoteResponse.assetTag);
             return pcrManifest;
         }
 
@@ -548,8 +621,8 @@ public class TAHelper {
          tpmSupport = false;
          }
          * */
-        
-        boolean tpmSupport = true;  
+
+        boolean tpmSupport = true;
 
 
         // xtw = xof.createXMLStreamWriter(new FileWriter("c:\\temp\\nb_xml.xml"));
@@ -579,7 +652,7 @@ public class TAHelper {
             xtw.writeEndElement();
         }
 
-        // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report. 
+        // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report.
         for (int pcrIndex = 0; pcrIndex < 24; pcrIndex++) {
             if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex))) {
                 List<Measurement> eventLogs = pcrManifest.getPcrEventLog(pcrIndex).getEventLog();
@@ -616,7 +689,7 @@ public class TAHelper {
             // Create a secure random number generator
             SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
             // Get 1024 random bits
-            byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address 
+            byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address
             sr.nextBytes(bytes);
 
 //            nonce = new BASE64Encoder().encode( bytes);
@@ -679,11 +752,11 @@ public class TAHelper {
          // first get a consistent newline character
          aikCertificate = aikCertificate.replace('\r', '\n').replace("\n\n", "\n");
          if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
-         log.info( "adding newlines to certificate BEGIN tag");            
+         log.info( "adding newlines to certificate BEGIN tag");
          aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
          }
          if( aikCertificate.indexOf("\n-----END CERTIFICATE-----") < 0 && aikCertificate.indexOf("-----END CERTIFICATE-----") >= 0 ) {
-         log.info( "adding newlines to certificate END tag");            
+         log.info( "adding newlines to certificate END tag");
          aikCertificate = aikCertificate.replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----");
          }
 
@@ -741,7 +814,7 @@ public class TAHelper {
     private File createRSAKeyFile(String sessionId) throws IOException, CertificateException {
         // 20130409 replacing external openssl command with equivalent java code, see below
         /*
-         String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
+         String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId));
          log.info( "RSA Key Command {}", command);
          CommandUtil.runCommand(command, false, "CreateRsaKey" );
          //log.log(Level.INFO, "Result - {0} ", result);
@@ -791,7 +864,7 @@ public class TAHelper {
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
                 if (validPcrNumber && validPcrValue) {
                     log.debug("Result PCR " + pcrNumber + ": " + pcrValue);
-//                	pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
+//                	pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));
                     pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
                 }
             } else {
@@ -832,13 +905,13 @@ public class TAHelper {
                         }
 
                         reader.next();
-                        // Get the Module name 
+                        // Get the Module name
                         if (reader.getLocalName().equalsIgnoreCase("name")) {
                             componentName = reader.getElementText();
                         }
 
                         reader.next();
-                        // Get the Module hash value 
+                        // Get the Module hash value
                         if (reader.getLocalName().equalsIgnoreCase("value")) {
                             digestValue = reader.getElementText();
                         }
@@ -860,7 +933,7 @@ public class TAHelper {
                 }
             } catch (FactoryConfigurationError | XMLStreamException | NumberFormatException ex) {
                 // bug #2171 we need to throw an exception to prevent the host from being registered with an error manifest
-                //log.error(ex.getMessage(), ex); 
+                //log.error(ex.getMessage(), ex);
                 throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
@@ -881,7 +954,7 @@ public class TAHelper {
         HashMap<String, String> info = new HashMap<String, String>();
         info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
         // Removing the prefix of "OpenSource" as it is being captured in the event type
-        info.put("ComponentName", moduleName); 
+        info.put("ComponentName", moduleName);
         info.put("PackageName", "");
         info.put("PackageVendor", "");
         info.put("PackageVersion", "");
@@ -892,7 +965,7 @@ public class TAHelper {
      public EntityManagerFactory getEntityManagerFactory() {
      return entityManagerFactory;
      }
-	
+
      public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
      this.entityManagerFactory = entityManagerFactory;
      }*/
@@ -900,10 +973,10 @@ public class TAHelper {
     /*
      private List<String> getPcrsList() {
      List<String> pcrs = new ArrayList<String>() ;
-		
+
      for(int i = 0 ; i< 24 ; i++)
      pcrs.add(String.valueOf(i));
-		
+
      return pcrs;
      }
      */
