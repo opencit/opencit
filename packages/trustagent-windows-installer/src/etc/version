@@ -1,0 +1,3 @@
+ARTIFACT=%project.artifactId%
+VERSION=%version%
+BUILD="%git.commit.time% (%git.branch%)"
