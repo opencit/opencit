@@ -17,7 +17,7 @@
     <parent> 
         <groupId>com.intel.mtwilson.maven</groupId> 
         <artifactId>mtwilson-dist-java-zip</artifactId> 
-        <version>3.3-SNAPSHOT</version> 
+        <version>2.2-SNAPSHOT</version> 
         <relativePath />
     </parent>
     
