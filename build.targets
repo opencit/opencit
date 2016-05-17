@@ -1,9 +1,9 @@
 # A successful build produces the following files:
-installers/mtwilson-client-java6/target/mtwilson-client-java6-2.1-SNAPSHOT.zip
-installers/mtwilson-client-java7/target/mtwilson-client-java7-2.1-SNAPSHOT.zip
-installers/mtwilson-server/target/mtwilson-server-2.1-SNAPSHOT-jdk_glassfish_monit.bin
-installers/mtwilson-trustagent-rhel/target/mtwilson-trustagent-rhel-2.1-SNAPSHOT.bin
-installers/mtwilson-trustagent-ubuntu/target/mtwilson-trustagent-ubuntu-2.1-SNAPSHOT.bin
-packages/trustagent-windows-installer/target/mtwilson-trustagent-windows-installer-2.1-SNAPSHOT.exe
-integration/mtwilson-client-java7/target/mtwilson-client-java7-2.1-SNAPSHOT-javadoc.jar
+installers/mtwilson-client-java6/target/mtwilson-client-java6-2.2-SNAPSHOT.zip
+installers/mtwilson-client-java7/target/mtwilson-client-java7-2.2-SNAPSHOT.zip
+installers/mtwilson-server/target/mtwilson-server-2.2-SNAPSHOT-jdk_glassfish_monit.bin
+installers/mtwilson-trustagent-rhel/target/mtwilson-trustagent-rhel-2.2-SNAPSHOT.bin
+installers/mtwilson-trustagent-ubuntu/target/mtwilson-trustagent-ubuntu-2.2-SNAPSHOT.bin
+packages/trustagent-windows-installer/target/mtwilson-trustagent-windows-installer-2.2-SNAPSHOT.exe
+integration/mtwilson-client-java7/target/mtwilson-client-java7-2.2-SNAPSHOT-javadoc.jar
 

@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.intel.mtwilson.trustagent</groupId>
         <artifactId>mtwilson-trustagent-parent</artifactId>
-        <version>2.1-SNAPSHOT</version>
+        <version>2.2-SNAPSHOT</version>
     </parent>
     
     <properties />

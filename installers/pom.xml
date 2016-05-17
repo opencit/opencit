@@ -3,7 +3,7 @@
     
     <groupId>com.intel.mtwilson.linux</groupId>
     <artifactId>mtwilson-linux</artifactId>
-    <version>2.1-SNAPSHOT</version>
+    <version>2.2-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <name>Mt Wilson Services Linux Installers</name>
@@ -27,7 +27,7 @@
     </modules>
     
     <properties>
-        <mtwilson.version>2.1-SNAPSHOT</mtwilson.version>
+        <mtwilson.version>2.2-SNAPSHOT</mtwilson.version>
     </properties>
     
     <build>
