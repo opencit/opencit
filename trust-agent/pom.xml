@@ -27,6 +27,7 @@
         <module>mtwilson-trustagent-tpm-tools</module>
         <module>mtwilson-trustagent-vrtmclient</module>
         <module>mtwilson-trustagent-ws-v2</module>
+        <module>mtwilson-tpm2-packages</module>
     </modules>
     
 </project>
