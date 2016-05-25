@@ -375,7 +375,7 @@ trousers_detect_and_run() {
   # and also this change only affects our process
   PATH=$PATH:/usr/sbin
 
-  TPM_VERSION=`cat $TRUSTAGENT_CONFIGURATION\tpm-version`
+  TPM_VERSION=`cat $TRUSTAGENT_CONFIGURATION/tpm-version`
   if [ "TPM_VERSION" == "1.2" ]; then 
     trousers=`which tcsd 2>/dev/null`
     if [ -z "$trousers" ]; then
