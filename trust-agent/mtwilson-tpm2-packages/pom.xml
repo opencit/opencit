@@ -47,23 +47,31 @@
                         </executions>
                     </plugin>
                     
-                    <!-- begin create zip in the target folder -->
+                  <!-- copy the resources to target folder -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>makezip</id>
-                                <phase>generate-resources</phase>
+                                <id>fix-mod</id>
+                                <phase>compile</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <target>
-                                        <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-                                            <fileset dir="${project.build.directory}/${project.artifactId}-${project.version}">
+                                    <target>                                      
+                                        <!-- permissions -->
+                                        <chmod perm="755">
+                                            <fileset dir="${makeself.directory}">
+                                                <include name="**/*.sh"/>
+                                                <include name="**/tboot/*.sh"/>
+                                                <include name="**/tboot/utils/*"/>
+                                                <include name="**/tss2/*.sh"/>
+                                                <include name="**/tss2/sbin/*"/>
+                                                <include name="**/tpm2-tools/*.sh"/>
+                                                <include name="**/tpm2-tools/sbin/*"/>
                                             </fileset>
-                                        </zip>
+                                        </chmod>
                                     </target>
                                 </configuration>
                             </execution>
@@ -90,7 +98,7 @@
                         <executions>
                             <execution>
                                 <id>create-single-installer</id>
-                                <phase>compile</phase>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
@@ -114,16 +122,12 @@
                         <executions>
                             <execution>
                                 <id>attach-artifacts</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>attach-artifact</goal>
                                 </goals>
                                 <configuration>
                                     <artifacts>
-                                        <artifact>
-                                            <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
-                                            <type>zip</type>
-                                        </artifact>
                                         <artifact>
                                             <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                             <type>bin</type>
