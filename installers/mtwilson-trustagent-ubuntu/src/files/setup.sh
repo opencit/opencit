@@ -91,7 +91,30 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 #VERSION=3.0
 #BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-3.0)"
 
+# make sure unzip and authbind are installed
+#java_required_version=1.7.0_51
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
 
+# identify tpm version and set the dependent packages based on version of TPM
+TPM_VERSION=1.2
+if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+  TPM_VERSION=1.2
+else
+#  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+  TPM_VERSION=2.0
+  #install tpm2-tss, tpm2-tools, and tboot for tpm2
+  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
+
+  # not install trousers and its dev packages for tpm 2.0
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc"
+  TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev make gcc"
+  TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel make gcc"
+  TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+fi
+echo "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -258,31 +281,6 @@ TRUSTAGENT_V_1_2_HOME=/opt/intel/cloudsecurity/trustagent
 TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
 package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
-
-# make sure unzip and authbind are installed
-#java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
-
-# find tpm version
-TPM_VERSION=1.2
-if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
-  TPM_VERSION=1.2
-else
-#  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
-  TPM_VERSION=2.0
-  #install tpm2-tss, tpm2-tools, and tboot for tpm2
-  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
-
-  # not install trousers and its dev packages for tpm1.2
-  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc"
-  TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev make gcc"
-  TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel make gcc"
-  TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
-fi
-echo "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
