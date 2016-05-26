@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -369,5 +370,16 @@ public class TrustagentConfiguration {
 
     public String getTrustAgentAdminUserName() {
         return conf.get(TRUSTAGENT_ADMIN_USERNAME); // intentionally no default - this must be generated during setup
-    }    
+    }
+
+    public static String getTpmVersion() throws IOException {
+        File tpmVerFileH = new File(Folders.configuration() + File.separator + "tpm-version");
+        
+        //set tpm version to 1.2 by default
+        String tpmVersion = "1.2";
+        if (tpmVerFileH.exists())
+            tpmVersion = FileUtils.readFileToString(tpmVerFileH);   
+        
+        return tpmVersion;
+    }
 }
