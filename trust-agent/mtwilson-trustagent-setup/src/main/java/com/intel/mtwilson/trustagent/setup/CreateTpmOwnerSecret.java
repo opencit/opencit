@@ -5,6 +5,9 @@
 package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.mtwilson.common.CommandResult;
+import com.intel.mtwilson.common.CommandUtil;
+import com.intel.mtwilson.common.TAException;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.IdentityOS;
@@ -53,7 +56,7 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
         getConfiguration().set(TrustagentConfiguration.TPM_OWNER_SECRET, tpmOwnerSecretHex);
     }
     
-    private boolean isTpmOwned() throws IOException {
+    private boolean isTpmOwned() throws IOException, TAException {
         log.debug("Identify the OS");
         if (IdentityOS.isWindows()) { 
             log.debug("It is Windows");
@@ -78,6 +81,11 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
             }
             else {
                 //Fix, how to check if tpm 2.0 owned
+                CommandResult result = CommandUtil.runCommand("tpm2_isowned");
+                if (result != null && result.getStdout() != null) {
+                    if(result.getStdout().contains("1")) 
+                        return true;
+                }
                 return false;
             }
         }
