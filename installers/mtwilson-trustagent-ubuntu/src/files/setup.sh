@@ -114,7 +114,6 @@ else
   TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel make gcc"
   TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
 fi
-echo "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -156,6 +155,7 @@ export TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
 export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
 export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
 export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
+
 
 # before we start, clear the install log (directory must already exist; created above)
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
@@ -281,6 +281,9 @@ TRUSTAGENT_V_1_2_HOME=/opt/intel/cloudsecurity/trustagent
 TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
 package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
+
+# save tpm version in trust agent configuration directory
+echo "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then

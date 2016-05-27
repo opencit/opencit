@@ -66,6 +66,7 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
             log.debug("It is Linux");
             
             String tpmVersion = TrustagentConfiguration.getTpmVersion();
+            log.debug("Tpm version: {}", tpmVersion);
             if (tpmVersion.equals("1.2")) {
                 File tpmOwned = new File("/sys/class/tpm/tpm0/device/owned");
                 if (!tpmOwned.exists()) {
