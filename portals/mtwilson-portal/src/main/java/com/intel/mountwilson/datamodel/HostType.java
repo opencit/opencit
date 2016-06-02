@@ -15,8 +15,7 @@ public class HostType {
         RED_HAT("redhat","rhel.png","true"),
         CITRIX_XENSERVER("xenserver","citrix.png","false"),
         WINDOWS("windows", "windows.png", "true"),
-        HYPERV("hyper-v", "hyper-v.png", "false"),
-        DOCKER("docker","docker.png","false");
+        HYPERV("hyper-v", "hyper-v.png", "false");
         
         private String value;
         private String imageName;
@@ -61,7 +60,8 @@ public class HostType {
     	QEMU("qemu","kvm.png"),
         KVM("kvm","kvm.png"),
         XEN("xen","xen.png"),
-        HYPERV("hyper-v", "hyper-v.png");
+        HYPERV("hyper-v", "hyper-v.png"),
+        DOCKER("docker","docker.png");
        
         
         private String value;
