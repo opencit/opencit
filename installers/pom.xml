@@ -20,8 +20,8 @@
         <module>mtwilson-client-java7</module>
         <module>mtwilson-portal-installer</module>
         <module>mtwilson-server</module>
-        <module>mtwilson-trustagent-rhel</module>
-        <module>mtwilson-trustagent-ubuntu</module>
+        <!--module>mtwilson-trustagent-rhel</module-->
+        <module>mtwilson-trustagent</module>
         <module>TomcatLinuxInstaller</module>
         <module>WLMServiceLinuxInstaller</module>
     </modules>
