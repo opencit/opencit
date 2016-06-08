@@ -497,6 +497,9 @@ public class TpmUtils {
 	public static String byteArrayToString(byte [] blob, int perLine) {
 		String returnVal = "";
 		StringBuffer sb = new StringBuffer();
+                
+                if (blob==null) return returnVal;
+                
 		for(int i = 0; i < blob.length; i++) {
 			String hexDigit = Integer.toHexString((int)blob[i] & 0xff).toUpperCase();
 			if (hexDigit.length() == 1)

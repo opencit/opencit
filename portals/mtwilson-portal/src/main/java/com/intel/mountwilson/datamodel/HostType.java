@@ -13,12 +13,17 @@ public class HostType {
         SUSE("suse","suse.png","true"),
         RHEL("rhel","rhel.png","true"),
         RED_HAT("redhat","rhel.png","true"),
-        CITRIX_XENSERVER("xenserver","citrix.png","false");
+        CITRIX_XENSERVER("xenserver","citrix.png","false"),
+        WINDOWS("windows", "windows.png", "true"),
+        HYPERV("hyper-v", "hyper-v.png", "false");
         
         private String value;
         private String imageName;
         private String vmmImageNeeded;
 
+        
+        
+        
         public String getVmmImageNeeded() {
             return vmmImageNeeded;
         }
@@ -54,7 +59,8 @@ public class HostType {
     public static enum hostVMM{
     	QEMU("qemu","kvm.png"),
         KVM("kvm","kvm.png"),
-        XEN("xen","xen.png");
+        XEN("xen","xen.png"),
+        HYPERV("hyper-v", "hyper-v.png");
        
         
         private String value;

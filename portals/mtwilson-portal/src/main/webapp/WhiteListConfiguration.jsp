@@ -75,6 +75,12 @@
                                     <span>17</span>
                                 </div>
                                 <div class="valueDivConfig" id="vmmPCRsValues">
+                                    <input type="checkbox" id="required_pcrs_12" name="12"> 
+                                    <span>12</span>
+                                    <input type="checkbox" id="required_pcrs_13" name="13">
+                                    <span>13</span>
+                                    <input type="checkbox" id="required_pcrs_14" name="14">
+                                    <span>14</span>
                                     <input type="checkbox" id="required_pcrs_18" name="18"> 
                                     <span>18</span>
                                     <input type="checkbox" id="required_pcrs_19" name="19">

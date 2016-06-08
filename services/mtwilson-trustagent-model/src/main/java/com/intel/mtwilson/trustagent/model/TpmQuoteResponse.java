@@ -28,6 +28,10 @@ public class TpmQuoteResponse {
     public String eventLog; // base64-encoded xml ....
     public String tcbMeasurement;
     
+    // added for assetTag attestation based on sha1(nonce | assetTag
+    public boolean isTagProvisioned;
+    public byte[] assetTag;
+    
     /**
         String responseXML =
                 "<client_request> "
