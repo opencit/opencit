@@ -261,7 +261,10 @@ ASSET_TAG_SETUP="y"
 
 # make sure unzip and authbind are installed
 #java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
+#Adding redhat-lsb libvirt for bug 5289
+#Adding net-tools for bug 5285
+#adding openssl-devel for bug 5284
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
 TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
 TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
 TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
@@ -325,14 +328,14 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
 fi
 
 ### INSTALL MEASUREMENT AGENT
-echo "Installing measurement agent..."
-TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
-if [ -z "$TBOOTXM_PACKAGE" ]; then
-  echo_failure "Failed to find measurement agent installer package"
-  exit -1
-fi
-./$TBOOTXM_PACKAGE
-if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
+#echo "Installing measurement agent..."
+#TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
+#if [ -z "$TBOOTXM_PACKAGE" ]; then
+#  echo_failure "Failed to find measurement agent installer package"
+#  exit -1
+#fi
+#./$TBOOTXM_PACKAGE
+#if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
 
 # Migrate any old data to the new locations  (should be rewritten in java)
 v1_aik=$TRUSTAGENT_V_1_2_CONFIGURATION/cert
