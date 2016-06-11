@@ -99,10 +99,8 @@ TRUSTAGENT_PID_FILE=$TRUSTAGENT_HOME/trustagent.pid
 TRUSTAGENT_HTTP_LOG_FILE=$TRUSTAGENT_LOGS/http.log
 #TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate"
 TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate"
-#TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
-TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret"
-#TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair take-ownership"
-TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair"
+TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
+TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair take-ownership"
 #TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS="create-binding-key certify-binding-key create-signing-key certify-signing-key"
 TRUSTAGENT_SETUP_TASKS="update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user $TRUSTAGENT_TPM_TASKS $TRUSTAGENT_AUTHORIZE_TASKS $TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS login-register"
 # not including configure-from-environment because we are running it always before the user-chosen tasks
