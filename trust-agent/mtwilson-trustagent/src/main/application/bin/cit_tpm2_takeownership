@@ -1,0 +1,59 @@
+#!/bin/bash
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+if [ "$#" -eq "0" ]; then
+  echo "Usage: cit_tpm2_takeownership <ownerpass> [verbose]"
+  exit 0
+fi
+
+ownerPasswd=$1
+endorsePasswd=$1
+lockPasswd=$1
+verbose=$2
+nameAlg=0x000B #SHA256
+keyType=0x0001 #RSA
+spkContext=/tmp/spk.context
+spkHandle=0x81000000 #0x81000000~0x810000FF
+
+echo -n "Taking ownership..."
+# Take ownership
+if [[ $verbose == verbose ]]; then
+  tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd
+else
+  tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd > /dev/null
+fi
+
+if [[ $? != 0 ]];then
+  echo "failed"
+  exit 1
+fi
+
+# Create storage primary key with NULL auth
+rm -rf $spkContext
+if [[ $verbose == verbose ]]; then
+  tpm2_createprimary -A o -P $ownerPasswd -g $nameAlg -G $keyType -C $spkContext
+else
+  tpm2_createprimary -A o -P $ownerPasswd -g $nameAlg -G $keyType -C $spkContext > /dev/null
+fi
+
+if [[ $? != 0 ]];then
+  echo "failed"
+  exit 1
+fi
+
+# make storage primary key persistent
+if [[ $verbose == verbose ]]; then
+  tpm2_evictcontrol -A o -P $ownerPasswd -c $spkContext -S $spkHandle
+else
+  tpm2_evictcontrol -A o -P $ownerPasswd -c $spkContext -S $spkHandle > /dev/null
+fi
+
+if [[ $? != 0 ]];then
+  echo "failed"
+  exit 1
+fi
+
+rm -rf $spkContext
+echo "done"

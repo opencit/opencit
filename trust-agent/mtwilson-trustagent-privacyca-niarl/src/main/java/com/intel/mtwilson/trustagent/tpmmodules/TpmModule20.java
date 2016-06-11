@@ -87,7 +87,7 @@ public class TpmModule20 implements TpmModuleProvider {
     @Override
     public void takeOwnership(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {
         final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + "/" + "cit_tpm2_takeownership" + " " + TpmUtils.byteArrayToHexString(ownerAuth);
+        String cmdToexecute = cmdPath + File.separator + "cit_tpm2_takeownership" + " " + TpmUtils.byteArrayToHexString(ownerAuth);
         commandLineResult result = executeTpmCommand(cmdToexecute, 0);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.takeOwnership returned nonzero error", result.getReturnCode());
@@ -128,18 +128,21 @@ public class TpmModule20 implements TpmModuleProvider {
 
         // Parse the args parameter to populate the environment variables array
         //HashMap<String,String> environmentVars = new HashMap<String, String>();
-        List<String> cmd = new ArrayList<String>();
         
-        /* the command to be run should be
-         * "cmd.exe /c path_to_tpmtool.exe arguments"
-        */
-        //cmd.add(newExeName);
-        cmd.add(cmdArgs);
+        String[] params = cmdArgs.split(" ");
+        //HashMap<String,String> environmentVars = new HashMap<String, String>();
+        List<String> cmd = new ArrayList<String>();
+        //cmd.add(newTpmModuleExePath + File.separator + newExeName);
+
+        for(int loop = 0; loop < params.length; loop++) {
+            String param = params[loop];
+            cmd.add(param);
+        }   
         // check the parameters
         for (String temp: cmd) {
             log.debug(temp);
         }
-        
+      
         /* create the process to run */
         ProcessBuilder pb = new ProcessBuilder(cmd);
         //pb.environment().putAll(environmentVars);
