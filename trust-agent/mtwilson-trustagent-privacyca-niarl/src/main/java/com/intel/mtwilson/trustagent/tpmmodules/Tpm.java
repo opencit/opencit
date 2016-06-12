@@ -18,14 +18,25 @@ import org.apache.commons.io.FileUtils;
  */
 public class Tpm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tpm.class);
-    public static TpmModuleProvider tpm;
+    public static TpmModuleProvider tpmModule = null;
 
     public Tpm() {
+        findModule();
+    }
+
+    public static TpmModuleProvider getModule() {
+        if (tpmModule == null) {
+            findModule();
+        }
+        return tpmModule;
+    }
+    
+    private static void findModule() {
         String os = System.getProperty("os.name").toLowerCase();
 	if  (os.indexOf( "win" ) >= 0) { //Windows
-            tpm = new TpmModuleWindows();
+            tpmModule = new TpmModuleWindows();
         } 
-        else { // should distinguish if it is TPM 1.2 or TPM 2.0. For now, set to TPM 1.2
+        else { // should distinguish if it is TPM 1.2 or TPM 2.0.
             String tpmVersion =null;
             try {
                 tpmVersion = TrustagentConfiguration.getTpmVersion();
@@ -34,16 +45,11 @@ public class Tpm {
             }
             log.debug("Tpm version: {}", tpmVersion);
             if (tpmVersion.equals("1.2")) {
-                tpm = new TpmModule12();
+                tpmModule = new TpmModule12();
             }
             else { /* tpm 2.0 */
-                tpm = new TpmModule20();
+                tpmModule = new TpmModule20();
             }
         }
     }
-
-    public static TpmModuleProvider getTpm() {
-        return tpm;
-    }
-    
 }

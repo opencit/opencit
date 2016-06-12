@@ -54,7 +54,7 @@ public class TakeOwnership extends AbstractSetupTask {
             Tpm tpm = new Tpm();
             
             try {
-                tpm.getTpm().takeOwnership(config.getTpmOwnerSecret(), nonce1);
+                tpm.getModule().takeOwnership(config.getTpmOwnerSecret(), nonce1);
             } catch (TpmModule.TpmModuleException e) {
                 if( e.getErrorCode() != null && e.getErrorCode() == 4 ) {
                     log.info("Ownership is already taken");

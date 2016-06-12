@@ -68,7 +68,7 @@ public class CreateIdentity implements Configurable, Runnable {
             if (IdentityOS.isWindows()) { 
                 /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
                 Tpm tpm = new Tpm();
-                ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                ekCert = tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
             } else
                 ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
             TpmIdentityRequest encryptedEkCert = new TpmIdentityRequest(ekCert, (RSAPublicKey) privacy.getPublicKey(), false);
@@ -81,7 +81,7 @@ public class CreateIdentity implements Configurable, Runnable {
             if (IdentityOS.isWindows()) { 
                 /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
                 Tpm tpm = new Tpm();
-                newId = tpm.getTpm().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), X509Util.decodeDerCertificate(ekCert), !shortcut);
+                newId = tpm.getModule().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), X509Util.decodeDerCertificate(ekCert), !shortcut);
                 
                 // write the AikOpaque to file
                 String aikopaquefilepath = config.getAikOpaqueFile().getAbsolutePath();
@@ -140,7 +140,7 @@ public class CreateIdentity implements Configurable, Runnable {
                 int index = 256 + symlength;
                 System.arraycopy(challenge, index, asymEKblob, 0, 256);
                 Tpm tpm = new Tpm();
-                HashMap<String, byte[]> results = tpm.getTpm().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
+                HashMap<String, byte[]> results = tpm.getModule().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
                 decrypted1 = results.get("aikcert");
             }
             
@@ -193,7 +193,7 @@ public class CreateIdentity implements Configurable, Runnable {
                 System.arraycopy(encrypted2, index, asymEKblob, 0, 256);
                 
                 Tpm tpm = new Tpm();
-                HashMap<String, byte[]> results = tpm.getTpm().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym2, config.getAikIndex());
+                HashMap<String, byte[]> results = tpm.getModule().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym2, config.getAikIndex());
                 System.out.println(results);
 
                 decrypted2 = results.get("aikcert");

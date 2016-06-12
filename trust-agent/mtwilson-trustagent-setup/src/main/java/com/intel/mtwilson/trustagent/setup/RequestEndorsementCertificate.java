@@ -226,7 +226,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
             /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
             try {
                 Tpm tpm = new Tpm();
-                ekCertBytes = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                ekCertBytes = tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
                 log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
                 ekCert = X509Util.decodeDerCertificate(ekCertBytes);
             } catch (TpmModuleException e) {
@@ -254,7 +254,9 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         }
         else {  /* Linux -- Also need to distinguish between TPM 1.2 and TPM 2.0 */
             try {
-                ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+                //ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC"); //tpm1.2           
+                ekCertBytes = Tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
+                
                 log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
                 ekCert = X509Util.decodeDerCertificate(ekCertBytes);
             } catch (TpmModuleException e) {
