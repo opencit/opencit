@@ -47,6 +47,8 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -54,6 +56,8 @@ import javax.xml.transform.stream.StreamSource;
  *
  */
 public class ConverterUtil {
+        private static final Logger log = LoggerFactory.getLogger(ConverterUtil.class);
+
 	//variable used to change date into given format to display on screen.
 	//private static final DateFormat formatter=  new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
 	
@@ -195,6 +199,7 @@ public class ConverterUtil {
 			String s = hostDetailsEntityVO.getVmmName();
 			String biosName = s.split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR))[0];
 			String hypervisor = s.split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR))[1];
+                        log.debug("ConverterUtil: VMM name '{}' - Bios '{}' - Hypervisor '{}'", s, biosName, hypervisor);
 			
                         // Setting this flag will ensure that we process the VMs for that particular host type.
                         // Since we are supporting only VMware at this time, we are setting it to true only for
@@ -219,7 +224,7 @@ public class ConverterUtil {
 			
 			//getting all Host VMM Type from enum
 			hostVMM[] hostVMMTypes = HostType.hostVMM.values();
-			hostVO.setHypervisorName("");
+                        hostVO.setHypervisorName("");
 			for (hostVMM hostOSType : hostVMMTypes) {
 				if((hypervisor.toLowerCase().contains(hostOSType.getValue().toLowerCase())) &&
                                         (skipAddingVMMImage == false)){

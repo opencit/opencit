@@ -320,6 +320,7 @@ trustagent_update_system_info() {
     dmidecode -s system-uuid > $TRUSTAGENT_VAR/system-info/dmidecode.system-uuid
     dmidecode --type processor > $TRUSTAGENT_VAR/system-info/dmidecode.processor
     lsb_release -a > $TRUSTAGENT_VAR/system-info/lsb_release
+    docker -v > $TRUSTAGENT_VAR/system-info/docker.version 2>&1
     virsh version > $TRUSTAGENT_VAR/system-info/virsh.version
     chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_VAR
   else
@@ -355,6 +356,9 @@ trustagent_system_info() {
           ;;
       "lsb_release -a")
           trustagent_system_info_get $TRUSTAGENT_VAR/system-info/lsb_release
+          ;;
+      "docker version")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/docker.version
           ;;
       "virsh version")
           trustagent_system_info_get $TRUSTAGENT_VAR/system-info/virsh.version
