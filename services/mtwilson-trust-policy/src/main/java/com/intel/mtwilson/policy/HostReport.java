@@ -44,4 +44,5 @@ public class HostReport {
 //    public Nonce nonce; // the nonce that was used to guarantee freshness (is this the challenge nonce or response nonce ??? hmm maybe not needed because it maybe part of TpmQuote)
     @JsonDeserialize(using=X509AttributeCertificateDeserializer.class)
     public X509AttributeCertificate tagCertificate;
+    public byte[] assetTagReported; // This is asset tag hash reported from the host. mainly used on Windows host
 }

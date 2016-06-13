@@ -5,3 +5,4 @@ installers/mtwilson-server/target/mtwilson-server-3.1-SNAPSHOT-jdk_glassfish_mon
 installers/mtwilson-trustagent-rhel/target/mtwilson-trustagent-rhel-3.1-SNAPSHOT.bin
 installers/mtwilson-trustagent-ubuntu/target/mtwilson-trustagent-ubuntu-3.1-SNAPSHOT.bin
 integration/mtwilson-client-java7/target/mtwilson-client-java7-3.1-SNAPSHOT-javadoc.jar
+packages/trustagent-windows-installer/target/mtwilson-trustagent-windows-installer-3.1-SNAPSHOT.exe

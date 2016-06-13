@@ -69,10 +69,13 @@ public class HostBO {
 
 	private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
 	public static final PcrIndex LOCATION_PCR = PcrIndex.PCR22;
+        public static final PcrIndex LOCATION_PCR_WINDOWS = PcrIndex.PCR23;
+        public PcrIndex locationPCR = LOCATION_PCR;
         private static final String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
+        
 //        private byte[] dataEncryptionKey = null;
 //        private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
 //        private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
@@ -121,6 +124,9 @@ public class HostBO {
                         checkForDuplicate(host);
 
                         getBiosAndVMM(host);
+                        
+                        if (host.getVmm().getOsName().toLowerCase().contains("microsoft"))
+                            locationPCR = LOCATION_PCR_WINDOWS;
 
                         log.debug("Getting Server Identity.");
 
@@ -293,8 +299,8 @@ public class HostBO {
 
 	private String getLocation(PcrManifest pcrManifest) throws IOException {
         if( pcrManifest == null ) { return null; }
-        if( pcrManifest.containsPcr(LOCATION_PCR) ) {
-            String value = pcrManifest.getPcr(LOCATION_PCR).getValue().toString();
+        if( pcrManifest.containsPcr(locationPCR) ) {
+            String value = pcrManifest.getPcr(locationPCR).getValue().toString();
             return My.jpa().mwLocationPcr().findTblLocationPcrByPcrValue(value);
         }
 		return null;
