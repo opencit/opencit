@@ -5,7 +5,9 @@
  */
 package com.intel.mtwilson.trustagent.tpmmodules;
 
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -80,8 +83,36 @@ public class TpmModule20 implements TpmModuleProvider {
     }
     
     @Override
-    public byte[] getCredential(byte[] ownerAuth, String credType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public byte[] getCredential(byte[] ownerAuth, String credType) throws TpmModule.TpmModuleException, IOException {
+        /*
+         * Get Credential (EC, PC, CC, and PCC)
+         * return: <cred blob>
+         */
+        /* if (!(credType.equals("EC") || credType.equals("CC") || credType.equals("PC")|| credType.equals("PCC"))) 
+            throw new TpmModule.TpmModuleException("TpmModule.getCredential: credential type parameter must be \"EC\", \"CC\", \"PC\", or \"PCC\".");
+
+        commandLineResult result;
+        if (credType.equals("EC")) {
+            final String cmdPath = Folders.application() + File.separator + "bin";
+            String cmdToexecute = cmdPath + File.separator + "tpm2-getec" + " RSA";
+            result = executeTpmCommand(cmdToexecute, 1);
+            if (result.getReturnCode() != 0) 
+                throw new TpmModule.TpmModuleException("TpmModule20.getCredential returned nonzero error", result.getReturnCode()); 
+            byte[] eccert = TpmUtils.hexStringToByteArray(result.getResult(0));
+            log.debug("TpmModule20 getCredential eccert length: {}", eccert.length);
+            return eccert;
+        }
+        log.debug("TpmModule20 getCredential Not supported CerdType: {}", credType);
+        return null;
+        */
+        
+        /* EC cert is save to file ekcert.cer now */
+        byte[] ecCertByte = null;
+        TrustagentConfiguration config = TrustagentConfiguration.loadConfiguration();
+        File ecCertificateFile = config.getEcCertificateFile();
+        if( ecCertificateFile.exists() )
+           ecCertByte = FileUtils.readFileToByteArray(ecCertificateFile);
+        return ecCertByte;
     }
 
     @Override
