@@ -11,6 +11,9 @@ fi
 ownerPasswd=$1
 endorsePasswd=$1
 lockPasswd=$1
+tmpownerPasswd=abc
+tmpendorsePasswd=abc
+tmplockPasswd=abc
 verbose=$2
 nameAlg=0x000B #SHA256
 keyType=0x0001 #RSA
@@ -26,8 +29,20 @@ else
 fi
 
 if [[ $? != 0 ]];then
-  echo "failed"
-  exit 1
+  # the above command failed, ownership is taken
+  # now we check if we are the owner by changing password
+  tpm2_takeownership -o $tmpownerPasswd -e $tmpendorsePasswd -l $tmplockPasswd -O $ownerPasswd -E $endorsePasswd -L $lockPasswd > /dev/null
+  ret=$?
+  if [[ "$ret" != 0 ]]; then
+    # we are not the owner since we cannot change
+    echo "ownership was taken with different password"
+    exit 1
+  else
+    # we are the owner, change the passwd back from tmppasswd
+    tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd -O $tmpownerPasswd -E $tmpendorsePasswd -L $tmplockPasswd > /dev/null
+    echo "ownership was taken with the same password"
+    exit 4
+  fi
 fi
 
 # Create storage primary key with NULL auth
@@ -39,8 +54,8 @@ else
 fi
 
 if [[ $? != 0 ]];then
-  echo "failed"
-  exit 1
+  echo "failed with create storage primary key"
+  exit 2
 fi
 
 # make storage primary key persistent
@@ -51,8 +66,8 @@ else
 fi
 
 if [[ $? != 0 ]];then
-  echo "failed"
-  exit 1
+  echo "failed with make storage primary key persistent"
+  exit 3
 fi
 
 rm -rf $spkContext
