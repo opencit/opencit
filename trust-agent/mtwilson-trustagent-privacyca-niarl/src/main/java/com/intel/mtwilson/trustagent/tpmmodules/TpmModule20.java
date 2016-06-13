@@ -112,6 +112,9 @@ public class TpmModule20 implements TpmModuleProvider {
         File ecCertificateFile = config.getEcCertificateFile();
         if( ecCertificateFile.exists() )
            ecCertByte = FileUtils.readFileToByteArray(ecCertificateFile);
+        else
+           throw new TpmModule.TpmModuleException("TpmModule20.getCredential returned nonzero error", 2);
+
         return ecCertByte;
     }
 
