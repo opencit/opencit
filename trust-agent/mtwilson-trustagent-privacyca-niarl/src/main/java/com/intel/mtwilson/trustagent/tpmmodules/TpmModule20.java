@@ -129,8 +129,15 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public byte[] getEndorsementKeyModulus(byte[] ownerAuth, byte[] nonce) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public byte[] getEndorsementKeyModulus(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-readek" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + "RSA";
+        commandLineResult result = executeTpmCommand(cmdToexecute, 2);
+  
+        if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.getEndorsementKeyModulus returned nonzero error", result.getReturnCode());
+        log.debug("EK handle: {}", result.getResult(0));
+        return TpmUtils.hexStringToByteArray(result.getResult(1));
     }
 
     @Override
