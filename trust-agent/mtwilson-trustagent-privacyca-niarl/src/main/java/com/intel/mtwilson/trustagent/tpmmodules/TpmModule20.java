@@ -13,14 +13,19 @@ import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -141,8 +146,31 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public void setCredential(byte[] ownerAuth, String credType, byte[] credBlob) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setCredential(byte[] ownerAuth, String credType, byte[] credBlob) throws IOException {
+        try{
+            TrustagentConfiguration config = TrustagentConfiguration.loadConfiguration();
+            String ekcertificatepath = config.getEcCertificateFile().getAbsolutePath();
+            File file = new File(ekcertificatepath);
+            mkdir(file);
+            
+            X509Certificate certificate = X509Util.decodeDerCertificate(credBlob); // throws CertificateException
+            String certificatePem = X509Util.encodePemCertificate(certificate);          
+            //String certificatestr = new String(credBlob);
+            try(FileOutputStream out = new FileOutputStream(file)) { // throws FileNotFoundException
+                IOUtils.write(certificatePem, out); // throws IOException
+            }
+        }   catch (CertificateException ex) {
+            Logger.getLogger(TpmModule20.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void mkdir(File file) throws IOException {
+        if (!file.getParentFile().isDirectory()) {
+            if (!file.getParentFile().mkdirs()) {
+                log.warn("Failed to create client installation path!");
+                throw new IOException("Failed to create client installation path!");
+            }
+        }
     }
 
     @Override

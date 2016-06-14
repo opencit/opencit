@@ -385,6 +385,6 @@ public class TrustagentConfiguration {
     
     /* This is temp solution for tpm2; we save the endorsement certificate (EC) to a file ec.pem */
     public File getEcCertificateFile() {
-        return new File(Folders.configuration() + File.separator + "ekcert.cer");        
+        return new File(Folders.configuration() + File.separator + "ekcert.pem");        
     }
 }
