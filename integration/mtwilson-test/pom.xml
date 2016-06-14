@@ -78,7 +78,7 @@
             <!-- Purpose: enables storing test environment info outside test sources -->
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-junit</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <!--version>0.1-SNAPSHOT</version-->
             <scope>test</scope>
         </dependency>
         
