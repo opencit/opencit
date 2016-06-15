@@ -252,35 +252,33 @@ public class HostAttestations extends MtWilsonClient {
      * Searches for the attestation results for the host with the specified criteria, and returns the attestation in the format specified by the accept header.
      * Basic attestation report would be returned back to the caller for the hosts matching the search criteria. If the user specifies the accept content type 
      * as "application/samlassertion+xml", then only the latest valid cached SAML assertion matching the search criteria would be returned back to the caller
-     * (a single attestation).
-     * 
-     * Other valid accept headers include:
-     * "application/xml"
-     * "application/json"
-     * 
+     * (a single attestation).<br>
+     * <br>
+     * Other valid accept headers include:<br>
+     * "application/xml"<br>
+     * "application/json"<br>
+     * <br>
      * If no accept header is specified, the returned data will default to the JSON type. Bot the XML and JSON types will return all attestations that meet the
-     * specified criteria.
-     * 
-     * @param criteria HostAttestationFilterCriteria object that specifies the search criteria.
-     * 
-     * Valid search parameters include:
-     * Host attestation ID - ("id")
-     * Host UUID - ("host_id")
-     * Host Name - ("nameEqualTo")
-     * Host AIK SHA1 - ("aik")
-     * Host AIK Public Key SHA1- ("aik_public_key_sha1") # of days for which we want the attestations from current date -("numberOfDays")
-     * Date from which we want the attestations - ("fromDate")
-     * Date till which we want the attestations - ("toDate")
-     * Filter criteria default is True; filter=false returns all attestations with no criteria applied, use with caution - ("filter")
-     * number of records we want to return back (10 by default; set this higher when retrieving all attestations over a certain date range) - ("limit")
-     * 
-     * Currently the following ISO 8601 date formats are supported
-     *     -- date. Ex: nameEqualTo=192.168.0.2&fromDate=2015-05-01&toDate=2015-06-01
-     *     -- date+time. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T00:00Z&toDate=2015-06-05T00:00Z
-     *     -- date+time+zone. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T12:30-02:00&toDate=2015-06-05T12:30-02:00
-     * 
+     * specified criteria.<br>
+     * <br>
+     * Currently the following ISO 8601 date formats are supported for date parameters:<br>
+     *     -- date. Ex: nameEqualTo=192.168.0.2&fromDate=2015-05-01&toDate=2015-06-01<br>
+     *     -- date+time. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T00:00Z&toDate=2015-06-05T00:00Z<br>
+     *     -- date+time+zone. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T12:30-02:00&toDate=2015-06-05T12:30-02:00<br>
+     * <br>
      * Note that when the fromDate and toDate options are specified, the output includes the attestations from the fromDate upto the toDate but not including the
      * attestations from the toDate.
+     * 
+     * @param id Host attestation ID
+     * @param host_id Host UUID
+     * @param nameEqualTo Host Name
+     * @param aik Host AIK SHA1
+     * @param aik_public_key_sha1 Host AIK Public Key SHA1
+     * @param numberOfDays Number of days for which we want the attestations from current date
+     * @param fromDate Date from which we want the attestations
+     * @param toDate Date till which we want the attestations
+     * @param limit number of records we want to return back (default is set to 10; set this higher when retrieving all attestations over a certain date range)
+     * @param filter setting this parameter to "false" returns all attestations with no criteria applied, use with caution (default is set to "true"; returns no records; parameters are required)
      * 
      * @return HostAttestationCollection object with a list of attestations for the hosts that match the filter criteria. 
      * @since Mt.Wilson 2.0
