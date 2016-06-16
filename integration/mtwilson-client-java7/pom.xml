@@ -547,6 +547,11 @@
                                             <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
                                             <type>zip</type>
                                         </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.zip</file>
+                                            <type>zip</type>
+                                            <classifier>javadoc</classifier>
+                                        </artifact>
                                     </artifacts>
                                 </configuration>
                             </execution>
