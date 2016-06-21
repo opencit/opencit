@@ -659,7 +659,7 @@ monit_install() {
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
   auto_install "Monit" "MONIT"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
       echo_failure "Unable to auto-install Monit"
