@@ -174,8 +174,17 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public TpmIdentity collateIdentityRequest(byte[] ownerAuth, byte[] keyAuth, String keyLabel, byte[] pcaPubKeyBlob, int keyIndex, X509Certificate endorsmentCredential, boolean useECinNvram) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public TpmIdentity collateIdentityRequest(byte[] ownerAuth, byte[] keyAuth, String keyLabel, byte[] pcaPubKeyBlob, int keyIndex, X509Certificate endorsmentCredential, boolean useECinNvram) throws IOException, TpmModule.TpmModuleException {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-createak" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + "RSA";
+        commandLineResult result = executeTpmCommand(cmdToexecute, 2);
+  
+        if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.collateIdentityRequest returned nonzero error", result.getReturnCode());
+        log.debug("AIK pub key in hex: {}", result.getResult(0));
+        byte[] credRequest = TpmUtils.hexStringToByteArray(result.getResult(0));
+        TpmIdentity newId = new TpmIdentity(credRequest, null, null);
+        return newId;
     }
 
     @Override
