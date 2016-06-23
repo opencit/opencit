@@ -76,7 +76,7 @@ public class Tpm2MakeCredentialTest {
     }
     
     @Test
-    public void testMakeCredential() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
+    public void testMakeCredential() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, ShortBufferException, IOException {
         Tpm2Credential out = Tpm2Utils.makeCredential(publicKey, Tpm2Algorithm.Symmetric.AES, 128, Tpm2Algorithm.Hash.SHA256, "12345678\n".getBytes(), objectName);
         System.out.println(bytesToHex(out.getCredential()));
         System.out.println(bytesToHex(out.getSecret()));

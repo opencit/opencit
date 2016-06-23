@@ -9,13 +9,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,7 +101,8 @@ public class Tpm2Utils {
                                             InvalidAlgorithmParameterException,
                                             IllegalBlockSizeException, 
                                             BadPaddingException,
-                                            ShortBufferException {
+                                            ShortBufferException,
+                                            IOException {
         if(credential == null || credential.length <= 0) {
             throw new IllegalArgumentException("credential is null or empty");
         }       
