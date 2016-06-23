@@ -36,6 +36,9 @@ public class Tpm2Utils {
     private final static String INTEGRITY = "INTEGRITY";
     private final static String STORAGE = "STORAGE";
     
+    private final static int SHORT_BYTES = 2;
+    private final static int INTEGER_BYTES = 4;
+    
     private static boolean isSupportedAsymAlgorithm(String algorithm) {
         switch(algorithm) {
             case "RSA":
@@ -193,7 +196,7 @@ public class Tpm2Utils {
         hmac.update(objectName); // add bytes
         byte[] integrity = hmac.doFinal();
         
-        credentialBlob.order(ByteOrder.LITTLE_ENDIAN).putShort((short)(Short.BYTES + integrity.length + encryptedCredential.length));
+        credentialBlob.order(ByteOrder.LITTLE_ENDIAN).putShort((short)(SHORT_BYTES + integrity.length + encryptedCredential.length));
         credentialBlob.order(ByteOrder.BIG_ENDIAN).putShort((short)integrity.length);
         credentialBlob.put(integrity).put(encryptedCredential);
         
@@ -277,11 +280,11 @@ public class Tpm2Utils {
     }   
     
     private static byte[] marshalInt16ToByteArray(short i, ByteOrder order) {
-        return ByteBuffer.allocate(Short.BYTES).order(order).putShort(i).array();
+        return ByteBuffer.allocate(SHORT_BYTES).order(order).putShort(i).array();
     }  
     
     private static byte[] marshalInt32ToByteArray(int i, ByteOrder order) {
-        return ByteBuffer.allocate(Integer.BYTES).order(order).putInt(i).array();
+        return ByteBuffer.allocate(INTEGER_BYTES).order(order).putInt(i).array();
     }   
     
     private static byte[] marshalStringToCString(String str) {
