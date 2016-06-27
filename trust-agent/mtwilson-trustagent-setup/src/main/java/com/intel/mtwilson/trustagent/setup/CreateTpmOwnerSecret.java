@@ -81,7 +81,7 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
             }
             else {
                 //Fix, how to check if tpm 2.0 owned
-                CommandResult result = CommandUtil.runCommand("tpm2_isowned");
+                CommandResult result = CommandUtil.runCommand("tpm2-isowned");
                 if (result != null && result.getStdout() != null) {
                     if(result.getStdout().contains("1")) 
                         return true;

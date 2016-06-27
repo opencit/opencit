@@ -11,6 +11,7 @@ import gov.niarl.his.privacyca.TpmModule;
 import com.intel.mtwilson.common.CommandResult;
 import com.intel.mtwilson.common.CommandUtil;
 import com.intel.mtwilson.common.TAException;
+import gov.niarl.his.privacyca.TpmUtils;
 import java.io.IOException;
 import org.apache.commons.codec.binary.Hex;
 import java.util.NoSuchElementException;
@@ -72,7 +73,7 @@ public class Util {
                 }
             }
             else {
-                CommandResult result = CommandUtil.runCommand("tpm2_isowned");
+                CommandResult result = CommandUtil.runCommand("tpm2-isowner " + TpmUtils.byteArrayToHexString(secret));
                 if (result != null && result.getStdout() != null) {
                     if(result.getStdout().contains("1")) 
                         return true;

@@ -11,9 +11,9 @@ fi
 ownerPasswd=$1
 endorsePasswd=$1
 lockPasswd=$1
-tmpownerPasswd=abc
-tmpendorsePasswd=abc
-tmplockPasswd=abc
+tmpownerPasswd=abcd
+tmpendorsePasswd=abcd
+tmplockPasswd=abcd
 verbose=$2
 nameAlg=0x000B #SHA256
 keyType=0x0001 #RSA
@@ -23,15 +23,15 @@ spkHandle=0x81000000 #0x81000000~0x810000FF
 echo -n "Taking ownership..."
 # Take ownership
 if [[ $verbose == verbose ]]; then
-  tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd
+  tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd -X
 else
-  tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd > /dev/null
+  tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd -X > /dev/null
 fi
 
 if [[ $? != 0 ]];then
   # the above command failed, ownership is taken
   # now we check if we are the owner by changing password
-  tpm2_takeownership -o $tmpownerPasswd -e $tmpendorsePasswd -l $tmplockPasswd -O $ownerPasswd -E $endorsePasswd -L $lockPasswd > /dev/null
+  tpm2_takeownership -o $tmpownerPasswd -e $tmpendorsePasswd -l $tmplockPasswd -O $ownerPasswd -E $endorsePasswd -L $lockPasswd -X > /dev/null
   ret=$?
   if [[ "$ret" != 0 ]]; then
     # we are not the owner since we cannot change
@@ -39,7 +39,7 @@ if [[ $? != 0 ]];then
     exit 1
   else
     # we are the owner, change the passwd back from tmppasswd
-    tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd -O $tmpownerPasswd -E $tmpendorsePasswd -L $tmplockPasswd > /dev/null
+    tpm2_takeownership -o $ownerPasswd -e $endorsePasswd -l $lockPasswd -O $tmpownerPasswd -E $tmpendorsePasswd -L $tmplockPasswd -X > /dev/null
     echo "ownership was taken with the same password"
     exit 4
   fi
@@ -48,9 +48,9 @@ fi
 # Create storage primary key with NULL auth
 rm -rf $spkContext
 if [[ $verbose == verbose ]]; then
-  tpm2_createprimary -A o -P $ownerPasswd -g $nameAlg -G $keyType -C $spkContext
+  tpm2_createprimary -A o -P $ownerPasswd -g $nameAlg -G $keyType -C $spkContext -X
 else
-  tpm2_createprimary -A o -P $ownerPasswd -g $nameAlg -G $keyType -C $spkContext > /dev/null
+  tpm2_createprimary -A o -P $ownerPasswd -g $nameAlg -G $keyType -C $spkContext -X > /dev/null
 fi
 
 if [[ $? != 0 ]];then
@@ -60,9 +60,9 @@ fi
 
 # make storage primary key persistent
 if [[ $verbose == verbose ]]; then
-  tpm2_evictcontrol -A o -P $ownerPasswd -c $spkContext -S $spkHandle
+  tpm2_evictcontrol -A o -P $ownerPasswd -c $spkContext -S $spkHandle -X
 else
-  tpm2_evictcontrol -A o -P $ownerPasswd -c $spkContext -S $spkHandle > /dev/null
+  tpm2_evictcontrol -A o -P $ownerPasswd -c $spkContext -S $spkHandle -X > /dev/null
 fi
 
 if [[ $? != 0 ]];then

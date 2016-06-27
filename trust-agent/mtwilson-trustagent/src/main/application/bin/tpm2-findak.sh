@@ -3,20 +3,23 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-ekType=$1 #RSA, ECC
+if [[ $# < 1 || $# > 2 ]]; then
+  echo -e "usage: \n  $0 <aktype>\n or\n  $0 <aktype> verbose"
+  exit 2
+fi
+
+akType=$1 #RSA, ECC
 verbose=$2 #verbose
-ekTypeHex=unknown
+akTypeHex=unknown
 tmpFile=/tmp/persistentobject
 
-rm -rf $tmpFile
-
-case $ekType in
-  "RSA") ekTypeHex=0x1;;
-  "ECC") ekTypeHex=0x23;;
+case $akType in
+  "RSA") akTypeHex=0x1;;
+  "ECC") akTypeHex=0x23;;
 esac
 
-echo -n "Find EK ($ekType:$ekTypeHex): "
-if [[ $ekTypeHex == unknown ]]; then
+echo -n "Find AK ($akType:$akTypeHex): "
+if [[ $akTypeHex == unknown ]]; then
   echo "failed: unknown type"
   exit 1
 fi
@@ -33,7 +36,15 @@ if [[ $verbose == "verbose" ]]; then
   cat $tmpFile
 fi
 
-result=`grep -B2 "Type: $ekTypeHex" $tmpFile | grep -o "0x810100.." | head -n1`
+for ((i=0x81018; i<0x81020; i++))
+do
+  j=`printf '0x%05x\n' $i`
+  result=`grep -B2 "Type: $akTypeHex" $tmpFile | grep -o "$j..." | head -n1`
+  if [ -n $result ]; then
+    break
+  fi
+done
+
 if [ -z $result ]; then
   echo "failed"
   exit 1

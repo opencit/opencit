@@ -3,6 +3,11 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+if [[ $# < 3 || $# > 4 ]]; then
+  echo -e "usage: \n  $0 <ownerpasswd> <ektype> <ekfile>\n or\n  $0 <ownerpasswd> <ektype> <ekfile> verbose"
+  exit 2
+fi
+
 ownerPasswd=$1
 endorsePasswd=$1
 ekType=$2 #RSA, ECC
@@ -11,8 +16,6 @@ verbose=$4 #verbose
 ekTypeHex=unknown
 tmpFile=/tmp/persistentobject
 ekHandle=
-
-rm -rf $tpmFile
 
 case $ekType in
   "RSA") ekTypeHex=0x1;;

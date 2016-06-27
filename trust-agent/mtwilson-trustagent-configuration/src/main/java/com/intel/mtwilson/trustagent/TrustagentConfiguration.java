@@ -49,6 +49,8 @@ public class TrustagentConfiguration {
     public final static String TPM_SRK_SECRET = "tpm.srk.secret"; // 20 bytes hex (40 hex digits)
     public final static String AIK_SECRET = "aik.secret"; // 20 bytes hex (40 hex digits)
     public final static String AIK_INDEX = "aik.index"; // integer, default 1  but original HIS code from NIARL defaulted to zero
+    public final static String AIK_HANDLE = "aik.handle"; // this is the Ak handle for TPM2.0, range 81018000-8101FFFF
+    public final static String EK_HANDLE = "ek.handle"; // this is the ek handle for TPM2.0, range 81010000-810100FF
     public final static String TRUSTAGENT_HTTP_TLS_PORT = "trustagent.http.tls.port"; // default 1443 
     public final static String TRUSTAGENT_TLS_CERT_DN = "trustagent.tls.cert.dn"; // default CN=trustagent
     public final static String TRUSTAGENT_TLS_CERT_IP = "trustagent.tls.cert.ip"; // default 127.0.0.1  , can be comma-separated list of values
@@ -66,6 +68,10 @@ public class TrustagentConfiguration {
     public static final String TRUSTAGENT_ADMIN_USERNAME = "trustagent.admin.username";
                
     private Configuration conf;
+
+    public Configuration getConf() {
+        return conf;
+    }
     
     public TrustagentConfiguration(org.apache.commons.configuration.Configuration configuration) {
         this(new CommonsConfiguration(configuration));
@@ -154,6 +160,30 @@ public class TrustagentConfiguration {
     }
     public int getAikIndex() {
         return Integer.valueOf(conf.get(AIK_INDEX, "1")); 
+    }
+    
+    public String getAikHandleHex() {
+        return conf.get(AIK_HANDLE); // intentionally no default - this must be generated during setup
+    }
+    public byte[] getAikHandle() {
+        try {
+            return Hex.decodeHex(getAikHandleHex().toCharArray());
+        }
+        catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid AIK Handle", e);
+        }
+    }
+    public String getEkHandleHex() {
+        log.debug("EK_HANDLE string: {}", conf.get(EK_HANDLE));
+        return conf.get(EK_HANDLE); // intentionally no default - this must be generated during setup
+    }
+    public byte[] getEkHandle() {
+        try {
+            return Hex.decodeHex(getEkHandleHex().toCharArray());
+        }
+        catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid EK Handle", e);
+        }
     }
     
     public File getAikCertificateFile() {

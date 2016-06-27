@@ -3,12 +3,15 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+if [[ $# < 1 || $# > 2 ]]; then
+  echo -e "usage: \n  $0 <ektype>\n or\n  $0 <ektype> verbose"
+  exit 2
+fi
+
 ekType=$1 #RSA, ECC
 verbose=$2 #verbose
 ekTypeHex=unknown
 tmpFile=/tmp/persistentobject
-
-rm -rf $tmpFile
 
 case $ekType in
   "RSA") ekTypeHex=0x1;;
