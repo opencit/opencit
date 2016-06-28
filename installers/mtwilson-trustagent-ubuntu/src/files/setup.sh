@@ -590,23 +590,30 @@ return_dir=`pwd`
     cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
     cd ..
   else
-    # compile and install tpm commands
-    echo "Compiling TPM commands... "
-    cd commands
-    COMPILE_OK=''
-    make 2>&1 > /dev/null
-    # identity and takeownership commands not needed with NIARL PRIVACY CA
-    if [ -e aikquote ]; then
-      chmod 755 aikquote
-      cp aikquote $TRUSTAGENT_HOME/bin
-      COMPILE_OK=yes
-      echo_success "OK"
+    if [ "$TPM_VERSION" == "1.2" ]; then
+      # compile and install tpm commands
+      echo "Compiling TPM commands... "
+      cd commands
+      COMPILE_OK=''
+      make 2>&1 > /dev/null
+      # identity and takeownership commands not needed with NIARL PRIVACY CA
+      if [ -e aikquote ]; then
+        chmod 755 aikquote
+        cp aikquote $TRUSTAGENT_HOME/bin
+        COMPILE_OK=yes
+        echo_success "OK"
+      else
+        echo_failure "FAILED"
+      fi
+      chmod 755 aikquote NIARL_TPM_Module openssl.sh
+      cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
+      cd ..
     else
-      echo_failure "FAILED"
-    fi
-    chmod 755 aikquote NIARL_TPM_Module openssl.sh
-    cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
-    cd ..
+      cd commands
+      chmod 755 NIARL_TPM_Module openssl.sh
+      cp NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
+      cd ..      
+    fi 
   fi
   cd ..
   # create trustagent-version file
