@@ -107,6 +107,8 @@ public class CreateIdentity implements Configurable, Runnable {
             IdentityChallengeRequest request = new IdentityChallengeRequest();
             request.setEndorsementCertificate(encryptedEkCert.toByteArray());
             request.setIdentityRequest(newId.getIdentityRequest());
+            request.setAikName(newId.getAikNameBytes());
+            request.setTpmVersion(Tpm.getTpmVersion());
             
             IdentityChallenge identityChallenge = client.identityChallengeRequest(request);
             byte[] challenge = identityChallenge.getIdentityChallenge();
@@ -151,6 +153,7 @@ public class CreateIdentity implements Configurable, Runnable {
             
             IdentityChallengeResponse identityChallengeResponse = new IdentityChallengeResponse();
             identityChallengeResponse.setChallengeResponse(encryptedChallenge.toByteArray());
+            identityChallengeResponse.setTpmVersion(Tpm.getTpmVersion());
             IdentityBlob identityBlob = client.identityChallengeResponse(identityChallengeResponse);
             byte[] encrypted2 = identityBlob.getIdentityBlob();
 

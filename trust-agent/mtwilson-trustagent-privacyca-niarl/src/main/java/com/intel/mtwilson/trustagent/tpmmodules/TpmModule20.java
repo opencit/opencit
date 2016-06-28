@@ -220,7 +220,7 @@ public class TpmModule20 implements TpmModuleProvider {
         TAconfig.setAikName(result.getResult(2));
         
         byte[] credRequest = TpmUtils.hexStringToByteArray(result.getResult(1));
-        TpmIdentity newId = new TpmIdentity(credRequest, null, null);
+        TpmIdentity newId = new TpmIdentity(credRequest, null, null, result.getResult(2).getBytes());
         return newId;
     }
 
