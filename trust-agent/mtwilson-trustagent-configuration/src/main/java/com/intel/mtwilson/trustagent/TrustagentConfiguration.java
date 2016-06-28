@@ -15,6 +15,7 @@ import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.SocketException;
@@ -22,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
@@ -165,27 +168,71 @@ public class TrustagentConfiguration {
     public String getAikHandleHex() {
         return conf.get(AIK_HANDLE); // intentionally no default - this must be generated during setup
     }
-    public byte[] getAikHandle() {
+    public String getAikHandle() {
+        /*
         try {
             return Hex.decodeHex(getAikHandleHex().toCharArray());
         }
         catch(DecoderException e) {
             throw new IllegalArgumentException("Invalid AIK Handle", e);
         }
+        */
+        try {
+            return readFromFile(Folders.configuration() + File.separator + "aikhandle");
+        } catch (IOException ex) {
+            Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalArgumentException("AiK Handle", ex);
+        }
     }
+    public void setAikHandle(String khandle) throws IOException {
+        writeToFile(Folders.configuration() + File.separator + "aikhandle", khandle);
+    }
+    
     public String getEkHandleHex() {
         log.debug("EK_HANDLE string: {}", conf.get(EK_HANDLE));
         return conf.get(EK_HANDLE); // intentionally no default - this must be generated during setup
     }
-    public byte[] getEkHandle() {
-        try {
+    public String getEkHandle() {
+            /*
+            try {
             return Hex.decodeHex(getEkHandleHex().toCharArray());
-        }
-        catch(DecoderException e) {
+            }
+            catch(DecoderException e) {
             throw new IllegalArgumentException("Invalid EK Handle", e);
+            }
+            */
+        try {
+            return readFromFile(Folders.configuration() + File.separator + "ekhandle");
+        } catch (IOException ex) {
+            Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalArgumentException("EK Handle", ex);
         }
     }
     
+    public void setEkHandle(String khandle) throws IOException {
+        writeToFile(Folders.configuration() + File.separator + "ekhandle", khandle);
+    }
+   
+    public String getAikName() {
+            /*
+            try {
+            return Hex.decodeHex(getEkHandleHex().toCharArray());
+            }
+            catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid EK Handle", e);
+            }
+            */
+        try {
+            return readFromFile(Folders.configuration() + File.separator + "aikname");
+        } catch (IOException ex) {
+            Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalArgumentException("AikName", ex);
+        }
+    }
+    public void setAikName(String kname) throws IOException {
+        writeToFile(Folders.configuration() + File.separator + "aikname", kname);
+    }
+        
     public File getAikCertificateFile() {
         return new File(Folders.configuration() + File.separator + "aik.pem");        
     }
@@ -417,4 +464,41 @@ public class TrustagentConfiguration {
     public File getEcCertificateFile() {
         return new File(Folders.configuration() + File.separator + "ekcert.pem");        
     }
+    
+    public File getEkHandleFile() {
+        return new File(Folders.configuration() + File.separator + "ekhandle");        
+    }
+    
+    public File getAkHandleFile() {
+        return new File(Folders.configuration() + File.separator + "aikhandle");        
+    }
+    
+    public File getAkNameFile() {
+        return new File(Folders.configuration() + File.separator + "aikname");        
+    }
+    
+    public static String readFromFile(String inFileName) throws IOException {
+        String outBytes = null;
+        File inFile = new File(inFileName);
+        if( inFile.exists() )
+           outBytes = FileUtils.readFileToString(inFile);
+        return outBytes;
+    }
+    
+    public static void writeToFile(String outFilename, String outBytes) throws IOException {
+        File outFile = new File(outFilename);
+        mkdir(outFile);
+        try(FileOutputStream out = new FileOutputStream(outFile)) { // throws FileNotFoundException
+            IOUtils.write(outBytes, out); // throws IOException
+        }
+    }
+ 
+    private static void mkdir(File file) throws IOException {
+        if (!file.getParentFile().isDirectory()) {
+            if (!file.getParentFile().mkdirs()) {
+                log.warn("Failed to create client installation path!");
+                throw new IOException("Failed to create client installation path!");
+            }
+        }
+    } 
 }

@@ -5,8 +5,10 @@
  */
 package com.intel.mtwilson.trustagent.tpmmodules;
 
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmModule;
@@ -141,14 +143,19 @@ public class TpmModule20 implements TpmModuleProvider {
         commandLineResult result = executeTpmCommand(cmdToexecute, 2);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.getEndorsementKeyModulus returned nonzero error", result.getReturnCode());
-        log.debug("EK handle: {}", result.getResult(0));
         
+        log.debug("EK handle: {}", result.getResult(0)); 
         // save the EK handle to configuration
-        TrustagentConfiguration TAconfig = TrustagentConfiguration.loadConfiguration();    
+        //SetupConfigurationProvider provider = new SetupConfigurationProvider(ConfigurationFactory.getConfigurationProvider());
+        //Configuration configuration = provider.load();
+        //configuration.set(TrustagentConfiguration.EK_HANDLE, ekHandle);  
+        //provider.save(configuration);
+        //log.debug("Set EK handle is {}", TAconfig.getEkHandleHex());
+
+        TrustagentConfiguration TAconfig = TrustagentConfiguration.loadConfiguration();
         // the output from above command return EK handle starting with 0x. this needs to be removed so the processing of this field later will succeed
-        String ekHandle = result.getResult(0).substring(2);
-        TAconfig.getConf().set(TrustagentConfiguration.EK_HANDLE, ekHandle);   
-        log.debug("Set EK handle is {}", TAconfig.getEkHandleHex());
+        TAconfig.setEkHandle(result.getResult(0).substring(2));
+
         
         return TpmUtils.hexStringToByteArray(result.getResult(1));
     }
@@ -184,8 +191,8 @@ public class TpmModule20 implements TpmModuleProvider {
     @Override
     public TpmIdentity collateIdentityRequest(byte[] ownerAuth, byte[] keyAuth, String keyLabel, byte[] pcaPubKeyBlob, int keyIndex, X509Certificate endorsmentCredential, boolean useECinNvram) throws IOException, TpmModule.TpmModuleException {
         TrustagentConfiguration TAconfig = TrustagentConfiguration.loadConfiguration();
-        log.debug("get EkHandle: {}", TAconfig.getEkHandleHex());
-        String ekHandle = TAconfig.getEkHandleHex();
+        String ekHandle = TAconfig.getEkHandle();
+        log.debug("collateIdentity Request get EkHandle : {}", ekHandle);
         //byte[] ekHandle = TAconfig.getEkHandle();
         
         /* tpm2-createak.sh <ownerpasswd> <akpasswd> <ekhandle> <aktype>
@@ -196,16 +203,22 @@ public class TpmModule20 implements TpmModuleProvider {
         String cmdToexecute = cmdPath + File.separator + "tpm2-createak.sh" 
                 + " " + TpmUtils.byteArrayToHexString(ownerAuth) 
                 + " " + TpmUtils.byteArrayToHexString(keyAuth) 
-                + " " + "0x81010000"  //hard code for now since we have problem to save the EK earlier.
+                + " " + ekHandle
+                //+ " " + "0x81010000"  //hard code for now since we have problem to save the EK earlier.
                 + " " + "RSA";
         commandLineResult result = executeTpmCommand(cmdToexecute, 3);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.collateIdentityRequest returned nonzero error", result.getReturnCode());
+        
         log.debug("AIK handle: {}", result.getResult(0));
-        TAconfig.getConf().set(TrustagentConfiguration.AIK_HANDLE, result.getResult(0));
+        // the output from above command return key handle starting with 0x. this needs to be removed so the processing of this field later will succeed
+        TAconfig.setAikHandle(result.getResult(0).substring(2));
+        //TAconfig.getConf().set(TrustagentConfiguration.AIK_HANDLE, result.getResult(0));
+        
         log.debug("AIK pub key: {}", result.getResult(1));
-        log.debug("AIK name: {}", result.getResult(2));        
-
+        log.debug("AIK name: {}", result.getResult(2));  
+        TAconfig.setAikName(result.getResult(2));
+        
         byte[] credRequest = TpmUtils.hexStringToByteArray(result.getResult(1));
         TpmIdentity newId = new TpmIdentity(credRequest, null, null);
         return newId;

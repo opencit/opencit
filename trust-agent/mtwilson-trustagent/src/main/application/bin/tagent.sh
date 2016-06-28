@@ -97,8 +97,7 @@ fi
 # all other variables with defaults
 TRUSTAGENT_PID_FILE=$TRUSTAGENT_HOME/trustagent.pid
 TRUSTAGENT_HTTP_LOG_FILE=$TRUSTAGENT_LOGS/http.log
-#TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate"
-TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate"
+TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate"
 TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
 TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair take-ownership"
 #TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS="create-binding-key certify-binding-key create-signing-key certify-signing-key"
