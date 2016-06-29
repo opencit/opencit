@@ -1105,6 +1105,40 @@ public class TpmUtils {
         symCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), ivSpec);
         return symCipher.doFinal(ciphertext);
     }
+    
+    /**
+     *
+     * @param key
+     * @param symCaAttestation
+     * @return
+     * @throws TpmUnsignedConversionException
+     * @throws TpmBytestreamResouceException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws InvalidAlgorithmParameterException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
+    public static byte[] decryptSymCaAttestation(byte[]key, byte[] symCaAttestation) throws TpmUnsignedConversionException, TpmBytestreamResouceException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {        
+        // once get the secret, we need to decrypt the sysmCaAttestation to get the aikcert
+        /* the symCaAttestation is in the format of TPM_SYM_CA_ATTESTATION
+            * UINT32          credSize   -- size of the credential parameter
+            * TPM_KEY_PARMS   algorithm  -- indicator and parameters forthe symmetic algorithm
+            * BYTE *          credential -- result of encryption TPM_IDENTITY_CREDENTIAL using the session_key and the algorithm indicated "algorithm"
+            *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
+         */
+        ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);        
+        int credsize = TpmUtils.getUINT32(bs);
+        TpmKeyParams keyParms = new TpmKeyParams(bs);
+        byte[] iv = new byte[16];
+        bs.read(iv, 0, 16);
+        int ciphertextLen = credsize - 16;
+        byte[] ciphertext = new byte[ciphertextLen];
+        bs.read(ciphertext, 0, ciphertextLen);
+
+        return TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
+    }
 
     /**
      * Generate a Hashed Message Authentication Code for TCS function authentication using the given auth blob and concatenation of all *H1 (1H1, 2H1, etc) values for the function.
