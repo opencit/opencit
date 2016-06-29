@@ -15,6 +15,24 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName="identity_blob")
 public class IdentityBlob {
     private byte[] identityBlob;
+    private int symSize;
+    private int asymSize;
+
+    public int getSymSize() {
+        return symSize;
+    }
+
+    public void setSymSize(int symSize) {
+        this.symSize = symSize;
+    }
+
+    public int getAsymSize() {
+        return asymSize;
+    }
+
+    public void setAsymSize(int asymSize) {
+        this.asymSize = asymSize;
+    }
 
     public void setIdentityBlob(byte[] identityBlob) {
         this.identityBlob = identityBlob;
@@ -22,7 +40,5 @@ public class IdentityBlob {
 
     public byte[] getIdentityBlob() {
         return identityBlob;
-    }
-
-    
+    }    
 }
