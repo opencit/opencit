@@ -30,7 +30,7 @@ public class IdentityRequestSubmitChallengeResponseResource {
     public byte[] identityChallengeResponse(byte[] challengeResponse) throws Exception {
         IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
         rpc.setChallengeResponse(challengeResponse);
-        return rpc.call();
+        return rpc.call().getIdentityBlob();
     }
 
     @POST
@@ -39,10 +39,7 @@ public class IdentityRequestSubmitChallengeResponseResource {
     public IdentityBlob identityChallengeResponse(IdentityChallengeResponse challengeResponse) throws Exception {
         IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
         rpc.setChallengeResponse(challengeResponse.getChallengeResponse());
-        byte[] encryptedAik = rpc.call();
-        IdentityBlob identityBlob = new IdentityBlob();
-        identityBlob.setIdentityBlob(encryptedAik);
-        return identityBlob;
+        return rpc.call();
     }
 
 }
