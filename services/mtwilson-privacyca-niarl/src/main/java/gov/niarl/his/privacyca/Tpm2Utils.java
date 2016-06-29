@@ -307,10 +307,7 @@ public class Tpm2Utils {
     
     // needs to be updated to support more algorithms
     public static PublicKey getPubKeyFromAikBlob(byte[] blob) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] modulus = new byte[0x100];
-        System.arraycopy(blob, 0x66, blob, 0, 0x100);
-
-        BigInteger modI = new BigInteger(1, modulus);
+        BigInteger modI = new BigInteger(1, blob);
         BigInteger expI = BigInteger.valueOf(65537);
         RSAPublicKeySpec newKeySpec = new RSAPublicKeySpec(modI, expI);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");

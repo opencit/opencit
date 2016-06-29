@@ -246,28 +246,9 @@ public class TpmModuleWindows implements TpmModuleProvider {
             };
             commandLineResult result = executeTpmCommand(cmdArgs, 2);
             if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.activateIdentity returned nonzero error", result.getReturnCode());
+                           
+            byte[] aikcert = TpmUtils.decryptSymCaAttestation(TpmUtils.hexStringToByteArray(result.getResult(0)), symCaAttestation);
             
-            // once get the secret, we need to decrypt the sysmCaAttestation to get the aikcert
-            /* the symCaAttestation is in the format of TPM_SYM_CA_ATTESTATION
-            * UINT32          credSize   -- size of the credential parameter
-            * TPM_KEY_PARMS   algorithm  -- indicator and parameters forthe symmetic algorithm
-            * BYTE *          credential -- result of encryption TPM_IDENTITY_CREDENTIAL using the session_key and the algorithm indicated "algorithm"
-            *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
-            */
-            ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);
-            
-            byte [] key = TpmUtils.hexStringToByteArray(result.getResult(0));
-            int credsize  = TpmUtils.getUINT32(bs);
-            TpmKeyParams keyParms = new TpmKeyParams(bs);
-            byte[] iv = new byte[16];
-            bs.read(iv, 0, 16);
-            int ciphertextLen = credsize - 16;
-            byte [] ciphertext = new byte[ciphertextLen];
-            bs.read(ciphertext, 0, ciphertextLen);
-            
-            byte [] aikcert = TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
-            
-            // return the results
             HashMap<String,byte[]> results = new HashMap<String, byte[]>();
             results.put("aikcert", aikcert);
             results.put("aikblob", TpmUtils.hexStringToByteArray(result.getResult(1)));
