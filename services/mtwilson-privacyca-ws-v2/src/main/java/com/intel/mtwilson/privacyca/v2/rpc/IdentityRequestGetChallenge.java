@@ -205,6 +205,7 @@ public class IdentityRequestGetChallenge implements Callable<IdentityChallenge> 
     private IdentityChallenge createReturn(TpmPubKey aik, RSAPublicKey pubEk, byte[] challengeRaw) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, TpmUnsignedConversionException, IOException, ShortBufferException {
         byte[] key = TpmUtils.createRandomBytes(16);
         //String keyfixed  = "1234567890123456";
+        //String keyfixed = "1234567890123456";
         //byte[] key = keyfixed.getBytes();
         byte[] iv = TpmUtils.createRandomBytes(16);
         byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
