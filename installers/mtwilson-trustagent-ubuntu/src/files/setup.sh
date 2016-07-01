@@ -283,7 +283,7 @@ package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
 
 # save tpm version in trust agent configuration directory
-echo "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
+echo -n "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
