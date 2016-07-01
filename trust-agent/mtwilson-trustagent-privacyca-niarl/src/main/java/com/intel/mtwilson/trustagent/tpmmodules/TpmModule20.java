@@ -229,7 +229,7 @@ public class TpmModule20 implements TpmModuleProvider {
         TAconfig.setAikName(result.getResult(2));
         
         byte[] credRequest = TpmUtils.hexStringToByteArray(result.getResult(1));
-        TpmIdentity newId = new TpmIdentity(credRequest, null, null, result.getResult(2).getBytes());
+        TpmIdentity newId = new TpmIdentity(credRequest, null, null, TpmUtils.hexStringToByteArray(result.getResult(2)));
         return newId;
     }
 
@@ -251,6 +251,11 @@ public class TpmModule20 implements TpmModuleProvider {
                 + " " + ekHandle
                 + " " + TpmUtils.byteArrayToHexString(asymCaContents);               
         CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+        
+        if(result.returnCode != 0) {
+            throw new TpmModule.TpmModuleException("Tpm2 activatecredential returned non zero error");
+        }
+        
         String decrypted = result.getResult(0);
         
         // TODO: put decrypted into HashMap        

@@ -14,6 +14,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -31,6 +32,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import javax.crypto.spec.SecretKeySpec;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  *
@@ -146,12 +148,13 @@ public class Tpm2Utils {
                 byte[] secretData = TpmUtils.createRandomBytes(nameAlgDigestLength);
                 seed = secretData;
                 Cipher rsaCipher;
+                Provider bcProvider = new BouncyCastleProvider();
                 OAEPParameterSpec oaepSpec;
                 if (nameAlgorithm == Tpm2Algorithm.Hash.SHA1) {
-                    rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
+                    rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding", bcProvider);
                     oaepSpec = new OAEPParameterSpec("SHA-1", "MGF1", MGF1ParameterSpec.SHA1, new PSource.PSpecified(marshalStringToCString(IDENTITY)));
                 } else if (nameAlgorithm == Tpm2Algorithm.Hash.SHA256) {
-                    rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+                    rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding", bcProvider);                    
                     oaepSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, new PSource.PSpecified(marshalStringToCString(IDENTITY)));
                 } else {
                     throw new NoSuchAlgorithmException(nameAlgorithm + " is not (currently) supported");

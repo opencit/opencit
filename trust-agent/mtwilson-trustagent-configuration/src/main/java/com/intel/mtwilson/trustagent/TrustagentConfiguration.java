@@ -455,7 +455,7 @@ public class TrustagentConfiguration {
         //set tpm version to 1.2 by default
         String tpmVersion = "1.2";
         if (tpmVerFileH.exists())
-            tpmVersion = FileUtils.readFileToString(tpmVerFileH);   
+            tpmVersion = FileUtils.readFileToString(tpmVerFileH).replaceAll("\n", "");   
         
         return tpmVersion;
     }

@@ -20,6 +20,7 @@ public class IdentityChallengeRequest {
     private byte[] identityRequest;
     private byte[] endorsementCertificate;
     private byte[] aikName;
+    private String tpmVersion;
 
     public byte[] getAikName() {
         return aikName;
@@ -36,7 +37,6 @@ public class IdentityChallengeRequest {
     public void setTpmVersion(String tpmVersion) {
         this.tpmVersion = tpmVersion;
     }
-    private String tpmVersion;
 
     public void setIdentityRequest(byte[] identityRequest) {
         this.identityRequest = identityRequest;

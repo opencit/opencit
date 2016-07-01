@@ -8,6 +8,8 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
+import gov.niarl.his.privacyca.Tpm2Algorithm;
+import gov.niarl.his.privacyca.Tpm2Credential;
 import gov.niarl.his.privacyca.Tpm2Utils;
 import gov.niarl.his.privacyca.TpmIdentityProof;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
@@ -31,6 +33,7 @@ import java.util.concurrent.Callable;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -44,6 +47,15 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdentityRequestSubmitResponse.class);
     private byte[] identityRequestResponseToChallenge;
     private String tpmVersion;
+    private byte[] aikName;
+
+    public byte[] getAikName() {
+        return aikName;
+    }
+
+    public void setAikName(byte[] aikName) {
+        this.aikName = aikName;
+    }
 
     public String getTpmVersion() {
         return tpmVersion;
@@ -123,10 +135,10 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
         }     
     }
 
-    private static IdentityBlob createReturn(TpmPubKey aik, RSAPublicKey pubEk, byte[] challengeRaw) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, TpmUtils.TpmUnsignedConversionException, IOException {
+    private IdentityBlob createReturn(TpmPubKey aik, RSAPublicKey pubEk, byte[] aicBytes) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, TpmUtils.TpmUnsignedConversionException, IOException, ShortBufferException {
         byte[] key = TpmUtils.createRandomBytes(16);
         byte[] iv = TpmUtils.createRandomBytes(16);
-        byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
+        byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(aicBytes, key, iv));
         byte[] credSize = TpmUtils.intToByteArray(encryptedBlob.length);
 
         TpmSymmetricKey symKey = new TpmSymmetricKey();
@@ -142,7 +154,15 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
 
         IdentityBlob ret = new IdentityBlob();
 
-        byte[] asymBlob = TpmUtils.TCGAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
+        byte[] asymBlob;
+        
+        if("2.0".equals(tpmVersion)) {
+            Tpm2Credential outCred = Tpm2Utils.makeCredential(pubEk, Tpm2Algorithm.Symmetric.AES, 128, Tpm2Algorithm.Hash.SHA256, key, aikName);
+            asymBlob = TpmUtils.concat(outCred.getCredential(), outCred.getSecret());
+        } else {
+            asymBlob = TpmUtils.TCGAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
+        }
+            
         byte[] symBlob = TpmUtils.concat(TpmUtils.concat(credSize, keyParms.toByteArray()), encryptedBlob);
         //return TpmUtils.concat(asymBlob, symBlob);                        
         //for windows to return EK_BLOB. append the encrypted EK_BLOB to the existing byte stream

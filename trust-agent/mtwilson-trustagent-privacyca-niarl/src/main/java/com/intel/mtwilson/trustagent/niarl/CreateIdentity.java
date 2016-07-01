@@ -143,6 +143,7 @@ public class CreateIdentity implements Configurable, Runnable {
             IdentityChallengeResponse identityChallengeResponse = new IdentityChallengeResponse();
             identityChallengeResponse.setChallengeResponse(encryptedChallenge.toByteArray());
             identityChallengeResponse.setTpmVersion(Tpm.getTpmVersion());
+            identityChallengeResponse.setAikName(newId.getAikNameBytes());
             IdentityBlob identityBlob = client.identityChallengeResponse(identityChallengeResponse);
             byte[] encrypted2 = identityBlob.getIdentityBlob();
 
