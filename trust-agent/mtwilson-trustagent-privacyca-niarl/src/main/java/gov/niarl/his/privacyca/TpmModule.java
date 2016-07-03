@@ -53,6 +53,14 @@ public class TpmModule {
             super(String.format("%s (%d)", msg, errorCode));
             this.errorCode = errorCode;
         }
+        
+        public TpmModuleException(Throwable t) {
+            super(t);
+        }
+        
+        public TpmModuleException(String msg, Throwable t) {
+            super(msg, t);
+        }
 
         /**
          * 

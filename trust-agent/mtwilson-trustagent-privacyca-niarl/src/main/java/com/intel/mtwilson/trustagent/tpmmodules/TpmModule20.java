@@ -11,13 +11,19 @@ import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.TpmIdentity;
+import gov.niarl.his.privacyca.TpmKeyParams;
 import gov.niarl.his.privacyca.TpmModule;
+import gov.niarl.his.privacyca.TpmSymmetricKey;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -26,6 +32,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -37,7 +46,7 @@ public class TpmModule20 implements TpmModuleProvider {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmModule20.class);
     
-    private static class commandLineResult {
+    private static class CommandLineResult {
         private int returnCode = 0;
         private String [] results = null;
         /**
@@ -45,7 +54,7 @@ public class TpmModule20 implements TpmModuleProvider {
          * @param newReturnCode
          * @param numResults
          */
-        public commandLineResult(int newReturnCode, int numResults){
+        public CommandLineResult(int newReturnCode, int numResults){
                 returnCode = newReturnCode;
                 results = new String[numResults];
         }
@@ -129,7 +138,7 @@ public class TpmModule20 implements TpmModuleProvider {
     public void takeOwnership(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {
         final String cmdPath = Folders.application() + File.separator + "bin";
         String cmdToexecute = cmdPath + File.separator + "tpm2-takeownership.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth);
-        commandLineResult result = executeTpmCommand(cmdToexecute, 0);
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.takeOwnership returned nonzero error", result.getReturnCode());
         return;
@@ -140,7 +149,7 @@ public class TpmModule20 implements TpmModuleProvider {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         final String cmdPath = Folders.application() + File.separator + "bin";
         String cmdToexecute = cmdPath + File.separator + "tpm2-readek" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + "RSA";
-        commandLineResult result = executeTpmCommand(cmdToexecute, 2);
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 2);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.getEndorsementKeyModulus returned nonzero error", result.getReturnCode());
         
@@ -206,7 +215,7 @@ public class TpmModule20 implements TpmModuleProvider {
                 + " " + ekHandle
                 //+ " " + "0x81010000"  //hard code for now since we have problem to save the EK earlier.
                 + " " + "RSA";
-        commandLineResult result = executeTpmCommand(cmdToexecute, 3);
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 3);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.collateIdentityRequest returned nonzero error", result.getReturnCode());
         
@@ -220,13 +229,46 @@ public class TpmModule20 implements TpmModuleProvider {
         TAconfig.setAikName(result.getResult(2));
         
         byte[] credRequest = TpmUtils.hexStringToByteArray(result.getResult(1));
-        TpmIdentity newId = new TpmIdentity(credRequest, null, null, result.getResult(2).getBytes());
+        TpmIdentity newId = new TpmIdentity(credRequest, null, null, TpmUtils.hexStringToByteArray(result.getResult(2)));
         return newId;
     }
 
     @Override
-    public HashMap<String, byte[]> activateIdentity2(byte[] ownerAuth, byte[] keyAuth, byte[] asymCaContents, byte[] symCaAttestation, int keyIndex) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public HashMap<String, byte[]> activateIdentity2(byte[] ownerAuth, byte[] keyAuth, byte[] asymCaContents, byte[] symCaAttestation, int keyIndex) throws IOException, TpmModule.TpmModuleException { 
+        HashMap<String, byte[]> toReturn = new HashMap<>();
+        TrustagentConfiguration TAconfig = TrustagentConfiguration.loadConfiguration();
+        String ekHandle = TAconfig.getEkHandle();
+        String akHandle = TAconfig.getAikHandle();
+        String akName = TAconfig.getAikName();
+        
+        log.debug("activateIdentity2 AIK Handle : {}", akHandle);
+        
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-activatecredential.sh"
+                + " " + TpmUtils.byteArrayToHexString(ownerAuth)
+                + " " + TpmUtils.byteArrayToHexString(keyAuth)
+                + " " + akHandle
+                + " " + ekHandle
+                + " " + TpmUtils.byteArrayToHexString(asymCaContents);               
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+        
+        if(result.returnCode != 0) {
+            throw new TpmModule.TpmModuleException("Tpm2 activatecredential returned non zero error");
+        }
+        
+        String decrypted = result.getResult(0);
+        
+        // TODO: put decrypted into HashMap        
+        try {
+            byte[] decrypted2 = TpmUtils.decryptSymCaAttestation(TpmUtils.hexStringToByteArray(decrypted), symCaAttestation);
+            toReturn.put("aikcert", decrypted2);
+            toReturn.put("aikblob", new byte[0]);
+            return toReturn;
+        } catch (TpmUtils.TpmUnsignedConversionException | TpmUtils.TpmBytestreamResouceException | NoSuchAlgorithmException |
+                NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+            Logger.getLogger(TpmModule20.class.getName()).log(Level.SEVERE, null, ex);
+            throw new TpmModule.TpmModuleException(ex);
+        }       
     }
 
     @Override
@@ -234,7 +276,7 @@ public class TpmModule20 implements TpmModuleProvider {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    private static commandLineResult executeTpmCommand(String cmdArgs, int returnCount)
+    private static CommandLineResult executeTpmCommand(String cmdArgs, int returnCount)
                     throws IOException {
 
         int returnCode;
@@ -296,7 +338,7 @@ public class TpmModule20 implements TpmModuleProvider {
 
         log.debug("Return code: " + returnCode);
 
-        commandLineResult toReturn = new commandLineResult(returnCode, returnCount);
+        CommandLineResult toReturn = new CommandLineResult(returnCode, returnCount);
         if ((returnCode == 0)&&(returnCount != 0)) {
                 StringTokenizer st = new StringTokenizer(line);
             if( st.countTokens() < returnCount ) {

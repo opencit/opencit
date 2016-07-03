@@ -14,7 +14,16 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class IdentityChallengeResponse {
     private byte[] identityRequestResponseToChallenge;
     private String tpmVersion;
+    private byte[] aikName;
 
+    public byte[] getAikName() {
+        return aikName;
+    }
+
+    public void setAikName(byte[] aikName) {
+        this.aikName = aikName;
+    }
+    
     public String getTpmVersion() {
         return tpmVersion;
     }

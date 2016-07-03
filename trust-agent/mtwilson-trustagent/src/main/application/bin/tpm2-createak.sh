@@ -70,9 +70,9 @@ function output_result()
   akHandle=$2
   akFile=$3
   akNameFie=$4
- 
+
   echo -n "$akHandle "
-  
+
   case $akType in
     "RSA")
       xxd -s 102 -l 256 -ps $akFile | tr -d "\n"  ;;
@@ -97,9 +97,9 @@ fi
 
 if [[ $verbose == "verbose" ]]; then
   echo "akHandle = $akHandle"
-  tpm2_getpubak -e $endorsePasswd -o $ownerPasswd -P $akPasswd -E $ekHandle -k $akHandle -f $akFile -n $akNameFile -g $akTypeHex -X
+  tpm2_getpubak -e $endorsePasswd -o $ownerPasswd -P $akPasswd -E $ekHandle -k $akHandle -f $akFile -n $akNameFile -g $akTypeHex -D 0x000B -s 0x0014 -X
 else
-  tpm2_getpubak -e $endorsePasswd -o $ownerPasswd -P $akPasswd -E $ekHandle -k $akHandle -f $akFile -n $akNameFile -g $akTypeHex -X > /dev/null
+  tpm2_getpubak -e $endorsePasswd -o $ownerPasswd -P $akPasswd -E $ekHandle -k $akHandle -f $akFile -n $akNameFile -g $akTypeHex -D 0x000B -s 0x0014 -X > /dev/null
 fi
 
 if [[ $? != 0 ]]; then
