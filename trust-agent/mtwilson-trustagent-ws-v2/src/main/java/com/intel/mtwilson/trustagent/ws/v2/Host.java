@@ -18,6 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.HostInfo;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 
 
 /**
@@ -56,6 +57,7 @@ public class Host {
             host.vmmVersion = context.getVmmVersion();
             host.processorInfo = context.getProcessorInfo();
             host.hardwareUuid = context.getHostUUID();
+            host.tpmVersion = Tpm.getTpmVersion();
             /*
             String responseXML =
                     "<host_info>"

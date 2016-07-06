@@ -23,6 +23,7 @@ public class HostInfo {
     public String vmmVersion;
     public String processorInfo;
     public String hardwareUuid; // was hostUUID
+    public String tpmVersion;
 
     /*
     "<host_info>"
@@ -84,5 +85,7 @@ public class HostInfo {
         return vmmVersion;
     }
     
-    
+    public String getTpmVersion() {
+        return tpmVersion;
+    }
 }
