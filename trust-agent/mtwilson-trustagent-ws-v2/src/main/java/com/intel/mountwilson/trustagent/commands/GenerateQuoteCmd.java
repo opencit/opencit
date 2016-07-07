@@ -165,7 +165,8 @@ public class GenerateQuoteCmd implements ICommand {
                     command.addArgument("-g");
                     command.addArgument("0x4");
                     command.addArgument("-l");
-                    command.addArguments(selectedPcrs.split("\\s+"));
+                    //command.addArguments(selectedPcrs.split("\\s+"));
+                    command.addArgument(selectedPcrs.replaceAll("\\s+", ","));
                     command.addArguments("-o");
                     command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName()));
                     command.addArguments("-X");   
