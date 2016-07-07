@@ -5,7 +5,11 @@
  */
 package com.intel.mtwilson.trustagent.tpmmodules;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.common.CommandResult;
+import com.intel.mtwilson.common.CommandUtil;
+import com.intel.mtwilson.common.TAException;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityProof;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
@@ -47,6 +51,114 @@ import javax.crypto.NoSuchPaddingException;
 
 public class TpmModuleWindows implements TpmModuleProvider {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmModuleWindows.class);
+
+    @Override
+    public void setAssetTag(byte[] ownerAuth, byte[] assetTagHash) throws IOException, TpmModuleException {
+        byte[] randPasswd = RandomUtil.randomByteArray(20);
+        String index = getAssetTagIndex();    
+        if(nvIndexExists(index)) {
+            log.debug("Index exists. Releasing index...");
+            nvRelease(ownerAuth, index);
+            log.debug("Creating new index...");
+            nvDefine(ownerAuth, randPasswd, index, 20);
+        } else {
+            log.debug("Index does not exist. Creating it...");
+            nvDefine(ownerAuth, randPasswd, index, 20);
+        }
+        
+        nvWrite(ownerAuth, randPasswd, index, assetTagHash);
+        log.debug("Provisioned asset tag");
+    }
+
+    @Override
+    public byte[] readAssetTag(byte[] ownerAuth) throws IOException, TpmModuleException {
+        String index = getAssetTagIndex();
+        log.debug("Reading asset tag for Windows...");
+        if(nvIndexExists(index)) {
+            log.debug("Asset Tag Index {} exists", index);
+            return nvRead(ownerAuth, index);
+        } else {
+            throw new TpmModule.TpmModuleException("Asset Tag has not been provisioned on this TPM");
+        }
+    }
+
+    @Override
+    public String getAssetTagIndex() throws IOException, TpmModuleException {
+        return "0x40000010";
+    }
+
+    @Override
+    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvdefine " + index + " 0x" + Integer.toHexString(size) + " " + TpmUtils.byteArrayToHexString(indexPassword) + " AUTHWRITE";
+            log.debug("running command: " + cmd);
+            CommandUtil.runCommand(cmd);
+        } catch (TAException ex) {
+            log.error("error writing to nvram, " + ex.getMessage());
+            throw new TpmModule.TpmModuleException(ex);
+        }
+    }
+
+    @Override
+    public void nvRelease(byte[] ownerAuth, String index) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvrelease " + index;
+            log.debug("running command: " + cmd);
+            CommandUtil.runCommand(cmd);
+        } catch (TAException ex) {
+            log.error("error releasing nvram index, " + ex.getMessage()); 
+            throw new TpmModule.TpmModuleException(ex);
+        }
+    }
+
+    @Override
+    public void nvWrite(byte[] ownerAuth, byte[] indexPassword, String index, byte[] data) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvwrite " + index + " " + TpmUtils.byteArrayToHexString(indexPassword) + " " + TpmUtils.byteArrayToHexString(data);
+            log.debug("running command: " + cmd);
+            CommandUtil.runCommand(cmd);
+        } catch (TAException ex) {
+            log.error("error writing to nvram, " + ex.getMessage());
+            throw new TpmModule.TpmModuleException(ex);
+        }
+    }
+
+    @Override
+    public boolean nvIndexExists(String index) throws IOException, TpmModuleException {
+        try {
+            CommandResult result = CommandUtil.runCommand("tpmtool.exe nvinfo " + index);
+            if (result != null && result.getStdout() != null) {
+                if (result.getStdout().contains("NVRAM index")) {
+                    return true;
+                }
+            }
+        } catch (TAException ex) {
+            log.error("error getting nvram info, " + ex.getMessage());
+            throw new TpmModule.TpmModuleException(ex);
+        }
+        return false;
+    }
+
+    @Override
+    public byte[] nvRead(byte[] ownerAuth, String index) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvread " + index;
+            log.debug("Running command: " + cmd);
+            CommandResult cmdResult = CommandUtil.runCommand(cmd);
+            
+            // check if the cmd returns successfully. if so, set the assettag
+            if (cmdResult.getExitcode() == 0) {
+                log.debug("Provisioned Asset tag hash: {}", cmdResult.getStdout());
+                return TpmUtils.hexStringToByteArray(cmdResult.getStdout());
+            } else {
+                log.debug("Error reading Asset tag");
+                throw new TpmModule.TpmModuleException("nvread returned non zero error");
+            }
+        } catch (TAException ex) {
+            log.error("error reading assetTag from nvram 0x40000010, " + ex.getMessage() );
+            throw new TpmModule.TpmModuleException(ex);
+        }
+    }
 
     private static class commandLineResult {
         private int returnCode = 0;
