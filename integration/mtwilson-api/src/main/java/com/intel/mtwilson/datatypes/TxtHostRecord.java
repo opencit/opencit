@@ -83,6 +83,8 @@ public class TxtHostRecord {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
     public String Hardware_Uuid;
+    @JsonProperty
+    public String TpmVersion;
     
     /**
      * @since 2.0
@@ -119,6 +121,7 @@ public class TxtHostRecord {
         AIK_SHA1 = input.getAikSha1();
         Hardware_Uuid = null;
         tlsPolicyChoice = input.getTlsPolicyChoice();
+        TpmVersion = input.getTpmVersion();
     }    
 
 
@@ -144,6 +147,8 @@ public class TxtHostRecord {
         this.VMM_OSVersion = host.VMM_OSVersion;
         this.VMM_Version = host.VMM_Version;
         this.tlsPolicyChoice = host.tlsPolicyChoice;
+        this.TpmVersion = host.TpmVersion;
+
     }    
 
 
