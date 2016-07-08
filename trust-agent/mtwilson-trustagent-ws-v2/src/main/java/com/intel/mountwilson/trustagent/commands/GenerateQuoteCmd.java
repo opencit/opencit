@@ -17,6 +17,7 @@ import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
+import gov.niarl.his.privacyca.TpmUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,6 +165,8 @@ public class GenerateQuoteCmd implements ICommand {
 	            command.addArgument(identityAuthKey);
                     command.addArgument("-g");
                     command.addArgument("0x4");
+                    command.addArgument("-q");
+                    command.addArgument(TpmUtils.byteArrayToHexString(nonce));
                     command.addArgument("-l");
                     //command.addArguments(selectedPcrs.split("\\s+"));
                     command.addArgument(selectedPcrs.replaceAll("\\s+", ","));
