@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hxia5
  */
+@Deprecated
 public class SetAssetTagWindows implements ICommand {
 
     Logger log = LoggerFactory.getLogger(getClass().getName());

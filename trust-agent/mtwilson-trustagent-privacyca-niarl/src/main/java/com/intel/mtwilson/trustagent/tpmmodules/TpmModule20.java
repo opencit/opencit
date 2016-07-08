@@ -6,10 +6,12 @@
 package com.intel.mtwilson.trustagent.tpmmodules;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmKeyParams;
 import gov.niarl.his.privacyca.TpmModule;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -45,6 +48,93 @@ import org.apache.commons.io.IOUtils;
 public class TpmModule20 implements TpmModuleProvider {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmModule20.class);
+
+    @Override
+    public void setAssetTag(byte[] ownerAuth, byte[] assetTagHash) throws IOException, TpmModule.TpmModuleException {
+        String index = getAssetTagIndex();
+        byte[] randPasswd = RandomUtil.randomByteArray(20);
+        if(nvIndexExists(index)) {
+            log.debug("Index exists. Releasing index...");
+            nvRelease(ownerAuth, index);
+            log.debug("Creating new index...");
+            nvDefine(ownerAuth, randPasswd, index, 20);
+        } else {
+            log.debug("Index does not exist. Creating it...");
+            nvDefine(ownerAuth, randPasswd, index, 20);
+        }
+        nvWrite(ownerAuth, randPasswd, index, assetTagHash);
+        log.debug("Provisioned asset tag");
+    }
+
+    @Override
+    public byte[] readAssetTag(byte[] ownerAuth) throws IOException, TpmModule.TpmModuleException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getAssetTagIndex() throws IOException, TpmModule.TpmModuleException {
+        return "0x1c10110";
+    }
+
+    @Override
+    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size) throws IOException, TpmModule.TpmModuleException {
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-nvdefine.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + 
+                TpmUtils.byteArrayToHexString(indexPassword) + " " + index + " " + size;
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+        
+        if (result.getReturnCode() != 0) {
+            throw new TpmModule.TpmModuleException("TpmModule20.nvDefine returned nonzero error", result.getReturnCode());
+        }
+    }
+
+    @Override
+    public void nvRelease(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException {
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-nvrelease.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + index;
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+
+        if (result.getReturnCode() != 0) {
+            throw new TpmModule.TpmModuleException("TpmModule20.nvRelease returned nonzero error", result.getReturnCode());
+        }
+    }
+
+    @Override
+    public byte[] nvRead(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void nvWrite(byte[] ownerAuth, byte[] indexPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
+        File file = new File("/tmp/" + UUID.randomUUID().toString());
+        
+        FileOutputStream output = new FileOutputStream(file);
+        IOUtils.write(data, output);
+        
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-nvwrite.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + index + " " + 
+                EscapeUtil.doubleQuoteEscapeShellArgument(file.getPath());
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+
+        file.delete();
+        
+        if (result.getReturnCode() != 0) {
+            throw new TpmModule.TpmModuleException("TpmModule20.nvWrite returned nonzero error", result.getReturnCode());
+        }        
+    }
+
+    @Override
+    public boolean nvIndexExists(String index) throws IOException, TpmModule.TpmModuleException {
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-nvindex-exists.sh" + " " + index;
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+
+        if (result.getReturnCode() != 0) {
+            throw new TpmModule.TpmModuleException("TpmModule20.nvRelease returned nonzero error", result.getReturnCode());
+        }
+        
+        return "1".equals(result.getResult(0));
+    }
     
     private static class CommandLineResult {
         private int returnCode = 0;

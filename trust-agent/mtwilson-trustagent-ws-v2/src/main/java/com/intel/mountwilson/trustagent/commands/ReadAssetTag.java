@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hxia5
  */
+@Deprecated
 public class ReadAssetTag implements ICommand {
 
     Logger log = LoggerFactory.getLogger(getClass().getName());
