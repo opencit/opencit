@@ -44,6 +44,15 @@
 #define UINT32 unsigned
 #endif
 
+typedef struct {
+	UINT16 size;
+	BYTE *name;
+} TPM2B_NAME;
+
+typedef struct {
+	UINT16 size;
+	BYTE *buffer;
+} TPM2B_DATA;
 
 int
 main (int ac, char **av)
@@ -52,6 +61,8 @@ main (int ac, char **av)
 	BYTE		*chal;
 	UINT32		chalLen;
 	BYTE		*quote;
+	BYTE		*ptr;
+	UINT32		index =0;
 	UINT32		quoteLen;
 	RSA			*aikRsa;
 	UINT32		selectLen;
@@ -59,16 +70,25 @@ main (int ac, char **av)
 	UINT32		pcrLen;
 	BYTE		*pcrs;
 	BYTE		*quoted;
-	UINT32		quotedLen;
-	UINT32		sigLen;
+	BYTE		*quotedInfo;
+	UINT16		quotedInfoLen;
+	BYTE		*tpmtSig;
 	UINT16		sigAlg;
+	UINT16		hashAlg;
 	BYTE		*sig;
+	UINT32		sigLen;
+	BYTE		*recvNonce;
+	UINT32		recvNonceLen;
+	UINT32		verifiedLen;
 	BYTE		chalmd[20];
-	BYTE		md[20];
+	BYTE		md[32]; // SHA256 hash
 	BYTE		qinfo[8+20+20];
+	TPM2B_NAME	*tpm2b_name = NULL;
+	TPM2B_DATA	*tpm2b_data = NULL;
 	char		*chalfile = NULL;
 	int			pcr;
 	int			pcri = 0;
+	int			ind = 0;
 	int			i;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
@@ -100,7 +120,7 @@ main (int ac, char **av)
 		}
 		fclose (f_in);
 		SHA1 (chal, chalLen, chalmd);
-		free (chal);
+		//free (chal);
 	} else {
 		memset (chalmd, 0, sizeof(chalmd));
 	}
@@ -134,31 +154,97 @@ main (int ac, char **av)
 	}
 	fclose (f_in);
 
-	/* Parse quote file */
+	/* Parse quote file
+         * The quote result is constructed as follows for now
+	 * pcr values (0-23), sha1 pcr bank. so the length is 20*24=480
+	 */
+        //printf("quoteLen: %d\n", quoteLen);
 
 	if (quoteLen < 2)
 		goto badquote;
 	selectLen = 0; //aa
 	select = quote;
+	ptr = quote;
+	index = 0;
 
+	// pcr values for pcr 0-23 in bank of SHA1
 	pcrs = quote;
 	pcrLen = 480;
 
-	quoted = pcrs + pcrLen;
-	quotedLen = ntohs(*(UINT16*)quoted) + 2;
+	index = index + pcrLen;	
+	// quoted infomration structure
+	quoted = quote + index; 
+	//quotedInfoLen = ntohs(*(UINT16*)quoted);
+	quotedInfoLen = (*(UINT16*)quoted); // This is NOT in network order
+ 	quotedInfo = quoted + 2; // following is the TPMS_ATTEST structure as defined in tpm2.0 spec
+        //printf("quoteInfoLen: %d\n", quotedInfoLen);
+	
+	index = index + 2;
+	//qualifiedSigner -- skip the magic header and type
+	index = index + 6;
+	tpm2b_name = (TPM2B_NAME*)(quote + index);
+        //printf("tpm2b_name size: %02x\n", ntohs(tpm2b_name->size)); //This is in Network Order
 
-	sig = quoted + quotedLen;
-        sigAlg = ntohs(*(UINT16*)sig);
-	sig = sig + 2;
-	sigLen = quoteLen - pcrLen - quotedLen - 2 ;
+	//tpm2b_data	
+	index = index + 2 + ntohs(tpm2b_name->size); // skip tpm2b_name
+	tpm2b_data = (TPM2B_DATA*)(quote + index);
+	recvNonceLen = ntohs(tpm2b_data->size);
+        //printf("Received Nonce Len: %02x\n", recvNonceLen); //This is in Network Order
+	index = index + 2; // skip UINT16
 
-	/* Verify RSA signature
-	SHA1 (qinfo, sizeof(qinfo), md);
-	if (1 != RSA_verify(NID_sha1, md, sizeof(md), sig, sigLen, aikRsa)) {
+	/* now compare the received nonce with the chal */
+	recvNonce = quote + index;
+	/* debug purpose
+	printf("Received nonce:  ");
+        for (ind=0; ind<chalLen; ind++) {
+	  printf("%02x", (*(BYTE*)(recvNonce+ind)));
+	}
+	printf("\n");	
+	printf("Challenge nonce: ");
+        for (ind=0; ind<chalLen; ind++) {
+	  printf("%02x", chal[ind]);
+	}
+	printf("\n");
+	*/	
+	if (memcmp(recvNonce, chal, chalLen) != 0) {
+		fprintf(stderr, "Error in comparing the received nonce with the challenge");
+		free(chal);
+		exit(1);
+	}
+	if (chal != NULL) 
+		free(chal);
+
+	index = index + 2 + ntohs(tpm2b_data->size); // skip tpm2b_name
+        tpmtSig = quoted + 2 + quotedInfoLen;
+        //sigAlg = ntohs(*(UINT16*)tpmtSig);
+        sigAlg = (*(UINT16*)tpmtSig); // This is NOT in networ order
+        //printf("sigAlg: %02x\n", sigAlg);
+        
+	//hashAlg = ntohs(*(UINT16*)(tpmtSig+2)); 
+	hashAlg = (*(UINT16*)(tpmtSig+2)); // This is NOT in network order
+        //printf("hashAlg: %02x\n", hashAlg);
+	
+	//sigLen = ntohs(*(UINT16*)(tpmtSig+4)); 
+	sigLen = (*(UINT16*)(tpmtSig+4)); // This is NOT in network order
+        //printf("sigLen: %02x\n", sigLen);
+        sig = tpmtSig + 6;
+
+	/* verify the length of data */	
+	verifiedLen = sig-quote+sigLen;
+	if (verifiedLen != quoteLen) {
+		fprintf (stderr, "Error in parsing data structure in quote\n");
+		exit(1);
+	}
+	
+	// Verify RSA signature
+        // hash
+        memset(md, 0, sizeof(md));
+	SHA256(quotedInfo, quotedInfoLen, md);
+        // signature
+	if (1 != RSA_verify(NID_sha256, md, sizeof(md), sig, sigLen, aikRsa)) {
 		fprintf (stderr, "Error, bad RSA signature in quote\n");
 		exit (2);
 	}
-	*/
 
 	/* Print out PCR values 
 	for (pcr=0; pcr < 8*selectLen; pcr++) {
