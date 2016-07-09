@@ -4,8 +4,9 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
@@ -13,6 +14,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.saml.TrustAssertion;
+import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import java.io.File;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -26,8 +28,6 @@ import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,8 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostAttestations extends MtWilsonClient {
     
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-    Properties properties = null;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAttestations.class);
 
     public HostAttestations(URL url) throws Exception{
         super(url);
@@ -44,7 +43,9 @@ public class HostAttestations extends MtWilsonClient {
 
     public HostAttestations(Properties properties) throws Exception {
         super(properties);
-        this.properties = properties;
+    }
+    public HostAttestations(Properties properties, PasswordKeyStore passwordKeyStore) throws Exception {
+        super(new PropertiesConfiguration(properties), passwordKeyStore);
     }
        
     /**
@@ -381,7 +382,7 @@ public class HostAttestations extends MtWilsonClient {
         String hostSaml = getTargetPathWithQueryParams("host-attestations", criteria).request(CryptoMediaType.APPLICATION_SAML).get(String.class);
         return hostSaml;
     }
-    
+        
     /**
      * Verifies the signature of the retrieved SAML assertion using the SAML certificate stored in the user keystore created during user registration.
      * This functionality is available for the Api library users only.
@@ -398,17 +399,15 @@ public class HostAttestations extends MtWilsonClient {
      * </xmp></pre></div>
      */        
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
-        if (properties != null && properties.getProperty("mtwilson.api.keystore") != null && !properties.getProperty("mtwilson.api.keystore").isEmpty()
-                && properties.getProperty("mtwilson.api.keystore.password") != null && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
-            SimpleKeystore keystore = new SimpleKeystore(new File(properties.getProperty("mtwilson.api.keystore")), properties.getProperty("mtwilson.api.keystore.password"));
+        String keystorePath = getConfiguration().get("mtwilson.api.keystore");
+        Password keystorePassword = getPassword("mtwilson.api.keystore.password");
+        if( keystorePath != null && !keystorePath.isEmpty() && keystorePassword != null ) {
+            SimpleKeystore keystore = new SimpleKeystore(new File(keystorePath), keystorePassword);
             X509Certificate[] trustedSamlCertificates;
             try {
                 trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
             }
             catch(KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
-                throw e;
-            }
-            catch(Exception e) {
                 throw e;
             }
             TrustAssertion trustAssertion = new TrustAssertion(trustedSamlCertificates, saml);
