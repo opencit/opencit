@@ -36,6 +36,10 @@
 #define BYTE unsigned char
 #endif
 
+#ifndef UINT8
+#define UINT8 unsigned char
+#endif
+
 #ifndef UINT16
 #define UINT16 unsigned short
 #endif
@@ -46,7 +50,7 @@
 
 typedef struct {
 	UINT16 size;
-	BYTE *name;
+	BYTE *buffer;
 } TPM2B_NAME;
 
 typedef struct {
@@ -54,37 +58,63 @@ typedef struct {
 	BYTE *buffer;
 } TPM2B_DATA;
 
-int
-main (int ac, char **av)
+typedef struct {
+	UINT16 size;
+	BYTE *digest;
+} TPM2B_DIGEST;
+
+typedef struct {
+	UINT16 hashAlg;
+	UINT8 size;
+	BYTE *pcrSelected;
+} TPMS_PCR_SELECTION;
+
+typedef struct {
+	UINT16 signAlg;
+	UINT16 hashAlg;
+	UINT16 size;
+	BYTE *signature;
+} TPMT_SIGNATURE;
+
+#define SHA1_SIZE 20 // 20 bytes
+#define SHA256_SIZE 32 // 32 bytes
+
+int main (int ac, char **av)
 {
 	FILE		*f_in;
 	BYTE		*chal;
 	UINT32		chalLen;
 	BYTE		*quote;
-	BYTE		*ptr;
 	UINT32		index =0;
+	UINT32		pos =0;
 	UINT32		quoteLen;
-	RSA			*aikRsa;
+	RSA		*aikRsa;
 	UINT32		selectLen;
 	BYTE		*select;
 	UINT32		pcrLen;
 	BYTE		*pcrs;
-	BYTE		*quoted;
-	BYTE		*quotedInfo;
+	BYTE		*quoted = NULL;
+	BYTE		*quotedInfo = NULL;
 	UINT16		quotedInfoLen;
-	BYTE		*tpmtSig;
+	BYTE		*tpmtSig = NULL;
 	UINT16		sigAlg;
 	UINT16		hashAlg;
 	BYTE		*sig;
 	UINT32		sigLen;
-	BYTE		*recvNonce;
+	BYTE		*recvNonce = NULL;
 	UINT32		recvNonceLen;
 	UINT32		verifiedLen;
 	BYTE		chalmd[20];
 	BYTE		md[32]; // SHA256 hash
 	BYTE		qinfo[8+20+20];
-	TPM2B_NAME	*tpm2b_name = NULL;
-	TPM2B_DATA	*tpm2b_data = NULL;
+	TPM2B_NAME	tpm2b_name;
+	TPM2B_DATA	tpm2b_data;
+	UINT32		pcrBankCount;
+	TPMS_PCR_SELECTION	pcr_selection;
+	TPM2B_DIGEST	tpm2b_digest;
+	TPMT_SIGNATURE	tpmt_signature;
+	BYTE 		pcrConcat[SHA256_SIZE * 24];
+	BYTE		pcrsDigest[SHA256_SIZE];
 	char		*chalfile = NULL;
 	int			pcr;
 	int			pcri = 0;
@@ -156,99 +186,155 @@ main (int ac, char **av)
 
 	/* Parse quote file
          * The quote result is constructed as follows for now
-	 * pcr values (0-23), sha1 pcr bank. so the length is 20*24=480
+	 *
+	 * part1: pcr values (0-23), sha1 pcr bank. so the length is 20*24=480
+	 * part2: the quoted information: TPM2B_ATTEST
+	 * part3: the signature: TPMT_SIGNATURE
 	 */
-        //printf("quoteLen: %d\n", quoteLen);
 
-	if (quoteLen < 2)
-		goto badquote;
-	selectLen = 0; //aa
-	select = quote;
-	ptr = quote;
 	index = 0;
 
+	/* PART1: quote PCR value */
 	// pcr values for pcr 0-23 in bank of SHA1
+	if (quoteLen < 2)
+		goto badquote;
+	select = quote;
 	pcrs = quote;
 	pcrLen = 480;
 
-	index = index + pcrLen;	
-	// quoted infomration structure
+	// PART2: quoted infomration structure - TPM2B_ATTEST
+	index += pcrLen;	
 	quoted = quote + index; 
-	//quotedInfoLen = ntohs(*(UINT16*)quoted);
 	quotedInfoLen = (*(UINT16*)quoted); // This is NOT in network order
  	quotedInfo = quoted + 2; // following is the TPMS_ATTEST structure as defined in tpm2.0 spec
         //printf("quoteInfoLen: %d\n", quotedInfoLen);
 	
-	index = index + 2;
 	//qualifiedSigner -- skip the magic header and type
-	index = index + 6;
-	tpm2b_name = (TPM2B_NAME*)(quote + index);
-        //printf("tpm2b_name size: %02x\n", ntohs(tpm2b_name->size)); //This is in Network Order
+	index += 2;
+	index += 6;
+
+	// tpm2b_name
+	tpm2b_name.size = ntohs(*(UINT16*)(quote + index));
+	index += 2;
+	tpm2b_name.buffer = quote + index;
+        //printf("tpm2b_name size: %02x\n", tpm2b_name.size); //This is in Network Order
 
 	//tpm2b_data	
-	index = index + 2 + ntohs(tpm2b_name->size); // skip tpm2b_name
-	tpm2b_data = (TPM2B_DATA*)(quote + index);
-	recvNonceLen = ntohs(tpm2b_data->size);
+	index += tpm2b_name.size; // skip tpm2b_name
+	tpm2b_data.size = ntohs(*(UINT16*)(quote + index));
+	recvNonceLen = tpm2b_data.size;
         //printf("Received Nonce Len: %02x\n", recvNonceLen); //This is in Network Order
-	index = index + 2; // skip UINT16
-
+	index += 2; // skip UINT16
 	/* now compare the received nonce with the chal */
-	recvNonce = quote + index;
-	/* debug purpose
-	printf("Received nonce:  ");
-        for (ind=0; ind<chalLen; ind++) {
-	  printf("%02x", (*(BYTE*)(recvNonce+ind)));
-	}
-	printf("\n");	
-	printf("Challenge nonce: ");
-        for (ind=0; ind<chalLen; ind++) {
-	  printf("%02x", chal[ind]);
-	}
-	printf("\n");
-	*/	
+	tpm2b_data.buffer = quote + index;
+	recvNonce = tpm2b_data.buffer;
+	index += tpm2b_data.size; // skip tpm2b_data
+	
+	// First verificaiton is to check if the received nonce matches the challenges sent	
 	if (memcmp(recvNonce, chal, chalLen) != 0) {
 		fprintf(stderr, "Error in comparing the received nonce with the challenge");
 		free(chal);
 		exit(1);
-	}
-	if (chal != NULL) 
+	} else {
 		free(chal);
+	}
+	
+	index += 17; // skip over the TPMS_CLOCKINFO structure
+	index += 8;  // skip over the firmware info
+	/* TPMU_ATTEST with selected PCR banks and PCRs, and their hash
+	 * tpms_quote_info tpml_pcr_selection	
+	 *	count 			uint32	0x00000001	 4 bytes -indicates the number of tpms_pcr_slection array
+	 *	tpms_pcr_selection	hash algorithm	uint16	2 bytes
+	 *				size of bit map	uint8	1 byte
+	 *				pcrSelect		size of bytes
+	 *	tpms_pcr_selection		
+	 *	...				
+	 *	tpm2b_digest		size	0x0020	2 bytes	
+	 *				digest	32 bytes of hash
+	 */
+	pcrBankCount = ntohl(*(UINT32*)(quote + index));
+	//printf("bank count: %02x\n", pcrBankCount);
+	index += 4;
+	pcr_selection.hashAlg = ntohs(*(UINT16*)(quote + index));
+	//printf("pcr bank: %02x\n", pcr_selection.hashAlg);
+	index += 2;
+	pcr_selection.size = (*(UINT8*)(quote + index));
+	//printf("pcr bit size byte: %02x\n", pcr_selection.size);
+	index += 1;
+	pcr_selection.pcrSelected = quote + index;
+	index += pcr_selection.size;
 
-	index = index + 2 + ntohs(tpm2b_data->size); // skip tpm2b_name
-        tpmtSig = quoted + 2 + quotedInfoLen;
-        //sigAlg = ntohs(*(UINT16*)tpmtSig);
-        sigAlg = (*(UINT16*)tpmtSig); // This is NOT in networ order
-        //printf("sigAlg: %02x\n", sigAlg);
-        
-	//hashAlg = ntohs(*(UINT16*)(tpmtSig+2)); 
-	hashAlg = (*(UINT16*)(tpmtSig+2)); // This is NOT in network order
+	//NOTE: currently we only limit the selection of one PCR bank for quote
+	tpm2b_digest.size = ntohs(*(UINT16*)(quote + index));
+	//printf("digest size: %02x\n", tpm2b_digest.size);
+	index += 2;
+	tpm2b_digest.digest = quote + index;
+
+	/* PART 3: TPMT_SIGNATURE */
+	index = 2 + quotedInfoLen; // jump to the TPMT_SIGNATURE strucuture
+        tpmtSig = quoted + index;
+	pos = 0;
+	/* sigAlg -indicates the signature algorithm
+         * TPMI_SIG_ALG_SCHEME
+	 * for now, it is TPM_ALG_RSASSA with value 0x0014
+	 */
+        tpmt_signature.signAlg = (*(UINT16*)tpmtSig); // This is NOT in networ order
+	/* hashAlg used by the signature algorithm indicated above
+         * TPM_ALG_HASH
+	 * for TPM_ALG_RSASSA, the default hash algorihtm is TPM_ALG_SHA256 with value 0x000b
+         */
+	pos += 2;
+	tpmt_signature.hashAlg = (*(UINT16*)(tpmtSig + pos)); // This is NOT in network order
         //printf("hashAlg: %02x\n", hashAlg);
 	
-	//sigLen = ntohs(*(UINT16*)(tpmtSig+4)); 
-	sigLen = (*(UINT16*)(tpmtSig+4)); // This is NOT in network order
+	pos += 2;
+	tpmt_signature.size = (*(UINT16*)(tpmtSig + pos)); // This is NOT in network order
         //printf("sigLen: %02x\n", sigLen);
-        sig = tpmtSig + 6;
+
+	pos += 2;
+        tpmt_signature.signature = tpmtSig + pos;
 
 	/* verify the length of data */	
-	verifiedLen = sig-quote+sigLen;
+	verifiedLen = (tpmt_signature.signature + tpmt_signature.size) - quote;
 	if (verifiedLen != quoteLen) {
 		fprintf (stderr, "Error in parsing data structure in quote\n");
 		exit(1);
 	}
 	
 	// Verify RSA signature
-        // hash
+        // hash first
         memset(md, 0, sizeof(md));
 	SHA256(quotedInfo, quotedInfoLen, md);
         // signature
-	if (1 != RSA_verify(NID_sha256, md, sizeof(md), sig, sigLen, aikRsa)) {
+	if (1 != RSA_verify(NID_sha256, md, sizeof(md), tpmt_signature.signature, tpmt_signature.size, aikRsa)) {
 		fprintf (stderr, "Error, bad RSA signature in quote\n");
 		exit (2);
 	}
 
-	/* Print out PCR values 
-	for (pcr=0; pcr < 8*selectLen; pcr++) {
-		if (select[pcr/8] & (1 << (pcr%8))) {
+	// validate the PCR concatenated digest
+	pcri=0; ind=0;
+	for (pcr=0; pcr < 8*pcr_selection.size; pcr++) {
+		if (pcr_selection.pcrSelected[pcr/8] & (1 << (pcr%8))) {
+			memcpy(pcrConcat+ind*20, pcrs+20*pcri, SHA1_SIZE);
+			pcri++;
+			ind++;
+		}
+	}
+	if (ind<1) {
+		fprintf(stderr, "Error, no PCRs selected for quote\n");
+		exit(3);
+	}
+        memset(pcrsDigest, 0, sizeof(pcrsDigest));
+	SHA256(pcrConcat, ind*SHA1_SIZE, pcrsDigest);
+	if (memcmp(pcrsDigest, tpm2b_digest.digest, tpm2b_digest.size) != 0) {
+		fprintf(stderr, "Error in comparing the concatenated PCR digest with the digest in quote");
+		exit(4);
+	}
+	
+	/* Print out PCR values  */
+	pcri=0;
+	for (pcr=0; pcr < 8*pcr_selection.size; pcr++) {
+		if (pcr_selection.pcrSelected[pcr/8] & (1 << (pcr%8))) {
 			printf ("%2d ", pcr);
 			for (i=0; i<20; i++) {
 				printf ("%02x", pcrs[20*pcri+i]);
@@ -256,15 +342,6 @@ main (int ac, char **av)
 			printf ("\n");
 			pcri++;
 		}
-	}
-        */
-        for (pcr=0; pcr < 24; pcr++) {
-		printf ("%2d ", pcr);
-		for (i=0; i<20; i++) {
-			printf ("%02x", pcrs[20*pcri+i]);
-		}
-		printf ("\n");
-                pcri++;
 	}
          
 	fflush (stdout);
