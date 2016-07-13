@@ -88,8 +88,15 @@ public class TpmModule12 implements TpmModuleProvider {
     }
 
     @Override
-    public byte[] readAssetTag(byte[] ownerAuth) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public byte[] readAssetTag(byte[] ownerAuth) throws IOException, TpmModule.TpmModuleException {
+        String index = getAssetTagIndex();
+        log.debug("Reading asset tag for Linux TPM 1.2...");
+        if(nvIndexExists(index)) {
+            log.debug("Asset Tag Index {} exists", index);
+            return nvRead(ownerAuth, index);
+        } else {
+            throw new TpmModule.TpmModuleException("Asset Tag has not been provisoined on this TPM");
+        }
     }
 
     @Override

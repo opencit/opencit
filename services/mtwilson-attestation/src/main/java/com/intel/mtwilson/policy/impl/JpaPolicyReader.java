@@ -209,6 +209,10 @@ public class JpaPolicyReader {
             tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagPcrRule); 
         }   
+                
+        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+        tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
+        rules.add(tagRule);
         
         return rules;
     }

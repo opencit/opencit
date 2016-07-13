@@ -550,6 +550,7 @@ public class TAHelper {
         }
 
         // for Windows host, we generate a new nonce by sha1(nonce | tag)
+        // Now is done for ALL hosts, not only Windows
         if (tpmQuoteResponse.isTagProvisioned) {
             log.debug("tpmQuoteResponse.isTagProvisioned is true");
             verifyNonce = Sha1Digest.digestOf(verifyNonce).extend(tpmQuoteResponse.assetTag).toByteArray();

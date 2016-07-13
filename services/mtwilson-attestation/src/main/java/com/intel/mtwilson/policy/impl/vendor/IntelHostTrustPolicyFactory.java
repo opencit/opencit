@@ -122,7 +122,8 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
     
     @Override
     public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
-        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
+        // No longer user PCR matches
+        return reader.loadMatchesRulesForAssetTag(atagCert, host);
     }
 
 }
