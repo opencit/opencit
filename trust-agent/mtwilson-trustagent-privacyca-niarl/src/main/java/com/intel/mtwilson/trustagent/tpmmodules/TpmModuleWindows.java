@@ -60,10 +60,10 @@ public class TpmModuleWindows implements TpmModuleProvider {
             log.debug("Index exists. Releasing index...");
             nvRelease(ownerAuth, index);
             log.debug("Creating new index...");
-            nvDefine(ownerAuth, randPasswd, index, 20);
+            nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
         } else {
             log.debug("Index does not exist. Creating it...");
-            nvDefine(ownerAuth, randPasswd, index, 20);
+            nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
         }
         
         nvWrite(ownerAuth, randPasswd, index, assetTagHash);
@@ -88,9 +88,9 @@ public class TpmModuleWindows implements TpmModuleProvider {
     }
 
     @Override
-    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size) throws IOException, TpmModuleException {
+    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attribute) throws IOException, TpmModuleException {
         try {
-            String cmd = "tpmtool.exe nvdefine " + index + " 0x" + Integer.toHexString(size) + " " + TpmUtils.byteArrayToHexString(indexPassword) + " AUTHWRITE";
+            String cmd = "tpmtool.exe nvdefine " + index + " 0x" + Integer.toHexString(size) + " " + TpmUtils.byteArrayToHexString(indexPassword) + " " + attribute;
             log.debug("running command: " + cmd);
             CommandUtil.runCommand(cmd);
         } catch (TAException ex) {

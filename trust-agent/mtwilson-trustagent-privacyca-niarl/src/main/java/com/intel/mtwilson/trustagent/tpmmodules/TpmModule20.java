@@ -57,10 +57,10 @@ public class TpmModule20 implements TpmModuleProvider {
             log.debug("Index exists. Releasing index...");
             nvRelease(ownerAuth, index);
             log.debug("Creating new index...");
-            nvDefine(ownerAuth, randPasswd, index, 20);
+            nvDefine(ownerAuth, randPasswd, index, 20, "0x02040002");
         } else {
             log.debug("Index does not exist. Creating it...");
-            nvDefine(ownerAuth, randPasswd, index, 20);
+            nvDefine(ownerAuth, randPasswd, index, 20, "0x02040002");
         }
         nvWrite(ownerAuth, randPasswd, index, assetTagHash);
         log.debug("Provisioned asset tag");
@@ -77,10 +77,10 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size) throws IOException, TpmModule.TpmModuleException {
+    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attributes) throws IOException, TpmModule.TpmModuleException {
         final String cmdPath = Folders.application() + File.separator + "bin";
         String cmdToexecute = cmdPath + File.separator + "tpm2-nvdefine.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + 
-                TpmUtils.byteArrayToHexString(indexPassword) + " " + index + " " + size;
+                TpmUtils.byteArrayToHexString(indexPassword) + " " + index + " " + size + " " + attributes;
         CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
         
         if (result.getReturnCode() != 0) {

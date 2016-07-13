@@ -78,10 +78,10 @@ public class TpmModule12 implements TpmModuleProvider {
             log.debug("Index exists. Releasing index...");
             nvRelease(ownerAuth, index);
             log.debug("Creating new index...");
-            nvDefine(ownerAuth, randPasswd, index, 20);
+            nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
         } else {
             log.debug("Index does not exist. Creating it...");
-            nvDefine(ownerAuth, randPasswd, index, 20);
+            nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
         }        
         nvWrite(ownerAuth, randPasswd, index, assetTagHash);
         log.debug("Provisioned asset tag");
@@ -98,8 +98,8 @@ public class TpmModule12 implements TpmModuleProvider {
     }
 
     @Override
-    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size) throws TpmModule.TpmModuleException, IOException {
-        log.debug("running command tpm_nvdefine -i " + index + " -s 0x" + Integer.toHexString(size) + " -x -aXXXX -oXXXX --permissions=AUTHWRITE");
+    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attributes) throws TpmModule.TpmModuleException, IOException {
+        log.debug("running command tpm_nvdefine -i " + index + " -s 0x" + Integer.toHexString(size) + " -x -aXXXX -oXXXX --permissions=" + attributes);
         Map<String, String> variables = new HashMap<>();
         variables.put("tpmOwnerPass", TpmUtils.byteArrayToHexString(ownerAuth));
         variables.put("NvramPassword", TpmUtils.byteArrayToHexString(indexPassword));
@@ -108,7 +108,7 @@ public class TpmModule12 implements TpmModuleProvider {
         command.addArgument("-t");
         command.addArgument("-aNvramPassword");
         command.addArgument("-otpmOwnerPass");
-        command.addArgument("--permissions=AUTHWRITE");
+        command.addArgument("--permissions=" + attributes);
         command.addArgument("-s 0x14", false);
         command.addArgument(String.format("-i %s", index), false);
         Result result = ExecUtil.execute(command, variables);
