@@ -29,6 +29,7 @@ public interface TpmModuleProvider {
     public void setAssetTag(byte[] ownerAuth, byte[] assetTagHash) throws IOException, TpmModule.TpmModuleException;
     public byte[] readAssetTag(byte[] ownerAuth) throws IOException, TpmModule.TpmModuleException;    
     public String getAssetTagIndex() throws IOException, TpmModule.TpmModuleException;
+    public String getPcrBanks() throws IOException, TpmModule.TpmModuleException;
     
     public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size) throws IOException, TpmModule.TpmModuleException;
     public void nvRelease(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException;

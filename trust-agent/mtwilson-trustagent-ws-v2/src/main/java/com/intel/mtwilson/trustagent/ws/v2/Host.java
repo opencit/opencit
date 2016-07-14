@@ -58,6 +58,7 @@ public class Host {
             host.processorInfo = context.getProcessorInfo();
             host.hardwareUuid = context.getHostUUID();
             host.tpmVersion = Tpm.getTpmVersion();
+            host.pcrBanks = Tpm.getpcrBanks();
             /*
             String responseXML =
                     "<host_info>"

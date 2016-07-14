@@ -6,6 +6,7 @@
 package com.intel.mtwilson.trustagent.tpmmodules;
 
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -20,6 +21,7 @@ public class Tpm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tpm.class);
     public static TpmModuleProvider tpmModule = null;
     public static String tpmVersion=null;
+    public static String pcrBanks=null;  // initialized to SHA1 to accomodate tpm1.2. this value is updated if tpm version is 2.0 
 
     public static String getTpmVersion() {
         if (tpmVersion==null) {
@@ -47,6 +49,20 @@ public class Tpm {
             findModule();
         }
         return tpmModule;
+    }
+    
+    public static String getpcrBanks() {
+        if (pcrBanks==null) {
+            try {
+                pcrBanks=getModule().getPcrBanks();
+                log.debug("tpm.getpcrBanks: {}", pcrBanks);
+            } catch (IOException ex) {
+                Logger.getLogger(Tpm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TpmModule.TpmModuleException ex) {
+                Logger.getLogger(Tpm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return pcrBanks;
     }
     
     private static void findModule() {

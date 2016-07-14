@@ -468,4 +468,8 @@ public class TpmModuleWindows implements TpmModuleProvider {
         return toReturn;
     }
     
+    @Override
+    public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {
+        return "SHA1";
+    }
 }

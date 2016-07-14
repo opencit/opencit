@@ -85,7 +85,8 @@ public class TxtHostRecord {
     public String Hardware_Uuid;
     @JsonProperty
     public String TpmVersion;
-    
+    @JsonProperty
+    public String PcrBanks;
     /**
      * @since 2.0
      */
@@ -122,6 +123,7 @@ public class TxtHostRecord {
         Hardware_Uuid = null;
         tlsPolicyChoice = input.getTlsPolicyChoice();
         TpmVersion = input.getTpmVersion();
+        PcrBanks = input.getPcrBanks();
     }    
 
 
@@ -148,6 +150,7 @@ public class TxtHostRecord {
         this.VMM_Version = host.VMM_Version;
         this.tlsPolicyChoice = host.tlsPolicyChoice;
         this.TpmVersion = host.TpmVersion;
+        this.PcrBanks = host.PcrBanks;
 
     }    
 

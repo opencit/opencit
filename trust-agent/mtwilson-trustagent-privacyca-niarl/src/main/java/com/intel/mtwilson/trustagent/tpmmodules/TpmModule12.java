@@ -188,4 +188,10 @@ public class TpmModule12 implements TpmModuleProvider {
     public byte[] nvRead(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {
+        return "SHA1";
+    }
+
 }

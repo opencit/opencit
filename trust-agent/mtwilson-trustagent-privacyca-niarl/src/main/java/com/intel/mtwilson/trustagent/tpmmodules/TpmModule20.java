@@ -139,6 +139,15 @@ public class TpmModule20 implements TpmModuleProvider {
     private static class CommandLineResult {
         private int returnCode = 0;
         private String [] results = null;
+        private String returnOutput = null;
+
+        public String getReturnOutput() {
+            return returnOutput;
+        }
+
+        public void setReturnOutput(String returnOutput) {
+            this.returnOutput = returnOutput;
+        }
         /**
          * 
          * @param newReturnCode
@@ -366,6 +375,17 @@ public class TpmModule20 implements TpmModuleProvider {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    @Override
+    public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {
+        final String cmdPath = Folders.application() + File.separator + "bin";
+        String cmdToexecute = cmdPath + File.separator + "tpm2-getpcrbanks";
+        CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+  
+        if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.getPcrBanks returned nonzero error", result.getReturnCode());
+        log.debug("returned pcr banks trimmed: {}", result.getReturnOutput().trim());
+        return result.getReturnOutput().trim();
+    }
+    
     private static CommandLineResult executeTpmCommand(String cmdArgs, int returnCount)
                     throws IOException {
 
@@ -429,6 +449,7 @@ public class TpmModule20 implements TpmModuleProvider {
         log.debug("Return code: " + returnCode);
 
         CommandLineResult toReturn = new CommandLineResult(returnCode, returnCount);
+        toReturn.setReturnOutput(line);
         if ((returnCode == 0)&&(returnCount != 0)) {
                 StringTokenizer st = new StringTokenizer(line);
             if( st.countTokens() < returnCount ) {

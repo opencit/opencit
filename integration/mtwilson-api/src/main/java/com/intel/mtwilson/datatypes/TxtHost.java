@@ -41,6 +41,15 @@ public class TxtHost {
     private TlsPolicyChoice tlsPolicyChoice; // may be null; since mtwilson 2.0
     private String bindingKeyCertificate; // may be null;
     private String tpmVersion;
+    private String pcrBanks;
+
+    public String getPcrBanks() {
+        return pcrBanks;
+    }
+
+    public void setPcrBanks(String pcrBanks) {
+        this.pcrBanks = pcrBanks;
+    }
 
     public String getTpmVersion() {
         return tpmVersion;
