@@ -29,7 +29,10 @@ import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.File;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
+import gov.niarl.his.privacyca.TpmModule;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -109,35 +112,19 @@ public class Tpm {
         /* If it is Windows host, Here we read Geotag from nvram index 0x40000010 and do sha1(nonce | geotag) and use the result as the nonce for TPM quote
            As of now, we still keep the same geotag provisioning mechanism by writing it to TPM. there are other approaches as well, but not in implementation.
         */  
-        boolean isTagProvisioned = false;
-        byte[] assetTagHash = null; 
-        if (osName.toLowerCase().contains("windows")) {
-            // 1. Trying to read AssetTag from TPM NVRAM 0x40000010
-            new ReadAssetTag(context).execute();
-            // 2. if provisioned, generate and set the new nonce
-            String assetTag = context.getAssetTagHash();
-            if (assetTag != null) {
-                log.debug("Assetag is: {}", assetTag);
-                try {
-                    assetTagHash = Hex.decodeHex(assetTag.toCharArray());
-                    if (assetTagHash.length == 20) { 
-                        // sha1(nonce | assetTagHash)
-                        log.debug("AssetTagHash is 20 bytes");
-                        byte[] extendedNonceWithAssetTag = Sha1Digest.digestOf(tpmQuoteRequest.getNonce()).extend(assetTagHash).toByteArray();
-                        tpmQuoteRequest.setNonce(extendedNonceWithAssetTag);
-                        isTagProvisioned = true;
-                    }
-                    else {
-                        log.debug("The asset tag read from NVRAM is not 20 bytes!");                  
-                    }
-                } catch (DecoderException ex) {
-                    log.error("Decoding assettag hash error: {}", ex.getMessage());
-                }
-            }
-            else {
-                log.debug("AssetTag is not provisioned");
-            }
-        }
+        boolean isTagProvisioned = false;        
+        byte[] ownerAuth = configuration.getTpmOwnerSecret();
+        byte[] assetTagHash = null;
+        try {
+            assetTagHash = com.intel.mtwilson.trustagent.tpmmodules.Tpm.getModule().readAssetTag(ownerAuth);
+            log.debug("Asset Tag is: {}", assetTagHash);
+            byte[] extendedNoncewithAssetTag = Sha1Digest.digestOf(tpmQuoteRequest.getNonce()).extend(assetTagHash).toByteArray();
+            tpmQuoteRequest.setNonce(extendedNoncewithAssetTag);
+            isTagProvisioned = true;
+        } catch (TpmModule.TpmModuleException ex) {
+            log.debug("Could not read Asset Tag from TPM");
+            log.debug("Asset Tag is not provisioned");
+        }               
 
         context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
         context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));

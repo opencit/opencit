@@ -179,8 +179,12 @@ public class TAHelper {
 //            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             if (isHostWindows)
                 aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
-            else
-                aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+            else {
+                if (host.TpmVersion.equals("2.0"))
+                    aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify2" : "aikqverify.exe");
+                else
+                    aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+            }
         } else {
             // mtwilson 1.2 configuration
             Configuration config = ASConfig.getConfiguration();
@@ -546,6 +550,7 @@ public class TAHelper {
         }
 
         // for Windows host, we generate a new nonce by sha1(nonce | tag)
+        // Now is done for ALL hosts, not only Windows
         if (tpmQuoteResponse.isTagProvisioned) {
             log.debug("tpmQuoteResponse.isTagProvisioned is true");
             verifyNonce = Sha1Digest.digestOf(verifyNonce).extend(tpmQuoteResponse.assetTag).toByteArray();

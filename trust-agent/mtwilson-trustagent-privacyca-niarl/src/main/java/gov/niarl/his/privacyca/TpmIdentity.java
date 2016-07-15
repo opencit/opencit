@@ -23,6 +23,16 @@ public class TpmIdentity {
 	private byte [] identityRequestBytes = null;
 	private byte [] aikModulus = null;
 	private byte [] aikKeyBytes = null;
+        private byte [] aikNameBytes = null;
+
+    public byte[] getAikNameBytes() {
+        return aikNameBytes;
+    }
+
+    public void setAikNameBytes(byte[] aikNameBytes) {
+        this.aikNameBytes = aikNameBytes;
+    }
+
 	/**
 	 * Create a new TpmIdentity with no data set.
 	 * 
@@ -42,6 +52,14 @@ public class TpmIdentity {
 		aikModulus = aikMod;
 		aikKeyBytes = aikBlob;
 	}
+        
+        public TpmIdentity(byte[] idReq, byte [] aikMod, byte [] aikBlob, byte[] aikName){
+            identityRequestBytes = idReq;
+            aikModulus = aikMod;
+            aikKeyBytes = aikBlob;
+            aikNameBytes = aikName;
+	}
+        
 	/**
 	 * Set the Identity Request.
 	 * 

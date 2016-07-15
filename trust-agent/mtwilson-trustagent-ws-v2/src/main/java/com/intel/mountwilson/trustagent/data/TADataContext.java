@@ -141,6 +141,10 @@ public class TADataContext {
     public String getQuoteFileName() {
         return getDataFolder() + File.separator + "aikquote";
     }
+    
+    public String getPcrsFileName() {
+        return getDataFolder() + File.separator + "pcrs";
+    }
 
     public String getAikBlobFileName() {
         return getCertificateFolder() + File.separator + Config.getInstance().getProperty("aikblob.filename");

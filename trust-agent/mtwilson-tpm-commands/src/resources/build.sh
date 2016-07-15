@@ -24,7 +24,7 @@ install_trousers() {
   echo "trousers: $TROUSERS_FILE"
   if [ -n "$TROUSERS_FILE" ] && [ -f "$TROUSERS_FILE" ]; then
     tar fxz $TROUSERS_FILE
-    (cd $TROUSERS && ./configure --prefix=/usr/local --with-openssl=/usr/local/ssl && make && sudo -n make install)
+    (cd $TROUSERS && patch -p1 < ../trousers.patch && ./configure --prefix=/usr/local --with-openssl=/usr/local/ssl && make && sudo -n make install)
     if [ -d /etc/ld.so.conf.d ]; then
       echo /usr/local/lib | sudo -n tee /etc/ld.so.conf.d/trousers.conf
     fi

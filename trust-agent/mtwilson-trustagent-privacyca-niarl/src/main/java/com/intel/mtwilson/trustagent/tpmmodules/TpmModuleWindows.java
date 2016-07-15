@@ -5,7 +5,14 @@
  */
 package com.intel.mtwilson.trustagent.tpmmodules;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.common.CommandResult;
+import com.intel.mtwilson.common.CommandUtil;
+import com.intel.mtwilson.common.TAException;
+import com.intel.mtwilson.trustagent.shell.CommandLineResult;
+import com.intel.mtwilson.trustagent.shell.ShellExecutor;
+import com.intel.mtwilson.trustagent.shell.ShellExecutorFactory;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityProof;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
@@ -48,55 +55,111 @@ import javax.crypto.NoSuchPaddingException;
 public class TpmModuleWindows implements TpmModuleProvider {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmModuleWindows.class);
 
-    private static class commandLineResult {
-        private int returnCode = 0;
-        private String [] results = null;
-        /**
-         * 
-         * @param newReturnCode
-         * @param numResults
-         */
-        public commandLineResult(int newReturnCode, int numResults){
-                returnCode = newReturnCode;
-                results = new String[numResults];
+    @Override
+    public void setAssetTag(byte[] ownerAuth, byte[] assetTagHash) throws IOException, TpmModuleException {
+        byte[] randPasswd = RandomUtil.randomByteArray(20);
+        String index = getAssetTagIndex();    
+        if(nvIndexExists(index)) {
+            log.debug("Index exists. Releasing index...");
+            nvRelease(ownerAuth, index);
+            log.debug("Creating new index...");
+            nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
+        } else {
+            log.debug("Index does not exist. Creating it...");
+            nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
         }
-        /**
-         * 
-         * @return
-         */
-        public int getReturnCode(){
-                return returnCode;
+        
+        nvWrite(randPasswd, index, assetTagHash);
+        log.debug("Provisioned asset tag");
+    }
+
+    @Override
+    public byte[] readAssetTag(byte[] ownerAuth) throws IOException, TpmModuleException {
+        String index = getAssetTagIndex();
+        log.debug("Reading asset tag for Windows...");
+        if(nvIndexExists(index)) {
+            log.debug("Asset Tag Index {} exists", index);
+            return nvRead(ownerAuth, index, 20);
+        } else {
+            throw new TpmModule.TpmModuleException("Asset Tag has not been provisioned on this TPM");
         }
-        /**
-         * 
-         * @param index
-         * @param result
-         * @throws IllegalArgumentException
-         */
-        public void setResult(int index, String result)
-                        throws IllegalArgumentException {
-                if (index + 1 > results.length)
-                        throw new IllegalArgumentException("Array index out of bounds.");
-                results[index] = result;
+    }
+
+    @Override
+    public String getAssetTagIndex() throws IOException, TpmModuleException {
+        return "0x40000010";
+    }
+
+    @Override
+    public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attribute) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvdefine " + index + " 0x" + Integer.toHexString(size) + " " + TpmUtils.byteArrayToHexString(indexPassword) + " " + attribute;
+            log.debug("running command: " + cmd);
+            CommandUtil.runCommand(cmd);
+        } catch (TAException ex) {
+            log.error("error writing to nvram, " + ex.getMessage());
+            throw new TpmModule.TpmModuleException(ex);
         }
-        /**
-         * 
-         * @return
-         */
-        public int getResultCount(){
-                return results.length;
+    }
+
+    @Override
+    public void nvRelease(byte[] ownerAuth, String index) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvrelease " + index;
+            log.debug("running command: " + cmd);
+            CommandUtil.runCommand(cmd);
+        } catch (TAException ex) {
+            log.error("error releasing nvram index, " + ex.getMessage()); 
+            throw new TpmModule.TpmModuleException(ex);
         }
-        /**
-         * 
-         * @param index
-         * @return
-         * @throws IllegalArgumentException
-         */
-        public String getResult(int index)
-                        throws IllegalArgumentException {
-                if (index + 1 > results.length)
-                        throw new IllegalArgumentException("Array index out of bounds.");
-                return results[index];
+    }
+
+    @Override
+    public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvwrite " + index + " " + TpmUtils.byteArrayToHexString(authPassword) + " " + TpmUtils.byteArrayToHexString(data);
+            log.debug("running command: " + cmd);
+            CommandUtil.runCommand(cmd);
+        } catch (TAException ex) {
+            log.error("error writing to nvram, " + ex.getMessage());
+            throw new TpmModule.TpmModuleException(ex);
+        }
+    }
+
+    @Override
+    public boolean nvIndexExists(String index) throws IOException, TpmModuleException {
+        try {
+            CommandResult result = CommandUtil.runCommand("tpmtool.exe nvinfo " + index);
+            if (result != null && result.getStdout() != null) {
+                if (result.getStdout().contains("NVRAM index")) {
+                    return true;
+                }
+            }
+        } catch (TAException ex) {
+            log.error("error getting nvram info, " + ex.getMessage());
+            throw new TpmModule.TpmModuleException(ex);
+        }
+        return false;
+    }
+
+    @Override
+    public byte[] nvRead(byte[] ownerAuth, String index, int size) throws IOException, TpmModuleException {
+        try {
+            String cmd = "tpmtool.exe nvread " + index;
+            log.debug("Running command: " + cmd);
+            CommandResult cmdResult = CommandUtil.runCommand(cmd);
+            
+            // check if the cmd returns successfully. if so, set the assettag
+            if (cmdResult.getExitcode() == 0) {
+                log.debug("Provisioned Asset tag hash: {}", cmdResult.getStdout());
+                return TpmUtils.hexStringToByteArray(cmdResult.getStdout());
+            } else {
+                log.debug("Error reading Asset tag");
+                throw new TpmModule.TpmModuleException("nvread returned non zero error");
+            }
+        } catch (TAException ex) {
+            log.error("error reading assetTag from nvram 0x40000010, " + ex.getMessage() );
+            throw new TpmModule.TpmModuleException(ex);
         }
     }
 
@@ -107,10 +170,10 @@ public class TpmModuleWindows implements TpmModuleProvider {
         
         //String argument = "-owner_auth " + TpmUtils.byteArrayToHexString(ownerAuth) + " -cred_type " + credType;
         // TROUSERS MODE OPTIONAL
-        commandLineResult result;
+        CommandLineResult result;
         if (credType.equals("EC")) {
-            String[] cmdArgs = {"GetEkCert"}; 
-            result = executeTpmCommand(cmdArgs, 1);
+            String[] cmdArgs = {}; 
+            result = getShellExecutor().executeTpmCommand("GetEkCert", cmdArgs, 1);
             if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModule.getCredential returned nonzero error", result.getReturnCode());
             
             byte[] eccert = TpmUtils.hexStringToByteArray(result.getResult(0));
@@ -169,7 +232,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
 		md.update(chosenId);
 		byte [] chosenIdHash = md.digest();
                 
-            String[] cmdArgs = {"CollateIdentityRequest", 
+            String[] cmdArgs = { 
                 TpmUtils.byteArrayToHexString(keyLabel.getBytes()),
                 TpmUtils.byteArrayToHexString(chosenIdHash),
                 TpmUtils.byteArrayToHexString(keyAuth)
@@ -179,7 +242,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
             argument.add(TpmUtils.byteArrayToHexString(keyAuth));
             */
             // executeTpmCommand returns idbinding (IDENTITY_CONTENTS), AIK Pub key modulus, and AIK key blob
-            commandLineResult result = executeTpmCommand(cmdArgs, 3);
+            CommandLineResult result = getShellExecutor().executeTpmCommand("CollateIdentityRequest", cmdArgs, 3);
             if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.collateIdentityRequest returned nonzero error", result.getReturnCode());
             
             /* executeTpmCommand returns 
@@ -239,35 +302,16 @@ public class TpmModuleWindows implements TpmModuleProvider {
             String HisIdentityLabel = "HIS_Identity_Key";
             
             // form the command arguments. This commands only returns the secrect encrypted inside the asymCaContents.
-            String[] cmdArgs = {"ActivateIdentity",
+            String[] cmdArgs = {
                 TpmUtils.byteArrayToHexString(HisIdentityLabel.getBytes()),
                 TpmUtils.byteArrayToHexString(keyAuth),
                 TpmUtils.byteArrayToHexString(asymCaContents),
             };
-            commandLineResult result = executeTpmCommand(cmdArgs, 2);
+            CommandLineResult result = getShellExecutor().executeTpmCommand("ActivateIdentity", cmdArgs, 2);
             if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.activateIdentity returned nonzero error", result.getReturnCode());
+                           
+            byte[] aikcert = TpmUtils.decryptSymCaAttestation(TpmUtils.hexStringToByteArray(result.getResult(0)), symCaAttestation);
             
-            // once get the secret, we need to decrypt the sysmCaAttestation to get the aikcert
-            /* the symCaAttestation is in the format of TPM_SYM_CA_ATTESTATION
-            * UINT32          credSize   -- size of the credential parameter
-            * TPM_KEY_PARMS   algorithm  -- indicator and parameters forthe symmetic algorithm
-            * BYTE *          credential -- result of encryption TPM_IDENTITY_CREDENTIAL using the session_key and the algorithm indicated "algorithm"
-            *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
-            */
-            ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);
-            
-            byte [] key = TpmUtils.hexStringToByteArray(result.getResult(0));
-            int credsize  = TpmUtils.getUINT32(bs);
-            TpmKeyParams keyParms = new TpmKeyParams(bs);
-            byte[] iv = new byte[16];
-            bs.read(iv, 0, 16);
-            int ciphertextLen = credsize - 16;
-            byte [] ciphertext = new byte[ciphertextLen];
-            bs.read(ciphertext, 0, ciphertextLen);
-            
-            byte [] aikcert = TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
-            
-            // return the results
             HashMap<String,byte[]> results = new HashMap<String, byte[]>();
             results.put("aikcert", aikcert);
             results.put("aikblob", TpmUtils.hexStringToByteArray(result.getResult(1)));
@@ -297,82 +341,13 @@ public class TpmModuleWindows implements TpmModuleProvider {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
-    private static commandLineResult executeTpmCommand(String[] args, int returnCount)
-                    throws IOException {
-
-        int returnCode;
-        final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
-        final String newExeName = "TPMTool.exe";
-
-        // Parse the args parameter to populate the environment variables array
-        //HashMap<String,String> environmentVars = new HashMap<String, String>();
-        List<String> cmd = new ArrayList<String>();
-        
-        /* the command to be run should be
-         * "cmd.exe /c path_to_tpmtool.exe arguments"
-        */
-        cmd.add("cmd.exe");
-        cmd.add("/c");
-        cmd.add(newExeName);
-        for (String cmdArg : args) {
-            cmd.add(cmdArg);
-        }
-        
-        // check the parameters
-        for (String temp: cmd) {
-            log.debug(temp);
-        }
-        
-        /* create the process to run */
-        ProcessBuilder pb = new ProcessBuilder(cmd);
-        //pb.environment().putAll(environmentVars);
-        Process p = pb.start();
-        //Process p = Runtime.getRuntime().exec(commandLine);
-        String line = "";
-        if (returnCount != 0){
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String newLine;
-            try {
-                    while ((newLine = input.readLine()) != null) {
-                            line = newLine;
-                            log.debug("executeTPM output line: {}", line);
-                    }
-                    log.debug("executeTPM last line: {}", line);
-
-                    input.close();
-            } catch (Exception e) {
-                    e.printStackTrace();
-            }
-            finally{
-                    if (input != null)
-                            input.close();
-            }
-        }
-        
-        //do a loop to wait for an exit value
-        try {
-            returnCode = p.waitFor();
-        }
-        catch(InterruptedException e) {
-            log.error("Interrupted while waiting for return value");
-            log.debug("Interrupted while waiting for return value", e);
-            returnCode = -1;
-        }
-
-        log.debug("Return code: " + returnCode);
-
-        commandLineResult toReturn = new commandLineResult(returnCode, returnCount);
-        if ((returnCode == 0)&&(returnCount != 0)) {
-                StringTokenizer st = new StringTokenizer(line);
-            if( st.countTokens() < returnCount ) {
-                log.debug("executeTPMCommand with return count {} but only {} tokens are available; expect java.util.NoSuchElementException", returnCount, st.countTokens());
-            }
-            for (int i = 0; i < returnCount; i++) {
-                toReturn.setResult(i, st.nextToken());
-            }
-        }
-        return toReturn;
+    @Override
+    public ShellExecutor getShellExecutor() {
+        return ShellExecutorFactory.getInstance(ShellExecutorFactory.OS.Windows);
     }
     
+    @Override
+    public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {
+        return "SHA1";
+    }
 }

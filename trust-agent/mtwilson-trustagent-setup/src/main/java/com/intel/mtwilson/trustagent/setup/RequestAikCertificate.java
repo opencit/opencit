@@ -84,7 +84,7 @@ public class RequestAikCertificate extends AbstractSetupTask {
                         /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
             try {
                 Tpm tpm = new Tpm();
-                byte[] ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                byte[] ekCert = tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
                 if( ekCert == null || ekCert.length == 0 ) {
                     configuration("Endorsement Certificate is null or zero-length");
                 }
@@ -98,7 +98,7 @@ public class RequestAikCertificate extends AbstractSetupTask {
             }
         } else { /* need to add the case if TPM is 2.0 since the APIs and utilities are different */
             try {
-                byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+                byte[] ekCert = Tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
                 if( ekCert == null || ekCert.length == 0 ) {
                     configuration("Endorsement Certificate is null or zero-length");
                 }

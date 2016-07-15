@@ -163,6 +163,7 @@ public class IntelHostAgent2 implements HostAgent {
         host.Processor_Info = hostInfo.getProcessorInfo().trim().substring(0, 8).toUpperCase();
         // now set some state we need for getHostAttestationReport
         vmmName = host.VMM_Name;
+        host.TpmVersion = hostInfo.getTpmVersion();
         return host;
     }
 

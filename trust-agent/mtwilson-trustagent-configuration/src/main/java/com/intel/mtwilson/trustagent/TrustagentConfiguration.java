@@ -15,6 +15,7 @@ import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.SocketException;
@@ -22,8 +23,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -48,6 +52,8 @@ public class TrustagentConfiguration {
     public final static String TPM_SRK_SECRET = "tpm.srk.secret"; // 20 bytes hex (40 hex digits)
     public final static String AIK_SECRET = "aik.secret"; // 20 bytes hex (40 hex digits)
     public final static String AIK_INDEX = "aik.index"; // integer, default 1  but original HIS code from NIARL defaulted to zero
+    public final static String AIK_HANDLE = "aik.handle"; // this is the Ak handle for TPM2.0, range 81018000-8101FFFF
+    public final static String EK_HANDLE = "ek.handle"; // this is the ek handle for TPM2.0, range 81010000-810100FF
     public final static String TRUSTAGENT_HTTP_TLS_PORT = "trustagent.http.tls.port"; // default 1443 
     public final static String TRUSTAGENT_TLS_CERT_DN = "trustagent.tls.cert.dn"; // default CN=trustagent
     public final static String TRUSTAGENT_TLS_CERT_IP = "trustagent.tls.cert.ip"; // default 127.0.0.1  , can be comma-separated list of values
@@ -65,6 +71,10 @@ public class TrustagentConfiguration {
     public static final String TRUSTAGENT_ADMIN_USERNAME = "trustagent.admin.username";
                
     private Configuration conf;
+
+    public Configuration getConf() {
+        return conf;
+    }
     
     public TrustagentConfiguration(org.apache.commons.configuration.Configuration configuration) {
         this(new CommonsConfiguration(configuration));
@@ -155,6 +165,74 @@ public class TrustagentConfiguration {
         return Integer.valueOf(conf.get(AIK_INDEX, "1")); 
     }
     
+    public String getAikHandleHex() {
+        return conf.get(AIK_HANDLE); // intentionally no default - this must be generated during setup
+    }
+    public String getAikHandle() {
+        /*
+        try {
+            return Hex.decodeHex(getAikHandleHex().toCharArray());
+        }
+        catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid AIK Handle", e);
+        }
+        */
+        try {
+            return readFromFile(Folders.configuration() + File.separator + "aikhandle");
+        } catch (IOException ex) {
+            Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalArgumentException("AiK Handle", ex);
+        }
+    }
+    public void setAikHandle(String khandle) throws IOException {
+        writeToFile(Folders.configuration() + File.separator + "aikhandle", khandle);
+    }
+    
+    public String getEkHandleHex() {
+        log.debug("EK_HANDLE string: {}", conf.get(EK_HANDLE));
+        return conf.get(EK_HANDLE); // intentionally no default - this must be generated during setup
+    }
+    public String getEkHandle() {
+            /*
+            try {
+            return Hex.decodeHex(getEkHandleHex().toCharArray());
+            }
+            catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid EK Handle", e);
+            }
+            */
+        try {
+            return readFromFile(Folders.configuration() + File.separator + "ekhandle");
+        } catch (IOException ex) {
+            Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalArgumentException("EK Handle", ex);
+        }
+    }
+    
+    public void setEkHandle(String khandle) throws IOException {
+        writeToFile(Folders.configuration() + File.separator + "ekhandle", khandle);
+    }
+   
+    public String getAikName() {
+            /*
+            try {
+            return Hex.decodeHex(getEkHandleHex().toCharArray());
+            }
+            catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid EK Handle", e);
+            }
+            */
+        try {
+            return readFromFile(Folders.configuration() + File.separator + "aikname");
+        } catch (IOException ex) {
+            Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalArgumentException("AikName", ex);
+        }
+    }
+    public void setAikName(String kname) throws IOException {
+        writeToFile(Folders.configuration() + File.separator + "aikname", kname);
+    }
+        
     public File getAikCertificateFile() {
         return new File(Folders.configuration() + File.separator + "aik.pem");        
     }
@@ -369,5 +447,58 @@ public class TrustagentConfiguration {
 
     public String getTrustAgentAdminUserName() {
         return conf.get(TRUSTAGENT_ADMIN_USERNAME); // intentionally no default - this must be generated during setup
-    }    
+    }
+
+    public static String getTpmVersion() throws IOException {
+        File tpmVerFileH = new File(Folders.configuration() + File.separator + "tpm-version");
+        
+        //set tpm version to 1.2 by default
+        String tpmVersion = "1.2";
+        if (tpmVerFileH.exists())
+            tpmVersion = FileUtils.readFileToString(tpmVerFileH).replaceAll("\n", "");   
+        
+        return tpmVersion;
+    }
+    
+    /* This is temp solution for tpm2; we save the endorsement certificate (EC) to a file ec.pem */
+    public File getEcCertificateFile() {
+        return new File(Folders.configuration() + File.separator + "ekcert.pem");        
+    }
+    
+    public File getEkHandleFile() {
+        return new File(Folders.configuration() + File.separator + "ekhandle");        
+    }
+    
+    public File getAkHandleFile() {
+        return new File(Folders.configuration() + File.separator + "aikhandle");        
+    }
+    
+    public File getAkNameFile() {
+        return new File(Folders.configuration() + File.separator + "aikname");        
+    }
+    
+    public static String readFromFile(String inFileName) throws IOException {
+        String outBytes = null;
+        File inFile = new File(inFileName);
+        if( inFile.exists() )
+           outBytes = FileUtils.readFileToString(inFile);
+        return outBytes;
+    }
+    
+    public static void writeToFile(String outFilename, String outBytes) throws IOException {
+        File outFile = new File(outFilename);
+        mkdir(outFile);
+        try(FileOutputStream out = new FileOutputStream(outFile)) { // throws FileNotFoundException
+            IOUtils.write(outBytes, out); // throws IOException
+        }
+    }
+ 
+    private static void mkdir(File file) throws IOException {
+        if (!file.getParentFile().isDirectory()) {
+            if (!file.getParentFile().mkdirs()) {
+                log.warn("Failed to create client installation path!");
+                throw new IOException("Failed to create client installation path!");
+            }
+        }
+    } 
 }
