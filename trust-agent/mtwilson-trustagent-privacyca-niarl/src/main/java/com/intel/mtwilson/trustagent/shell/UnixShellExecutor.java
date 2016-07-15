@@ -1,0 +1,22 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.intel.mtwilson.trustagent.shell;
+
+import com.intel.mtwilson.Folders;
+import java.io.File;
+import java.util.List;
+
+/**
+ *
+ * @author dczech
+ */
+class UnixShellExecutor extends GenericShellExecutor {
+
+    @Override
+    void PrepareCommandOverride(List<String> cmd) {        
+    }
+    
+}

@@ -5,6 +5,7 @@
  */
 package com.intel.mtwilson.trustagent.tpmmodules;
 
+import com.intel.mtwilson.trustagent.shell.ShellExecutor;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.IOException;
@@ -31,12 +32,15 @@ public interface TpmModuleProvider {
     public String getAssetTagIndex() throws IOException, TpmModule.TpmModuleException;
     public String getPcrBanks() throws IOException, TpmModule.TpmModuleException;
     
+    /* release and define require owner authorization */
     public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attributes) throws IOException, TpmModule.TpmModuleException;
     public void nvRelease(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException;
-    public byte[] nvRead(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException;
-    public void nvWrite(byte[] ownerAuth, byte[] indexPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException;
+    /* read and writing can use index auth or higher */
+    public byte[] nvRead(byte[] authPassword, String index, int size) throws IOException, TpmModule.TpmModuleException;
+    public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException;
     public boolean nvIndexExists(String index) throws IOException, TpmModule.TpmModuleException;
-    
+        
+    ShellExecutor getShellExecutor();
     
     
 }

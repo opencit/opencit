@@ -6,6 +6,10 @@
 package com.intel.mtwilson.trustagent.tpmmodules;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.trustagent.shell.CommandLineResult;
+import com.intel.mtwilson.trustagent.shell.ShellExecutor;
+import com.intel.mtwilson.trustagent.shell.ShellExecutorFactory;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
@@ -13,6 +17,7 @@ import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
@@ -83,7 +88,7 @@ public class TpmModule12 implements TpmModuleProvider {
             log.debug("Index does not exist. Creating it...");
             nvDefine(ownerAuth, randPasswd, index, 20, "AUTHWRITE");
         }        
-        nvWrite(ownerAuth, randPasswd, index, assetTagHash);
+        nvWrite(randPasswd, index, assetTagHash);
         log.debug("Provisioned asset tag");
     }
 
@@ -93,7 +98,7 @@ public class TpmModule12 implements TpmModuleProvider {
         log.debug("Reading asset tag for Linux TPM 1.2...");
         if(nvIndexExists(index)) {
             log.debug("Asset Tag Index {} exists", index);
-            return nvRead(ownerAuth, index);
+            return nvRead(ownerAuth, index, 20);
         } else {
             throw new TpmModule.TpmModuleException("Asset Tag has not been provisoined on this TPM");
         }
@@ -116,7 +121,7 @@ public class TpmModule12 implements TpmModuleProvider {
         command.addArgument("-aNvramPassword");
         command.addArgument("-otpmOwnerPass");
         command.addArgument("--permissions=" + attributes);
-        command.addArgument("-s 0x14", false);
+        command.addArgument(String.format("-s 0x%s", Integer.toHexString(size)), false);
         command.addArgument(String.format("-i %s", index), false);
         Result result = ExecUtil.execute(command, variables);
         if (result.getExitCode() != 0) {
@@ -146,23 +151,22 @@ public class TpmModule12 implements TpmModuleProvider {
     }
 
     @Override
-    public void nvWrite(byte[] ownerAuth, byte[] indexPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {
-        String filename = "/tmp/" + UUID.randomUUID().toString();
-        File tmpFile = new File(filename);
+    public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
+        File tmpFile = File.createTempFile("nvwrite", ".data");
         
         FileOutputStream output = new FileOutputStream(tmpFile);
         IOUtils.write(data, output);
         
-        log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f " + filename);
+        log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f " + tmpFile.getPath());
         Map<String, String> variables = new HashMap<>();
-        variables.put("NvramPassword", TpmUtils.byteArrayToHexString(indexPassword));
+        variables.put("NvramPassword", TpmUtils.byteArrayToHexString(authPassword));
         CommandLine command = new CommandLine("/opt/trustagent/bin/tpm_nvwrite");
         command.addArgument("-x");
         command.addArgument("-t");
         command.addArgument("-pNvramPassword");
         command.addArgument(String.format("-i %s", index), false);
         command.addArgument("-f");
-        command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(filename));
+        command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(tmpFile.getPath()));
         Result result = ExecUtil.execute(command, variables);
         if (result.getExitCode() != 0) {
             log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
@@ -177,7 +181,7 @@ public class TpmModule12 implements TpmModuleProvider {
     @Override
     public boolean nvIndexExists(String index) throws IOException, TpmModule.TpmModuleException {
         CommandLine command = new CommandLine("/opt/trustagent/bin/tpm_nvinfo");
-        command.addArgument(String.format("-i %s", index), false);
+        command.addArgument(String.format("-i %s", index), false);        
         Result result = ExecUtil.execute(command);
         if (result.getExitCode() != 0) {
             log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
@@ -192,9 +196,30 @@ public class TpmModule12 implements TpmModuleProvider {
     }
 
     @Override
-    public byte[] nvRead(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public byte[] nvRead(byte[] authPassword, String index, int size) throws IOException, TpmModule.TpmModuleException {
+        File f = File.createTempFile("nvread", ".data");   
+        String[] args = {
+            "-i " + index,
+            "-s 0x" + Integer.toHexString(size),
+            "-f " + f.getName()
+        };
+    
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm_nvread", args, 1);
+        if(result.getReturnCode() != 0) {
+            f.delete();
+            throw new TpmModule.TpmModuleException("TpmModule12.nvRead returned nonzero error", result.getReturnCode());
+        }
+        
+        FileInputStream fis = new FileInputStream(f);
+        byte[] res = IOUtils.toByteArray(fis);
+        f.delete();
+        return res;       
     }
+
+    @Override
+    public ShellExecutor getShellExecutor() {
+        return ShellExecutorFactory.getInstance(ShellExecutorFactory.OS.Unix);
+    }                      
     
     @Override
     public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {

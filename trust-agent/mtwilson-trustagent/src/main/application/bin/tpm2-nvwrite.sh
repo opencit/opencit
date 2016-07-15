@@ -4,20 +4,20 @@
 # *** TABS will cause errors in some linux distributions
 
 if [[ $# < 3 || $# > 4 ]]; then
-  echo -e "usage: \n  $0 <ownerpasswd> <index> <datafile>\n or\n  $0 <ownerpasswd> <index> <datafile> verbose"
+  echo -e "usage: \n  $0 <authpasswd> <index> <datafile>\n or\n  $0 <authpasswd> <index> <datafile> verbose"
   exit 2
 fi
 
-ownerPasswd=$1
+authPasswd=$1
 index=$2
 dataFile=$3
 verbose=$4
 
 if [[ $verbose == "verbose" ]]; then
   echo -n "Write to NV Index ($index)"
-  tpm2_nvwrite -x $index -a 0x40000001 -P $ownerPasswd -f $dataFile -X
+  tpm2_nvwrite -x $index -a 0x40000001 -P $authPasswd -f $dataFile -X
 else
-  tpm2_nvwrite -x $index -a 0x40000001 -P $ownerPasswd -f $dataFile -X > /dev/null
+  tpm2_nvwrite -x $index -a 0x40000001 -P $authPasswd -f $dataFile -X > /dev/null
 fi
 
 if [[ $? != 0 ]]; then

@@ -11,6 +11,9 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.shell.CommandLineResult;
+import com.intel.mtwilson.trustagent.shell.ShellExecutor;
+import com.intel.mtwilson.trustagent.shell.ShellExecutorFactory;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmKeyParams;
@@ -52,17 +55,21 @@ public class TpmModule20 implements TpmModuleProvider {
     @Override
     public void setAssetTag(byte[] ownerAuth, byte[] assetTagHash) throws IOException, TpmModule.TpmModuleException {
         String index = getAssetTagIndex();
-        byte[] randPasswd = RandomUtil.randomByteArray(20);
+        //byte[] randPasswd = ownerAuth; //RandomUtil.randomByteArray(20);
+        
+        // Use ownerAuth for indexPassword
+        
         if(nvIndexExists(index)) {
             log.debug("Index exists. Releasing index...");
             nvRelease(ownerAuth, index);
             log.debug("Creating new index...");
-            nvDefine(ownerAuth, randPasswd, index, 20, "0x02040002");
+            nvDefine(ownerAuth, ownerAuth, index, 20, "0x02040002");
         } else {
             log.debug("Index does not exist. Creating it...");
-            nvDefine(ownerAuth, randPasswd, index, 20, "0x02040002");
+            nvDefine(ownerAuth, ownerAuth, index, 20, "0x02040002");
         }
-        nvWrite(ownerAuth, randPasswd, index, assetTagHash);
+        
+        nvWrite(ownerAuth, index, assetTagHash);
         log.debug("Provisioned asset tag");
     }
 
@@ -72,7 +79,7 @@ public class TpmModule20 implements TpmModuleProvider {
         log.debug("Reading asset tag for Linux TPM 2.0...");
         if(nvIndexExists(index)) {
             log.debug("Asset Tag Index {} exists", index);
-            return nvRead(ownerAuth, index);
+            return nvRead(ownerAuth, index, 20);
         } else {
             throw new TpmModule.TpmModuleException("Asset Tag has not been provisioned on this TPM");
         }
@@ -85,10 +92,15 @@ public class TpmModule20 implements TpmModuleProvider {
 
     @Override
     public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attributes) throws IOException, TpmModule.TpmModuleException {
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-nvdefine.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + 
-                TpmUtils.byteArrayToHexString(indexPassword) + " " + index + " " + size + " " + attributes;
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+        String[] args = {
+            TpmUtils.byteArrayToHexString(ownerAuth),
+            TpmUtils.byteArrayToHexString(indexPassword),
+            index,
+            Integer.toString(size),
+            attributes
+        };
+        
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvdefine.sh", args, 0);
         
         if (result.getReturnCode() != 0) {
             throw new TpmModule.TpmModuleException("TpmModule20.nvDefine returned nonzero error", result.getReturnCode());
@@ -97,9 +109,12 @@ public class TpmModule20 implements TpmModuleProvider {
 
     @Override
     public void nvRelease(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException {
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-nvrelease.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + index;
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+        String[] args = {
+            TpmUtils.byteArrayToHexString(ownerAuth),
+            index
+        };
+        
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvrelease.sh", args, 0);
 
         if (result.getReturnCode() != 0) {
             throw new TpmModule.TpmModuleException("TpmModule20.nvRelease returned nonzero error", result.getReturnCode());
@@ -107,21 +122,34 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public byte[] nvRead(byte[] ownerAuth, String index) throws IOException, TpmModule.TpmModuleException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public byte[] nvRead(byte[] ownerAuth, String index, int size) throws IOException, TpmModule.TpmModuleException {
+        String[] args = {
+            TpmUtils.byteArrayToHexString(ownerAuth),
+            index,
+            Integer.toString(size)
+        };
+        
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvread.sh", args, 1);
+        if(result.getReturnCode() != 0 ) {
+            throw new TpmModule.TpmModuleException("TpmModule20.nvWrite returned nonzero error", result.getReturnCode());
+        }
+        return TpmUtils.hexStringToByteArray(result.getResult(0));
     }
 
     @Override
-    public void nvWrite(byte[] ownerAuth, byte[] indexPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
-        File file = new File("/tmp/" + UUID.randomUUID().toString());
+    public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
+        File file = File.createTempFile("nvwrite", "data");
         
         FileOutputStream output = new FileOutputStream(file);
-        IOUtils.write(data, output);
+        IOUtils.write(data, output);        
         
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-nvwrite.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + index + " " + 
-                EscapeUtil.doubleQuoteEscapeShellArgument(file.getPath());
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+        String[] args  = {
+            TpmUtils.byteArrayToHexString(authPassword),
+            index,
+            EscapeUtil.doubleQuoteEscapeShellArgument(file.getPath())
+        };
+        
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvwrite.sh", args, 0);
 
         file.delete();
         
@@ -131,10 +159,11 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public boolean nvIndexExists(String index) throws IOException, TpmModule.TpmModuleException {
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-nvindex-exists.sh" + " " + index;
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+    public boolean nvIndexExists(String index) throws IOException, TpmModule.TpmModuleException {                        
+        String[] args = {
+            index
+        };
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvindex-exists.sh", args, 1);
 
         if (result.getReturnCode() != 0) {
             throw new TpmModule.TpmModuleException("TpmModule20.nvRelease returned nonzero error", result.getReturnCode());
@@ -142,67 +171,11 @@ public class TpmModule20 implements TpmModuleProvider {
         
         return "1".equals(result.getResult(0));
     }
-    
-    private static class CommandLineResult {
-        private int returnCode = 0;
-        private String [] results = null;
-        private String returnOutput = null;
 
-        public String getReturnOutput() {
-            return returnOutput;
-        }
-
-        public void setReturnOutput(String returnOutput) {
-            this.returnOutput = returnOutput;
-        }
-        /**
-         * 
-         * @param newReturnCode
-         * @param numResults
-         */
-        public CommandLineResult(int newReturnCode, int numResults){
-                returnCode = newReturnCode;
-                results = new String[numResults];
-        }
-        /**
-         * 
-         * @return
-         */
-        public int getReturnCode(){
-                return returnCode;
-        }
-        /**
-         * 
-         * @param index
-         * @param result
-         * @throws IllegalArgumentException
-         */
-        public void setResult(int index, String result)
-                        throws IllegalArgumentException {
-                if (index + 1 > results.length)
-                        throw new IllegalArgumentException("Array index out of bounds.");
-                results[index] = result;
-        }
-        /**
-         * 
-         * @return
-         */
-        public int getResultCount(){
-                return results.length;
-        }
-        /**
-         * 
-         * @param index
-         * @return
-         * @throws IllegalArgumentException
-         */
-        public String getResult(int index)
-                        throws IllegalArgumentException {
-                if (index + 1 > results.length)
-                        throw new IllegalArgumentException("Array index out of bounds.");
-                return results[index];
-        }
-    }
+    @Override
+    public ShellExecutor getShellExecutor() {
+        return ShellExecutorFactory.getInstance(ShellExecutorFactory.OS.Unix);
+    }        
     
     @Override
     public byte[] getCredential(byte[] ownerAuth, String credType) throws TpmModule.TpmModuleException, IOException {
@@ -241,21 +214,23 @@ public class TpmModule20 implements TpmModuleProvider {
     }
 
     @Override
-    public void takeOwnership(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-takeownership.sh" + " " + TpmUtils.byteArrayToHexString(ownerAuth);
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 0);
+    public void takeOwnership(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {                        
+        String[] args = {
+            TpmUtils.byteArrayToHexString(ownerAuth)
+        };
+        
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-takeownership.sh", args, 0);
   
-        if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.takeOwnership returned nonzero error", result.getReturnCode());
-        return;
+        if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.takeOwnership returned nonzero error", result.getReturnCode());        
     }
 
     @Override
-    public byte[] getEndorsementKeyModulus(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-readek" + " " + TpmUtils.byteArrayToHexString(ownerAuth) + " " + "RSA";
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 2);
+    public byte[] getEndorsementKeyModulus(byte[] ownerAuth, byte[] nonce) throws IOException, TpmModule.TpmModuleException {                
+        String args[] = {
+            TpmUtils.byteArrayToHexString(ownerAuth),
+            "RSA"
+        };
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-readek", args, 2);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.getEndorsementKeyModulus returned nonzero error", result.getReturnCode());
         
@@ -313,15 +288,16 @@ public class TpmModule20 implements TpmModuleProvider {
         /* tpm2-createak.sh <ownerpasswd> <akpasswd> <ekhandle> <aktype>
         output: <akhandle> <akpubkey> <akname>
         */
-
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-createak.sh" 
-                + " " + TpmUtils.byteArrayToHexString(ownerAuth) 
-                + " " + TpmUtils.byteArrayToHexString(keyAuth) 
-                + " " + ekHandle
-                //+ " " + "0x81010000"  //hard code for now since we have problem to save the EK earlier.
-                + " " + "RSA";
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 3);
+       
+        String[] args = {
+            TpmUtils.byteArrayToHexString(ownerAuth),
+            TpmUtils.byteArrayToHexString(keyAuth),
+            ekHandle,
+            //"0x81010000",
+            "RSA"
+        };
+        
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-createak.sh", args, 3);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.collateIdentityRequest returned nonzero error", result.getReturnCode());
         
@@ -348,17 +324,18 @@ public class TpmModule20 implements TpmModuleProvider {
         String akName = TAconfig.getAikName();
         
         log.debug("activateIdentity2 AIK Handle : {}", akHandle);
+       
+        String[] args = {
+            TpmUtils.byteArrayToHexString(ownerAuth),
+            TpmUtils.byteArrayToHexString(keyAuth),
+            akHandle,
+            ekHandle,
+            TpmUtils.byteArrayToHexString(asymCaContents)
+        };
         
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-activatecredential.sh"
-                + " " + TpmUtils.byteArrayToHexString(ownerAuth)
-                + " " + TpmUtils.byteArrayToHexString(keyAuth)
-                + " " + akHandle
-                + " " + ekHandle
-                + " " + TpmUtils.byteArrayToHexString(asymCaContents);               
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-activatecredential.sh", args, 1);
         
-        if(result.returnCode != 0) {
+        if(result.getReturnCode() != 0) {
             throw new TpmModule.TpmModuleException("Tpm2 activatecredential returned non zero error");
         }
         
@@ -384,88 +361,11 @@ public class TpmModule20 implements TpmModuleProvider {
     
     @Override
     public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {
-        final String cmdPath = Folders.application() + File.separator + "bin";
-        String cmdToexecute = cmdPath + File.separator + "tpm2-getpcrbanks";
-        CommandLineResult result = executeTpmCommand(cmdToexecute, 1);
+        String[] args = {};
+        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-getpcrbanks", args, 1);
   
         if (result.getReturnCode() != 0) throw new TpmModule.TpmModuleException("TpmModule20.getPcrBanks returned nonzero error", result.getReturnCode());
         log.debug("returned pcr banks trimmed: {}", result.getReturnOutput().trim());
         return result.getReturnOutput().trim();
-    }
-    
-    private static CommandLineResult executeTpmCommand(String cmdArgs, int returnCount)
-                    throws IOException {
-
-        int returnCode;
-        final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ;
-        final String newExeName = "";
-
-        // Parse the args parameter to populate the environment variables array
-        //HashMap<String,String> environmentVars = new HashMap<String, String>();
-        
-        String[] params = cmdArgs.split(" ");
-        //HashMap<String,String> environmentVars = new HashMap<String, String>();
-        List<String> cmd = new ArrayList<String>();
-        //cmd.add(newTpmModuleExePath + File.separator + newExeName);
-
-        for(int loop = 0; loop < params.length; loop++) {
-            String param = params[loop];
-            cmd.add(param);
-        }   
-        // check the parameters
-        for (String temp: cmd) {
-            log.debug(temp);
-        }
-      
-        /* create the process to run */
-        ProcessBuilder pb = new ProcessBuilder(cmd);
-        //pb.environment().putAll(environmentVars);
-        Process p = pb.start();
-        //Process p = Runtime.getRuntime().exec(commandLine);
-        String line = "";
-        if (returnCount != 0){
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String newLine;
-            try {
-                    while ((newLine = input.readLine()) != null) {
-                            line = newLine;
-                            log.debug("executeTPM output line: {}", line);
-                    }
-                    log.debug("executeTPM last line: {}", line);
-
-                    input.close();
-            } catch (Exception e) {
-                    e.printStackTrace();
-            }
-            finally{
-                    if (input != null)
-                            input.close();
-            }
-        }
-        
-        //do a loop to wait for an exit value
-        try {
-            returnCode = p.waitFor();
-        }
-        catch(InterruptedException e) {
-            log.error("Interrupted while waiting for return value");
-            log.debug("Interrupted while waiting for return value", e);
-            returnCode = -1;
-        }
-
-        log.debug("Return code: " + returnCode);
-
-        CommandLineResult toReturn = new CommandLineResult(returnCode, returnCount);
-        toReturn.setReturnOutput(line);
-        if ((returnCode == 0)&&(returnCount != 0)) {
-                StringTokenizer st = new StringTokenizer(line);
-            if( st.countTokens() < returnCount ) {
-                log.debug("executeTPMCommand with return count {} but only {} tokens are available; expect java.util.NoSuchElementException", returnCount, st.countTokens());
-            }
-            for (int i = 0; i < returnCount; i++) {
-                toReturn.setResult(i, st.nextToken());
-            }
-        }
-        return toReturn;
-    }
+    }      
 }
