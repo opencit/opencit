@@ -79,6 +79,7 @@ abstract class GenericShellExecutor implements ShellExecutor {
         log.debug("Return code: " + returnCode);
         
         CommandLineResult toReturn = new CommandLineResult(returnCode, returnCount);
+        toReturn.setReturnOutput(line);
         if ((returnCode == 0) && (returnCount != 0)) {
             StringTokenizer st = new StringTokenizer(line);
             if (st.countTokens() < returnCount) {
