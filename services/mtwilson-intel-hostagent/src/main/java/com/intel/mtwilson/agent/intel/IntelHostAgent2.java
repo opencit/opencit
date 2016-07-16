@@ -164,6 +164,8 @@ public class IntelHostAgent2 implements HostAgent {
         // now set some state we need for getHostAttestationReport
         vmmName = host.VMM_Name;
         host.TpmVersion = hostInfo.getTpmVersion();
+        host.PcrBanks = hostInfo.getPcrBanks();
+        log.debug("Received host pcrbanks: {}", host.PcrBanks);
         return host;
     }
 
