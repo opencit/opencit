@@ -24,8 +24,8 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 #print the hex
-echo "$result" | sed -n 2p
-echo 
+echo "$result" | sed -n 3p | tr -d " \n"
+echo
 
 if [[ $verbose == "verbose" ]]; then
   echo "done. Read $size octets @ $index"
