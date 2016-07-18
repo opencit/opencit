@@ -160,12 +160,15 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
             Tpm2Credential outCred = Tpm2Utils.makeCredential(pubEk, Tpm2Algorithm.Symmetric.AES, 128, Tpm2Algorithm.Hash.SHA256, key, aikName);
             asymBlob = TpmUtils.concat(outCred.getCredential(), outCred.getSecret());
         } else {
+            // this can't be SHA256 because this is for TPM 1.2
             asymBlob = TpmUtils.TCGAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
         }
             
         byte[] symBlob = TpmUtils.concat(TpmUtils.concat(credSize, keyParms.toByteArray()), encryptedBlob);
         //return TpmUtils.concat(asymBlob, symBlob);                        
         //for windows to return EK_BLOB. append the encrypted EK_BLOB to the existing byte stream
+        
+        // another 1.2 specific structure
         byte[] ekBlob = returnEKBlob(key, TpmUtils.sha1hash(aik.toByteArray()));
         if (ekBlob == null) {
             log.debug("ekBlob is null :(");
