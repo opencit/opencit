@@ -292,7 +292,7 @@ public class TpmUtils {
         certGen.setNotAfter(expiry.getTime());
         certGen.setSubjectDN(new X500Principal("CN=" + caName));
         certGen.setPublicKey(pubKey);
-        certGen.setSignatureAlgorithm("SHA256SHAwithRSA");
+        certGen.setSignatureAlgorithm("SHA256withRSA");
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
         X509Certificate caCert = certGen.generate(privKey);

@@ -45,7 +45,7 @@ public class TrustagentConfiguration {
     // provide the username and password when connecting to Trust Agent.
     
     public final static String MTWILSON_API_URL = "mtwilson.api.url";
-    public final static String MTWILSON_TLS_CERT_SHA1 = "mtwilson.tls.cert.sha1";
+    public final static String MTWILSON_TLS_CERT_SHA256 = "mtwilson.tls.cert.sha256";
     public final static String MTWILSON_API_USERNAME = "mtwilson.api.username"; // NOTE: MUST NOT STORE THE VALUE
     public final static String MTWILSON_API_PASSWORD = "mtwilson.api.password"; // NOTE: MUST NOT STORE THE VALUE
     public final static String TPM_OWNER_SECRET = "tpm.owner.secret"; // 20 bytes hex (40 hex digits)
@@ -105,7 +105,7 @@ public class TrustagentConfiguration {
      * @return 
      */
     public List<String> getMtWilsonTlsCertificateFingerprints() {        
-        String fingerprintCsv = conf.get(MTWILSON_TLS_CERT_SHA1, null);
+        String fingerprintCsv = conf.get(MTWILSON_TLS_CERT_SHA256, null);
         if( fingerprintCsv == null || fingerprintCsv.isEmpty() ) {
             return Collections.EMPTY_LIST;
         }
@@ -329,8 +329,8 @@ public class TrustagentConfiguration {
         return new File(Folders.log() + File.separator + "measurement.xml");
     }
 
-    public String getMtwilsonTlsPolicyCertificateSha1() {
-        return conf.get("mtwilson.tls.cert.sha1", null);
+    public String getMtwilsonTlsPolicyCertificateSha256() {
+        return conf.get("mtwilson.tls.cert.sha256", null);
     }
     
     public Properties getMtWilsonClientProperties() {
@@ -340,8 +340,8 @@ public class TrustagentConfiguration {
         properties.setProperty("mtwilson.api.password", getMtWilsonApiPassword());
         properties.setProperty("mtwilson.api.tls.policy.certificate.keystore.file", getTrustagentKeystoreFile().getAbsolutePath());
         properties.setProperty("mtwilson.api.tls.policy.certificate.keystore.password", getTrustagentKeystorePassword());
-        properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", getMtwilsonTlsPolicyCertificateSha1());
-        properties.setProperty("mtwilson.tls.cert.sha1", getMtwilsonTlsPolicyCertificateSha1());
+        properties.setProperty("mtwilson.api.tls.policy.certificate.sha256", getMtwilsonTlsPolicyCertificateSha256());
+        properties.setProperty("mtwilson.tls.cert.sha256", getMtwilsonTlsPolicyCertificateSha256());
         return properties;
     }
     
