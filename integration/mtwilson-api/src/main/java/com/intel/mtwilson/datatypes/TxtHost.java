@@ -132,7 +132,8 @@ public class TxtHost {
      * @throws MalformedURLException 
      */
     public String getAddOn_Connection_String() throws MalformedURLException {
-        ConnectionString connStr = null;
+        //#5822: Null pointer dereference of 'new ConnectionString(...).hostname' where null comes from constant
+        ConnectionString connStr = new ConnectionString();
         if( connectionString == null) {
             if (ipAddress != null && port != null) {
                 // for backwards compatibility with cilents that don't submit a connection string for intel hosts
@@ -159,7 +160,8 @@ public class TxtHost {
             }
         }
         // Now return back the properly formatted connection string.
-        if( connStr != null ) 
+        //#6356: Comparing strings "" and 'connStr.getAddOnConnectionString()' using equals(), instead of length() == 0
+        if( connStr.getHostname() != null && connStr.getAddOnConnectionString().length() != 0 ) 
             return connStr.getConnectionStringWithPrefix();
         else 
             return null;        

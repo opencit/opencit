@@ -291,13 +291,13 @@ public class HostInfoCmdWin implements ICommand {
             log.error("Error executing the [wmic bios get manufacturer]");
         }   
     }
-
-    private void getVmmAndVersion() throws TAException, IOException {
-        context.setVmmName("Windows Hyper-V");
-        context.setVmmVersion("1.0");
-        log.debug("VMM Name: " + context.getVmmName());
-        log.debug("VMM Version: " + context.getVmmVersion());
-    }
+    //#5817: Private method 'getVmmAndVersion' is unused.
+    //private void getVmmAndVersion() throws TAException, IOException {
+    //    context.setVmmName("Windows Hyper-V");
+    //    context.setVmmVersion("1.0");
+    //    log.debug("VMM Name: " + context.getVmmName());
+    //    log.debug("VMM Version: " + context.getVmmVersion());
+    //}
 
     /**
      * Retrieves the CPU ID of the processor. This is used to identify the processor generation.

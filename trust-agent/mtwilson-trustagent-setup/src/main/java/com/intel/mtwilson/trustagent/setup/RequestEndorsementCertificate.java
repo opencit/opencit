@@ -225,8 +225,9 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         if (IdentityOS.isWindows()) { 
             /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
             try {
-                Tpm tpm = new Tpm();
-                ekCertBytes = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                //#5823: Call to static method 'com.intel.mtwilson.trustagent.tpmmodules.Tpm.getTpm' via instance reference.
+                //Tpm tpm = new Tpm();
+                ekCertBytes = Tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
                 log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
                 ekCert = X509Util.decodeDerCertificate(ekCertBytes);
             } catch (TpmModuleException e) {

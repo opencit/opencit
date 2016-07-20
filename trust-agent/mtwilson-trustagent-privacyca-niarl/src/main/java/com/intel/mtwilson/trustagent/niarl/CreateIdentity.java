@@ -67,8 +67,9 @@ public class CreateIdentity implements Configurable, Runnable {
             byte[] ekCert;
             if (IdentityOS.isWindows()) { 
                 /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
-                Tpm tpm = new Tpm();
-                ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                //#5815: Call to static method 'com.intel.mtwilson.trustagent.tpmmodules.Tpm.getTpm' via instance reference.
+               //Tpm tpm = new Tpm();
+                ekCert = Tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
             } else
                 ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
             TpmIdentityRequest encryptedEkCert = new TpmIdentityRequest(ekCert, (RSAPublicKey) privacy.getPublicKey(), false);
@@ -139,8 +140,9 @@ public class CreateIdentity implements Configurable, Runnable {
                 byte[] asymEKblob = new byte[256];
                 int index = 256 + symlength;
                 System.arraycopy(challenge, index, asymEKblob, 0, 256);
-                Tpm tpm = new Tpm();
-                HashMap<String, byte[]> results = tpm.getTpm().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
+                //#5816: Call to static method 'com.intel.mtwilson.trustagent.tpmmodules.Tpm.getTpm' via instance reference.
+                //Tpm tpm = new Tpm();
+                HashMap<String, byte[]> results = Tpm.getTpm().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
                 decrypted1 = results.get("aikcert");
             }
             

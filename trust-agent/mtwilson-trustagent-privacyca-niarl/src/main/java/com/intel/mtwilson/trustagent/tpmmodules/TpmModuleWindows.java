@@ -302,7 +302,8 @@ public class TpmModuleWindows implements TpmModuleProvider {
                     throws IOException {
 
         int returnCode;
-        final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
+        //#5814: Variable 'newTpmModuleExePath' was never read after being assigned.
+        //final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
         final String newExeName = "TPMTool.exe";
 
         // Parse the args parameter to populate the environment variables array

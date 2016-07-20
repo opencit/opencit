@@ -62,8 +62,10 @@ public class TblSamlAssertionJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            TblSamlAssertion persistentTblSamlAssertion = em.find(TblSamlAssertion.class, tblSamlAssertion.getId());
-            TblHosts hostIdOld = persistentTblSamlAssertion.getHostId();
+            //#6358: Variable 'persistentTblSamlAssertion' was never read after being assigned.
+            //TblSamlAssertion persistentTblSamlAssertion = em.find(TblSamlAssertion.class, tblSamlAssertion.getId());
+            //#5821: Variable 'hostIdOld' was never read after being assigned
+            //TblHosts hostIdOld = persistentTblSamlAssertion.getHostId();
             TblHosts hostIdNew = tblSamlAssertion.getHostId();
             if (hostIdNew != null) {
                 hostIdNew = em.getReference(hostIdNew.getClass(), hostIdNew.getId());
