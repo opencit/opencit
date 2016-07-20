@@ -17,6 +17,15 @@ import org.apache.commons.lang.StringUtils;
 public class TpmQuoteRequest {
     private byte[] nonce; // must be 20 bytes
     private int[] pcrs; // variable-length array of pcr index numbers, each one 0-23 
+    private String pcrbanks; //the selected PCR banks (SHA1, SHA256, or both) for TPM 2.0
+
+    public String getPcrbanks() {
+        return pcrbanks;
+    }
+
+    public void setPcrbanks(String pcrBanks) {
+        this.pcrbanks = pcrBanks;
+    }
     
     public TpmQuoteRequest() {
         this.nonce = null;

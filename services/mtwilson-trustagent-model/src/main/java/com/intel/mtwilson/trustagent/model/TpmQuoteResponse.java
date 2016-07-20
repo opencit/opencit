@@ -27,6 +27,7 @@ public class TpmQuoteResponse {
     public byte[] quote;
     public String eventLog; // base64-encoded xml ....
     public String tcbMeasurement;
+    public String selectedPcrBanks;
     
     // added for assetTag attestation based on sha1(nonce | assetTag
     public boolean isTagProvisioned;

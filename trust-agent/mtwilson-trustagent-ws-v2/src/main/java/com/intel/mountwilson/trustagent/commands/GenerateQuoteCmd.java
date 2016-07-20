@@ -137,12 +137,18 @@ public class GenerateQuoteCmd implements ICommand {
             log.debug("TPM version before calling: {} ", tpmVersion);
             if (tpmVersion.equals("2.0")) {
                 try {
+                    String pcrBanks = context.getSelectedPcrBanks();
+                    String algToQuote = "0x04"; //be default set to sha1 PCR bank
+                    if (pcrBanks!=null && pcrBanks.equals("SHA256"))
+                        algToQuote = "0x0B";                    
+                    log.debug("Selected pcrBanks to quote {}", algToQuote);
+                    
                     /* 1st: get pcrs - tpm2_listpcrs -g 0x4 -o pcrs.out
                      *      This commmand returns specified PCR bank pcr values (all 24 pcrs in the bank)
                     */
                     CommandLine command1 = new CommandLine("tpm2_listpcrs");
                     command1.addArgument("-g");
-                    command1.addArgument("0x4");
+                    command1.addArgument(algToQuote);
                     command1.addArgument("-o");
                     command1.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getPcrsFileName()));
                     Result result1 = ExecUtil.execute(command1);
@@ -164,7 +170,7 @@ public class GenerateQuoteCmd implements ICommand {
                     command.addArgument("-P");
 	            command.addArgument(identityAuthKey);
                     command.addArgument("-g");
-                    command.addArgument("0x4");
+                    command.addArgument(algToQuote);
                     command.addArgument("-q");
                     command.addArgument(TpmUtils.byteArrayToHexString(nonce));
                     command.addArgument("-l");
@@ -196,8 +202,8 @@ public class GenerateQuoteCmd implements ICommand {
                     log.debug("quote result: {}", quoteResult.toString());
                     
                     byte[] combined = new byte[pcrs.length + quoteResult.length];
-                    System.arraycopy(pcrs, 0, combined, 0, pcrs.length);
-                    System.arraycopy(quoteResult, 0, combined, pcrs.length, quoteResult.length);
+                    System.arraycopy(quoteResult, 0, combined, 0, quoteResult.length);
+                    System.arraycopy(pcrs, 0, combined, quoteResult.length, pcrs.length);
                     context.setTpmQuote(combined);
                     
                 } catch (IOException ex) {
