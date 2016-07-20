@@ -5,6 +5,7 @@ klocworkProject="dcg_security-mtwilson"
 klocworkServerUrl="https://klocwork-jf18.devtools.intel.com:8160"
 
 generateBuildSpecs() {
+  ant ready clean
   kwmaven --output "${buildSpecsDirectory}/mtwilson.out" -DskipTests=true install
   (cd installers/AttestationServiceLinuxInstaller/src/files/aikqverify && make clean)
   (cd installers/AttestationServiceLinuxInstaller/src/files/aikqverify && kwinject --output "${buildSpecsDirectory}/aikqverify.out" make)
