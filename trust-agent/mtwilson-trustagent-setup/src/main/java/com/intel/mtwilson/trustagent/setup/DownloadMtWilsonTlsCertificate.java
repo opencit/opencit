@@ -7,6 +7,7 @@ package com.intel.mtwilson.trustagent.setup;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.AnyProtocolSelector;
 import com.intel.mtwilson.setup.AbstractSetupTask;
@@ -63,7 +64,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
         }
         approved = trustagentConfiguration.getMtWilsonTlsCertificateFingerprints();
         if( approved.isEmpty() ) {
-            configuration("One or more approved TLS certificate fingerprints must be set in MTWILSON_TLS_CERT_SHA1; comma-separated values ok");
+            configuration("One or more approved TLS certificate fingerprints must be set in MTWILSON_TLS_CERT_SHA256; comma-separated values ok");
         }
         keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
     }
@@ -82,7 +83,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
                 // current certs
                 ArrayList<String> present = new ArrayList<>();
                 for(X509Certificate certificate : certificates) {
-                    String fingerprint = Sha1Digest.digestOf(certificate.getEncoded()).toHexString();
+                    String fingerprint = Sha256Digest.digestOf(certificate.getEncoded()).toHexString();
                     present.add(fingerprint);
                 }
                 if( !containsAny(present, approved) ) {
@@ -110,7 +111,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
         ArrayList<X509Certificate> rejected = new ArrayList<>();
         ArrayList<X509Certificate> accepted = new ArrayList<>();
         for(X509Certificate certificate : certificates) {
-            String fingerprint = Sha1Digest.digestOf(certificate.getEncoded()).toHexString();
+            String fingerprint = Sha256Digest.digestOf(certificate.getEncoded()).toHexString();
             if( approved.contains(fingerprint)) {
                 log.debug("Server certificate {} is approved", fingerprint);
                 keystore.addTrustedSslCertificate(certificate, fingerprint);
@@ -125,7 +126,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
             keystore.save();
         }
         if( accepted.isEmpty() && !rejected.isEmpty() ) {
-            log.warn("All server certificates were rejected; check MTWILSON_TLS_CERT_SHA1");
+            log.warn("All server certificates were rejected; check MTWILSON_TLS_CERT_SHA256");
         }
     }
     
