@@ -113,10 +113,10 @@ int main (int ac, char **av)
 	TPM2B_NAME	tpm2b_name;
 	TPM2B_DATA	tpm2b_data;
 	UINT32		pcrBankCount;
-	TPMS_PCR_SELECTION	pcr_selection[MAX_BANKS]; //
+	TPMS_PCR_SELECTION	pcr_selection[MAX_BANKS]; 
 	TPM2B_DIGEST	tpm2b_digest;
 	TPMT_SIGNATURE	tpmt_signature;
-	BYTE 		pcrConcat[SHA256_SIZE * 24];
+	BYTE 		pcrConcat[SHA256_SIZE * 24 * 3]; //allocate 3 SHA256 banks memory to accomodate possible combination
 	BYTE		pcrsDigest[SHA256_SIZE];
 	char		*chalfile = NULL;
 	int			pcr;
