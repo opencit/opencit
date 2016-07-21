@@ -197,13 +197,15 @@ public class JpaPolicyReader {
         
         //PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR23.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
         /* set asset tag PCR to 23 if it is Windows */
-        int assetTagPCR = 22;
+        
         if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
-            assetTagPCR = 23;          
+            //assetTagPCR = ;          
             AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
             tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagRule);   
-        } else {          
+        } else {       
+            //#5829: Variable 'assetTagPCR' was never read after being assigned.
+            int assetTagPCR = 22;            
             PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(assetTagPCR, Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
         
             tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());

@@ -195,9 +195,10 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
             byte [] loczero = new byte [1];
             loczero[0] = (byte)0x01; //TPM_LOC_ZERO
             System.arraycopy(loczero, 0, activationBlob, index, 1);
-            index = index + 1;
+            //#5830: Variable 'index' was never read after being assigned.
+            //index = index + 1;
             // the digest is 0, so no need to copy
-            index = index + 20;
+            //index = index + 20;
             log.debug("Activation blob size: " + cbActivation);
             log.debug("Activatoin blob: " + TpmUtils.byteArrayToHexString(activationBlob));
             return activationBlob;

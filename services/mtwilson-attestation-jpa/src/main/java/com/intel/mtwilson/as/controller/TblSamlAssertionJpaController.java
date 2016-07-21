@@ -71,7 +71,7 @@ public class TblSamlAssertionJpaController implements Serializable {
                 hostIdNew = em.getReference(hostIdNew.getClass(), hostIdNew.getId());
                 tblSamlAssertion.setHostId(hostIdNew);
             }
-            tblSamlAssertion = em.merge(tblSamlAssertion);
+            //tblSamlAssertion = em.merge(tblSamlAssertion);
 //            if (hostIdOld != null && !hostIdOld.equals(hostIdNew)) {
 //                hostIdOld.getTblSamlAssertionCollection().remove(tblSamlAssertion);
 //                hostIdOld = em.merge(hostIdOld);

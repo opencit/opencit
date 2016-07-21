@@ -218,7 +218,10 @@ public class TADataContext {
     }
 
     public TpmQuoteResponse getTpmQuoteResponse() {
-        return tpmQuoteResponse;
+        if(tpmQuoteResponse != null)
+            return tpmQuoteResponse;
+        else
+            return null;
     }
 
     public ErrorCode getErrorCode() {
