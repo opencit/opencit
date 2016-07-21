@@ -217,10 +217,11 @@ public class HostInfoCmdWin implements ICommand {
         }
     }
         
-    private String trim(String text) {
-        if( text == null ) { return null; }
-        return text.trim();
-    }
+    //#5841: Private method 'trim' is unused.
+    //private String trim(String text) {
+    //    if( text == null ) { return null; }
+    //    return text.trim();
+    //}
 
     /*
      * Sample response of dmidecode -s bios-vendor -> Intel Corp. Sample

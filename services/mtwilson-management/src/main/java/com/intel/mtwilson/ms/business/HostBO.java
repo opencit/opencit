@@ -653,8 +653,8 @@ public class HostBO {
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
                 hostConfigObj.setOverWriteWhiteList(false);
                 hostConfigObj.setRegisterHost(false);
-
-                if (vmmPCRs == WINDOWS_PCRs) {
+                //#5840: Comparing strings 'vmmPCRs' and 'WINDOWS_PCRs' with ==
+                if (vmmPCRs.equals(WINDOWS_PCRs)) {
                     hostConfigObj.setBiosPCRs(WINDOWS_BIOS_PCRs);
                 } else {
                     hostConfigObj.setBiosPCRs(BIOS_PCRs);
@@ -1754,7 +1754,8 @@ public class HostBO {
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         List<X509Certificate> privacyCaCerts;
-        File pcaListPemFile = null;
+        //#5837: Variable 'pcaListPemFile' was never read after being assigned.
+        File pcaListPemFile;
         try {
             pcaListPemFile = ResourceFinder.getFile("PrivacyCA.list.pem");
             try (InputStream privacyCaIn = new FileInputStream(pcaListPemFile)) {
@@ -1771,7 +1772,8 @@ public class HostBO {
         catch(FileNotFoundException e) {
             log.debug("Cannot load external certificates from PrivacyCA.list.pem: {}", e.getMessage());
         }
-        File pcaPemFile = null;
+        //#5838: Variable 'pcaPemFile' was never read after being assigned.
+        File pcaPemFile;
         try {
             pcaPemFile = ResourceFinder.getFile("PrivacyCA.pem");
             try (InputStream privacyCaIn = new FileInputStream(pcaPemFile)) {
