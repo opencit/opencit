@@ -37,7 +37,7 @@ generateBuildSpecs() {
 }
 
 buildProject() {
-  kwbuildproject --url "${klocworkServerUrl}/${klocworkProject}" --tables-directory "${tablesDirectory}" --force "${buildSpecsDirectory}/mtwilson.out" "${buildSpecsDirectory}/aikqverify.out" "${buildSpecsDirectory}/aikqverify_services.out" "${buildSpecsDirectory}/hex2bin_trustagent.out" "${buildSpecsDirectory}/aikquote_trustagent.out" "${buildSpecsDirectory}/niarl_plain.out" "${buildSpecsDirectory}/niarl_sha1.out" "${buildSpecsDirectory}/hex2bin.out" "${buildSpecsDirectory}/tpm_createkey.out" "${buildSpecsDirectory}/tpm_cit_commands.out"
+  kwbuildproject --url "${klocworkServerUrl}/${klocworkProject}" --tables-directory "${tablesDirectory}" --force "${buildSpecsDirectory}/mtwilson.out" "${buildSpecsDirectory}/aikqverify.out" "${buildSpecsDirectory}/aikqverify_services.out" "${buildSpecsDirectory}/hex2bin_trustagent.out" "${buildSpecsDirectory}/aikquote_trustagent.out" "${buildSpecsDirectory}/niarl_plain.out" "${buildSpecsDirectory}/niarl_sha1.out" "${buildSpecsDirectory}/hex2bin.out" "${buildSpecsDirectory}/tpm_cit_commands.out"
 }
 
 uploadResults() {
