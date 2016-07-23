@@ -812,7 +812,7 @@ tagent setup update-extensions-cache-file --force 2>/dev/null
 # NOTE: only the output from start-http-server is redirected to the logfile;
 #       the stdout from the setup command will be displayed
 tagent setup
-tagent start >>$logfile  2>&1
+#tagent start >>$logfile  2>&1
 
 # optional: register tpm password with mtwilson so pull provisioning can
 #           be accomplished with less reboots (no ownership transfer)
