@@ -18,7 +18,8 @@
  */
 int hex2bytea( const char *a_pszHex, BYTE **a_pDecoded, int *a_iDecodedLen ) {
         BYTE *pDecoded;
-        int iDecodedLen, iByte, i;
+        unsigned int iByte;
+        int iDecodedLen, i;
         int iHexLen = strlen(a_pszHex);
         if( iHexLen % 2 != 0 ) {
                 *a_pDecoded = NULL;
