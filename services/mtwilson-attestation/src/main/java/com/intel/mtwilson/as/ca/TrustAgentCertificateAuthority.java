@@ -283,19 +283,14 @@ public class TrustAgentCertificateAuthority {
     
     private RsaCredentialX509 getCA(String password) throws CryptographyException, FileNotFoundException {
         try {
+            
+            if (keystore == null)
+                throw new KeyStoreException();
+            
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(keyAlias, password);
             return credential;
         }
-        catch(NoSuchAlgorithmException e) {
-            throw new CryptographyException("Cannot load CA Cert from keystore", e);
-        }
-        catch(UnrecoverableEntryException e) {
-            throw new CryptographyException("Cannot load CA Cert from keystore", e);
-        }
-        catch(KeyStoreException e) {
-            throw new CryptographyException("Cannot load CA Cert from keystore", e);
-        }
-        catch(CertificateEncodingException e) {
+        catch(NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
             throw new CryptographyException("Cannot load CA Cert from keystore", e);
         }
     }
