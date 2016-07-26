@@ -82,13 +82,13 @@ static int parse(const int aOpt, const char *aArg)
 		keyType = TSS_KEY_TYPE_SIGNING;
 		break;
 	case 'k':
-		strncpy_s(filenamePrivatekeyblobOutput, aArg, PATH_MAX);
+		strncpy(filenamePrivatekeyblobOutput, aArg, PATH_MAX);
 		break;
 	case 'p':
-		strncpy_s(filenamePublickeyOutput, aArg, PATH_MAX);
+		strncpy(filenamePublickeyOutput, aArg, PATH_MAX);
 		break;
 	case 'q':
-		strncpy_s(keypassword, aArg, PATH_MAX);
+		strncpy(keypassword, aArg, PATH_MAX);
 		keyAuth = TSS_KEY_AUTHORIZATION;
 		break;
 	case 'Q':
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
                         fprintf(stderr, "%s is not defined\n", keypassword);
                         goto out_close;
                 }
-				strncpy_s(keypassword, keypasswordEnv, PATH_MAX);
+				strncpy(keypassword, keypasswordEnv, PATH_MAX);
 	  }
 	  if( decodeHexPassword ) {
 			if( hex2bytea(keypassword, &keypasswordBytes, &lengthKeypasswordBytes) != 0 ) {
