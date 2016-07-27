@@ -456,7 +456,7 @@ public class TpmIdentityRequest {
 			OAEPParameterSpec oaepSpec = new OAEPParameterSpec("Sha1", "MGF1", MGF1ParameterSpec.SHA1, new PSource.PSpecified("TCPA".getBytes()));
 			asymCipher.init(Cipher.PRIVATE_KEY, privCaKey, oaepSpec);
 			asymCipher.update(asymBlob);
-			byte[] temparray = null;
+			byte[] temparray;
 			try {
 				temparray = asymCipher.doFinal();
 			} catch (BadPaddingException e) { //<- TrouSerS does not use an OAEP parameter string of "TCPA", per 1.1b spec. This results in a BadPaddingException -- try again without!

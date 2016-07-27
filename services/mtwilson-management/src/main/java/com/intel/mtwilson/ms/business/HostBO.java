@@ -620,14 +620,13 @@ public class HostBO {
      * @return : true if the white list is configured successfully.
      */
     public boolean configureWhiteListFromHost(TxtHostRecord gkvHost) throws ApiException {
-        WhitelistConfigurationData hostConfigObj = null;
         boolean configStatus;
 
         try {
            
             if (gkvHost != null) {
 
-                hostConfigObj = new WhitelistConfigurationData();                
+                WhitelistConfigurationData hostConfigObj = new WhitelistConfigurationData();                
                 String vmmPCRs;                
                 TxtHost tempHostObj = new TxtHost(gkvHost);
                 
