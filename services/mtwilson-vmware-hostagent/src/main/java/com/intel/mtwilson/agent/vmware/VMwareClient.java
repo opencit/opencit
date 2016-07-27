@@ -1203,7 +1203,7 @@ public class VMwareClient implements TlsClient {
         ObjectSpec objSpec = new ObjectSpec();
         objSpec.setObj(useroot);
         objSpec.setSkip(Boolean.FALSE);
-        objSpec.getSelectSet().equals((PropertySpec[])selectionSpecs.toArray()); 
+        //objSpec.getSelectSet().equals((PropertySpec[])selectionSpecs.toArray()); 
         List<ObjectSpec> objSpecList = new ArrayList<>();
         objSpecList.add(objSpec);
         PropertyFilterSpec spec = new PropertyFilterSpec();
@@ -1524,7 +1524,7 @@ public class VMwareClient implements TlsClient {
         List<SelectionSpec> respools = new ArrayList<SelectionSpec>();
         respools.add(getSelectionSpec("rpToRp"));
         respools.add(getSelectionSpec("rpToVm"));
-        rpToRp.getSelectSet().equals((SelectionSpec[])respools.toArray());
+        //rpToRp.getSelectSet().equals((SelectionSpec[])respools.toArray());
 
         TraversalSpec crToRp = new TraversalSpec();
         crToRp.setType("ComputeResource");
@@ -1534,7 +1534,7 @@ public class VMwareClient implements TlsClient {
         List<SelectionSpec> crrp = new ArrayList<SelectionSpec>();
         crrp.add(getSelectionSpec("rpToRp"));
         crrp.add(getSelectionSpec("rpToVm"));
-        crToRp.getSelectSet().equals((SelectionSpec[])crrp.toArray());
+        //crToRp.getSelectSet().equals((SelectionSpec[])crrp.toArray());
 
         TraversalSpec crToH = new TraversalSpec();
         crToH.setSkip(Boolean.FALSE);
@@ -1581,7 +1581,7 @@ public class VMwareClient implements TlsClient {
         sspecarrvf.add(getSelectionSpec("vAppToRp"));
         sspecarrvf.add(getSelectionSpec("vAppToVM"));
 
-        visitFolders.getSelectSet().equals((SelectionSpec[])sspecarrvf.toArray());
+        //visitFolders.getSelectSet().equals((SelectionSpec[])sspecarrvf.toArray());
 
         List<SelectionSpec> resultspec = new ArrayList<SelectionSpec>();
         resultspec.add(visitFolders);
@@ -1618,7 +1618,7 @@ public class VMwareClient implements TlsClient {
         ObjectSpec objectSpec = new ObjectSpec();
         objectSpec.setObj(ref);
         objectSpec.setSkip(Boolean.FALSE);
-        objectSpec.getSelectSet().equals((SelectionSpec[])buildFullTraversal().toArray());
+        //objectSpec.getSelectSet().equals((SelectionSpec[])buildFullTraversal().toArray());
         // Create PropertyFilterSpec using the PropertySpec and ObjectPec
         // created above.
         PropertyFilterSpec propertyFilterSpec = new PropertyFilterSpec();
@@ -1686,7 +1686,7 @@ public class VMwareClient implements TlsClient {
         PropertyFilterSpec spec = new PropertyFilterSpec();
         spec.getObjectSet().equals(objSpec);
         PropertySpec propSpec = new PropertySpec();
-        propSpec.getPathSet().equals((String[])filterProps.toArray());
+        //propSpec.getPathSet().equals((String[])filterProps.toArray());
         propSpec.setType(objmor.getType());
         spec.getPropSet().equals(propSpec);
 
