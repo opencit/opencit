@@ -51,14 +51,14 @@ public class MwConfigurationJpaController extends GenericJpaController<MwConfigu
 
     public void edit(MwConfiguration mwConfiguration) throws NonexistentEntityException, MSDataException {
         EntityManager em = getEntityManager();
-        String key = null;
+        
         try {
             em.getTransaction().begin();
             mwConfiguration = em.merge(mwConfiguration);
-            key = mwConfiguration.getKey();
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
+            String key = mwConfiguration.getKey();
             if (msg == null || msg.length() == 0) {
                 if (key != null && findMwConfiguration(key) == null) {
                     throw new NonexistentEntityException("The mwConfiguration with key " + key + " no longer exists.");

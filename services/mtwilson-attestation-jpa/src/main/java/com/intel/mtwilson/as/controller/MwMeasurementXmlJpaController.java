@@ -63,7 +63,7 @@ public class MwMeasurementXmlJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            mwMeasurementXml = em.merge(mwMeasurementXml);
+            em.merge(mwMeasurementXml);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();

@@ -60,7 +60,7 @@ void convert_niarl_password(char *in_var, BYTE *blob) {
 		exit(1);
 	}
 
-	int size = temp_size / 2;	//base 16 takes 2 digits so reduce length to show real size
+	//int size = temp_size / 2;	//base 16 takes 2 digits so reduce length to show real size
 	//blob = new BYTE[size];	//create the byte array  
 
 	UINT32	hex_value = 0;	//accumulates 2 hex characters to load into blob
