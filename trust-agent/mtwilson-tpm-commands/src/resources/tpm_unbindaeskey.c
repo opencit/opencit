@@ -238,10 +238,12 @@ int main(int argc, char **argv) {
 	exitCode = 0;
 	
 	out_close:
-	if( hKey ) { Tspi_Context_CloseObject(hContext, hKey); }
-	if( hSRK ) { Tspi_Context_CloseObject(hContext, hSRK); }
+	if( hKey != NULL ) { Tspi_Context_CloseObject(hContext, hKey); }
+	if( hSRK != NULL ) { Tspi_Context_CloseObject(hContext, hSRK); }
 	Tspi_Context_Close(hContext);
 
 	out:
+	if( contentEncryptedInputFile != NULL ) { free(contentEncryptedInputFile ); }
+	if( contentPrivatekeyFile != NULL ) { free(contentPrivatekeyFile ); }
 	return exitCode;
 }
