@@ -33,9 +33,8 @@ public class MwVmAttestationReportJpaController implements Serializable {
     }
 
     public void create(MwVmAttestationReport mwVmAttestationReport) throws PreexistingEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwVmAttestationReport);
             em.getTransaction().commit();
@@ -45,16 +44,13 @@ public class MwVmAttestationReportJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void edit(MwVmAttestationReport mwVmAttestationReport) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.merge(mwVmAttestationReport);
             em.getTransaction().commit();
@@ -68,16 +64,13 @@ public class MwVmAttestationReportJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(String id) throws NonexistentEntityException {
-        EntityManager em = null;
-        try {
-            em = getEntityManager();
+        EntityManager em = getEntityManager();
+        try {            
             em.getTransaction().begin();
             MwVmAttestationReport mwVmAttestationReport;
             try {
@@ -89,9 +82,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
             em.remove(mwVmAttestationReport);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 

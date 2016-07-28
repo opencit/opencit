@@ -40,9 +40,8 @@ public class MwMeasurementXmlJpaController implements Serializable {
     }
 
     public void create(MwMeasurementXml mwMeasurementXml) throws PreexistingEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwMeasurementXml);
             em.getTransaction().commit();
@@ -52,16 +51,13 @@ public class MwMeasurementXmlJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void edit(MwMeasurementXml mwMeasurementXml) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
-        try {
-            em = getEntityManager();
+        EntityManager em = getEntityManager();
+        try {            
             em.getTransaction().begin();
             em.merge(mwMeasurementXml);
             em.getTransaction().commit();
@@ -75,16 +71,13 @@ public class MwMeasurementXmlJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(String id) throws NonexistentEntityException {
-        EntityManager em = null;
-        try {
-            em = getEntityManager();
+        EntityManager em = getEntityManager();
+        try {            
             em.getTransaction().begin();
             MwMeasurementXml mwMeasurementXml;
             try {
@@ -96,9 +89,7 @@ public class MwMeasurementXmlJpaController implements Serializable {
             em.remove(mwMeasurementXml);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
