@@ -163,7 +163,7 @@ main (int ac, char **av)
 	UINT32		npcrMax;
 	UINT32		npcrBytes;
 	UINT32		npcrs = 0;
-	BYTE		*buf;
+	BYTE		*buf = NULL;
 	UINT32		bufLen;
 	BYTE		*bp;
 	BYTE		*tmpbuf;
@@ -212,6 +212,11 @@ main (int ac, char **av)
 		bufLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
 		buf = malloc (bufLen);
+                if(buf == NULL){
+                    fprintf (stderr, "Unable to allocate memory for buf\n", chalfile);
+                    exit (1);
+                }
+                    
 		if (fread(buf, 1, bufLen, f_in) != bufLen) {
 			fprintf (stderr, "Unable to readn file %s\n", chalfile);
 			exit (1);
@@ -355,7 +360,8 @@ main (int ac, char **av)
 	return 0;
 
 error:
-        free(buf);
+        if(buf != NULL)
+            free(buf);
 	fprintf (stderr, "Failure, error code: 0x%x\n", result);
 	return 1;
 }

@@ -187,7 +187,5 @@ main (int ac, char **av)
 badquote:
         free(quote);
 	fprintf (stderr, "Input AIK quote file incorrect format\n");
-        if (quote != NULL)
-            free(quote);
 	return 1;
 }

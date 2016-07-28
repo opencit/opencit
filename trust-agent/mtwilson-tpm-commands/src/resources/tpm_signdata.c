@@ -285,5 +285,7 @@ int main(int argc, char **argv) {
 	Tspi_Context_Close(hContext);
 
 	out:
+        free(contentPrivatekeyFile);
+        free(contentInputFile);
 	return exitCode;
 }

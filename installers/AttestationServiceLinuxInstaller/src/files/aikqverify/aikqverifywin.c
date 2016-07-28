@@ -190,6 +190,7 @@ main (int ac, char **av)
 
     // Step 2: Validate the nonce
     if (pbNounce != NULL && (memcmp(chalmd, pbNonce, 20) != 0)) {
+        free(pbNonce);
     	fprintf (stderr, "Error, bad Nonce in quote\n");
 		exit (2);
     }
