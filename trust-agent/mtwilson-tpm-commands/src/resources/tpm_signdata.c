@@ -64,10 +64,10 @@
 
 extern const char *__progname;
 
-static char filenameInput[PATH_MAX] = "";
-static char filenameOutput[PATH_MAX] = "";
-static char filenamePrivatekey[PATH_MAX] = "";
-static char keypassword[PATH_MAX] = "";
+static char filenameInput[PATH_MAX + 1] = "";
+static char filenameOutput[PATH_MAX + 1] = "";
+static char filenamePrivatekey[PATH_MAX + 1] = "";
+static char keypassword[PATH_MAX + 1] = "";
 static const char *keypasswordEnv;
 static TSS_FLAG keypasswordMode = TSS_SECRET_MODE_PLAIN;
 static BOOL decodeHexPassword = FALSE;
@@ -278,6 +278,9 @@ int main(int argc, char **argv) {
 	exitCode = 0;
 	
 	out_close:
+	if (filePrivatekey != NULL) { fclose(filePrivatekey); }
+	if (fileInput != NULL) { fclose(fileInput); }
+	if (fileOutput != NULL) { fclose(fileOutput); }
 	if( passwordBytes) { free(passwordBytes); }
 	if( keypasswordBytes) { free(keypasswordBytes); }
 	if( hKey ) { Tspi_Context_CloseObject(hContext, hKey); }

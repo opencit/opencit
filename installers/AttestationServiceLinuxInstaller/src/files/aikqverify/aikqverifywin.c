@@ -189,7 +189,7 @@ main (int ac, char **av)
     SHA1(pbQuote, cbQuote, quoteDigest);
 
     // Step 2: Validate the nonce
-    if (pbNounce != NULL && (memcmp(chalmd, pbNonce, 20) != 0)) {
+    if (pbNonce != NULL && (memcmp(chalmd, pbNonce, 20) != 0)) {
     	fprintf (stderr, "Error, bad Nonce in quote\n");
 		exit (2);
     }

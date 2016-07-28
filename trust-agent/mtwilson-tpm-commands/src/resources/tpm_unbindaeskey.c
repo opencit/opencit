@@ -54,10 +54,10 @@
 		goto out_close; \
 	}
 
-static char filenameEncryptedInput[PATH_MAX] = "";
-static char filenamePlaintextOutput[PATH_MAX] = "";
-static char filenamePrivatekey[PATH_MAX] = "";
-static char keypassword[PATH_MAX] = "";
+static char filenameEncryptedInput[PATH_MAX + 1] = "";
+static char filenamePlaintextOutput[PATH_MAX + 1] = "";
+static char filenamePrivatekey[PATH_MAX + 1] = "";
+static char keypassword[PATH_MAX + 1] = "";
 static const char *keypasswordEnv;
 static TSS_FLAG keypasswordMode = TSS_SECRET_MODE_PLAIN;
 static BOOL decodeHexPassword = FALSE;

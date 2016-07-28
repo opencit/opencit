@@ -60,9 +60,9 @@
 
 extern const char *__progname;
 
-static char filenameInput[PATH_MAX] = "";
-static char filenameOutput[PATH_MAX] = "";
-static char filenamePublickey[PATH_MAX] = "";
+static char filenameInput[PATH_MAX + 1] = "";
+static char filenameOutput[PATH_MAX + 1] = "";
+static char filenamePublickey[PATH_MAX + 1] = "";
 
 
 static int parse(const int aOpt, const char *aArg)
@@ -182,6 +182,9 @@ int main(int argc, char **argv) {
 	exitCode = 0;
 	
 	out_close:
+	if (filePublickey != NULL) { fclose(filePublickey); }
+	if (fileInput != NULL) { fclose(fileInput); }
+	if (fileOutput != NULL) { fclose(fileOutput); }
 	if( hKey ) { Tspi_Context_CloseObject(hContext, hKey); }
 	Tspi_Context_Close(hContext);
 

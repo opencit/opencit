@@ -11,7 +11,8 @@
  */
 
 #include "NIARL_TPM_ModuleV2.h"
-
+#include <ctype.h>
+#include <climits>
 
 NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 {
@@ -98,7 +99,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_debug)
 		{
-			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
+			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- ";
+			if (timeinfo != NULL) {
+				cerr << asctime(timeinfo) << " ";
+			}
 			cerr << ' ' << i_mode << " mode selection" << endl;
 			cerr << ' ' << b_debug << " debug toggle" << endl;
 			cerr << ' ' << logfile.is_open() << " logging" << endl;
@@ -108,7 +112,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_log)
 		{
-			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " (timeinfo != NULL) ? <<  asctime(timeinfo): << " ";
+			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- ";
+			if (timeinfo != NULL) {
+				clog << asctime(timeinfo) << " ";
+			}
 			clog << ' ' << i_mode << " mode selection" << endl;
 			clog << ' ' << b_debug << " debug toggle" << endl;
 			clog << ' ' << logfile.is_open() << " logging" << endl;
@@ -212,11 +219,19 @@ NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
 
-		if(b_debug)
-			cerr << "END --- NIARL TPM Module --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
+		if(b_debug) {
+			cerr << "END --- NIARL TPM Module --- ";
+			if (timeinfo != NULL) {
+				cerr << asctime(timeinfo) << " ";
+			}
+		}
 
-		if(b_log)
-			clog << "END --- NIARL TPM Module --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
+		if(b_log) {
+			clog << "END --- NIARL TPM Module --- ";
+			if (timeinfo != NULL) {
+				clog << asctime(timeinfo) << " ";
+			}
+		}
 	}
 }
 
@@ -5037,7 +5052,15 @@ void NIARL_TPM_ModuleV2::get_rand_int()
 		if(s_argv[i].compare("-bytes") == 0)
 		{
 			if(++i >= i_argc) return;
-			numbytes = atoi(s_argv[i].c_str());
+			const char* input = s_argv[i].c_str();
+			for (int j = 0; j < strlen(input); j++)
+			{
+				if (!isdigit(input[j])) {
+					return_code = -1 * ERROR_ARG_VALIDATION;
+					return;
+				}
+			}
+			numbytes = atoi(input);
 			i_success++;
 		}
 	}
@@ -5091,9 +5114,11 @@ void NIARL_TPM_ModuleV2::get_rand_int()
 		if(b_log)	cerr << ' ' << result << " GET RANDOM" << endl;
 		return_code = result;
 
-	for(UINT32 i = 0; i < numbytes; i++)
-	{
-		cout << setbase(16) << setw(2) << setfill('0') << (int)randbytes[i];
+	if (numbytes <= UINT_MAX) {
+		for(UINT32 i = 0; i < numbytes; i++)
+		{
+			cout << setbase(16) << setw(2) << setfill('0') << (int)randbytes[i];
+		}
 	}
 
 //CLEANUP SECTION

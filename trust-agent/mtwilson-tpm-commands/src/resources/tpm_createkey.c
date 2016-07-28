@@ -61,11 +61,11 @@
 
 extern const char *__progname;
 
-static char filenamePrivatekeyblobOutput[PATH_MAX] = "";
-static char filenamePublickeyOutput[PATH_MAX] = "";
+static char filenamePrivatekeyblobOutput[PATH_MAX + 1] = "";
+static char filenamePublickeyOutput[PATH_MAX + 1] = "";
 static TSS_FLAG keyType = 0;
 static TSS_FLAG keyAuth = TSS_KEY_NO_AUTHORIZATION;
-static char keypassword[PATH_MAX] = "";
+static char keypassword[PATH_MAX + 1] = "";
 static const char *keypasswordEnv;
 static TSS_FLAG keypasswordMode = TSS_SECRET_MODE_PLAIN;
 static BOOL decodeHexPassword = FALSE;
