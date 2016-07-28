@@ -132,20 +132,19 @@ int main(int argc, char **argv) {
 	TSS_HTPM        hTPM;
 	TSS_HKEY        hSRK; 
 	TSS_HPOLICY     hSRKPolicy; 
-	TSS_HKEY        hKey; 
+	TSS_HKEY        hKey = NULL; 
 	TSS_HPOLICY     hKeyPolicy; 
 	TSS_FLAG        keyflags;
 	TSS_RESULT      result;
 	BYTE            WELL_KNOWN_SECRET[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPublickey;
 	BYTE            *contentPublickey;
-	FILE            *filePublickey;
+	FILE            *filePublickey = NULL;
 	UINT32          lengthPrivatekeyblob;
 	BYTE            *contentPrivatekeyblob;
-	FILE            *filePrivatekeyblob;
+	FILE            *filePrivatekeyblob = NULL;
 	BYTE			*keypasswordBytes = NULL;
 	UINT32			lengthKeypasswordBytes;
-	int             i;
 	int             exitCode = -1;
 	
 	struct option hOpts[] = {
@@ -238,5 +237,9 @@ int main(int argc, char **argv) {
 	Tspi_Context_Close(hContext);
 
 	out:
+	if(filePublickey != NULL)
+		fclose(filePublickey);
+	if(filePrivatekeyblob != NULL)
+		fclose(filePrivatekeyblob);
 	return exitCode;
 }

@@ -1194,7 +1194,7 @@ public class VMwareClient implements TlsClient {
             useroot = serviceContent.getRootFolder();
         }
 
-        List<SelectionSpec> selectionSpecs = null;
+        List<SelectionSpec> selectionSpecs = new ArrayList<>();
         if (recurse) {
             selectionSpecs = buildFullTraversal();
         }

@@ -98,7 +98,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_debug)
 		{
-			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 			cerr << ' ' << i_mode << " mode selection" << endl;
 			cerr << ' ' << b_debug << " debug toggle" << endl;
 			cerr << ' ' << logfile.is_open() << " logging" << endl;
@@ -108,7 +108,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_log)
 		{
-			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " (timeinfo != NULL) ? <<  asctime(timeinfo): << " ";
 			clog << ' ' << i_mode << " mode selection" << endl;
 			clog << ' ' << b_debug << " debug toggle" << endl;
 			clog << ' ' << logfile.is_open() << " logging" << endl;
@@ -213,10 +213,10 @@ NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 		timeinfo = localtime(&rawtime);
 
 		if(b_debug)
-			cerr << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+			cerr << "END --- NIARL TPM Module --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 
 		if(b_log)
-			clog << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+			clog << "END --- NIARL TPM Module --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 	}
 }
 
@@ -1950,6 +1950,15 @@ void NIARL_TPM_ModuleV2::create_key()
 		return_code = -1 * ERROR_ARG_MISSING;
 		return;
 	}
+	
+	// Validate the key type
+	if((keytype.compare("bind") != 0) && (keytype.compare("sign") != 0))
+	{
+		if(b_debug)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		if(b_log)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		return_code = -1 * ERROR_ARG_VALIDATION;
+		return;	
+	}
 
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
@@ -2041,7 +2050,7 @@ void NIARL_TPM_ModuleV2::create_key()
 			if(b_debug)	cerr << " binding key selected" << endl;
 			if(b_log)	cerr << " binding key selected" << endl;
 	}
-	else if(keytype.compare("sign") == 0)
+	else // if(keytype.compare("sign") == 0) - Since we have already validated that the keytype is either bind or sign, we need not check again here.
 	{
 		//uuid_key.rgbNode[5] = 0x06;
 		uuid_key.rgbNode[0] = 0x06;
@@ -2221,6 +2230,15 @@ void NIARL_TPM_ModuleV2::set_key()
 		return;
 	}
 
+	// Validate the key type
+	if((keytype.compare("identity") != 0) && (keytype.compare("bind") != 0) && (keytype.compare("sign") != 0))
+	{
+		if(b_debug)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		if(b_log)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		return_code = -1 * ERROR_ARG_VALIDATION;
+		return;	
+	}
+	
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
 	NIARL_Util_ByteBlob	keyblob(s_keyblob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
@@ -2320,7 +2338,7 @@ void NIARL_TPM_ModuleV2::set_key()
 			if(b_debug)	cerr << " binding key selected" << endl;
 			if(b_log)	cerr << " binding key selected" << endl;
 	}
-	else if(keytype.compare("sign") == 0)
+	else // if(keytype.compare("sign") == 0) - No need to check for signing key here again since the keytype has been validated to be either identity or bind or sign.
 	{
 		//uuid_key.rgbNode[5] = 0x06;
 		uuid_key.rgbNode[0] = 0x06;
@@ -2766,6 +2784,15 @@ void NIARL_TPM_ModuleV2::clear_key()
 		return;
 	}
 
+	// Validate the key type
+	if((keytype.compare("identity") != 0) && (keytype.compare("bind") != 0) && (keytype.compare("sign") != 0))
+	{
+		if(b_debug)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		if(b_log)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		return_code = -1 * ERROR_ARG_VALIDATION;
+		return;	
+	}
+	
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
 
@@ -2865,7 +2892,7 @@ void NIARL_TPM_ModuleV2::clear_key()
 			if(b_debug)	cerr << "binding key selected" << endl;
 			if(b_log)	clog << "binding key selected" << endl;
 	}
-	else if(keytype.compare("sign") == 0)
+	else // if(keytype.compare("sign") == 0) - No need to check for sign key here since we have already validated that the keytype should be either of identity, bind or sign.
 	{
 		//uuid_key.rgbNode[5] = 0x06;
 		uuid_key.rgbNode[0] = 0x06;
@@ -3284,6 +3311,13 @@ void NIARL_TPM_ModuleV2::get_credential()
 		ekbufLen = (cred_blob[i+2] << 8) + cred_blob[i+3] + 4;
 		//cout << ekbufLen << endl;
 		ekbuf = (BYTE*)malloc(ekbufLen);
+		if (ekbuf == NULL)
+		{
+			if(b_debug)	cerr << " Memory allocation failed in get_credential method" << endl;
+			if(b_log)	clog << " Memory allocation failed in get_credential method" << endl;
+			return_code = -1 * ERROR_UNKNOWN;
+			return;		
+		}
 		for (int inc=i; inc<cred_size; inc++) {
 		  ekbuf[inc-i]=cred_blob[inc];
 		}

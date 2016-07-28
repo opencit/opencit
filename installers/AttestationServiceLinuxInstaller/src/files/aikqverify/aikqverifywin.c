@@ -65,9 +65,6 @@ main (int ac, char **av)
 	UINT32		quoteLen;
 	RSA			*aikRsa;
 	UINT32		selectLen;
-	BYTE		*select;
-	UINT32		pcrLen;
-	BYTE		*pcrs;
 	UINT32		sigLen;
 	BYTE		*sig;
 	BYTE		chalmd[20];
@@ -89,7 +86,6 @@ main (int ac, char **av)
     UINT32 cbLog = 0;
     BYTE *pbNonce = NULL;
     BYTE quoteDigest[20] = {0};
-    UINT32 cbQuoteDigest = 0;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
 		chalfile = av[2];

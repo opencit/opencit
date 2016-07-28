@@ -56,7 +56,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            mwVmAttestationReport = em.merge(mwVmAttestationReport);
+            em.merge(mwVmAttestationReport);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();

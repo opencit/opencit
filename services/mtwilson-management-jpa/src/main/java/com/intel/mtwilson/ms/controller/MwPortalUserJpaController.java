@@ -51,14 +51,14 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
 
     public void edit(MwPortalUser mwPortalUser) throws NonexistentEntityException, MSDataException {
         EntityManager em = getEntityManager();
-        Integer id = null;
+        
         try {
             em.getTransaction().begin();
             mwPortalUser = em.merge(mwPortalUser);
-            id = mwPortalUser.getId();
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
+            Integer id = mwPortalUser.getId();
             if (msg == null || msg.length() == 0) {
                 if (id != null && findMwPortalUser(id) == null) {
                     throw new NonexistentEntityException("The mwPortalUser with id " + id + " no longer exists.");

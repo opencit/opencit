@@ -620,14 +620,13 @@ public class HostBO {
      * @return : true if the white list is configured successfully.
      */
     public boolean configureWhiteListFromHost(TxtHostRecord gkvHost) throws ApiException {
-        WhitelistConfigurationData hostConfigObj = null;
         boolean configStatus;
 
         try {
            
             if (gkvHost != null) {
 
-                hostConfigObj = new WhitelistConfigurationData();                
+                WhitelistConfigurationData hostConfigObj = new WhitelistConfigurationData();                
                 String vmmPCRs;                
                 TxtHost tempHostObj = new TxtHost(gkvHost);
                 
@@ -660,10 +659,12 @@ public class HostBO {
                     hostConfigObj.setBiosPCRs(BIOS_PCRs);
                 }
                 hostConfigObj.setVmmPCRs(vmmPCRs);
+                configStatus = configureWhiteListFromCustomData(hostConfigObj);
+                return configStatus;
+            } else {
+                log.error("Good know host has not been specified.");
+                throw new MSException(ErrorCode.AS_HOST_NOT_FOUND);
             }
-
-            configStatus = configureWhiteListFromCustomData(hostConfigObj);
-            return configStatus;
 
         } catch (MSException | ASException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
