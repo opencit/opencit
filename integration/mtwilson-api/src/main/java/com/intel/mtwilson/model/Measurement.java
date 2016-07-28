@@ -6,10 +6,12 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.HashMap;
 import java.util.Map;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 
 /**
  *
@@ -74,8 +76,7 @@ public class Measurement extends ObjectModel {
     
     @Override
     protected void validate() {
-        if( digest == null ) { fault("SHA1 Digest is null"); }
-        //else if (!digest.isValid()) { fault(digest, "Invalid measurement value"); }
+        if( digest == null ) { fault("Digest is null"); }
         else if (!Sha1Digest.isValid(digest.toByteArray())) { fault("Invalid measurement value"); }
         if( label == null ) { fault("Measurement label is null"); }
     }

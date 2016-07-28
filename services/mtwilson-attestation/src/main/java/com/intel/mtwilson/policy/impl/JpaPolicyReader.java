@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl;
 
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
@@ -27,6 +28,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwMeasurementXmlJpaController;
 import com.intel.mtwilson.as.data.MwMeasurementXml;
+import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.Rule;
@@ -117,11 +119,11 @@ public class JpaPolicyReader {
     }        
 
     public Rule createPcrMatchesConstantRuleFromTblPcrManifest(TblPcrManifest pcrInfo, String... markers) {
-        try {
+        try {            
             PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
-            Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
-            log.debug("Creating PcrMatchesConstantRule from PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
+            //Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
+            log.debug("Creating PcrMatchesConstantRule from PCR {} value {}", pcrIndex.toString(), pcrInfo.getValue());
+            PcrMatchesConstant rule = new PcrMatchesConstant(PcrFactory.newInstance(pcrInfo.getPcrBank(), pcrIndex, pcrInfo.getValue()));
             rule.setMarkers(markers);
             return rule;
         }
@@ -204,8 +206,7 @@ public class JpaPolicyReader {
             tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagRule);   
         } else {          
-            PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(assetTagPCR, Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
-        
+            PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(PcrFactory.newInstance(DigestAlgorithm.SHA1, new PcrIndex(assetTagPCR), atagCert.getPCREvent()));            
             tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagPcrRule); 
         }   

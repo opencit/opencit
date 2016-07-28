@@ -26,6 +26,7 @@ import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.FileResource;
@@ -176,11 +177,19 @@ public class HostTrustBO {
             hostObjToRegister.AddOn_Connection_String = hostObj.AddOn_Connection_String;
             if (hostObj.Port != null) { hostObjToRegister.Port = hostObj.Port; }
             hostObjToRegister.tlsPolicyChoice = hostObj.tlsPolicyChoice;
+            hostObjToRegister.TpmVersion = hostObj.TpmVersion;
+            
+            // it says "banks" but this is actually singular. TxtHostRecord here is just a generic object used to pass around fields in this case
+            // the flow is awkward and goes from TxtHostRecord -> TxtHost -> TblHost, rather than just creating a TblHost directly. 
+            // This will grab the best algorithm if multiple are specified, if one is specified it will just use that, if none is specified it will use SHA1
+            
+            hostObjToRegister.PcrBanks = hostObj.getBestPcrAlgorithmBank();
             
             TblHosts tblHosts = new TblHosts();
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor
+            tblHosts.setPcrBank(hostObj.getBestPcrAlgorithmBank());
             
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
@@ -381,7 +390,7 @@ public class HostTrustBO {
                         hostObj.HostName, hostObjToRegister.BIOS_Name);
             }
 
-            HostResponse hostResponse;
+            HostResponse hostResponse;                   
             
             // We need to check if the host is already configured in the system. If yes, we need to update the host or else create a new one
             if (hostBO.getHostByName(new Hostname((hostObj.HostName))) != null) {
@@ -1012,10 +1021,14 @@ public class HostTrustBO {
                 pcr.setUpdatedOn(today);
                 pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults 
                 pcr.setManifestName(biosPcrIndex);
-                if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)) == null ) {
+                // TODO HANDLE AlgorithmBank stored in the host entry. TblHosts should have Algorithm Selection
+                if(report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(DigestAlgorithm.valueOf(host.getPcrBank()), Integer.valueOf(biosPcrIndex)) == null) {
                     throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
                 }
-                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
+                //if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)) == null ) {
+                //    throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
+                //}
+                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(DigestAlgorithm.valueOf(host.getPcrBank()), Integer.valueOf(biosPcrIndex)).getValue().toString());
                 taLogMap.put(PcrIndex.valueOf(Integer.valueOf(biosPcrIndex)), pcr);
             }
             for(String vmmPcrIndex : vmmPcrList) {
@@ -1027,10 +1040,10 @@ public class HostTrustBO {
                 pcr.setUpdatedOn(today);
                 pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults 
                 pcr.setManifestName(vmmPcrIndex);
-                if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)) == null ) {
+                if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(DigestAlgorithm.valueOf(host.getPcrBank()), Integer.valueOf(vmmPcrIndex)) == null ) {
                     throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
                 }
-                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
+                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(DigestAlgorithm.valueOf(host.getPcrBank()), Integer.valueOf(vmmPcrIndex)).getValue().toString());
                 taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
             }
             // Here duplicate the for loop and add in pcr 22 from trustReport
@@ -1075,10 +1088,10 @@ public class HostTrustBO {
                         pcr.setUpdatedOn(today);
                         pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults 
                         pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
-                        if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()) == null ) {
+                        if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(DigestAlgorithm.valueOf(host.getPcrBank()), pcrPolicy.getExpectedPcr().getIndex()) == null ) {
                             throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
                         }
-                        pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
+                        pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(DigestAlgorithm.valueOf(host.getPcrBank()), pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
                         taLogMap.put(pcrPolicy.getExpectedPcr().getIndex(), pcr);
                     }
                     pcr.setTrustStatus(result.isTrusted());

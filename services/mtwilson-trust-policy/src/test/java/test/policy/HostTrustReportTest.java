@@ -38,7 +38,7 @@ public class HostTrustReportTest {
         
         result1 = result1.extend(Sha1Digest.valueOf("d2f867d36c99b9c8e9b0de45a73351b06628aeb7"));
         System.out.println(result1.toString());
-        result1 = result1.extend(Sha1Digest.valueOf("e209744ec7e2cd40aed641f5172d6c0afa3619e7".getBytes()));
+        result1 = result1.extend(Sha1Digest.valueOf("e209744ec7e2cd40aed641f5172d6c0afa3619e7"));
         
         System.out.println(result1.toString());
         
@@ -63,7 +63,7 @@ Check: PcrMatchesConstant: PCR 0, aabbccddeeaabbccddeeaabbccddeeaabbccddee
      */
     @Test
     public void testPcrMatchesConstantPolicyPass() {
-        Pcr expected = new Pcr(0, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        PcrSha1 expected = new PcrSha1(0, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
         PcrMatchesConstant policy = new PcrMatchesConstant(expected);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
@@ -103,8 +103,8 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
      */
     @Test
     public void testPcrMatchesConstantPolicyFail() {
-        Pcr expected = new Pcr(0, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
-        Pcr actual   = new Pcr(0, "aabbccddeeaabbccddeeaabbccddeeaabbccdd00");
+        Pcr expected = new PcrSha1(0, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr actual   = new PcrSha1(0, "aabbccddeeaabbccddeeaabbccddeeaabbccdd00");
         PcrMatchesConstant policy = new PcrMatchesConstant(expected);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
@@ -147,9 +147,9 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
      */
     @Test
     public void testPcrMatchesConstantPolicyListPass() {
-        Pcr expected1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr expected1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
         PcrMatchesConstant policy1 = new PcrMatchesConstant(expected1);
-        Pcr expected2 = new Pcr(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr expected2 = new PcrSha1(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
         PcrMatchesConstant policy2 = new PcrMatchesConstant(expected2);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
@@ -268,10 +268,10 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
      */
     @Test
     public void testPcrMatchesConstantPolicyListFailRequireAll() {
-        Pcr expected1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
-        Pcr actual1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccdd11");
+        Pcr expected1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr actual1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccdd11");
         PcrMatchesConstant policy1 = new PcrMatchesConstant(expected1);
-        Pcr expected2 = new Pcr(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr expected2 = new PcrSha1(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
         Pcr actual2 = expected2;// new Pcr(2, "aabbccddeeaabbccddeeaabbccddeeaabbccdd22");
         PcrMatchesConstant policy2 = new PcrMatchesConstant(expected2);
         HostReport hostReport = new HostReport();
@@ -364,11 +364,11 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
      */
     @Test
     public void testPcrMatchesConstantPolicyListFailRequireAny() {
-        Pcr expected1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
-        Pcr actual1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccdd11");
+        Pcr expected1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr actual1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccdd11");
         PcrMatchesConstant policy1 = new PcrMatchesConstant(expected1);
-        Pcr expected2 = new Pcr(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
-        Pcr actual2 = new Pcr(2, "aabbccddeeaabbccddeeaabbccddeeaabbccdd22");
+        Pcr expected2 = new PcrSha1(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr actual2 = new PcrSha1(2, "aabbccddeeaabbccddeeaabbccddeeaabbccdd22");
         PcrMatchesConstant policy2 = new PcrMatchesConstant(expected2);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
@@ -441,10 +441,10 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
      */
     @Test
     public void testPcrMatchesConstantPolicyListPassRequireAny() {
-        Pcr expected1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
-        Pcr actual1 = new Pcr(1, "aabbccddeeaabbccddeeaabbccddeeaabbccdd11");
+        Pcr expected1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr actual1 = new PcrSha1(1, "aabbccddeeaabbccddeeaabbccddeeaabbccdd11");
         PcrMatchesConstant policy1 = new PcrMatchesConstant(expected1);
-        Pcr expected2 = new Pcr(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
+        Pcr expected2 = new PcrSha1(2, "aabbccddeeaabbccddeeaabbccddeeaabbccddee");
         Pcr actual2 = expected2;
         PcrMatchesConstant policy2 = new PcrMatchesConstant(expected2);
         HostReport hostReport = new HostReport();

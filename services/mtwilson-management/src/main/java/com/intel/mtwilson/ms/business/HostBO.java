@@ -122,6 +122,7 @@ public class HostBO {
             }
             try {
                 long threadStart = System.currentTimeMillis();
+                // TODO: the below two calls can be optimized heavily, probably to speed up both, or combine them.
                  attestationReport = agent.getHostAttestationReport(requiredPCRs, challenge);
                  measurementXmlLog = agent.getPcrManifest(challenge).getMeasurementXml();
                  log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
@@ -354,6 +355,8 @@ public class HostBO {
                 hostObj.VMM_OSName = hostDetails.VMM_OSName;
                 hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
                 hostObj.Processor_Info = hostDetails.Processor_Info;
+                hostObj.TpmVersion = hostDetails.TpmVersion;
+                hostObj.PcrBanks = hostDetails.PcrBanks;
             } catch (Throwable te) {
                 log.error("Unexpected error in registerHostFromCustomData: {}", te);
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
@@ -597,6 +600,7 @@ public class HostBO {
 
             hostConfigObj = getHostMLEDetails(hostConfigObj);            
 
+            
             new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
             
             log.debug("Successfully registered the host: " + hostConfigObj.getTxtHostRecord().HostName);
@@ -776,6 +780,8 @@ public class HostBO {
                     gkvHost.VMM_OSName = gkvHostDetails.VMM_OSName;
                     gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
                     gkvHost.Processor_Info = gkvHostDetails.Processor_Info;
+                    gkvHost.TpmVersion = gkvHostDetails.TpmVersion;
+                    gkvHost.PcrBanks = gkvHostDetails.PcrBanks;
                 } catch (Throwable te) {
                     log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.getMessage());
                     log.debug("Unexpected error in configureWhiteListFromCustomData", te);
@@ -1045,9 +1051,10 @@ public class HostBO {
                     String compName = reader.getAttributeValue("", "ComponentName");
                     String pcrNum = reader.getAttributeValue("", "ExtendedToPCR");
                     String digVal = reader.getAttributeValue("", "DigestValue");
+                    String algBank = reader.getAttributeValue("", "DigestAlgorithm");
                     
                     if (reqdManifestList.contains(pcrNum)) {
-                        if (!isComponentValid(digVal)) {
+                        if (!isComponentValid(algBank, digVal)) {
                             log.error("Module '{}' specified for '{}' is not valid.", digVal, compName);
                             return false;
                         }
@@ -1055,9 +1062,10 @@ public class HostBO {
                 } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) {
                     String pcrNum = reader.getAttributeValue("", "ComponentName");
                     String digVal = reader.getAttributeValue(null, "DigestValue");
+                    String algBank = reader.getAttributeValue("", "DigestAlgorithm");
                     
                     if (reqdManifestList.contains(pcrNum)) {
-                        if (!isComponentValid(digVal)) {
+                        if (!isComponentValid(algBank, digVal)) {
                             log.error("PCR '{}' specified for '{}' is not valid.", digVal, pcrNum);
                             return false;
                         }
@@ -1070,14 +1078,21 @@ public class HostBO {
         return true;
     }
     
-    private Boolean isComponentValid(String modValue) {
-        String hexadecimalRegEx = "[0-9A-Fa-f]{40}";
-        String invalidWhiteList = "[0]{40}|[Ff]{40}";
+    private Boolean isComponentValid(String pcrBank, String modValue) {
+        String hexadecimalRegEx = "[0-9A-Fa-f]+";
+        String invalidWhiteList = "[0]+|[Ff]+";
         
+        int expectedSize = (pcrBank != null && "SHA256".equalsIgnoreCase(pcrBank)) ? 32*2 : 20*2;
+         
         if (modValue == null || modValue.trim().isEmpty()) {
             return true;
         } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
         // Bug:775 & 802: If the TPM is reset we have seen that all the PCR values would be set to Fs. So, we need to disallow that since it is invalid. Also, all 0's are also invalid.
+        
+        if (modValue.length() != expectedSize) {
+            return false;
+        }
+        
         if (modValue.matches(invalidWhiteList)) {
             return false;
         }
@@ -1159,7 +1174,7 @@ public class HostBO {
 
                 List<ManifestData> biosMFList = new ArrayList<>();
                 for (String biosPCR : biosPCRList) {
-                    biosMFList.add(new ManifestData(biosPCR, ""));
+                    biosMFList.add(new ManifestData(biosPCR, "", hostObj.getBestPcrAlgorithmBank()));
                 }
 
                 mleObj.setManifestList(biosMFList);
@@ -1260,7 +1275,7 @@ public class HostBO {
 
                 List<ManifestData> vmmMFList = new ArrayList<>();
                 for (String vmmPCR : vmmPCRList) {
-                    vmmMFList.add(new ManifestData(vmmPCR, "")); // whitelist service now allows empty pcr's 
+                    vmmMFList.add(new ManifestData(vmmPCR, "", hostObj.getBestPcrAlgorithmBank())); // whitelist service now allows empty pcr's 
                 }
 
                 mleVMMObj.setManifestList(vmmMFList);
@@ -1574,8 +1589,10 @@ public class HostBO {
                         if (pcrsToWhiteList.contains(reader.getAttributeValue(null, "ComponentName"))) {
                             TblPcrManifest tblPCR;
                             PCRWhiteList pcrObj = new PCRWhiteList();
+
                             pcrObj.setPcrName(reader.getAttributeValue(null, "ComponentName"));
                             pcrObj.setPcrDigest(reader.getAttributeValue(null, "DigestValue"));
+                            pcrObj.setPcrBank(reader.getAttributeValue(null, "DigestAlgorithm"));
                             Integer mleID;
 
                             if (pcrObj.getPcrName() == null) {
@@ -1589,9 +1606,9 @@ public class HostBO {
                                     pcrObj.setOsName("");
                                     pcrObj.setOsVersion("");
                                     pcrObj.setOemName(hostObj.BIOS_Oem);
-                                    mleID = mleBiosSearchObj.getId();
+                                    mleID = mleBiosSearchObj.getId();                                    
                                     //log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
-                                    tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
+                                    tblPCR = pcrJpa.findByMleIdNamePcrBank(mleID, pcrObj.getPcrName(), pcrObj.getPcrBank());
                                     if (tblPCR == null) {
                                         mleBO.addPCRWhiteList(pcrObj, emt, null, null);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -1636,7 +1653,7 @@ public class HostBO {
                                     }
                                 }
 
-                                tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
+                                tblPCR = pcrJpa.findByMleIdNamePcrBank(mleID, pcrObj.getPcrName(), pcrObj.getPcrBank());
                                 if (tblPCR == null) {
                                     mleBO.addPCRWhiteList(pcrObj, emt, null, null);
                                     log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());

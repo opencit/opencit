@@ -148,6 +148,12 @@ public class HostBO {
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
+                        }                      
+                        if (host.getTpmVersion() != null) {
+                        tblHosts.setTpmVersion(host.getTpmVersion());
+                        }
+                        if (host.getPcrBanks() != null) {
+                            tblHosts.setPcrBank(host.getPcrBanks());
                         }
 
                         if (agent == null) {
@@ -437,6 +443,12 @@ public class HostBO {
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
+                        }
+                        if (host.getTpmVersion() != null) {
+                            tblHosts.setTpmVersion(host.getTpmVersion());
+                        }
+                        if (host.getPcrBanks() != null) {
+                            tblHosts.setPcrBank(host.getPcrBanks());
                         }
 
                         if (agent == null) {
@@ -764,7 +776,7 @@ public class HostBO {
                 // tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
                 // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
                 tblHosts.setDescription(host.getDescription());
-                tblHosts.setEmail(host.getEmail());
+                tblHosts.setEmail(host.getEmail());                
                 if (host.getHostName() != null) {
                         tblHosts.setIPAddress(host.getHostName().toString()); // datatype.IPAddress
                 }else{

@@ -2,8 +2,15 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 
 //import org.codehaus.jackson.annotate.JsonValue;
 
@@ -13,45 +20,44 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
  * Representation of a single PCR Value in the TPM. A PCR value consists of
  * the PCR Number and the SHA1 Digest. 
  * 
+ * @param <T>
  * @since 0.5.4
  * @author jbuhacoff
  */
-public class Pcr extends ObjectModel {
-    private final PcrIndex pcrIndex;
-    private final Sha1Digest pcrValue;
 
-    public Pcr(int pcrNumber, byte[] sha1Digest) {
-        this(new PcrIndex(pcrNumber), new Sha1Digest(sha1Digest));
+@JsonTypeInfo(use = Id.CLASS,
+              include = JsonTypeInfo.As.PROPERTY,
+              property = "digest_type")
+@JsonSubTypes({
+    @Type(value = PcrSha1.class),
+    @Type(value = PcrSha256.class)
+})
+public abstract class Pcr<T extends AbstractDigest> extends ObjectModel {
+    private final PcrIndex pcrIndex;          
+    
+    protected Pcr(PcrIndex pcrNumber) {
+        pcrIndex = pcrNumber;
     }
     
-    @JsonCreator
-    public Pcr(@JsonProperty("index") int pcrNumber, @JsonProperty("value") String sha1Digest) {
-        this(new PcrIndex(pcrNumber), new Sha1Digest(sha1Digest));
-    }
-    
-    public Pcr(PcrIndex pcr, Sha1Digest digest) {
-        this.pcrIndex = pcr;
-        this.pcrValue = digest;
-    }
-
     public PcrIndex getIndex() { return pcrIndex; } // BUG #497 needs to be renamed getIndex() and return a type PcrIndex
-    public Sha1Digest getValue() { return pcrValue; }
-    
+    abstract public T getValue();
+    abstract public DigestAlgorithm getPcrBank();
     /**
      * Returns a string representing the PCR Value in the format "pcr: value"
      * Example: assert new PcrValue(15,"...").toString().equals("15: ...");
      *
+     * @return 
      * @see java.lang.Object#toString()
      */
 //    @JsonValue
     @Override
     public String toString() {
-        return String.format("%d: %s", pcrIndex.toInteger(), pcrValue.toString());
+        return String.format("%s: %d: %s", getPcrBank(), pcrIndex.toInteger(), getValue().toString());
     }
     
     @Override
     public int hashCode() {
-        return pcrIndex.hashCode() + pcrValue.hashCode();
+        return pcrIndex.hashCode() + getValue().hashCode();
     }
 
     /**
@@ -72,7 +78,7 @@ public class Pcr extends ObjectModel {
         if ((this.pcrIndex == null) ? (other.pcrIndex != null) : !this.pcrIndex.equals(other.pcrIndex)) {
             return false;
         }
-        if ((this.pcrValue == null) ? (other.pcrValue != null) : !this.pcrValue.equals(other.pcrValue)) {
+        if ((this.getValue() == null) ? (other.getValue() != null) : !this.getValue().equals(other.getValue())) {
             return false;
         }
         return true;
@@ -82,9 +88,12 @@ public class Pcr extends ObjectModel {
     public void validate() {
         if( pcrIndex == null ) { fault("Pcr index is null"); }
         else if( !pcrIndex.isValid() ) { fault(pcrIndex, "Invalid pcr index"); }
-        if( pcrValue == null ) { fault("SHA1 Digest is null"); }
+        if( getValue() == null ) { fault("Digest is null"); }
         //else if (!pcrValue.isValid()) { fault(pcrValue, "Invalid pcr value"); }
-        else if (!Sha1Digest.isValid(pcrValue.toByteArray())) { fault("Invalid pcr value"); }
+        
+        validateOverride();                
     }
+    
+    protected abstract void validateOverride();
 
 }

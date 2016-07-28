@@ -49,7 +49,7 @@ public class PcrMatchesConstant extends BaseRule {
             report.fault(new PcrManifestMissing());            
         }
         else {
-            Pcr actual = hostReport.pcrManifest.getPcr(expected.getIndex().toInteger());
+            Pcr actual = hostReport.pcrManifest.getPcr(expected.getPcrBank(), expected.getIndex().toInteger());
             if( actual == null ) {
                 report.fault(new PcrValueMissing(expected.getIndex()));
             }

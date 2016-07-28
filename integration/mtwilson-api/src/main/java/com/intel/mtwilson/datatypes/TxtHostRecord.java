@@ -15,6 +15,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.shiro.util.StringUtils;
 //import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 //import org.codehaus.jackson.annotate.JsonProperty;
 //import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -153,6 +156,31 @@ public class TxtHostRecord {
         this.PcrBanks = host.PcrBanks;
 
     }    
+    
+    @JsonIgnore
+    public String getBestPcrAlgorithmBank() {
+        if(PcrBanks != null && PcrBanks.length() > 0)
+            return selectBestSinglePcrBank(this.PcrBanks);
+        else 
+            return "SHA1";
+    }
+    
+    private String selectBestSinglePcrBank(String availableBanks) {        
+        String[] banks = StringUtils.split(availableBanks, ' ');
+        Map<String, Integer> rankings = new HashMap<>();
+        rankings.put("SHA1", 0);
+        rankings.put("SHA256", 1);
+        rankings.put("SHA384", 2);
+        rankings.put("SHA512", 3);
+        
+        String best = banks[0];
+        for(String b : banks) {
+            if(rankings.get(b) > rankings.get(best)) {
+                best = b;
+            }
+        }        
+        return best;
+    }
 
 
 }

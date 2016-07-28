@@ -7,6 +7,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mtwilson.model.PcrSha1;
 import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmBootSecurityOptionEventDetails;
@@ -45,7 +46,7 @@ public class VMWare51Esxi51   {
             // convert the vwmare data types to mt wilson datatypes
             String digest = VMwareClient.byteArrayToHexString(hostTpmDigestInfo.getDigestValue());
             log.debug("HostTpmDigestInfo Digest = {}", digest); 
-            Pcr pcr = new Pcr(hostTpmDigestInfo.getPcrNumber(), digest);
+            Pcr pcr = new PcrSha1(hostTpmDigestInfo.getPcrNumber(), digest);
             pcrManifest.setPcr(pcr);
         }
         }

@@ -99,6 +99,7 @@ public class TxtHost {
         tlsPolicyChoice = host.tlsPolicyChoice;
         bindingKeyCertificate = null;
         tpmVersion = host.TpmVersion;
+        pcrBanks = host.PcrBanks;
         
 //        tlsPolicyId = (host.tlsPolicyChoice == null ? null : host.tlsPolicyChoice.getTlsPolicyId());
         // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory

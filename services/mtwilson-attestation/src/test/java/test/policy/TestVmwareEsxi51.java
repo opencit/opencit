@@ -212,7 +212,7 @@ public class TestVmwareEsxi51 {
         String[] biosPcrList = bios.getRequiredManifestList().split(",");
         for(String biosPcrIndex : biosPcrList) {
             // first delete any pcr's already defined for this vmm, since we will redefine them now
-            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdName(bios.getId(), biosPcrIndex);
+            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdNamePcrBank(bios.getId(), biosPcrIndex, "SHA1");
             if( pcrWhitelist != null ) {
                 My.jpa().mwPcrManifest().destroy(pcrWhitelist.getId());
             }
@@ -230,7 +230,7 @@ public class TestVmwareEsxi51 {
         String[] vmmPcrList = vmm.getRequiredManifestList().split(","); // only 17, 18, 20  ... 19 is treated separately below for vmware
         for(String vmmPcrIndex : vmmPcrList) {
             // first delete any pcr's already defined for this vmm, since we will redefine them now
-            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdName(vmm.getId(), vmmPcrIndex);
+            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdNamePcrBank(vmm.getId(), vmmPcrIndex, "SHA1");
             if( pcrWhitelist != null ) {
                 My.jpa().mwPcrManifest().destroy(pcrWhitelist.getId());
             }
