@@ -533,7 +533,7 @@ void NIARL_TPM_ModuleV2::clear_ownership()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1629,7 +1629,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	nonce(s_nonce);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1812,7 +1812,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3015,7 +3015,7 @@ void NIARL_TPM_ModuleV2::set_credential()
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	credential(s_blob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3188,7 +3188,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 //CONTEXT SECTION
 	TSS_RESULT		result;
@@ -3288,7 +3288,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 		if(b_debug)	cerr << " Trousers mode activated" << endl;
 		if(b_log)	clog << " Trousers mode activated" << endl;
 
-		UINT32			counter = 0;
+		//UINT32			counter = 0;
 
 		//cred_size = 10;		//allow enough space to get DER x509 size header
 		cred_size = 128;
@@ -3449,7 +3449,7 @@ void NIARL_TPM_ModuleV2::clear_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION

@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 	UINT32          lengthEncData;
 	BYTE            *encData;
 	FILE            *fileOutput;
-	int             i;
+	//int             i;
 	int             exitCode = -1;
 	
 	struct option hOpts[] = {

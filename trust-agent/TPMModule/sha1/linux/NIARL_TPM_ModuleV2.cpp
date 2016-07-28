@@ -91,7 +91,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_debug)
 		{
-			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 			cerr << ' ' << i_mode << " mode selection" << endl;
 			cerr << ' ' << b_debug << " debug toggle" << endl;
 			cerr << ' ' << logfile.is_open() << " logging" << endl;
@@ -101,7 +101,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_log)
 		{
-			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 			clog << ' ' << i_mode << " mode selection" << endl;
 			clog << ' ' << b_debug << " debug toggle" << endl;
 			clog << ' ' << logfile.is_open() << " logging" << endl;
@@ -183,10 +183,10 @@ NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 		timeinfo = localtime(&rawtime);
 
 		if(b_debug)
-			cerr << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+			cerr << "END --- NIARL TPM Module --- " << (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 
 		if(b_log)
-			clog << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+			clog << "END --- NIARL TPM Module --- " << (timeinfo != NULL) ? << asctime(timeinfo): << " ";
 	}
 }
 
@@ -500,7 +500,7 @@ void NIARL_TPM_ModuleV2::clear_ownership()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1557,7 +1557,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	nonce(s_nonce);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1739,7 +1739,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -2914,7 +2914,7 @@ void NIARL_TPM_ModuleV2::set_credential()
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	credential(s_blob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3086,7 +3086,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3288,7 +3288,7 @@ void NIARL_TPM_ModuleV2::clear_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
