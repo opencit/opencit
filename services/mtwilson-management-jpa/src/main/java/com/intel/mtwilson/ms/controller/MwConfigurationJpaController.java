@@ -54,7 +54,7 @@ public class MwConfigurationJpaController extends GenericJpaController<MwConfigu
         
         try {
             em.getTransaction().begin();
-            mwConfiguration = em.merge(mwConfiguration);
+            em.merge(mwConfiguration);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();

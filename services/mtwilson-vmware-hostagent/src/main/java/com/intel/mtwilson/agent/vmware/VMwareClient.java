@@ -1152,10 +1152,10 @@ public class VMwareClient implements TlsClient {
             Set props = (Set) tInfo.get(type);
             pSpec.setType(type);
             pSpec.setAll(props.isEmpty() ? Boolean.TRUE : Boolean.FALSE);
-            for (Iterator pi = props.iterator(); pi.hasNext();) {
-                String prop = (String) pi.next();
+            //for (Iterator pi = props.iterator(); pi.hasNext();) {
+                //String prop = (String) pi.next();
                 //pSpec.getPathSet().equals(prop);
-            }
+            //}
             pSpecs.add(pSpec);
         }
 
@@ -1199,7 +1199,7 @@ public class VMwareClient implements TlsClient {
             selectionSpecs = buildFullTraversal();
         }
     
-        List<PropertySpec> propspecary = buildPropertySpecArray(typeinfo);
+        //List<PropertySpec> propspecary = buildPropertySpecArray(typeinfo);
         ObjectSpec objSpec = new ObjectSpec();
         objSpec.setObj(useroot);
         objSpec.setSkip(Boolean.FALSE);

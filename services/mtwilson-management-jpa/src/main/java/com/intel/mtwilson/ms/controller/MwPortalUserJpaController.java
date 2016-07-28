@@ -54,7 +54,7 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
         
         try {
             em.getTransaction().begin();
-            mwPortalUser = em.merge(mwPortalUser);
+            em.merge(mwPortalUser);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();

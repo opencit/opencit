@@ -51,7 +51,7 @@ public class MwAssetTagCertificateJpaController extends GenericJpaController<MwA
         EntityManager em = getEntityManager();        
         try {
             em.getTransaction().begin();
-            mwAssetTagCertificate = em.merge(mwAssetTagCertificate);            
+            em.merge(mwAssetTagCertificate);            
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();

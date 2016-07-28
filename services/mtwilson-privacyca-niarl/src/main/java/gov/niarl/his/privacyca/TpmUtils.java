@@ -115,9 +115,9 @@ public class TpmUtils {
 		if (source.available() < 4) {
 			throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
 		}
-		int retval = 0;
+		int retval;
 		byte[] temp = new byte[4];
-		int k =source.read(temp, 0, 4);
+		// int k =source.read(temp, 0, 4);
 		if ((temp[0]&0x80) == 0x80) throw new TpmUnsignedConversionException("Cannot convert UINT32 to signed Integer: too large - would be converted to negative.");
 		retval = (int)((temp[0]<<24&0xff000000) + 
 		         (int) (temp[1]<<16&0x00ff0000) + 
@@ -139,9 +139,9 @@ public class TpmUtils {
 		if (source.available() < 2) {
 			throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
 		}
-		int retval = 0;
+		int retval;
 		byte[] temp = new byte[2];
-		int k = source.read(temp, 0, 2);
+		// int k = source.read(temp, 0, 2);
 		if ((temp[0]&0x80) == 0x80) throw new TpmUnsignedConversionException("Cannot convert UINT16 to signed Short: too large - would be converted to negative.");
 		retval = (int)((temp[0]<<8)&0x0000ff00) + 
 			 	 (int)((temp[1]<<0)&0x000000ff);
@@ -190,7 +190,7 @@ public class TpmUtils {
 			throw new TpmBytestreamResouceException("There are not enough available bytes in the bytestream to extract the requested number.");
 		}
 		byte[] retval = new byte[size];
-		int k = source.read(retval, 0, size);
+		// int k = source.read(retval, 0, size);
 		return retval;
 	}
 	/**
@@ -823,8 +823,7 @@ public class TpmUtils {
 		char[] charArray = new String(Base64.encode(toEncode)).toCharArray();
 		String toReturn = "";
 		for (int i = 0; i < charArray.length; i++){
-			if(breakLines){if((i%64 == 0)) toReturn = sb.append("\n").toString(); }
-			toReturn = sb.append(charArray[i]).toString();
+			if(breakLines){ if((i%64 == 0)) toReturn = sb.append("\n").toString(); } else { toReturn = sb.append(charArray[i]).toString(); }
 		}
 		return toReturn;
 	}
