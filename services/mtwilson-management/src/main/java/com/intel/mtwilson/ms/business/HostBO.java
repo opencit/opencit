@@ -659,6 +659,8 @@ public class HostBO {
                     hostConfigObj.setBiosPCRs(BIOS_PCRs);
                 }
                 hostConfigObj.setVmmPCRs(vmmPCRs);
+                if (hostConfigObj == null)
+                    throw new MSException(ErrorCode.AS_HOST_NOT_FOUND);
                 configStatus = configureWhiteListFromCustomData(hostConfigObj);
                 return configStatus;
             } else {
