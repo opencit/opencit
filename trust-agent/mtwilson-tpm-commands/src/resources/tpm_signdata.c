@@ -133,7 +133,7 @@ static void help(const char* aCmd)
 int main(int argc, char **argv) {
 	TSS_HCONTEXT    hContext;
 	TSS_HTPM        hTPM; 
-	TSS_HPOLICY     hTPMPolicy;
+	//TSS_HPOLICY     hTPMPolicy;
 	TSS_HKEY        hSRK; 
 	TSS_HPOLICY     hSRKPolicy;
 	TSS_HKEY        hKey; 
@@ -151,10 +151,10 @@ int main(int argc, char **argv) {
 	BYTE            *signatureData;
 	FILE            *fileOutput;
 	BYTE			*passwordBytes = NULL;
-	UINT32			lengthPasswordBytes;
+	//UINT32			lengthPasswordBytes;
 	BYTE			*keypasswordBytes = NULL;
 	UINT32			lengthKeypasswordBytes;
-	int             i;
+	//int             i;
 	int             exitCode = -1;
 	
 	struct option hOpts[] = {

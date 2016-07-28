@@ -116,13 +116,13 @@ static void help(const char* aCmd)
 int main(int argc, char **argv) {
 	TSS_HCONTEXT    hContext;
 	TSS_HTPM        hTPM; 
-	TSS_HPOLICY     hTPMPolicy;
+	//TSS_HPOLICY     hTPMPolicy;
 	TSS_HKEY        hSRK; 
 	TSS_HPOLICY     hSRKPolicy;
 	TSS_HKEY        hKey; 
 	TSS_HPOLICY     hKeyPolicy;
 	TSS_HENCDATA    hEncdata;
-	TSS_HPOLICY     hEncdataPolicy;
+	//TSS_HPOLICY     hEncdataPolicy;
 	TSS_RESULT      result;
 	BYTE            WELL_KNOWN_SECRET[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPrivatekeyFile;

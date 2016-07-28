@@ -64,9 +64,9 @@ main (int ac, char **av)
 	BYTE		*quote;
 	UINT32		quoteLen;
 	RSA			*aikRsa;
-	UINT32		selectLen;
-	UINT32		sigLen;
-	BYTE		*sig;
+	//UINT32		selectLen;
+	//UINT32		sigLen;
+	//BYTE		*sig;
 	BYTE		chalmd[20];
 	BYTE		md[20];
 	BYTE		qinfo[8+20+20];
@@ -207,9 +207,9 @@ main (int ac, char **av)
 
 	return 0;
 
-badquote:
-	fprintf (stderr, "Input AIK quote file incorrect format\n");
-	return 1;
+//badquote:
+	//fprintf (stderr, "Input AIK quote file incorrect format\n");
+	//return 1;
 }
 
 

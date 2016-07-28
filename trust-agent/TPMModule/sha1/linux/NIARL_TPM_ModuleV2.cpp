@@ -500,7 +500,7 @@ void NIARL_TPM_ModuleV2::clear_ownership()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1557,7 +1557,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	nonce(s_nonce);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1739,7 +1739,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -2914,7 +2914,7 @@ void NIARL_TPM_ModuleV2::set_credential()
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	credential(s_blob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3086,7 +3086,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3288,7 +3288,7 @@ void NIARL_TPM_ModuleV2::clear_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
