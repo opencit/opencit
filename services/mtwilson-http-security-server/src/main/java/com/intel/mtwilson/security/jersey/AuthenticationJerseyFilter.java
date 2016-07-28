@@ -97,6 +97,10 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         
         String requestBody = readEntityBodyQuietly(request);
         
+        if( servletRequest == null ) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Servlet request cannot be null").build());
+        }
+        
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.instance = servletRequest.getLocalAddr();
         requestInfo.received = new Date();
