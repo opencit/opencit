@@ -26,9 +26,10 @@ public class BasicView implements View {
 	public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// For the basic implementation, the response only contains the status of the method call. True or False.
 		response.setContentType(getContentType());
-                if (model.get("result") == null) {
+                Object result = model.get("result");
+                if (result == null) {
                     throw new IllegalArgumentException("BasicView result cannot be null.");
                 }
-                response.getWriter().write(model.get("result").toString());
+                response.getWriter().write(result.toString());
 	}
 }
