@@ -232,23 +232,36 @@ main (int ac, char **av)
 	bufLen = ftell (f_in);
 	fseek (f_in, 0, SEEK_SET);
 	buf = malloc (bufLen);
+        if(buf == NULL){
+            fprintf (stderr, "Unable to allocate memory for buf\n");
+            exit (1);
+        }
 	if (fread(buf, 1, bufLen, f_in) != bufLen) {
 		fprintf (stderr, "Unable to readn file %s\n", av[1]);
 		exit (1);
 	}
 	fclose (f_in);
 
-	result = Tspi_Context_LoadKeyByBlob (hContext, hSRK, bufLen, buf, &hAIK); CKERR;
-	free (buf);
+	result = Tspi_Context_LoadKeyByBlob (hContext, hSRK, bufLen, buf, &hAIK); 
+        CKERR;	
 	fprintf (stderr, "after Tspi_Context_LoadKeyByBlob \n");
 	if (pass) {
 		BYTE *binary_password = malloc(sizeof(BYTE)* strlen(pass)/ 2);
-		convert_niarl_password(pass, binary_password);
+                if(binary_password == NULL){
+                    fprintf (stderr, "Unable to allocate memory for binary_password\n");
+                    exit (1);
+                }                    
+		convert_niarl_password(pass, binary_password);                
 		result = Tspi_Context_CreateObject(hContext, TSS_OBJECT_TYPE_POLICY,
-				TSS_POLICY_USAGE, &hAIKPolicy); CKERR;
+				TSS_POLICY_USAGE, &hAIKPolicy); 
+                if (result != TSS_SUCCESS)
+                    free(binary_password);
+                CKERR;
 		result = Tspi_Policy_AssignToObject(hAIKPolicy, hAIK);
 		result = Tspi_Policy_SetSecret (hAIKPolicy, TSS_SECRET_MODE_PLAIN,
-				strlen(pass)/2, binary_password); CKERR;
+				strlen(pass)/2, binary_password); 
+                free(binary_password);
+                CKERR;
 	}
 
 	/* Create PCR list to be quoted */
@@ -338,9 +351,11 @@ main (int ac, char **av)
 	fclose (f_out);
 
 	printf ("Success!\n");
+        free(buf);
 	return 0;
 
 error:
+        free(buf);
 	fprintf (stderr, "Failure, error code: 0x%x\n", result);
 	return 1;
 }
