@@ -280,7 +280,7 @@ public class TpmIdentityProof {
 		//placed by the TSS, but the identity binding is created by the TPM independently. If one value of
 		//structver is used during the creation of the identity binding signature but a different structver
 		//is used when performing verification, the result will always be a failure to verify.
-		byte [] thisStructVer = structVer;
+		byte [] thisStructVer;// = structVer;
 		byte [] traditionalStructVer = {(byte)0x01, (byte)0x01, (byte)0x00, (byte)0x00};
 		thisStructVer = traditionalStructVer;
 		byte [] identityContents = new byte[thisStructVer.length + tpmMakeIdOrd.length + chosenIdHash.length + aikPubKey.length];
