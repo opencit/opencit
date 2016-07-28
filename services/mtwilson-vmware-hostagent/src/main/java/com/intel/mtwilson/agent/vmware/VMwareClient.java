@@ -1154,7 +1154,7 @@ public class VMwareClient implements TlsClient {
             pSpec.setAll(props.isEmpty() ? Boolean.TRUE : Boolean.FALSE);
             for (Iterator pi = props.iterator(); pi.hasNext();) {
                 String prop = (String) pi.next();
-                pSpec.getPathSet().equals(prop);
+                //pSpec.getPathSet().equals(prop);
             }
             pSpecs.add(pSpec);
         }
@@ -1207,8 +1207,8 @@ public class VMwareClient implements TlsClient {
         List<ObjectSpec> objSpecList = new ArrayList<>();
         objSpecList.add(objSpec);
         PropertyFilterSpec spec = new PropertyFilterSpec();
-        spec.getPropSet().equals(propspecary); 
-        spec.getObjectSet().equals(objSpecList); 
+        //spec.getPropSet().equals(propspecary); 
+        //spec.getObjectSet().equals(objSpecList); 
         List<PropertyFilterSpec> listpfs = new ArrayList<>();
         listpfs.add(spec);
         List<ObjectContent> listobjcont = retrievePropertiesAllObjects(listpfs);
@@ -1505,7 +1505,7 @@ public class VMwareClient implements TlsClient {
         hToVm.setType("HostSystem");
         hToVm.setPath("vm");
         hToVm.setName("hToVm");
-        hToVm.getSelectSet().equals(getSelectionSpec("visitFolders"));
+        //hToVm.getSelectSet().equals(getSelectionSpec("visitFolders"));
         hToVm.setSkip(Boolean.FALSE);
 
         // DC -> DS
@@ -1547,20 +1547,20 @@ public class VMwareClient implements TlsClient {
         dcToHf.setType("Datacenter");
         dcToHf.setPath("hostFolder");
         dcToHf.setName("dcToHf");
-        dcToHf.getSelectSet().equals(getSelectionSpec("visitFolders"));
+        //dcToHf.getSelectSet().equals(getSelectionSpec("visitFolders"));
 
         TraversalSpec vAppToRp = new TraversalSpec();
         vAppToRp.setName("vAppToRp");
         vAppToRp.setType("VirtualApp");
         vAppToRp.setPath("resourcePool");
-        vAppToRp.getSelectSet().equals(getSelectionSpec("rpToRp"));
+        //vAppToRp.getSelectSet().equals(getSelectionSpec("rpToRp"));
 
         TraversalSpec dcToVmf = new TraversalSpec();
         dcToVmf.setType("Datacenter");
         dcToVmf.setSkip(Boolean.FALSE);
         dcToVmf.setPath("vmFolder");
         dcToVmf.setName("dcToVmf");
-        dcToVmf.getSelectSet().equals(getSelectionSpec("visitFolders"));
+        //dcToVmf.getSelectSet().equals(getSelectionSpec("visitFolders"));
 
         // For Folder -> Folder recursion
         TraversalSpec visitFolders = new TraversalSpec();
@@ -1611,7 +1611,7 @@ public class VMwareClient implements TlsClient {
             throws VMwareConnectionException {
         PropertySpec propertySpec = new PropertySpec();
         propertySpec.setAll(Boolean.FALSE);
-        propertySpec.getPathSet().equals(propertyString);
+        //propertySpec.getPathSet().equals(propertyString);
         propertySpec.setType(type);
 
         // Now create Object Spec
@@ -1622,8 +1622,8 @@ public class VMwareClient implements TlsClient {
         // Create PropertyFilterSpec using the PropertySpec and ObjectPec
         // created above.
         PropertyFilterSpec propertyFilterSpec = new PropertyFilterSpec();
-        propertyFilterSpec.getPropSet().equals(propertySpec);
-        propertyFilterSpec.getObjectSet().equals(objectSpec);
+        //propertyFilterSpec.getPropSet().equals(propertySpec);
+        //propertyFilterSpec.getObjectSet().equals(objectSpec);
         List<PropertyFilterSpec> listpfs = new ArrayList<PropertyFilterSpec>(1);
         listpfs.add(propertyFilterSpec);
         List<ObjectContent> listobjcont = retrievePropertiesAllObjects(listpfs);
@@ -1684,11 +1684,11 @@ public class VMwareClient implements TlsClient {
         objSpec.setObj(objmor);
         objSpec.setSkip(Boolean.FALSE);
         PropertyFilterSpec spec = new PropertyFilterSpec();
-        spec.getObjectSet().equals(objSpec);
+        //spec.getObjectSet().equals(objSpec);
         PropertySpec propSpec = new PropertySpec();
         //propSpec.getPathSet().equals((String[])filterProps.toArray());
         propSpec.setType(objmor.getType());
-        spec.getPropSet().equals(propSpec);
+        //spec.getPropSet().equals(propSpec);
 
         ManagedObjectReference filterSpecRef;
         try {
