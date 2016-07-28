@@ -823,8 +823,7 @@ public class TpmUtils {
 		char[] charArray = new String(Base64.encode(toEncode)).toCharArray();
 		String toReturn = "";
 		for (int i = 0; i < charArray.length; i++){
-			if(breakLines){if((i%64 == 0)) toReturn = sb.append("\n").toString(); }
-			toReturn = sb.append(charArray[i]).toString();
+			if(breakLines){ if((i%64 == 0)) toReturn = sb.append("\n").toString(); } else { toReturn = sb.append(charArray[i]).toString(); }
 		}
 		return toReturn;
 	}

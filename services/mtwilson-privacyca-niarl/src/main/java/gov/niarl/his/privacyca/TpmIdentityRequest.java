@@ -449,7 +449,7 @@ public class TpmIdentityRequest {
 			InvalidAlgorithmParameterException, 
 			TpmUtils.TpmBytestreamResouceException,
 			PrivacyCaException {
-		TpmSymmetricKey symKey = new TpmSymmetricKey();
+		TpmSymmetricKey symKey;
 		switch (asymAlgorithm.getEncScheme()) {
 		case 0x3: // <-- most likely with NTRU, TrouSerS
 			Cipher asymCipher = Cipher.getInstance("RSA/ECB/OAEPWithSha1AndMGF1Padding");
