@@ -1124,6 +1124,7 @@ public class VMwareClient implements TlsClient {
      *
      * @return Array of container filter specs
      */
+    /*
     private List<PropertySpec> buildPropertySpecArray(String[][] typeinfo) {
         // Eliminate duplicates
         HashMap<String, Set> tInfo = new HashMap<String, Set>();
@@ -1160,7 +1161,7 @@ public class VMwareClient implements TlsClient {
         }
 
         return pSpecs;
-    }
+    }*/
 
     /**
      * Retrieve content recursively with multiple properties. the typeinfo array

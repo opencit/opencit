@@ -189,10 +189,12 @@ main (int ac, char **av)
     SHA1(pbQuote, cbQuote, quoteDigest);
 
     // Step 2: Validate the nonce
-    if (pbNounce != NULL && (memcmp(chalmd, pbNonce, 20) != 0)) {
-        free(pbNonce);
-    	fprintf (stderr, "Error, bad Nonce in quote\n");
-		exit (2);
+    if (pbNounce != NULL) {
+        if (memcmp(chalmd, pbNonce, 20) != 0) {
+            free(pbNonce);
+            fprintf (stderr, "Error, bad Nonce in quote\n");
+            exit (2);
+        }
     }
 
     // Step 3: Verify the signature with the public AIK
