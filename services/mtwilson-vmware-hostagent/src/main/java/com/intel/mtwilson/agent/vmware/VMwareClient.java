@@ -1601,11 +1601,12 @@ public class VMwareClient implements TlsClient {
         return resultspec;
     }*/
 
+    /*
     private SelectionSpec getSelectionSpec(String name) {
         SelectionSpec genericSpec = new SelectionSpec();
         genericSpec.setName(name);
         return genericSpec;
-    }
+    }*/
 
     private List<DynamicProperty> getDynamicProarray(ManagedObjectReference ref,
             String type,
