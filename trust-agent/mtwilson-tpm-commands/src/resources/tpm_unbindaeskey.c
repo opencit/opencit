@@ -127,13 +127,13 @@ int main(int argc, char **argv) {
 	BYTE            WELL_KNOWN_SECRET[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPrivatekeyFile;
 	BYTE            *contentPrivatekeyFile = NULL;
-	FILE            *filePrivatekey;
+	FILE            *filePrivatekey = NULL;
 	UINT32          lengthEncryptedInputFile;
 	BYTE            *contentEncryptedInputFile = NULL;
-	FILE            *fileEncryptedInput;
+	FILE            *fileEncryptedInput = NULL;
 	UINT32          lengthPlaintextOutput;
-	BYTE            *plaintextOutput;
-	FILE            *filePlaintextOutput;
+	BYTE            *plaintextOutput = NULL;
+	FILE            *filePlaintextOutput = NULL;
 	BYTE			*keypasswordBytes = NULL;
 	UINT32			lengthKeypasswordBytes;
 

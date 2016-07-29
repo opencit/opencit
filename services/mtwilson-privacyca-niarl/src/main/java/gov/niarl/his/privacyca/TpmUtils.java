@@ -27,6 +27,7 @@ import java.security.spec.*;
 import java.security.interfaces.*;
 import javax.security.auth.x500.X500Principal;
 import javax.security.cert.CertificateException;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.*;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -61,6 +62,7 @@ import java.util.BitSet;
  *
  */
 public class TpmUtils {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmUtils.class);
 	/**
 	 * Converts an integer to a four-byte array.
 	 * 
@@ -606,20 +608,16 @@ public class TpmUtils {
 			NoSuchAlgorithmException, 
 			javax.security.cert.CertificateException, 
 			java.security.cert.CertificateException {
-		InputStream certStream = new FileInputStream(filename);
-//		byte [] certBytes = new byte[certStream.available()];
-		byte[] certBytes = new byte[2048];
-		try {
-			certStream.read(certBytes);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally{
-				 certStream.close();
-		}
-		javax.security.cert.X509Certificate cert = javax.security.cert.X509Certificate.getInstance(certBytes);
-		return convertX509Cert(cert);
+		try(InputStream certStream = new FileInputStream(filename)){
+    //		byte [] certBytes = new byte[certStream.available()];
+                    byte[] certBytes = IOUtils.toByteArray(certStream);                    
+                    javax.security.cert.X509Certificate cert = javax.security.cert.X509Certificate.getInstance(certBytes);
+                    return convertX509Cert(cert);
+                }
+                catch(Exception e){
+                    log.error("Error encountered while reading cert from file",e);
+                    throw new java.security.cert.CertificateException("Error encountered while reading cert from file");
+                }		
 	}
 	/**
 	 * Retrieve a certificate as an X509Certificate object from a byte string, assuming DER encoding.
