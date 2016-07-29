@@ -102,14 +102,14 @@ int main(int argc, char **argv) {
 	TSS_RESULT      result;
 	//BYTE            nonsecret[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPublickeyFile;
-	BYTE            *contentPublickeyFile;
-	FILE            *filePublickey;
+	BYTE            *contentPublickeyFile = NULL;
+	FILE            *filePublickey = NULL;
 	UINT32          lengthInputFile;
-	BYTE            *contentInputFile;
-	FILE            *fileInput;
+	BYTE            *contentInputFile = NULL;
+	FILE            *fileInput = NULL;
 	UINT32          lengthEncData;
 	BYTE            *encData;
-	FILE            *fileOutput;
+	FILE            *fileOutput = NULL;
 	//int             i;
 	int             exitCode = -1;
 	
@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
 	fseek (filePublickey, 0, SEEK_END);
 	lengthPublickeyFile = ftell (filePublickey);
 	fseek (filePublickey, 0, SEEK_SET);
-	contentPublickeyFile = malloc (lengthPublickeyFile);
+	CATCH_NULL(contentPublickeyFile = malloc (lengthPublickeyFile));
 	CATCH_ERROR( fread(contentPublickeyFile, 1, lengthPublickeyFile, filePublickey) != lengthPublickeyFile );
 	fclose(filePublickey);
 	filePublickey = NULL;
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 	fseek (fileInput, 0, SEEK_END);
 	lengthInputFile = ftell (fileInput);
 	fseek (fileInput, 0, SEEK_SET);
-	contentInputFile = malloc (lengthInputFile);
+	CATCH_NULL(contentInputFile = malloc (lengthInputFile));
 	CATCH_ERROR( fread(contentInputFile, 1, lengthInputFile, fileInput) != lengthInputFile );
 	fclose(fileInput);
 	fileInput = NULL;

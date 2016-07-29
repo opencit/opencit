@@ -142,14 +142,14 @@ int main(int argc, char **argv) {
 	TSS_RESULT      result;
 	BYTE            WELL_KNOWN_SECRET[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPrivatekeyFile;
-	BYTE            *contentPrivatekeyFile;
-	FILE            *filePrivatekey;
+	BYTE            *contentPrivatekeyFile = NULL;
+	FILE            *filePrivatekey = NULL;
 	UINT32          lengthInputFile;
-	BYTE            *contentInputFile;
-	FILE            *fileInput;
+	BYTE            *contentInputFile = NULL;
+	FILE            *fileInput = NULL;
 	UINT32          lengthSignatureData;
 	BYTE            *signatureData;
-	FILE            *fileOutput;
+	FILE            *fileOutput = NULL;
 	BYTE			*passwordBytes = NULL;
 	//UINT32			lengthPasswordBytes;
 	BYTE			*keypasswordBytes = NULL;
@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
 	fseek (filePrivatekey, 0, SEEK_END);
 	lengthPrivatekeyFile = ftell (filePrivatekey);
 	fseek (filePrivatekey, 0, SEEK_SET);
-	contentPrivatekeyFile = malloc (lengthPrivatekeyFile);
+	CATCH_NULL(contentPrivatekeyFile = malloc (lengthPrivatekeyFile));
 	CATCH_ERROR( fread(contentPrivatekeyFile, 1, lengthPrivatekeyFile, filePrivatekey) != lengthPrivatekeyFile );
 	fclose(filePrivatekey);
 	filePrivatekey = NULL;
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
 	fseek (fileInput, 0, SEEK_END);
 	lengthInputFile = ftell (fileInput);
 	fseek (fileInput, 0, SEEK_SET);
-	contentInputFile = malloc (lengthInputFile);
+	CATCH_NULL(contentInputFile = malloc (lengthInputFile));
 	CATCH_ERROR( fread(contentInputFile, 1, lengthInputFile, fileInput) != lengthInputFile );
 	fclose(fileInput);
 	fileInput = NULL;

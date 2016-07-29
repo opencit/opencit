@@ -3253,8 +3253,8 @@ void NIARL_TPM_ModuleV2::get_credential()
 	UINT32			cred_size;
 	BYTE*			cred_blob;
 	UINT32 nvIndex = TSS_NV_DEFINED|TPM_NV_INDEX_EKCert;
-	UINT32 ekbufLen;
-	BYTE *ekbuf;
+	UINT32 ekbufLen = 0;
+	BYTE *ekbuf = NULL;
 	UINT32 offset;
 	UINT32 ekOffset;
 	unsigned i;
