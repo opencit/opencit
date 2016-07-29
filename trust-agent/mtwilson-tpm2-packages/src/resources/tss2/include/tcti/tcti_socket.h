@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-#include <tss2/tpm20.h>
+#include <sapi/tpm20.h>
 #include <tcti/common.h>
 
 #define DEFAULT_SIMULATOR_TPM_PORT        2321
@@ -68,7 +68,7 @@ TSS2_RC InitSocketTcti (
 TSS2_RC TeardownSocketTcti (TSS2_TCTI_CONTEXT *tctiContext);
 
 TSS2_RC SendSessionEndSocketTcti(
-    TSS2_TCTI_CONTEXT *tctiContext,      
+    TSS2_TCTI_CONTEXT *tctiContext,
     UINT8 tpmCmdServer
     );
 

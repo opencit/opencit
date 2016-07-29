@@ -1,5 +1,6 @@
-Name: tss2
+Name: sapi
 Description: TPM2 System API library.
 URL: https://github.com/01org/TPM2.0-TSS
 Version: 0.98
-Cflags: /usr/local/include/tss2
+Cflags: -I/home/hdxia/tpm2_packages/tss2/include/sapi
+Libs: -lsapi
