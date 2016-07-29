@@ -238,6 +238,9 @@ int main(int argc, char **argv) {
 	exitCode = 0;
 	
 	out_close:
+	if (filePrivatekey != NULL) { fclose(filePrivatekey); }
+	if (fileEncryptedInput != NULL) { fclose(fileEncryptedInput); }
+	if (filePlaintextOutput != NULL) { fclose(filePlaintextOutput); }
 	if( hKey != NULL ) { Tspi_Context_CloseObject(hContext, hKey); }
 	if( hSRK != NULL ) { Tspi_Context_CloseObject(hContext, hSRK); }
 	Tspi_Context_Close(hContext);
