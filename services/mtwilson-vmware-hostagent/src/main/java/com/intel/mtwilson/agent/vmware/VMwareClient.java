@@ -1195,10 +1195,10 @@ public class VMwareClient implements TlsClient {
             useroot = serviceContent.getRootFolder();
         }
 
-        List<SelectionSpec> selectionSpecs = new ArrayList<>();
-        if (recurse) {
-            selectionSpecs = buildFullTraversal();
-        }
+        //List<SelectionSpec> selectionSpecs = new ArrayList<>();
+        //if (recurse) {
+        //    selectionSpecs = buildFullTraversal();
+        //}
     
         //List<PropertySpec> propspecary = buildPropertySpecArray(typeinfo);
         ObjectSpec objSpec = new ObjectSpec();
