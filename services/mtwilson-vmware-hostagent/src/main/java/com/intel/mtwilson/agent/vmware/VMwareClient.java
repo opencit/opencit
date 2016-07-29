@@ -1485,6 +1485,7 @@ public class VMwareClient implements TlsClient {
      * @return An array of SelectionSpec covering VM, Host, Resource pool,
      * Cluster Compute Resource and Datastore.
      */
+    /*
     private List<SelectionSpec> buildFullTraversal() {
         // Terminal traversal specs
 
@@ -1598,7 +1599,7 @@ public class VMwareClient implements TlsClient {
         resultspec.add(rpToRp);
 
         return resultspec;
-    }
+    }*/
 
     private SelectionSpec getSelectionSpec(String name) {
         SelectionSpec genericSpec = new SelectionSpec();
