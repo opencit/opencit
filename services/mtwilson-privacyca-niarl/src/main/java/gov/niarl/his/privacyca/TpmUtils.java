@@ -610,7 +610,7 @@ public class TpmUtils {
 //		byte [] certBytes = new byte[certStream.available()];
 		byte[] certBytes = new byte[2048];
 		try {
-			int k = certStream.read(certBytes);
+			certStream.read(certBytes);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

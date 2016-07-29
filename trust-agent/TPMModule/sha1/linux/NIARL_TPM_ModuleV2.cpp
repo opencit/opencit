@@ -1966,7 +1966,7 @@ void NIARL_TPM_ModuleV2::create_key()
 //KEY OPERATIONS (NOT SET YET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
-	UINT32			init_flags;
+	UINT32			init_flags = 0;
 
 		if(b_debug)	cerr << "Key Section" << endl;
 		if(b_log)	clog << "Key Section" << endl;
@@ -2237,7 +2237,7 @@ void NIARL_TPM_ModuleV2::set_key()
 //KEY OPERATIONS (NOT SET YET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
-	UINT32			init_flags;
+	UINT32			init_flags = 0;
 
 		if(b_debug)	cerr << "Key Section" << endl;
 		if(b_log)	clog << "Key Section" << endl;
@@ -2781,7 +2781,7 @@ void NIARL_TPM_ModuleV2::clear_key()
 //KEY OPERATIONS (SET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
-	UINT32			init_flags;
+	UINT32			init_flags = 0;
 
 		if(b_debug)	cerr << "Key Section" << endl;
 		if(b_log)	clog << "Key Section" << endl;
