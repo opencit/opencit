@@ -139,9 +139,11 @@ public class GenerateQuoteCmd implements ICommand {
                 try {
                     String pcrBanks = context.getSelectedPcrBanks();
                     String algToQuote = "0x04"; //be default set to sha1 PCR bank
+                    String selectedPcrList = selectedPcrs.replaceAll("\\s+", ","); //change the format to use ',' to seperate the list
                     if (pcrBanks!=null && pcrBanks.equals("SHA256"))
                         algToQuote = "0x0B";                    
                     log.debug("Selected pcrBanks to quote {}", algToQuote);
+                    String quoteAlgWithPcrs = algToQuote + ":" + selectedPcrList;
                     
                     /* 1st: get pcrs - tpm2_listpcrs -g 0x4 -o pcrs.out
                      *      This commmand returns specified PCR bank pcr values (all 24 pcrs in the bank)
@@ -169,13 +171,12 @@ public class GenerateQuoteCmd implements ICommand {
                     command.addArgument(TAconfig.getAikHandle());
                     command.addArgument("-P");
 	            command.addArgument(identityAuthKey);
-                    command.addArgument("-g");
-                    command.addArgument(algToQuote);
+                    command.addArgument("-L");
+                    command.addArgument(quoteAlgWithPcrs);
                     command.addArgument("-q");
                     command.addArgument(TpmUtils.byteArrayToHexString(nonce));
-                    command.addArgument("-l");
-                    //command.addArguments(selectedPcrs.split("\\s+"));
-                    command.addArgument(selectedPcrs.replaceAll("\\s+", ","));
+                    //command.addArgument("-l");
+                    //command.addArgument(selectedPcrs.replaceAll("\\s+", ","));
                     command.addArguments("-o");
                     command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName()));
                     command.addArguments("-X");   
