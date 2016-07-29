@@ -117,9 +117,9 @@ int main(int argc, char **argv) {
 	TSS_HCONTEXT    hContext;
 	TSS_HTPM        hTPM; 
 	//TSS_HPOLICY     hTPMPolicy;
-	TSS_HKEY        hSRK; 
+	TSS_HKEY        hSRK = NULL; 
 	TSS_HPOLICY     hSRKPolicy;
-	TSS_HKEY        hKey; 
+	TSS_HKEY        hKey = NULL; 
 	TSS_HPOLICY     hKeyPolicy;
 	TSS_HENCDATA    hEncdata;
 	//TSS_HPOLICY     hEncdataPolicy;

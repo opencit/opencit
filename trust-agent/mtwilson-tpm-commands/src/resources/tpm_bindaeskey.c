@@ -97,7 +97,7 @@ static void help(const char* aCmd)
 
 int main(int argc, char **argv) {
 	TSS_HCONTEXT    hContext;
-	TSS_HKEY        hKey; 
+	TSS_HKEY        hKey = NULL; 
 	TSS_HENCDATA    hEncdata;
 	TSS_RESULT      result;
 	//BYTE            nonsecret[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
