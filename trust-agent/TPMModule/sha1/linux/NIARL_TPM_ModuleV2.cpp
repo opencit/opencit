@@ -24,6 +24,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	b_outfile = false;
 	i_mode = 0;
 	i_return = 0;
+	return_code = 0;
 
 	//setup local copy of argument array
 	i_argc = argc;

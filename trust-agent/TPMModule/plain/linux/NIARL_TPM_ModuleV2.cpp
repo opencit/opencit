@@ -25,6 +25,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	i_mode = 0;
 	i_return = 0;
 	b_getenvSecrets = false;
+	return_code = 0;
 
 	//setup local copy of argument array
 	i_argc = argc;
@@ -3416,7 +3417,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 //CLEANUP SECTION
 	result = Tspi_Context_CloseObject(context, policy_tpm);
 	result = Tspi_Context_CloseObject(context, nvstore);
-
+	free(ekbuf);
 	//result = Tspi_Context_FreeMemory(context, NULL);
 	result = Tspi_Context_Close(context);
 	return;

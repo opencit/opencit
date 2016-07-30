@@ -233,8 +233,10 @@ main (int ac, char **av)
 
 	/* Read AIK blob */
 	if ((f_in = fopen(av[1], "rb")) == NULL) {
-		fprintf (stderr, "Unable to open file %s\n", av[1]);
-		exit (1);
+            if(f_in != NULL)
+                fclose(f_in);
+            fprintf (stderr, "Unable to open file %s\n", av[1]);
+            exit (1);
 	}
 	fseek (f_in, 0, SEEK_END);
 	bufLen = ftell (f_in);
