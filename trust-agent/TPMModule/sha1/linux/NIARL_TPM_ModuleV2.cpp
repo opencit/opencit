@@ -165,10 +165,14 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	}
 }
 
+NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(const NIARL_TPM_ModuleV2& src) { /* do not create copies */ }
+
+NIARL_TPM_ModuleV2& NIARL_TPM_ModuleV2::operator=(const NIARL_TPM_ModuleV2&) { return *this; }
+
 NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 {
 	//delete dynamic arrays
-	delete [] s_argv;
+		delete [] s_argv;
 
 	//close logfile
 	if(logfile.is_open())

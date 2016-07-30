@@ -211,19 +211,22 @@ main (int ac, char **av)
 		fseek (f_in, 0, SEEK_END);
 		bufLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
-		buf = malloc (bufLen);
-                if(buf == NULL){
-                    fprintf (stderr, "Unable to allocate memory for buf\n", chalfile);
-                    exit (1);
-                }
-                    
-		if (fread(buf, 1, bufLen, f_in) != bufLen) {
-			fprintf (stderr, "Unable to readn file %s\n", chalfile);
-			exit (1);
+		
+		if (bufLen > 0) {
+			buf = malloc (bufLen);
+			if(buf == NULL){
+				fprintf (stderr, "Unable to allocate memory for buf\n", chalfile);
+				exit (1);
+			}
+			
+			if (fread(buf, 1, bufLen, f_in) != bufLen) {
+				fprintf (stderr, "Unable to readn file %s\n", chalfile);
+				exit (1);
+			}
+			fclose (f_in);
+			sha1 (hContext, buf, bufLen, chalmd);
+			free (buf);
 		}
-		fclose (f_in);
-		sha1 (hContext, buf, bufLen, chalmd);
-		free (buf);
 	} else {
 		memset (chalmd, 0, sizeof(chalmd));
 	}
