@@ -46,5 +46,5 @@
 ldconfig
 cp tcsd2.service /lib/systemd/system
 systemctl enable tcsd2.service
-systemctl stop tcsd2.service
-systemctl start tcsd2.service
+#systemctl stop tcsd2.service
+systemctl start tcsd2
