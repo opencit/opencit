@@ -1,7 +1,7 @@
 # Important! Ensure that the tabs are maintained.
 # Converting tabs to spaces is an error in Makefiles
 
-all:    aikqverify aikqverify2 aikqverifywin
+all:    clean aikqverify aikqverify2 aikqverifywin
 
 aikqverify: aikqverify.o
 	gcc aikqverify.o -o aikqverify -lcrypto
