@@ -95,13 +95,14 @@ int main (int ac, char **av)
 	UINT32		pcrLen;
 	BYTE		*pcrs;
 	UINT32		pcrSize;
+	UINT32		pcrPos;
 	UINT32		concatSize;
 	BYTE		*quoted = NULL;
 	BYTE		*quotedInfo = NULL;
 	UINT16		quotedInfoLen;
 	BYTE		*tpmtSig = NULL;
 	UINT16		sigAlg;
-	UINT16		hashAlg;
+	UINT32		hashAlg;
 	BYTE		*sig;
 	UINT32		sigLen;
 	BYTE		*recvNonce = NULL;
@@ -321,47 +322,64 @@ int main (int ac, char **av)
 	}
 
 	// validate the PCR concatenated digest
-	pcri=0; ind=0; concatSize=0;
+	pcri=0; ind=0; concatSize=0; pcrPos=0;
 	for (j=0; j<pcrBankCount; j++) {
-		if (pcr_selection[j].hashAlg == 0x04)
+		hashAlg = pcr_selection[j].hashAlg;
+		if (hashAlg == 0x04)
 			pcrSize = SHA1_SIZE;
-		else
+		else if (hashAlg == 0x0B)
 			pcrSize = SHA256_SIZE;
+		else {
+			fprintf (stderr, "Not supported PCR banks (%02x) in quote\n", hashAlg);
+			exit(3);
+		}
 		
 		for (pcr=0; pcr < 8*pcr_selection[j].size; pcr++) {
 			if (pcr_selection[j].pcrSelected[pcr/8] & (1 << (pcr%8))) {
-				memcpy(pcrConcat+ind*pcrSize, pcrs+pcrSize*pcri, pcrSize);
+				memcpy(pcrConcat+pcrPos, pcrs+pcrPos, pcrSize);
 				pcri++;
 				ind++;
 				concatSize += pcrSize;
+				pcrPos += pcrSize;
 			}
 		}
 	}
 	if (ind<1) {
 		fprintf(stderr, "Error, no PCRs selected for quote\n");
-		exit(3);
+		exit(4);
 	}
         memset(pcrsDigest, 0, sizeof(pcrsDigest));
 	SHA256(pcrConcat, concatSize, pcrsDigest);
 	if (memcmp(pcrsDigest, tpm2b_digest.digest, tpm2b_digest.size) != 0) {
 		fprintf(stderr, "Error in comparing the concatenated PCR digest with the digest in quote");
-		exit(4);
+		exit(5);
 	}
 	
 	/* Print out PCR values  */
-	pcri=0; ind=0; concatSize=0;
+	pcri=0; ind=0; concatSize=0; pcrPos=0;
 	for (j=0; j<pcrBankCount; j++) {
-		if (pcr_selection[j].hashAlg == 0x04)
+		hashAlg = pcr_selection[j].hashAlg;
+		if (hashAlg == 0x04)
 			pcrSize = SHA1_SIZE;
-		else
+		else if (hashAlg == 0x0B)
 			pcrSize = SHA256_SIZE;
+		else {
+			fprintf (stderr, "Not supported PCR banks (%02x) in quote\n", hashAlg);
+			exit(6);
+		}
 		for (pcr=0; pcr < 8*pcr_selection[j].size; pcr++) {
 			if (pcr_selection[j].pcrSelected[pcr/8] & (1 << (pcr%8))) {
-				printf ("%2d ", pcr);
+				if (hashAlg == 0x04)
+					printf ("%2d ", pcr);
+				else if (hashAlg == 0x0B)
+					//printf ("SHA256_%2d ", pcr);
+					printf ("%2d_SHA256 ", pcr);
+
 				for (i=0; i<pcrSize; i++) {
-					printf ("%02x", pcrs[pcrSize*pcri+i]);
+					printf ("%02x", pcrs[pcrPos+i]);
 				}
 				printf ("\n");
+				pcrPos += pcrSize;
 				pcri++;
 			}
 		}

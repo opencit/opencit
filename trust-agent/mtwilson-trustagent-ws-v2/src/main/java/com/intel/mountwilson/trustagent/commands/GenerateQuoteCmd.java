@@ -137,20 +137,30 @@ public class GenerateQuoteCmd implements ICommand {
             log.debug("TPM version before calling: {} ", tpmVersion);
             if (tpmVersion.equals("2.0")) {
                 try {
-                    String pcrBanks = context.getSelectedPcrBanks();
-                    String algToQuote = "0x04"; //be default set to sha1 PCR bank
                     String selectedPcrList = selectedPcrs.replaceAll("\\s+", ","); //change the format to use ',' to seperate the list
-                    if (pcrBanks!=null && pcrBanks.equals("SHA256"))
-                        algToQuote = "0x0B";                    
-                    log.debug("Selected pcrBanks to quote {}", algToQuote);
-                    String quoteAlgWithPcrs = algToQuote + ":" + selectedPcrList;
+                    String quoteAlgWithPcrs = "";
+                    if (context.getSelectedPcrBanks() == null) {
+                        quoteAlgWithPcrs = "0x0B:" + selectedPcrList;
+                    } else {
+                        String[] pcrBanks = context.getSelectedPcrBanks().split("\\s+");
+                        for (int i=0; i<pcrBanks.length; i++) {
+                            if (i != 0)
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "+";                            
+                            if (pcrBanks[i].equals("SHA1"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x04" + ":" + selectedPcrList;
+                            else if (pcrBanks[i].equals("SHA256"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0B" + ":" + selectedPcrList;  
+                            else
+                                log.debug("Unrecognized pcrbank value: {}", pcrBanks[i]);
+                        }
+                    }
                     
                     /* 1st: get pcrs - tpm2_listpcrs -g 0x4 -o pcrs.out
                      *      This commmand returns specified PCR bank pcr values (all 24 pcrs in the bank)
                     */
                     CommandLine command1 = new CommandLine("tpm2_listpcrs");
-                    command1.addArgument("-g");
-                    command1.addArgument(algToQuote);
+                    command1.addArgument("-L");
+                    command1.addArgument(quoteAlgWithPcrs);
                     command1.addArgument("-o");
                     command1.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getPcrsFileName()));
                     Result result1 = ExecUtil.execute(command1);

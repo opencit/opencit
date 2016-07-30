@@ -868,20 +868,32 @@ public class TAHelper {
         for (String pcrString : result) {
             String[] parts = pcrString.trim().split(" ");
             if (parts.length == 2) {
-                String pcrNumber = parts[0].trim().replaceAll(pcrNumberUntaint, "").replaceAll("\n", "");
+                /* parts[0] contains pcr index and the bank algorithm
+                 * in case of SHA1, the bank algorithm is not attached. so the format is just the pcr number same as before
+                 * in case of SHA256 or other algorithms, the format is "pcrNumber_SHA256"
+                 */
+                String[] pcrIndexParts = parts[0].trim().split("_");
+                String pcrNumber = pcrIndexParts[0].trim().replaceAll(pcrNumberUntaint, "").replaceAll("\n", "");
+                String pcrBank;
+                if (pcrIndexParts.length ==2)
+                    pcrBank = pcrIndexParts[1].trim();
+                else
+                    pcrBank = "SHA1";
                 String pcrValue = parts[1].trim().replaceAll(pcrValueUntaint, "").replaceAll("\n", "");
+
                 boolean validPcrNumber = pcrNumberPattern.matcher(pcrNumber).matches();
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
                 if (validPcrNumber && validPcrValue) {
                     log.debug("Result PCR " + pcrNumber + ": " + pcrValue);
 //                	pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));
                     // TODO: structure returned by this will be different, so we can actually select the algorithm by type and not length
-                    if(pcrValue.length() == 32 * 2) {
+                    // if(pcrValue.length() == 32 * 2) {
+                    if(pcrBank.equals("SHA256")) {
                         pcrManifest.setPcr(PcrFactory.newInstance(DigestAlgorithm.SHA256, PcrIndex.valueOf(pcrNumber), pcrValue));
-                    } else if(pcrValue.length() == 20 * 2) {
+                    //} else if(pcrValue.length() == 20 * 2) {
+                    } else if(pcrBank.equals("SHA1")) {
                         pcrManifest.setPcr(PcrFactory.newInstance(DigestAlgorithm.SHA1, PcrIndex.valueOf(pcrNumber), pcrValue));
                     } 
-                  
                 }
             } else {
                 log.warn("Result PCR invalid");
