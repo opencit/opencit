@@ -22,7 +22,7 @@ aikqverify2.o: $(wildcard aikqverify2.c)
 	gcc -c aikqverify2.c
 	
 clean:
-	rm -f aikqverify aikqverify.o aikqverifywin aikverifywin.o aikqverify2 aikqverify2.o
+	rm -f aikqverify aikqverify.o aikqverifywin aikqverifywin.o aikqverify2 aikqverify2.o
 
 install:
 	mkdir -p /var/opt/intel/aikverifyhome/bin
