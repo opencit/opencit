@@ -4,20 +4,14 @@
  */
 package com.intel.mtwilson.saml;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
 import java.util.*;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
@@ -102,7 +96,7 @@ public class SamlGenerator {
         this.builderFactory = XMLObjectBuilderFactoryHolder.builderFactory;
         try {
             signatureGenerator = new SAMLSignature(issuerConfiguration);
-        } catch (ClassNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | IllegalAccessException | InstantiationException | IOException | CertificateException ex) {
+        } catch (ReflectiveOperationException | GeneralSecurityException | IOException ex) {
             log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
             throw new ConfigurationException("Failed to initialize SAML signature generator", ex);
         }

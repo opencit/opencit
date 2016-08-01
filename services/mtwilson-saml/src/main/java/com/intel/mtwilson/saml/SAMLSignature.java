@@ -2,7 +2,6 @@ package com.intel.mtwilson.saml;
 
 import java.io.*;
 import java.security.*;
-import java.security.cert.CertificateException;
 import java.util.Collections;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
@@ -19,8 +18,6 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.mtwilson.My;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -43,11 +40,15 @@ public class SAMLSignature {
     /**
      * Loads a keystore and builds a stock key-info structure for use by base
      * classes.
+     * @param issuerConfiguration with the private key, issuer certificate, and JSR105 provider
+     * @throws java.lang.ReflectiveOperationException could be ClassNotFoundException, IllegalAccessException, or IntantiationException
+     * @throws java.security.GeneralSecurityException could be KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, or CertificateException when accessing the private key and issuer certificate
+     * @throws java.io.IOException when reading configuration files from disk
      */
-    public SAMLSignature(IssuerConfiguration issuerConfiguration) throws ClassNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IllegalAccessException, InstantiationException, IOException, CertificateException {
+    public SAMLSignature(IssuerConfiguration issuerConfiguration) throws ReflectiveOperationException, GeneralSecurityException, IOException {
         this.issuerConfiguration = issuerConfiguration;
         
-        String providerName = issuerConfiguration.getJsr105Provider(); //configuration.getString("jsr105Provider", "org.jcp.xml.dsig.internal.dom.XMLDSigRI");
+        String providerName = issuerConfiguration.getJsr105Provider();
         factory = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
 
 
@@ -60,6 +61,10 @@ public class SAMLSignature {
      * signature element so that it is in the correct position according to the
      * SAML assertion and protocol schema: it must immediately follow any Issuer
      * and precede everything else.
+     * @param target the XML element to sign, generally the entire document
+     * @throws java.security.GeneralSecurityException on failure to use the private key
+     * @throws javax.xml.crypto.dsig.XMLSignatureException for invalid document structure
+     * @throws javax.xml.crypto.MarshalException on failure to serialize the signature
      */
     public void signSAMLObject(Element target)
             throws GeneralSecurityException, XMLSignatureException, MarshalException {
