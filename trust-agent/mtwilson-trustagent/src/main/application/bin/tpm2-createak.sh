@@ -18,7 +18,7 @@ akFile=/tmp/ak.pub
 akNameFile=/tmp/ak.name
 akTypeHex=unknown
 tmpFile=/tmp/persistentobject
-akHandle=
+akHandle=0x81018000
 
 case $akType in
   "RSA") akTypeHex=0x1;;
@@ -34,34 +34,29 @@ if [[ $akTypeHex == unknown ]]; then
   exit 1
 fi
 
-function get_next_usable_persistent_handle()
-{
-  rm -rf $tmpFile
-  tpm2_listpersistent > $tmpFile
-  if [[ $? != 0 ]];then
-    echo "failed: unable to list persistent handles"
+function clear_ak_handle() {
+  if [[ $verbose == "verbose" ]]; then
+    echo "Trying to clear any existing AK handles..."
+  fi
+
+  tpm2_listpersistent | grep -q "Persistent handle: 0x81018000"
+  if [[ $? != 0 ]]; then
+    #ak doesnt exist, we dont need to clear, keep going
+    return 0
+  fi
+  if [[ $verbose == "verbose" ]]; then
+    echo "clearing $akHandle"
+    tpm2_evictcontrol -A o -H $akHandle -S $akHandle -P $ownerPasswd -X
+  else
+    tpm2_evictcontrol -A o -H $akHandle -S $akHandle -P $ownerPasswd -X > /dev/null
+  fi
+
+  if [[ $? != 0 ]]; then
+    echo "failed to clear ak @ $akHandle"
     return 1
   fi
 
-  #if [[ $verbose == "verbose" ]]; then
-  #  echo
-  #  cat $tmpFile
-  #fi
-
-  result=`grep -o "0x8101...." $tmpFile`
-  #echo $result
-
-  for ((i=0x81018000; i<=0x8101ffff; i++))
-  do
-    j=`printf '0x%08x\n' $i`
-    if [ -z `echo $result | grep -o "$j"` ]; then
-      echo "$j"
-      return 0
-    fi
-  done
-
-  echo "no usable persistent handle"
-  return 1
+  return 0
 }
 
 function output_result()
@@ -89,7 +84,8 @@ function output_result()
 
 rm $akFile $akNameFile -f
 
-akHandle=`get_next_usable_persistent_handle`
+clear_ak_handle
+
 if [[ $? != 0 ]]; then
   echo "failed: no usable persistent handle"
   exit 1
