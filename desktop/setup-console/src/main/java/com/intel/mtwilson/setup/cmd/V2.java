@@ -47,6 +47,7 @@ public class V2 implements Command {
                 break;
             }
             catch(Exception e) {
+                e.printStackTrace();
                 // didn't find the class in this package or it's not the right interface
             }
         }

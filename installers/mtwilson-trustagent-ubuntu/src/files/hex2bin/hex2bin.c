@@ -28,15 +28,18 @@ int main(int argc, char **argv) {
      printf("usuage is: hex2bin hexString binaryFile");
      exit(-1);
     }
-    int b, i=0;
+    unsigned int b;
+    int i=0;
     int scanerr = 0;
         FILE* outFile = fopen(argv[2],"w");
     for(i=0;argv[1]+i != NULL;i+=2) {
         scanerr = sscanf(argv[1]+i, "%2x", &b);
         if( scanerr == EOF ) { break; }
         if( scanerr != 1 ) { fprintf(stderr, "non-hex input\n"); exit(1); }
-        fputc(b, outFile);
+        if(outFile != NULL)
+            fputc(b, outFile);
     }
-    fclose(outFile);
+    if(outFile != NULL)
+        fclose(outFile);
     exit(0);
 }

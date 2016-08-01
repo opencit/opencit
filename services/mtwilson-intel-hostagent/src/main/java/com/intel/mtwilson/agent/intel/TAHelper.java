@@ -622,7 +622,7 @@ public class TAHelper {
          }
          * */
 
-        boolean tpmSupport = true;
+//        boolean tpmSupport = true;
 
 
         // xtw = xof.createXMLStreamWriter(new FileWriter("c:\\temp\\nb_xml.xml"));
@@ -631,9 +631,9 @@ public class TAHelper {
         xtw.writeStartElement("Host_Attestation_Report");
         xtw.writeAttribute("Host_Name", hostName);
         xtw.writeAttribute("Host_VMM", vmmName);
-        xtw.writeAttribute("TXT_Support", String.valueOf(tpmSupport));
+        xtw.writeAttribute("TXT_Support", String.valueOf(true)); //String.valueOf(tpmSupport));
 
-        if (tpmSupport == true) {
+//        if (tpmSupport == true) {
             for (int i = 0; i < 24; i++) {
 //                ArrayList<IManifest> pcrMFList = new ArrayList<IManifest>();
 //                pcrMFList.addAll(pcrManifestMap.values());
@@ -646,11 +646,11 @@ public class TAHelper {
                 xtw.writeAttribute("DigestValue", pcr.getValue().toString().toUpperCase()); // pInfo.getPcrValue().toUpperCase());
                 xtw.writeEndElement();
             }
-        } else {
-            xtw.writeStartElement("PCRInfo");
-            xtw.writeAttribute("Error", "Host does not support TPM.");
-            xtw.writeEndElement();
-        }
+//        } else {
+//            xtw.writeStartElement("PCRInfo");
+//            xtw.writeAttribute("Error", "Host does not support TPM.");
+//            xtw.writeEndElement();
+//        }
 
         // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report.
         for (int pcrIndex = 0; pcrIndex < 24; pcrIndex++) {

@@ -449,14 +449,14 @@ public class TpmIdentityRequest {
 			InvalidAlgorithmParameterException, 
 			TpmUtils.TpmBytestreamResouceException,
 			PrivacyCaException {
-		TpmSymmetricKey symKey = new TpmSymmetricKey();
+		TpmSymmetricKey symKey;
 		switch (asymAlgorithm.getEncScheme()) {
 		case 0x3: // <-- most likely with NTRU, TrouSerS
 			Cipher asymCipher = Cipher.getInstance("RSA/ECB/OAEPWithSha1AndMGF1Padding");
 			OAEPParameterSpec oaepSpec = new OAEPParameterSpec("Sha1", "MGF1", MGF1ParameterSpec.SHA1, new PSource.PSpecified("TCPA".getBytes()));
 			asymCipher.init(Cipher.PRIVATE_KEY, privCaKey, oaepSpec);
 			asymCipher.update(asymBlob);
-			byte[] temparray = null;
+			byte[] temparray;
 			try {
 				temparray = asymCipher.doFinal();
 			} catch (BadPaddingException e) { //<- TrouSerS does not use an OAEP parameter string of "TCPA", per 1.1b spec. This results in a BadPaddingException -- try again without!

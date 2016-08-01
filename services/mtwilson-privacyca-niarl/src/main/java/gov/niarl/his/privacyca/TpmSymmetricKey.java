@@ -82,7 +82,7 @@ public class TpmSymmetricKey {
 	 * @return Human-readable report of the TpmSymmetricKey.
 	 */
 	public String getAlgorithmStr(){
-		String returnVal = "";
+		String returnVal;
 		switch (algorithmId){
 		case TpmKeyParams.TPM_ALG_DES:
 			returnVal = "DES";
@@ -121,7 +121,7 @@ public class TpmSymmetricKey {
 	 * @return The encryption scheme as a string.
 	 */
 	public String getEncSchemeStr(){
-		String returnVal = "";
+		String returnVal;
 		switch (encScheme){
 		case TpmKeyParams.TPM_ES_NONE:
 			returnVal = "NONE/NoPadding";

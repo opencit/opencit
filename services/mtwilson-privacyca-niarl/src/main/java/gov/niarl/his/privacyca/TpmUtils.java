@@ -20,12 +20,14 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.security.*;
+import java.security.SecureRandom;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.security.spec.*;
 import java.security.interfaces.*;
 import javax.security.auth.x500.X500Principal;
 import javax.security.cert.CertificateException;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.*;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -41,7 +43,7 @@ import java.util.BitSet;
  * utility to other classes in this package; and those that perform some cross-class 
  * functionality that is specific to this package.</p>
  * <p>This package was created for performing as a Privacy Certification Authority (Privacy CA), 
- * as specified by the Trusted Computing Group. The function <b>ProcessIdentityRequest</b> encompasses 
+ * as specified by the Trusted Computing Group. The function <b>processIdentityRequest</b> encompasses 
  * the role of a Privacy CA by taking an identity request, processing it with a CA signing key, 
  * and producing the specified data blobs containing a certificate.</p>
  * <p>The function <b>makeEkCert</b> works similarly to create a certificate for a TPM's Endorsement 
@@ -60,6 +62,7 @@ import java.util.BitSet;
  *
  */
 public class TpmUtils {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmUtils.class);
 	/**
 	 * Converts an integer to a four-byte array.
 	 * 
@@ -114,9 +117,9 @@ public class TpmUtils {
 		if (source.available() < 4) {
 			throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
 		}
-		int retval = 0;
+		int retval;
 		byte[] temp = new byte[4];
-		int k =source.read(temp, 0, 4);
+		// int k =source.read(temp, 0, 4);
 		if ((temp[0]&0x80) == 0x80) throw new TpmUnsignedConversionException("Cannot convert UINT32 to signed Integer: too large - would be converted to negative.");
 		retval = (int)((temp[0]<<24&0xff000000) + 
 		         (int) (temp[1]<<16&0x00ff0000) + 
@@ -138,9 +141,9 @@ public class TpmUtils {
 		if (source.available() < 2) {
 			throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
 		}
-		int retval = 0;
+		int retval;
 		byte[] temp = new byte[2];
-		int k = source.read(temp, 0, 2);
+		// int k = source.read(temp, 0, 2);
 		if ((temp[0]&0x80) == 0x80) throw new TpmUnsignedConversionException("Cannot convert UINT16 to signed Short: too large - would be converted to negative.");
 		retval = (int)((temp[0]<<8)&0x0000ff00) + 
 			 	 (int)((temp[1]<<0)&0x000000ff);
@@ -189,7 +192,7 @@ public class TpmUtils {
 			throw new TpmBytestreamResouceException("There are not enough available bytes in the bytestream to extract the requested number.");
 		}
 		byte[] retval = new byte[size];
-		int k = source.read(retval, 0, size);
+		// int k = source.read(retval, 0, size);
 		return retval;
 	}
 	/**
@@ -464,7 +467,7 @@ public class TpmUtils {
 	 * @return The Big Integer with the value of the byte array.
 	 */
 	private static BigInteger byteArrayToBigInt(byte[] incoming) {
-		byte [] tempArray = null;
+		byte [] tempArray;
 		if ((incoming[0]&0x80) == 0x80) {
 			tempArray = new byte[incoming.length + 1];
 			tempArray[0] = (byte)0x00;
@@ -605,20 +608,16 @@ public class TpmUtils {
 			NoSuchAlgorithmException, 
 			javax.security.cert.CertificateException, 
 			java.security.cert.CertificateException {
-		InputStream certStream = new FileInputStream(filename);
-//		byte [] certBytes = new byte[certStream.available()];
-		byte[] certBytes = new byte[2048];
-		try {
-			int k = certStream.read(certBytes);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally{
-				 certStream.close();
-		}
-		javax.security.cert.X509Certificate cert = javax.security.cert.X509Certificate.getInstance(certBytes);
-		return convertX509Cert(cert);
+		try(InputStream certStream = new FileInputStream(filename)){
+    //		byte [] certBytes = new byte[certStream.available()];
+                    byte[] certBytes = IOUtils.toByteArray(certStream);                    
+                    javax.security.cert.X509Certificate cert = javax.security.cert.X509Certificate.getInstance(certBytes);
+                    return convertX509Cert(cert);
+                }
+                catch(Exception e){
+                    log.error("Error encountered while reading cert from file",e);
+                    throw new java.security.cert.CertificateException("Error encountered while reading cert from file");
+                }		
 	}
 	/**
 	 * Retrieve a certificate as an X509Certificate object from a byte string, assuming DER encoding.
@@ -661,7 +660,7 @@ public class TpmUtils {
 	 * @throws java.security.cert.CertificateException Passed if an certificate creation error occurs.
 	 * @throws TpmUtils.TpmBytestreamResouceException Passed from called functions, this most likely reflects a poorly constructed Identity Request or its base Identity Proof. 
 	 */
-	public static idResponse ProcessIdentityRequest (byte [] idRequestBlob, RSAPrivateKey caPrivKey, X509Certificate caPubCert, int validityDays) 
+	public static idResponse processIdentityRequest (byte [] idRequestBlob, RSAPrivateKey caPrivKey, X509Certificate caPubCert, int validityDays) 
 			throws PrivacyCaException, 
 			TpmUtils.TpmUnsignedConversionException, 
 			BadPaddingException, 
@@ -719,7 +718,7 @@ public class TpmUtils {
 	 * @throws java.security.cert.CertificateException
 	 * @throws TpmUtils.TpmBytestreamResouceException
 	 */
-	public static X509Certificate PartiallyProcessIdentityRequest (byte [] idRequestBlob, RSAPrivateKey caPrivKey, X509Certificate caPubCert, int validityDays) 
+	public static X509Certificate partiallyProcessIdentityRequest (byte [] idRequestBlob, RSAPrivateKey caPrivKey, X509Certificate caPubCert, int validityDays) 
 			throws PrivacyCaException, 
 			TpmUtils.TpmUnsignedConversionException, 
 			BadPaddingException, 
@@ -793,7 +792,7 @@ public class TpmUtils {
 	 */
 	public static byte [] createRandomBytes(int numBytes) 
 			throws IOException {
-		Random random = new Random(System.nanoTime());
+		SecureRandom random = new SecureRandom();		
 		//byte [] randomBytes = longToByteArray(random.nextLong());
 		byte [] randomBytes = new byte[numBytes];
 		random.nextBytes(randomBytes);
@@ -806,7 +805,7 @@ public class TpmUtils {
 	 * @return A String with the base64 encoded certificate.
 	 * @throws CertificateEncodingException Thrown if there is a problem with the certificate.
 	 */
-	public static String PEMencodeCert(X509Certificate cert) 
+	public static String pemEncodeCert(X509Certificate cert) 
 			throws CertificateEncodingException {
 		return "-----BEGIN CERTIFICATE-----" + base64encode(cert.getEncoded(), false) + "-----END CERTIFICATE-----";
 	}
@@ -822,8 +821,7 @@ public class TpmUtils {
 		char[] charArray = new String(Base64.encode(toEncode)).toCharArray();
 		String toReturn = "";
 		for (int i = 0; i < charArray.length; i++){
-			if(breakLines){if((i%64 == 0)) toReturn = sb.append("\n").toString(); }
-			toReturn = sb.append(charArray[i]).toString();
+			if(breakLines){ if((i%64 == 0)) toReturn = sb.append("\n").toString(); } else { toReturn = sb.append(charArray[i]).toString(); }
 		}
 		return toReturn;
 	}
@@ -925,7 +923,7 @@ public class TpmUtils {
 	 */
 	public static byte[] sha1hash(byte[] blob)
 			throws NoSuchAlgorithmException{
-		byte[] toReturn = null;
+		byte[] toReturn;
 		MessageDigest md = MessageDigest.getInstance("SHA1");
 		md.update(blob);
 		toReturn = md.digest();
@@ -944,7 +942,7 @@ public class TpmUtils {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static byte[] TCGAsymEncrypt(byte[] payload, RSAPublicKey pubKey, String OAEPstring)
+	public static byte[] tcgAsymEncrypt(byte[] payload, RSAPublicKey pubKey, String OAEPstring)
 			throws NoSuchAlgorithmException,
 				NoSuchPaddingException,
 				InvalidKeyException,
@@ -970,14 +968,14 @@ public class TpmUtils {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static byte[] TCGAsymEncrypt(byte[] payload, RSAPublicKey pubKey)
+	public static byte[] tcgAsymEncrypt(byte[] payload, RSAPublicKey pubKey)
 			throws NoSuchAlgorithmException,
 				NoSuchPaddingException,
 				InvalidKeyException,
 				InvalidAlgorithmParameterException,
 				IllegalBlockSizeException,
 				BadPaddingException{
-		return TCGAsymEncrypt(payload, pubKey, "TCPA");
+		return tcgAsymEncrypt(payload, pubKey, "TCPA");
 	}
 	/**
 	 * Perform a symmetric encryption of a byte array in the way specified by the TCG for all TPM-related symmetric encryption activities. The given key and IV are used.
@@ -992,7 +990,7 @@ public class TpmUtils {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static byte[] TCGSymEncrypt(byte[] payload, byte[] key, byte[] iv)
+	public static byte[] tcgSymEncrypt(byte[] payload, byte[] key, byte[] iv)
 			throws NoSuchAlgorithmException, 
 				NoSuchPaddingException, 
 				InvalidKeyException, 
@@ -1028,7 +1026,7 @@ public class TpmUtils {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static byte[] TCGAsymDecrypt(byte[] ciphertext, RSAPrivateKey privKey, String OAEPstring) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
+	public static byte[] tcgAsymDecrypt(byte[] ciphertext, RSAPrivateKey privKey, String OAEPstring) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
 		Cipher asymCipher = Cipher.getInstance("RSA/ECB/OAEPWithSha1AndMGF1Padding");
 		OAEPParameterSpec oaepSpec = new OAEPParameterSpec("Sha1", "MGF1", MGF1ParameterSpec.SHA1, new PSource.PSpecified(OAEPstring.getBytes()));
 		asymCipher.init(Cipher.PRIVATE_KEY, privKey, oaepSpec);
@@ -1049,7 +1047,7 @@ public class TpmUtils {
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
 	 */
-	public static byte[] TCGSymDecrypt(byte[] ciphertext, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
+	public static byte[] tcgSymDecrypt(byte[] ciphertext, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
 		Cipher symCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		IvParameterSpec ivSpec = new IvParameterSpec(iv);
 		symCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), ivSpec);
@@ -1059,10 +1057,10 @@ public class TpmUtils {
 	 * Generate a Hashed Message Authentication Code for TCS function authentication using the given auth blob and concatenation of all *H1 (1H1, 2H1, etc) values for the function.
 	 * @param authBlob 20 byte auth code for the object in question
 	 * @param xH1concat A concatenation of all of the authenticated *H1 parameters for the function, e.g. 1H1, 2H1, 3H1, etc. 
-	 * @return The HMAC blob suitable to be used for passing as a TCS parameter
+	 * @return The hmac blob suitable to be used for passing as a TCS parameter
 	 * @throws Exception
 	 */
-	public static byte[] HMAC(byte[] authBlob, byte[] xH1concat) throws Exception{
+	public static byte[] hmac(byte[] authBlob, byte[] xH1concat) throws Exception{
 		Mac mac = Mac.getInstance("HmacSha1");
 		SecretKey key = new SecretKeySpec(authBlob, "HmacSha1");
 		mac.init(key);

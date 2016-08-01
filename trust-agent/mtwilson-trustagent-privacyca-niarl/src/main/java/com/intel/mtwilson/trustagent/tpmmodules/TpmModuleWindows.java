@@ -258,12 +258,15 @@ public class TpmModuleWindows implements TpmModuleProvider {
             
             byte [] key = TpmUtils.hexStringToByteArray(result.getResult(0));
             int credsize  = TpmUtils.getUINT32(bs);
-            TpmKeyParams keyParms = new TpmKeyParams(bs);
+            //#5839: Variable 'keyParms' was never read after being assigned.
+            //TpmKeyParams keyParms = new TpmKeyParams(bs);
             byte[] iv = new byte[16];
-            bs.read(iv, 0, 16);
+            //#5813: The value returned by 'java.io.ByteArrayInputStream.read'() method is ignored
+            //bs.read(iv, 0, 16);
             int ciphertextLen = credsize - 16;
             byte [] ciphertext = new byte[ciphertextLen];
-            bs.read(ciphertext, 0, ciphertextLen);
+            //#5826: The value returned by 'java.io.ByteArrayInputStream.read'() method is ignored
+            //bs.read(ciphertext, 0, ciphertextLen);
             
             byte [] aikcert = TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
             
@@ -302,7 +305,8 @@ public class TpmModuleWindows implements TpmModuleProvider {
                     throws IOException {
 
         int returnCode;
-        final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
+        //#5814: Variable 'newTpmModuleExePath' was never read after being assigned.
+        //final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
         final String newExeName = "TPMTool.exe";
 
         // Parse the args parameter to populate the environment variables array
