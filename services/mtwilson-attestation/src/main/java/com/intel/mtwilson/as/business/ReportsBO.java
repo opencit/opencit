@@ -442,7 +442,7 @@ public class ReportsBO {
 
         if (pcrManifestCollection != null) {
             for (TblPcrManifest pcrManifest : pcrManifestCollection) {
-                if (pcrManifest.getName().equals(manifestName)) {
+                if (pcrManifest.getName().equals(manifestName) && pcrManifest.getPcrBank().equals(tblHosts.getPcrBank())) {
                     return pcrManifest;
                 }
             }

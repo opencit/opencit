@@ -57,8 +57,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.shiro.util.StringUtils;
 /**
  * All settings should be via setters, not via constructor, because this class
  * may be instantiated by a factory.
@@ -151,11 +153,7 @@ public class HostBO {
                         }                
                         // User specified priority overrides for these fields
                         if (host.getTpmVersion() != null) {
-                        tblHosts.setTpmVersion(host.getTpmVersion());
-                        }
-                        if (host.getPcrBanks() != null) {
-                            // always select the best in the user supplied list. User may specify a list of size 1 to force a specific bank
-                            tblHosts.setPcrBank(host.getBestPcrAlgorithmBank());
+                            tblHosts.setTpmVersion(host.getTpmVersion());
                         }
 
                         if (agent == null) {
@@ -169,11 +167,22 @@ public class HostBO {
                         if(tblHosts.getTpmVersion() == null) {
                             tblHosts.setTpmVersion(detailsPulledFromHost.TpmVersion);
                         }
-                        if(tblHosts.getPcrBank() != null) {
-                            // User has overidden PCR Bank. Complain if it isn't supported
-                            if(!detailsPulledFromHost.PcrBanks.contains(tblHosts.getPcrBank())) {
-                                throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, "This TPM Does not support PCR Bank: " + tblHosts.getPcrBank());
+                        if(host.getPcrBanks() != null) {
+                            // User has overidden PCR Bank List. Complain if we can't support it
+                            String overrideList = host.getPcrBanks();
+                            String supportedList = detailsPulledFromHost.PcrBanks;
+                            
+                            Set<String> override = StringUtils.splitToSet(overrideList, " ");
+                            Set<String> supported = StringUtils.splitToSet(supportedList, " ");
+                            
+                            supported.retainAll(override); // intersection of set
+                            
+                            if(supported.size() <= 0) {
+                                throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, "This TPM Does not support any of the PCR Banks requested: " + override);
                             }
+                            
+                            detailsPulledFromHost.PcrBanks = (StringUtils.join(supported.iterator(), " "));
+                            tblHosts.setPcrBank(detailsPulledFromHost.getBestPcrAlgorithmBank());
                         } else {
                             // else we Select AUTO based on Host capabilities, consistent with the V2 api
                             tblHosts.setPcrBank(detailsPulledFromHost.getBestPcrAlgorithmBank());

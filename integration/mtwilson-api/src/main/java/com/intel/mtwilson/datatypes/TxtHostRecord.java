@@ -165,7 +165,7 @@ public class TxtHostRecord {
             return "SHA1";
     }
     
-    static String selectBestSinglePcrBank(String availableBanks) {        
+    public static String selectBestSinglePcrBank(String availableBanks) {        
         String[] banks = StringUtils.split(availableBanks, ' ');
         Map<String, Integer> rankings = new HashMap<>();
         rankings.put("SHA1", 0);
