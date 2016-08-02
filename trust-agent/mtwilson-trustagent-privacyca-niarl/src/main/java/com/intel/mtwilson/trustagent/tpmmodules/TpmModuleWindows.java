@@ -268,7 +268,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
             //#5826: The value returned by 'java.io.ByteArrayInputStream.read'() method is ignored
             //bs.read(ciphertext, 0, ciphertextLen);
             
-            byte [] aikcert = TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
+            byte [] aikcert = TpmUtils.tcgSymDecrypt(ciphertext, key, iv);
             
             // return the results
             HashMap<String,byte[]> results = new HashMap<String, byte[]>();
