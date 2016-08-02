@@ -99,7 +99,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
 	private static byte[] createReturn(TpmPubKey aik, RSAPublicKey pubEk, byte[] challengeRaw) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, TpmUtils.TpmUnsignedConversionException, IOException{
 		byte [] key = TpmUtils.createRandomBytes(16);
 		byte [] iv = TpmUtils.createRandomBytes(16);
-		byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
+		byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.tcgSymEncrypt(challengeRaw, key, iv));
 		byte [] credSize = TpmUtils.intToByteArray(encryptedBlob.length);
 
 		TpmSymmetricKey symKey = new TpmSymmetricKey();
@@ -113,7 +113,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
 		keyParms.setSubParams(null);
 		keyParms.setTrouSerSmode(true);
 
-		byte [] asymBlob = TpmUtils.TCGAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
+		byte [] asymBlob = TpmUtils.tcgAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
 		byte [] symBlob = TpmUtils.concat(TpmUtils.concat(credSize, keyParms.toByteArray()), encryptedBlob);
 		//return TpmUtils.concat(asymBlob, symBlob);                        
                 //for windows to return EK_BLOB. append the encrypted EK_BLOB to the existing byte stream
@@ -123,7 +123,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
                     return TpmUtils.concat(asymBlob, symBlob);
                 }
                 else {
-                    byte [] asymEkBlob = TpmUtils.TCGAsymEncrypt(ekBlob, pubEk);
+                    byte [] asymEkBlob = TpmUtils.tcgAsymEncrypt(ekBlob, pubEk);
                     log.debug(" asymEkBlob: " + TpmUtils.byteArrayToHexString(asymEkBlob));
                     return TpmUtils.concat(TpmUtils.concat(asymBlob, symBlob), asymEkBlob);
                 }
