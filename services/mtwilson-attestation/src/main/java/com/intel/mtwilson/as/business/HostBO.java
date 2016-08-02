@@ -148,18 +148,36 @@ public class HostBO {
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
-                        }                      
+                        }                
+                        // User specified priority overrides for these fields
                         if (host.getTpmVersion() != null) {
                         tblHosts.setTpmVersion(host.getTpmVersion());
                         }
                         if (host.getPcrBanks() != null) {
-                            tblHosts.setPcrBank(host.getPcrBanks());
+                            // always select the best in the user supplied list. User may specify a list of size 1 to force a specific bank
+                            tblHosts.setPcrBank(host.getBestPcrAlgorithmBank());
                         }
 
                         if (agent == null) {
                             HostAgentFactory factory = new HostAgentFactory();
                             agent = factory.getHostAgent(tblHosts);
                         }
+                        
+                        TxtHostRecord detailsPulledFromHost = agent.getHostDetails();
+                        
+                        // pull details from host to fill in null or invalid information
+                        if(tblHosts.getTpmVersion() == null) {
+                            tblHosts.setTpmVersion(detailsPulledFromHost.TpmVersion);
+                        }
+                        if(tblHosts.getPcrBank() != null) {
+                            // User has overidden PCR Bank. Complain if it isn't supported
+                            if(!detailsPulledFromHost.PcrBanks.contains(tblHosts.getPcrBank())) {
+                                throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, "This TPM Does not support PCR Bank: " + tblHosts.getPcrBank());
+                            }
+                        } else {
+                            // else we Select AUTO based on Host capabilities, consistent with the V2 api
+                            tblHosts.setPcrBank(detailsPulledFromHost.getBestPcrAlgorithmBank());
+                        }                                             
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                             PublicKey publicKey = agent.getAik();

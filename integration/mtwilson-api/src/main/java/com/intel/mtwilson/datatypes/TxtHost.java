@@ -6,6 +6,8 @@ import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Hostname;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import static com.intel.mtwilson.datatypes.TxtHostRecord.selectBestSinglePcrBank;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 
 /**
@@ -234,4 +236,12 @@ public class TxtHost {
     public void setBindingKeyCertificate(String bindingKeyCertificate) {
         this.bindingKeyCertificate = bindingKeyCertificate;
     }    
+    
+    @JsonIgnore
+    public String getBestPcrAlgorithmBank() {
+        if(this.pcrBanks != null && this.pcrBanks.length() > 0)
+            return TxtHostRecord.selectBestSinglePcrBank(this.pcrBanks);
+        else 
+            return "SHA1";
+    }
 }
