@@ -1,9 +1,18 @@
 package com.intel.mtwilson.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
+import static com.intel.dcsg.cpg.crypto.DigestAlgorithm.SHA1;
 import java.util.ArrayList;
 import java.util.List;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 //import org.codehaus.jackson.annotate.JsonValue;
 
 /**
@@ -35,7 +44,10 @@ import java.util.List;
  * @author jbuhacoff
  */
 public class PcrManifest extends ObjectModel {
-    private final Pcr[] pcrs = new Pcr[24];
+    private final PcrSha1[] sha1pcrs = new PcrSha1[24];    
+    private final PcrSha256[] sha2pcrs = new PcrSha256[24];
+    //private final Pcr<Sha512Digest>[] sha512pcrs = new Pcr[24];
+    
     private final PcrEventLog[] pcrEventLogs = new PcrEventLog[24];
     private String measurementXml;
     private byte[] ProvisionedTag; //this is additional field added to support the new way of assetag attestation -- Haidong
@@ -54,33 +66,107 @@ public class PcrManifest extends ObjectModel {
         this.ProvisionedTag = null;
     }
     
-    public void setPcr(Pcr pcr) {
-        pcrs[pcr.getIndex().toInteger()] = pcr;
+    public void setPcr(DigestAlgorithm bank, Pcr pcr) {
+        switch(bank) {
+            case SHA256:
+                sha2pcrs[pcr.getIndex().toInteger()] = (PcrSha256)pcr;
+                break;
+            default:
+                sha1pcrs[pcr.getIndex().toInteger()] = (PcrSha1)pcr;
+        }
     }
     
+    public void setPcr(Pcr pcr) {        
+        setPcr(pcr.getPcrBank(), pcr);
+    }
+            
+    public Pcr getPcr(DigestAlgorithm bank, int index) {
+        switch(bank) {
+            case SHA256:
+                return sha2pcrs[index];
+            default:
+                return sha1pcrs[index];
+        }
+    }
+    
+    @Deprecated
     public Pcr getPcr(int index) {
-        return pcrs[index];
+        return sha1pcrs[index];
     }
 
+    public Pcr getPcr(DigestAlgorithm bank, PcrIndex pcrIndex) {
+        return getPcr(bank, pcrIndex.toInteger());
+    }
+    
+    @Deprecated
     public Pcr getPcr(PcrIndex pcrIndex) {
-        return pcrs[pcrIndex.toInteger()];
+        return getPcr(DigestAlgorithm.SHA1, pcrIndex);
+    }
+    
+    /**
+     *
+     * @return
+     */
+    @JsonIgnore
+    public Map<DigestAlgorithm, List<Pcr>> getPcrsMap() {
+        Map<DigestAlgorithm, List<Pcr>> pcrsMap = new LinkedHashMap<>();
+        
+        List<Pcr> sha1 = new ArrayList<>();
+        for(PcrSha1 pcr : sha1pcrs) {
+            if(pcr != null) {
+                sha1.add(pcr);
+            }
+        }
+        
+        List<Pcr> sha2 = new ArrayList<>();
+        for (PcrSha256 pcr : sha2pcrs) {
+            if(pcr != null) {
+                sha2.add(pcr);
+            }
+        }
+        
+        pcrsMap.put(DigestAlgorithm.SHA1, sha1);
+        pcrsMap.put(DigestAlgorithm.SHA256, sha2);
+        
+        return pcrsMap;
     }
     
     public List<Pcr> getPcrs() {
+        List<Pcr> pcrs = new ArrayList<>();
+        for(Pcr pcr : sha1pcrs) {
+            if(pcr != null) {
+                pcrs.add(pcr);
+            }
+        }
+        
+        for(Pcr pcr: sha2pcrs) {
+            if(pcr != null) {
+                pcrs.add(pcr);
+            }
+        }
+        
+        return pcrs;
+    }
+    
+    public List<Pcr> getPcrs(DigestAlgorithm bank) {        
+        Pcr[] p = bank == DigestAlgorithm.SHA256 ? sha2pcrs : sha1pcrs;
+        
         ArrayList<Pcr> pcrsList = new ArrayList<>();
-        for (Pcr pcr : pcrs) {
+        for (Pcr pcr : p) {
             if (pcr != null)
                 pcrsList.add(pcr);
-        }
+        }        
         return pcrsList;
     }
     
-    public void setPcrs(List<Pcr> pcrsList) {
+    public void setPcrs(DigestAlgorithm bank, List<Pcr> pcrsList) {
+        Pcr[] p = bank == DigestAlgorithm.SHA256 ? sha2pcrs : sha1pcrs;
+        
         for (int i = 0; i < 23; i++) {
-            pcrs[i] = null;
+            p[i] = null;
         }
         for (Pcr pcr : pcrsList) {
-            setPcr(pcr);
+            setPcr(bank, pcr);
         }
     }
     
@@ -102,12 +188,27 @@ public class PcrManifest extends ObjectModel {
         }
     }
     
-    public void clearPcr(int index) {
-        pcrs[index] = null;
+    public void clearPcr(DigestAlgorithm bank, int index) {
+        switch(bank) {
+            case SHA256:
+                sha2pcrs[index] = null;
+            default:
+                sha1pcrs[index] = null;
+        }
     }
     
+    @Deprecated
+    public void clearPcr(int index) {
+        clearPcr(DigestAlgorithm.SHA1, index);
+    }
+    
+    public void clearPcr(DigestAlgorithm bank, PcrIndex pcrIndex) {
+        clearPcr(bank, pcrIndex.toInteger());
+    }
+    
+    @Deprecated
     public void clearPcr(PcrIndex pcrIndex) {
-        pcrs[pcrIndex.toInteger()] = null;
+        clearPcr(DigestAlgorithm.SHA1, pcrIndex.toInteger());
     }
     
     public void setPcrEventLog(PcrEventLog pcrEventLog) {
@@ -131,15 +232,27 @@ public class PcrManifest extends ObjectModel {
     }
     
     
+    public boolean containsPcr(DigestAlgorithm bank, PcrIndex index) {
+        if( index == null) return false;
+        
+        switch(bank) {
+            case SHA1:
+                return sha1pcrs[index.toInteger()] != null;
+            case SHA256:
+                return sha2pcrs[index.toInteger()] != null;
+            default:
+                return false;
+        }
+    }
+    
     /**
      * Checks to see if the PcrManifest contains the given Pcr (index and value)
      * @param pcr
      * @return true if the PcrManifest contains the given Pcr at its specified index and value, and false in all other cases
      */
+    @Deprecated
     public boolean containsPcr(PcrIndex index) {
-        if( index == null ) { return false; }
-        if( pcrs[index.toInteger()] == null ) { return false; }
-        return false;
+        return containsPcr(DigestAlgorithm.SHA1, index);
     }
 
     /**
@@ -157,13 +270,22 @@ public class PcrManifest extends ObjectModel {
      * Returns a string representing the PCR manifest, one PCR index-value pair
      * per line. Only non-null PCRs are represented in the output. PcrEventLogs are ignored.
      * 
+     * @return 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         String result = "";
-        for(int i=0; i<pcrs.length; i++) {
-            if( pcrs[i] != null ) { result = result.concat(pcrs[i].toString()+"\n"); }
+        for (Pcr<Sha1Digest> sha1pcr : sha1pcrs) {
+            if (sha1pcr != null) {
+                result = result.concat(sha1pcr.toString() + "\n");
+            }
+        }
+        
+        for(Pcr<Sha256Digest> p : sha2pcrs) {
+            if(p != null) {
+                result = result.concat(p.toString() + "\n");
+            }
         }
         return result;
     }
@@ -171,14 +293,24 @@ public class PcrManifest extends ObjectModel {
     @Override
     public void validate() {
         int countPcrEntries = 0;
-        for(int i=0; i<pcrs.length; i++) {
-            if( pcrs[i] != null ) {
+        for(int i=0; i<sha1pcrs.length; i++) {
+            if( sha1pcrs[i] != null ) {
                 countPcrEntries++;
-                if( !pcrs[i].isValid() ) {
-                    fault(pcrs[i], String.format("Pcr %d is invalid", i));
+                if( !sha1pcrs[i].isValid() ) {
+                    fault(sha1pcrs[i], String.format("SHA1 Pcr %d is invalid", i));
                 }
             }
         }
+        
+        for(Pcr<Sha256Digest> p : sha2pcrs) {
+            if(p != null) {
+                countPcrEntries++;
+                if(!p.isValid()) {
+                    fault(p, String.format("SHA256 Pcr %d is invalid", p.getIndex().toInteger()));
+                }
+            }
+        }
+        
         if( countPcrEntries == 0 ) {
             fault("Pcr manifest does not have any entries");
         }

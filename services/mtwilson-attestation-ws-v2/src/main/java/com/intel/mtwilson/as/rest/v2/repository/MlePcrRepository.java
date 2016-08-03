@@ -154,7 +154,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
             for (TblPcrManifest pcr : pcrs) {
                 if (pcr.getName().equalsIgnoreCase(pcrIndex)) {
                     log.debug("MlePcr:Delete - About to delete pcr index {} for mle with uuid {}.", locator.pcrIndex, locator.mleUuid.toString());
-                    new MleBO().deletePCRWhiteList(null, null, null, null, null, null, pcr.getUuid_hex());
+                    new MleBO().deletePCRWhiteList(null, null, null, null, null, null, null, pcr.getUuid_hex());
                 }
             }            
         } catch (Exception ex) {

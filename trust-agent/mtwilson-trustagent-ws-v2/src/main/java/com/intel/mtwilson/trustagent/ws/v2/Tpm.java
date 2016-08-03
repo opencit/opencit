@@ -108,6 +108,12 @@ public class Tpm {
         TADataContext context = new TADataContext(); // when we call getSessionId it will create a new random one
         String osName = System.getProperty("os.name");
         context.setOsName(osName);
+        
+        //set PCR banks only applies to TPM 2.0
+        if (tpmQuoteRequest.getPcrbanks() == null)
+            context.setSelectedPcrBanks("SHA1");
+        else
+            context.setSelectedPcrBanks(tpmQuoteRequest.getPcrbanks());
 
         /* If it is Windows host, Here we read Geotag from nvram index 0x40000010 and do sha1(nonce | geotag) and use the result as the nonce for TPM quote
            As of now, we still keep the same geotag provisioning mechanism by writing it to TPM. there are other approaches as well, but not in implementation.

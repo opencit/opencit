@@ -164,7 +164,7 @@ trustagent_setup() {
 
 trustagent_authorize() {
   export HARDWARE_UUID=$(trustagent_system_info "dmidecode -s system-uuid")
-  local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
+  local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA256"
   local default_value
   for v in $authorize_vars
   do

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#install tboot
-cd tboot
-./install.sh
-cd ..
+#skip the installation of tboot. it should be installed and tested before TA is installed.
+#cd tboot
+#./install.sh
+#cd ..
 
 #install tss2
 cd tss2

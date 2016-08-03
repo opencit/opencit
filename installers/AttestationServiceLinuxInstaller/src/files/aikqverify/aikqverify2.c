@@ -78,6 +78,7 @@ typedef struct {
 
 #define SHA1_SIZE 20 // 20 bytes
 #define SHA256_SIZE 32 // 32 bytes
+#define MAX_BANKS 3  // support up to 3 pcr banks
 
 int main (int ac, char **av)
 {
@@ -93,12 +94,15 @@ int main (int ac, char **av)
 	BYTE		*select;
 	UINT32		pcrLen;
 	BYTE		*pcrs;
+	UINT32		pcrSize;
+	UINT32		pcrPos;
+	UINT32		concatSize;
 	BYTE		*quoted = NULL;
 	BYTE		*quotedInfo = NULL;
 	UINT16		quotedInfoLen;
 	BYTE		*tpmtSig = NULL;
 	UINT16		sigAlg;
-	UINT16		hashAlg;
+	UINT32		hashAlg;
 	BYTE		*sig;
 	UINT32		sigLen;
 	BYTE		*recvNonce = NULL;
@@ -110,16 +114,16 @@ int main (int ac, char **av)
 	TPM2B_NAME	tpm2b_name;
 	TPM2B_DATA	tpm2b_data;
 	UINT32		pcrBankCount;
-	TPMS_PCR_SELECTION	pcr_selection;
+	TPMS_PCR_SELECTION	pcr_selection[MAX_BANKS]; 
 	TPM2B_DIGEST	tpm2b_digest;
 	TPMT_SIGNATURE	tpmt_signature;
-	BYTE 		pcrConcat[SHA256_SIZE * 24];
+	BYTE 		pcrConcat[SHA256_SIZE * 24 * 3]; //allocate 3 SHA256 banks memory to accomodate possible combination
 	BYTE		pcrsDigest[SHA256_SIZE];
 	char		*chalfile = NULL;
 	int			pcr;
 	int			pcri = 0;
 	int			ind = 0;
-	int			i;
+	int			i,j;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
 		chalfile = av[2];
@@ -194,22 +198,17 @@ int main (int ac, char **av)
 
 	index = 0;
 
-	/* PART1: quote PCR value */
-	// pcr values for pcr 0-23 in bank of SHA1
 	if (quoteLen < 2)
 		goto badquote;
-	select = quote;
-	pcrs = quote;
-	pcrLen = 480;
 
-	// PART2: quoted infomration structure - TPM2B_ATTEST
-	index += pcrLen;	
+	// PART1: quoted infomration structure - TPM2B_ATTEST
+	index = 0;	
 	quoted = quote + index; 
 	quotedInfoLen = (*(UINT16*)quoted); // This is NOT in network order
  	quotedInfo = quoted + 2; // following is the TPMS_ATTEST structure as defined in tpm2.0 spec
         //printf("quoteInfoLen: %d\n", quotedInfoLen);
 	
-	//qualifiedSigner -- skip the magic header and type
+	//qualifiedSigner -- skip the magic header and type -- not interested
 	index += 2;
 	index += 6;
 
@@ -239,8 +238,8 @@ int main (int ac, char **av)
 		free(chal);
 	}
 	
-	index += 17; // skip over the TPMS_CLOCKINFO structure
-	index += 8;  // skip over the firmware info
+	index += 17; // skip over the TPMS_CLOCKINFO structure - Not interested
+	index += 8;  // skip over the firmware info - Not interested
 	/* TPMU_ATTEST with selected PCR banks and PCRs, and their hash
 	 * tpms_quote_info tpml_pcr_selection	
 	 *	count 			uint32	0x00000001	 4 bytes -indicates the number of tpms_pcr_slection array
@@ -253,16 +252,25 @@ int main (int ac, char **av)
 	 *				digest	32 bytes of hash
 	 */
 	pcrBankCount = ntohl(*(UINT32*)(quote + index));
+        if (pcrBankCount > MAX_BANKS) {
+		fprintf(stderr, "number of PCR selection array in the quote is greater than %d", MAX_BANKS);
+		exit(1);
+	}
+		
 	//printf("bank count: %02x\n", pcrBankCount);
 	index += 4;
-	pcr_selection.hashAlg = ntohs(*(UINT16*)(quote + index));
-	//printf("pcr bank: %02x\n", pcr_selection.hashAlg);
-	index += 2;
-	pcr_selection.size = (*(UINT8*)(quote + index));
-	//printf("pcr bit size byte: %02x\n", pcr_selection.size);
-	index += 1;
-	pcr_selection.pcrSelected = quote + index;
-	index += pcr_selection.size;
+
+	// processing the tpms_pcr_selection array  
+	for (i=0; i<pcrBankCount; i++) {
+		pcr_selection[i].hashAlg = ntohs(*(UINT16*)(quote + index));
+		//printf("pcr bank: %02x\n", pcr_selection[i].hashAlg);
+		index += 2;
+		pcr_selection[i].size = (*(UINT8*)(quote + index));
+		//printf("pcr bit size byte: %02x\n", pcr_selection.size);
+		index += 1;
+		pcr_selection[i].pcrSelected = quote + index;
+		index += pcr_selection[i].size;
+        }
 
 	//NOTE: currently we only limit the selection of one PCR bank for quote
 	tpm2b_digest.size = ntohs(*(UINT16*)(quote + index));
@@ -270,7 +278,7 @@ int main (int ac, char **av)
 	index += 2;
 	tpm2b_digest.digest = quote + index;
 
-	/* PART 3: TPMT_SIGNATURE */
+	/* PART 2: TPMT_SIGNATURE */
 	index = 2 + quotedInfoLen; // jump to the TPMT_SIGNATURE strucuture
         tpmtSig = quoted + index;
 	pos = 0;
@@ -294,10 +302,12 @@ int main (int ac, char **av)
 	pos += 2;
         tpmt_signature.signature = tpmtSig + pos;
 
-	/* verify the length of data */	
-	verifiedLen = (tpmt_signature.signature + tpmt_signature.size) - quote;
-	if (verifiedLen != quoteLen) {
-		fprintf (stderr, "Error in parsing data structure in quote\n");
+	/* PART3: quote PCR value */
+	// pcr values for pcr 0-23 in bank of SHA1
+        pcrs = tpmt_signature.signature + tpmt_signature.size;	
+        pcrLen = quoteLen - (pcrs-quote);
+        if (pcrLen <=0) {
+		fprintf (stderr, "no PCR values included in quote\n");
 		exit(1);
 	}
 	
@@ -312,35 +322,66 @@ int main (int ac, char **av)
 	}
 
 	// validate the PCR concatenated digest
-	pcri=0; ind=0;
-	for (pcr=0; pcr < 8*pcr_selection.size; pcr++) {
-		if (pcr_selection.pcrSelected[pcr/8] & (1 << (pcr%8))) {
-			memcpy(pcrConcat+ind*20, pcrs+20*pcri, SHA1_SIZE);
-			pcri++;
-			ind++;
+	pcri=0; ind=0; concatSize=0; pcrPos=0;
+	for (j=0; j<pcrBankCount; j++) {
+		hashAlg = pcr_selection[j].hashAlg;
+		if (hashAlg == 0x04)
+			pcrSize = SHA1_SIZE;
+		else if (hashAlg == 0x0B)
+			pcrSize = SHA256_SIZE;
+		else {
+			fprintf (stderr, "Not supported PCR banks (%02x) in quote\n", hashAlg);
+			exit(3);
+		}
+		
+		for (pcr=0; pcr < 8*pcr_selection[j].size; pcr++) {
+			if (pcr_selection[j].pcrSelected[pcr/8] & (1 << (pcr%8))) {
+				memcpy(pcrConcat+pcrPos, pcrs+pcrPos, pcrSize);
+				pcri++;
+				ind++;
+				concatSize += pcrSize;
+				pcrPos += pcrSize;
+			}
 		}
 	}
 	if (ind<1) {
 		fprintf(stderr, "Error, no PCRs selected for quote\n");
-		exit(3);
+		exit(4);
 	}
         memset(pcrsDigest, 0, sizeof(pcrsDigest));
-	SHA256(pcrConcat, ind*SHA1_SIZE, pcrsDigest);
+	SHA256(pcrConcat, concatSize, pcrsDigest);
 	if (memcmp(pcrsDigest, tpm2b_digest.digest, tpm2b_digest.size) != 0) {
 		fprintf(stderr, "Error in comparing the concatenated PCR digest with the digest in quote");
-		exit(4);
+		exit(5);
 	}
 	
 	/* Print out PCR values  */
-	pcri=0;
-	for (pcr=0; pcr < 8*pcr_selection.size; pcr++) {
-		if (pcr_selection.pcrSelected[pcr/8] & (1 << (pcr%8))) {
-			printf ("%2d ", pcr);
-			for (i=0; i<20; i++) {
-				printf ("%02x", pcrs[20*pcri+i]);
+	pcri=0; ind=0; concatSize=0; pcrPos=0;
+	for (j=0; j<pcrBankCount; j++) {
+		hashAlg = pcr_selection[j].hashAlg;
+		if (hashAlg == 0x04)
+			pcrSize = SHA1_SIZE;
+		else if (hashAlg == 0x0B)
+			pcrSize = SHA256_SIZE;
+		else {
+			fprintf (stderr, "Not supported PCR banks (%02x) in quote\n", hashAlg);
+			exit(6);
+		}
+		for (pcr=0; pcr < 8*pcr_selection[j].size; pcr++) {
+			if (pcr_selection[j].pcrSelected[pcr/8] & (1 << (pcr%8))) {
+				if (hashAlg == 0x04)
+					printf ("%2d ", pcr);
+				else if (hashAlg == 0x0B)
+					//printf ("SHA256_%2d ", pcr);
+					printf ("%2d_SHA256 ", pcr);
+
+				for (i=0; i<pcrSize; i++) {
+					printf ("%02x", pcrs[pcrPos+i]);
+				}
+				printf ("\n");
+				pcrPos += pcrSize;
+				pcri++;
 			}
-			printf ("\n");
-			pcri++;
 		}
 	}
          

@@ -6,6 +6,8 @@ import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Hostname;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import static com.intel.mtwilson.datatypes.TxtHostRecord.selectBestSinglePcrBank;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 
 /**
@@ -99,6 +101,7 @@ public class TxtHost {
         tlsPolicyChoice = host.tlsPolicyChoice;
         bindingKeyCertificate = null;
         tpmVersion = host.TpmVersion;
+        pcrBanks = host.PcrBanks;
         
 //        tlsPolicyId = (host.tlsPolicyChoice == null ? null : host.tlsPolicyChoice.getTlsPolicyId());
         // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory
@@ -233,4 +236,12 @@ public class TxtHost {
     public void setBindingKeyCertificate(String bindingKeyCertificate) {
         this.bindingKeyCertificate = bindingKeyCertificate;
     }    
+    
+    @JsonIgnore
+    public String getBestPcrAlgorithmBank() {
+        if(this.pcrBanks != null && this.pcrBanks.length() > 0)
+            return TxtHostRecord.selectBestSinglePcrBank(this.pcrBanks);
+        else 
+            return "SHA1";
+    }
 }

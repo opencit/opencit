@@ -137,12 +137,30 @@ public class GenerateQuoteCmd implements ICommand {
             log.debug("TPM version before calling: {} ", tpmVersion);
             if (tpmVersion.equals("2.0")) {
                 try {
+                    String selectedPcrList = selectedPcrs.replaceAll("\\s+", ","); //change the format to use ',' to seperate the list
+                    String quoteAlgWithPcrs = "";
+                    if (context.getSelectedPcrBanks() == null) {
+                        quoteAlgWithPcrs = "0x0B:" + selectedPcrList;
+                    } else {
+                        String[] pcrBanks = context.getSelectedPcrBanks().split("\\s+");
+                        for (int i=0; i<pcrBanks.length; i++) {
+                            if (i != 0)
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "+";                            
+                            if (pcrBanks[i].equals("SHA1"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x04" + ":" + selectedPcrList;
+                            else if (pcrBanks[i].equals("SHA256"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0B" + ":" + selectedPcrList;  
+                            else
+                                log.debug("Unrecognized pcrbank value: {}", pcrBanks[i]);
+                        }
+                    }
+                    
                     /* 1st: get pcrs - tpm2_listpcrs -g 0x4 -o pcrs.out
                      *      This commmand returns specified PCR bank pcr values (all 24 pcrs in the bank)
                     */
                     CommandLine command1 = new CommandLine("tpm2_listpcrs");
-                    command1.addArgument("-g");
-                    command1.addArgument("0x4");
+                    command1.addArgument("-L");
+                    command1.addArgument(quoteAlgWithPcrs);
                     command1.addArgument("-o");
                     command1.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getPcrsFileName()));
                     Result result1 = ExecUtil.execute(command1);
@@ -163,13 +181,12 @@ public class GenerateQuoteCmd implements ICommand {
                     command.addArgument(TAconfig.getAikHandle());
                     command.addArgument("-P");
 	            command.addArgument(identityAuthKey);
-                    command.addArgument("-g");
-                    command.addArgument("0x4");
+                    command.addArgument("-L");
+                    command.addArgument(quoteAlgWithPcrs);
                     command.addArgument("-q");
                     command.addArgument(TpmUtils.byteArrayToHexString(nonce));
-                    command.addArgument("-l");
-                    //command.addArguments(selectedPcrs.split("\\s+"));
-                    command.addArgument(selectedPcrs.replaceAll("\\s+", ","));
+                    //command.addArgument("-l");
+                    //command.addArgument(selectedPcrs.replaceAll("\\s+", ","));
                     command.addArguments("-o");
                     command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName()));
                     command.addArguments("-X");   
@@ -196,8 +213,8 @@ public class GenerateQuoteCmd implements ICommand {
                     log.debug("quote result: {}", quoteResult.toString());
                     
                     byte[] combined = new byte[pcrs.length + quoteResult.length];
-                    System.arraycopy(pcrs, 0, combined, 0, pcrs.length);
-                    System.arraycopy(quoteResult, 0, combined, pcrs.length, quoteResult.length);
+                    System.arraycopy(quoteResult, 0, combined, 0, quoteResult.length);
+                    System.arraycopy(pcrs, 0, combined, quoteResult.length, pcrs.length);
                     context.setTpmQuote(combined);
                     
                 } catch (IOException ex) {

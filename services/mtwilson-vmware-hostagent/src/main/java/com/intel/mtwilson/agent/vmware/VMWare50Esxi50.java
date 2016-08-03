@@ -2,6 +2,7 @@ package com.intel.mtwilson.agent.vmware;
 
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.model.PcrSha1;
 import com.vmware.vim25.HostTpmDigestInfo;
 import java.util.List;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class VMWare50Esxi50   {
             log.debug("HostTpmDigestInfo DigestMethod = {}", algorithm);
             // convert the vwmare data types to mt wilson datatypes
             String digest = VMwareClient.byteArrayToHexString(htdi.getDigestValue());
-            Pcr pcr = new Pcr(htdi.getPcrNumber(), digest);
+            Pcr pcr = new PcrSha1(htdi.getPcrNumber(), digest);
             pcrManifest.setPcr(pcr);
         }        
         return pcrManifest;

@@ -209,7 +209,7 @@ public class TpmUtils {
         certGen.setNotAfter(expiry.getTime());
         certGen.setSubjectDN(new X500Principal(""));
         certGen.setPublicKey(aik.getKey());
-        certGen.setSignatureAlgorithm("SHA1withRSA");
+        certGen.setSignatureAlgorithm("SHA256withRSA");
         certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, sanLabel)));
         X509Certificate cert = certGen.generate(privKey, "BC");
         return cert;
@@ -292,7 +292,7 @@ public class TpmUtils {
         certGen.setNotAfter(expiry.getTime());
         certGen.setSubjectDN(new X500Principal("CN=" + caName));
         certGen.setPublicKey(pubKey);
-        certGen.setSignatureAlgorithm("SHA1withRSA");
+        certGen.setSignatureAlgorithm("SHA256withRSA");
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
         X509Certificate caCert = certGen.generate(privKey);
@@ -355,7 +355,7 @@ public class TpmUtils {
         certGen.setNotAfter(expiry.getTime());
         certGen.setSubjectDN(new X500Principal("CN=" + subjectName));
         certGen.setPublicKey(pubKey);
-        certGen.setSignatureAlgorithm("SHA1withRSA");
+        certGen.setSignatureAlgorithm("SHA256withRSA");
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
         certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
@@ -416,7 +416,7 @@ public class TpmUtils {
         pubExp[2] = (byte) (0x01 & 0xff);
         RSAPublicKey pubEk = TpmUtils.makePubKey(pubEkMod, pubExp);
         certGen.setPublicKey(pubEk);
-        certGen.setSignatureAlgorithm("SHA1withRSA");
+        certGen.setSignatureAlgorithm("SHA256withRSA");
         certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "TPM EK Credential")));
         X509Certificate cert = certGen.generate(privKey, "BC");
         return cert;

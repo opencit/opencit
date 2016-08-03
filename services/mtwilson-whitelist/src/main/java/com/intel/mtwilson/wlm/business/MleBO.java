@@ -33,8 +33,8 @@ public class MleBO {
     TblEventTypeJpaController eventTypeJpaController = null;
     TblPackageNamespaceJpaController packageNSJpaController = null;
     MwMleSourceJpaController mleSourceJpaController = null;
-    private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
-    private static String invalidWhiteList = "[0]{40}|[Ff]{40}";
+    private static String hexadecimalRegEx = "[0-9A-Fa-f]+";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
+    private static String invalidWhiteList = "[0]+|[Ff]+";
 
     public MleBO() {
         try {
@@ -51,11 +51,18 @@ public class MleBO {
     }
 
     // This function will be used to validate the white list values. We have seen in some cases where in we would get -1. 
-    private boolean isWhiteListValid(String whiteList) {
+    private boolean isWhiteListValid(String pcrBank, String whiteList) {
+        int expectedSize = (pcrBank != null && "SHA256".equalsIgnoreCase(pcrBank)) ? 32 * 2 : 20 * 2;
+        
         if (whiteList == null || whiteList.trim().isEmpty()) {
             return true;
         } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
         // Bug:775 & 802: If the TPM is reset we have seen that all the PCR values would be set to Fs. So, we need to disallow that since it is invalid. Also, all 0's are also invalid.
+        
+        if (whiteList.length() != expectedSize) {
+            return false;
+        }
+        
         if (whiteList.matches(invalidWhiteList)) {
             return false;
         }
@@ -66,8 +73,8 @@ public class MleBO {
         }
     }
 
-    private void validateWhitelistValue(String componentName, String whiteList) {
-        if (!isWhiteListValid(whiteList)) {
+    private void validateWhitelistValue(String pcrBank, String componentName, String whiteList) {
+        if (!isWhiteListValid(pcrBank, whiteList)) {
             log.error("White list '{}' specified for '{}' is not valid.", whiteList, componentName);
             throw new ASException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
         }
@@ -131,7 +138,7 @@ public class MleBO {
             // before we create the MLE, check that the provided PCR values are valid -- if they aren't we abort
             if (mleData.getManifestList() != null) {
                 for (ManifestData pcrData : mleData.getManifestList()) {
-                    validateWhitelistValue(pcrData.getName(), pcrData.getValue());
+                    validateWhitelistValue(pcrData.getPcrBank(), pcrData.getName(), pcrData.getValue());
                 }
             }
             mleJpaController.create(tblMle);
@@ -505,8 +512,9 @@ public class MleBO {
                     }
                     pcrManifest.setName(manifestData.getName());
                     // Bug: 375. Need to ensure we are accepting only valid hex strings.
-                    validateWhitelistValue(manifestData.getName(), manifestData.getValue()); // throws exception if invalid
+                    validateWhitelistValue(manifestData.getPcrBank(), manifestData.getName(), manifestData.getValue()); // throws exception if invalid
                     pcrManifest.setValue(manifestData.getValue());
+                    pcrManifest.setPcrBank(manifestData.getPcrBank());
                     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                                                                                                 /*
                      pcrManifest.setCreatedOn(today);
@@ -563,17 +571,22 @@ public class MleBO {
      * @throws ASDataException
      */
     private void updatePcrManifest(TblMle tblMle, MleData mleData) throws NonexistentEntityException, ASDataException {
-        HashMap<String, String> newPCRMap = getPcrMap(mleData);
+        HashMap<String, ManifestData> newPCRMap = getPcrMap(mleData);
 
         if (tblMle.getTblPcrManifestCollection() != null) { // this can be null for MODULE Manifest
 
             for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
-                if (newPCRMap.containsKey(pcrManifest.getName())) {
+                if (newPCRMap.containsKey(pcrManifest.getName() + pcrManifest.getPcrBank())) {
+                    ManifestData newPcrData = newPCRMap.get(pcrManifest.getName());
+                    if(!newPcrData.getPcrBank().equals(pcrManifest.getPcrBank())) {
+                        continue;
+                    }
+                    
                     log.debug(String.format("Updating Pcr manifest value for mle %s  version %s pcr name %s",
                             pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
                     // Bug 375
-                    validateWhitelistValue(pcrManifest.getName(), newPCRMap.get(pcrManifest.getName())); // throws exception if invalid
-                    pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()));
+                    validateWhitelistValue(pcrManifest.getPcrBank(), pcrManifest.getName(), newPCRMap.get(pcrManifest.getName()).getValue()); // throws exception if invalid
+                    pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()).getValue());                    
 
                     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                     // pcrManifest.setUpdatedBy(getLoggedInUser());
@@ -592,8 +605,11 @@ public class MleBO {
                 TblPcrManifest pcrManifest = new TblPcrManifest();
                 pcrManifest.setName(pcrName);
                 // Bug 375
-                validateWhitelistValue(pcrName, newPCRMap.get(pcrName)); // throws exception if invalid
-                pcrManifest.setValue(newPCRMap.get(pcrName));
+                ManifestData newPcrData = newPCRMap.get(pcrName);
+                
+                validateWhitelistValue(newPcrData.getPcrBank(), pcrName, newPcrData.getValue()); // throws exception if invalid
+                pcrManifest.setValue(newPcrData.getValue());
+                pcrManifest.setPcrBank(newPcrData.getPcrBank());
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                                                                                                 /*
                  pcrManifest.setCreatedOn(today);
@@ -606,8 +622,8 @@ public class MleBO {
                 pcrManifest.setUuid_hex(new UUID().toString());
                 pcrManifest.setMle_uuid_hex(tblMle.getUuid_hex());
 
-                log.debug(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s",
-                        pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
+                log.debug(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s  algorithm bank %s",
+                        pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName(), pcrManifest.getPcrBank()));
 
                 pcrManifestJpaController.create(pcrManifest);
             }
@@ -620,12 +636,12 @@ public class MleBO {
      * @param mleData
      * @return
      */
-    private HashMap<String, String> getPcrMap(MleData mleData) {
-        HashMap<String, String> pcrMap = new HashMap<>();
+    private HashMap<String, ManifestData> getPcrMap(MleData mleData) {
+        HashMap<String, ManifestData> pcrMap = new HashMap<>();
 
         if (mleData.getManifestList() != null) {
             for (ManifestData manifestData : mleData.getManifestList()) {
-                pcrMap.put(manifestData.getName(), manifestData.getValue());
+                pcrMap.put(manifestData.getName() + manifestData.getPcrBank(), manifestData);
             }
         }
 
@@ -728,7 +744,7 @@ public class MleBO {
             //                try {
             // Now we need to check if PCR is already configured. If yes, then
             // we ned to ask the user to use the Update option instead of create
-            tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
+            tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName(), pcrData.getPcrBank());
             if (tblPcr != null) {
                 throw new ASException(ErrorCode.WS_PCR_WHITELIST_ALREADY_EXISTS, pcrData.getPcrName());
             }
@@ -740,7 +756,7 @@ public class MleBO {
             // In order to reuse the addPCRManifest function, we need to create a list and
             // add a single entry into it using the manifest data that we got.
             List<ManifestData> pcrWhiteList = new ArrayList<>();
-            pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest()));
+            pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest(), pcrData.getPcrBank()));
 
             // Now add the pcr to the database.
             addPcrManifest(tblMle, pcrWhiteList, em, uuid);
@@ -765,10 +781,20 @@ public class MleBO {
      * @param pcrName : Name of the PCR
      * @return : Data row containing the PCR manifest details.
      */
-    private TblPcrManifest getPCRWhiteListDetails(Integer mle_id, String pcrName) {
-        TblPcrManifest tblPcr;
+    private List<TblPcrManifest> getPCRWhiteListDetails(Integer mle_id, String pcrName) {
+        List<TblPcrManifest> tblPcr;
         validateNull("pcrName", pcrName);
         tblPcr = pcrManifestJpaController.findByMleIdName(mle_id, pcrName);
+        return tblPcr;
+    }
+    
+    private TblPcrManifest getPCRWhiteListDetails(Integer mle_id, String pcrName, String pcrBank) {
+        if(pcrBank == null) {
+            pcrBank = "SHA1";
+        }
+        TblPcrManifest tblPcr;
+        validateNull("pcrName", pcrName);        
+        tblPcr = pcrManifestJpaController.findByMleIdNamePcrBank(mle_id, pcrName, pcrBank);
         return tblPcr;
     }
 
@@ -802,7 +828,7 @@ public class MleBO {
                     throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
                 }
 
-                tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
+                tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName(), pcrData.getPcrBank());
             }
 
             if (tblPcr == null) {
@@ -810,7 +836,7 @@ public class MleBO {
             }
 
             // Now update the pcr in the database.
-            validateWhitelistValue(pcrData.getPcrName(), pcrData.getPcrDigest()); // throws exception if invalid
+            validateWhitelistValue(pcrData.getPcrBank(), pcrData.getPcrName(), pcrData.getPcrDigest()); // throws exception if invalid
             tblPcr.setValue(pcrData.getPcrDigest());
             // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                                     /*
@@ -848,7 +874,7 @@ public class MleBO {
      * @param oemName : OEM Name associated with the BIOS MLE
      * @return
      */
-    public String deletePCRWhiteList(String pcrName, String mleName, String mleVersion, String osName, String osVersion, String oemName, String pcrUuid) {
+    public String deletePCRWhiteList(String pcrName, String algorithmBank, String mleName, String mleVersion, String osName, String osVersion, String oemName, String pcrUuid) {
         TblPcrManifest tblPcr;
         TblMle tblMle;
         try {
@@ -865,7 +891,7 @@ public class MleBO {
                 }
 
                 // Now get the PCR details
-                tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrName);
+                tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrName, algorithmBank);
 
             }
 
@@ -1020,7 +1046,7 @@ public class MleBO {
             newModuleRecord.setComponentName(fullComponentName);
 
             // Bug 375: If the white list is not valid, then an exception would be thrown.
-            validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
+            validateWhitelistValue("sha1", moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
             newModuleRecord.setDigestValue(moduleData.getDigestValue());
 
             newModuleRecord.setPackageName(moduleData.getPackageName());
@@ -1135,7 +1161,7 @@ public class MleBO {
                 }
             }
 
-            validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
+            validateWhitelistValue("sha1", moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
             tblModule.setDigestValue(moduleData.getDigestValue());
 
             tblModule.setDescription(moduleData.getDescription());

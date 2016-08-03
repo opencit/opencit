@@ -305,7 +305,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName, null);
+        return mleBO.deletePCRWhiteList(pcrName, "SHA1", mleName, mleVersion,osName, osVersion, oemName, null);
     }
 
      /**

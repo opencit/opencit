@@ -199,9 +199,9 @@ public class TpmModule12 implements TpmModuleProvider {
     public byte[] nvRead(byte[] authPassword, String index, int size) throws IOException, TpmModule.TpmModuleException {
         File f = File.createTempFile("nvread", ".data");   
         String[] args = {
-            "-i " + index,
-            "-s 0x" + Integer.toHexString(size),
-            "-f " + f.getName()
+            "-i", index,
+            "-s", "0x" + Integer.toHexString(size),
+            "-f", f.getPath()
         };
     
         CommandLineResult result = getShellExecutor().executeTpmCommand("tpm_nvread", args, 1);

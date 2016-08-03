@@ -72,6 +72,7 @@ public class ConverterUtil {
 		hostRecord.HostName=dataVO.getHostName();
 		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
+                hostRecord.PcrBanks=dataVO.getPcrBank();
         if( dataVO.getTlsPolicyId() != null && !dataVO.getTlsPolicyId().isEmpty() ) {
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
             tlsPolicyChoice.setTlsPolicyId(dataVO.getTlsPolicyId());

@@ -30,14 +30,14 @@
 
 #ifndef TSS2_API_VERSION_1_1_1_1
 #error Version mismatch among TSS2 header files. \
-       Do not include this file, #include <tss2/tpm20.h> instead.
+       Do not include this file, #include <sapi/tpm20.h> instead.
 #endif  /* TSS2_API_VERSION_1_1_1_1 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <tss2/tss2_tcti.h>
+#include <sapi/tss2_tcti.h>
 
 // Fields for ABI negotiation.
 #define TSSWG_INTEROP 1
@@ -86,9 +86,9 @@ size_t  Tss2_Sys_GetContextSize(
     );
 
 TSS2_RC Tss2_Sys_Initialize(
-    TSS2_SYS_CONTEXT *sysContext, 
+    TSS2_SYS_CONTEXT *sysContext,
     size_t contextSize,
-    TSS2_TCTI_CONTEXT *tctiContext, 
+    TSS2_TCTI_CONTEXT *tctiContext,
     TSS2_ABI_VERSION *abiVersion
     );
 
@@ -105,7 +105,7 @@ TSS2_RC Tss2_Sys_GetTctiContext(
 // Command Preparation Functions
 //
 TSS2_RC Tss2_Sys_GetDecryptParam(
-    TSS2_SYS_CONTEXT *sysContext,   
+    TSS2_SYS_CONTEXT *sysContext,
     size_t *decryptParamSize,
     const uint8_t **decryptParamBuffer
     );
@@ -122,7 +122,7 @@ TPM_RC Tss2_Sys_GetCpBuffer(
     const uint8_t **cpBuffer);
 
 TPM_RC Tss2_Sys_SetCmdAuths(
-    TSS2_SYS_CONTEXT * sysContext,  
+    TSS2_SYS_CONTEXT * sysContext,
     const TSS2_SYS_CMD_AUTHS *cmdAuthsArray
     );
 
@@ -148,7 +148,7 @@ TSS2_RC Tss2_Sys_Execute(
 //
 TSS2_RC Tss2_Sys_GetCommandCode(
     TSS2_SYS_CONTEXT *sysContext,
-    UINT8 (*commandCode)[4]  
+    UINT8 (*commandCode)[4]
     );
 
 TSS2_RC Tss2_Sys_GetRspAuths(
@@ -179,5 +179,5 @@ TPM_RC Tss2_Sys_GetRpBuffer(
 #ifdef __cplusplus
 }
 #endif
-    
+
 #endif

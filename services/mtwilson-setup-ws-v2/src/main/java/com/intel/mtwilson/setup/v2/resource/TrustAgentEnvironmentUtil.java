@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.v2.resource;
 
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -102,8 +102,8 @@ public class TrustAgentEnvironmentUtil {
         }
         String urltext = String.format("%s://%s:%d/mtwilson/v2", request.getScheme(), request.getLocalName(), request.getLocalPort());
         X509Certificate cert = getTlsCertificate();
-        String tlsCertFingerprint = Sha1Digest.digestOf(cert.getEncoded()).toHexString();
-        String content = String.format("MTWILSON_API_URL=%s\nMTWILSON_API_USERNAME=%s\nMTWILSON_API_PASSWORD=%s\nMTWILSON_TLS_CERT_SHA1=%s\n",
+        String tlsCertFingerprint = Sha256Digest.digestOf(cert.getEncoded()).toHexString();
+        String content = String.format("MTWILSON_API_URL=%s\nMTWILSON_API_USERNAME=%s\nMTWILSON_API_PASSWORD=%s\nMTWILSON_TLS_CERT_SHA256=%s\n",
                 urltext, input.username, input.password, tlsCertFingerprint);
         return content;
     }

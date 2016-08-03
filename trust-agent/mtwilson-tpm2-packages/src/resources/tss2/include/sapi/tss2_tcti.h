@@ -38,13 +38,13 @@
 // defined.
 //
 // The first field of a Context must be the common part
-// (see below). 
+// (see below).
 #ifndef TSS2_TCTI
 #define TSS2_TCTI
 
 #ifndef TSS2_API_VERSION_1_1_1_1
 #error Version mismatch among TSS2 header files. \
-       Do not include this file, #include <tss2/tpm20.h> instead.
+       Do not include this file, #include <sapi/tpm20.h> instead.
 #endif  /* TSS2_API_VERSION_1_1_1_1 */
 
 #ifdef __cplusplus
