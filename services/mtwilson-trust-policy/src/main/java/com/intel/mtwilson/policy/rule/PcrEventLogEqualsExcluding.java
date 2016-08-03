@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +48,15 @@ public class PcrEventLogEqualsExcluding extends PcrEventLogEquals {
         Iterator<Measurement> it = modules.iterator();
         while(it.hasNext()) {
             Measurement measurement = it.next();
-            log.debug(measurement.getLabel() + " :: " + measurement.getValue().toString() + " :: " + measurement.getInfo().values().toString() + 
-                    " :: " + measurement.getInfo().keySet().toString());
+            Map<String,String> mInfo = measurement.getInfo();
+            log.debug(measurement.getLabel() + " :: " + measurement.getValue().toString() + " :: " + mInfo.values().toString() + 
+                    " :: " + mInfo.keySet().toString());
             // examin m.getInfo()  to decide if it's dynamic,   and also if excludeHostSpecificModules is true then exclude host specific modules
-            if (excludeHostSpecificModules &&  hostSpecificModules.contains(measurement.getInfo().get("ComponentName")))
+            if (excludeHostSpecificModules &&  hostSpecificModules.contains(mInfo.get("ComponentName")))
                 continue;
             // let us skip even the dynamic modules
-            if( measurement.getInfo().get("PackageName") != null && measurement.getInfo().get("PackageName").equalsIgnoreCase("") && 
-                    measurement.getInfo().get("PackageVendor") != null && measurement.getInfo().get("PackageVendor").equalsIgnoreCase("")) {
+            if( mInfo.get("PackageName") != null && mInfo.get("PackageName").equalsIgnoreCase("") && 
+                    mInfo.get("PackageVendor") != null && mInfo.get("PackageVendor").equalsIgnoreCase("")) {
                 log.debug("Skipping the module since it is dynamic.");
                 continue;
             }

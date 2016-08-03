@@ -28,6 +28,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwMeasurementXmlJpaController;
 import com.intel.mtwilson.as.data.MwMeasurementXml;
+import com.intel.mtwilson.model.MeasurementSha1;
 import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.XmlMeasurementLog;
@@ -266,11 +267,11 @@ public class JpaPolicyReader {
                 TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  
                 if( hostSpecificModule == null ) {
                     log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
-                    Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
+                    Measurement m = new MeasurementSha1(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
                     return m;
                 }
                 else {
-                    Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
+                    Measurement m = new MeasurementSha1(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
                     return m;
                 }
             } else
@@ -280,7 +281,7 @@ public class JpaPolicyReader {
             info.put("PackageName", moduleInfo.getPackageName());
             info.put("PackageVersion", moduleInfo.getPackageVersion());
             info.put("PackageVendor", moduleInfo.getPackageVendor());
-            Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getComponentName(), info); 
+            Measurement m = new MeasurementSha1(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getComponentName(), info); 
             return m;
         }
     }

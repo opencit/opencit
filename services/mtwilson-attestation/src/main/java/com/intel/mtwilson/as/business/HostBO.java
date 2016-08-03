@@ -872,9 +872,9 @@ public class HostBO {
             if (pcrEventLog != null) {
                 for (Measurement m : pcrEventLog.getEventLog()) {
                     if (m != null && m.getInfo() != null && (!m.getInfo().isEmpty())) {
-
-                        String mEventName = m.getInfo().get("EventName");
-                        String mComponentName = m.getInfo().get("ComponentName");
+                        Map<String, String> mInfo = m.getInfo();
+                        String mEventName = mInfo.get("EventName");
+                        String mComponentName = mInfo.get("ComponentName");
                         log.debug("Checking host specific manifest for event '"   + mEventName + 
                                 "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
 
@@ -888,7 +888,7 @@ public class HostBO {
                                     "' MLE_ID '" + vmmMleId.getId() + "' component '" + mComponentName + "'");
 
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                                    m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+                                    mInfo.get("ComponentName"),  mInfo.get("EventName"));
 
                             if (tblModuleManifest != null) {
                                 TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
@@ -897,17 +897,17 @@ public class HostBO {
                                 tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
                                 tblHostSpecificManifests.add(tblHostSpecificManifest);
                             }
-                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null
-                                && ArrayUtils.contains(openSourceHostSpecificModules, m.getInfo().get("ComponentName"))) {
+                        } else if (hostType.equals(Vendor.INTEL) && mInfo.get("EventName") != null
+                                && ArrayUtils.contains(openSourceHostSpecificModules, mInfo.get("ComponentName"))) {
 
-                            log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                                    "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                            log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
-                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                            log.debug("Adding host specific manifest for event '"   + mInfo.get("EventName") + 
+                                    "' field '" + m.getLabel() + "' component '" + mInfo.get("ComponentName") + "'");
+                            log.debug("Querying manifest for event '"   + mInfo.get("EventName") + 
+                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + mInfo.get("ComponentName") + "'");
 
                             // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                                    m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+                                    mInfo.get("ComponentName"),  mInfo.get("EventName"));
 
                             if (tblModuleManifest != null) {
                                 TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();

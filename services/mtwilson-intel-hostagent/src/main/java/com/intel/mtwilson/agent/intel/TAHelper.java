@@ -1,5 +1,6 @@
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
@@ -44,6 +45,8 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.MeasurementSha1;
+import com.intel.mtwilson.model.MeasurementSha256;
 import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
@@ -846,7 +849,7 @@ public class TAHelper {
     }
 
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
-//        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
+//        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();        
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s",
@@ -922,6 +925,7 @@ public class TAHelper {
                 int extendedToPCR = -1;
                 String digestValue = "";
                 String componentName = "";
+                String pcrBank = "SHA1";
 
                 while (reader.hasNext()) {
                     if (reader.getEventType() == XMLStreamConstants.START_ELEMENT
@@ -947,8 +951,8 @@ public class TAHelper {
                         log.debug("Process module " + componentName + " getting extended to " + extendedToPCR);
 
                         // Attach the PcrEvent logs to the corresponding pcr indexes.
-                        // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.
-                        Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue);
+                        // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.                        
+                        Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue, pcrBank);
                         if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(extendedToPCR))) {
                             pcrManifest.getPcrEventLog(extendedToPCR).getEventLog().add(m);
                         } else {
@@ -978,7 +982,7 @@ public class TAHelper {
      * @param moduleHash
      * @return
      */
-    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash) {
+    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash, String pcrBank) {
         HashMap<String, String> info = new HashMap<String, String>();
         info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
         // Removing the prefix of "OpenSource" as it is being captured in the event type
@@ -987,7 +991,15 @@ public class TAHelper {
         info.put("PackageVendor", "");
         info.put("PackageVersion", "");
 
-        return new Measurement(new Sha1Digest(moduleHash), moduleName, info);
+        DigestAlgorithm da = DigestAlgorithm.valueOf(pcrBank);        
+        switch(da) {
+            case SHA1:
+                return new MeasurementSha1(new Sha1Digest(moduleHash), moduleName, info);                
+            case SHA256:                
+                return new MeasurementSha256(new Sha256Digest(moduleHash), moduleName, info);                
+            default:
+                throw new UnsupportedOperationException("PCRBank: " + pcrBank + " not supported");
+        }        
     }
     /*
      public EntityManagerFactory getEntityManagerFactory() {

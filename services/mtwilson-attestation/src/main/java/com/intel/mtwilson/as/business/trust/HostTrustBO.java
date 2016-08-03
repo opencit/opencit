@@ -1234,7 +1234,8 @@ public class HostTrustBO {
 
                                 Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                                 for(Measurement m : missingEntries) {
-                                    String mComponentName = m.getInfo().get("ComponentName");
+                                    Map<String, String> mInfo = m.getInfo();
+                                    String mComponentName = mInfo.get("ComponentName");
                                     log.debug("Missing entry : " + mComponentName + "||" + m.getValue().toString());
                                     // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
                                     if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()) == null ) {
@@ -1244,7 +1245,8 @@ public class HostTrustBO {
                                     List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
                                     if (actualEntries != null) {
                                         for(Measurement a : actualEntries) {
-                                            String aFullComponentName = a.getInfo().get("FullComponentName");
+                                            Map<String, String> aInfo = a.getInfo();
+                                            String aFullComponentName = aInfo.get("FullComponentName");
                                             if (a != null && a.getInfo() != null && (!a.getInfo().isEmpty())) {
                                                 // log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
                                                 if( aFullComponentName != null && mComponentName != null && 
@@ -1256,10 +1258,10 @@ public class HostTrustBO {
                                         }
                                     }
                                     // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.
-                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getInfo().get("ComponentName"));
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, mInfo.get("ComponentName"));
                                     if (findByTaLogIdAndName == null) {
                                         TblModuleManifestLog event = new TblModuleManifestLog();
-                                        event.setName(m.getInfo().get("ComponentName"));
+                                        event.setName(mInfo.get("ComponentName"));
                                         event.setTaLogId(pcr);
                                         event.setValue( found == null ? "" : found.getValue().toString() ); // we don't know from our report what the "actual" value is since we only logged that an expected value was missing... so maybe there's a module with the same name and wrong value in the host report, which we don't know here... see comment above,  this probably needs to change.
                                         event.setWhitelistValue(m.getValue().toString()); // since this is a additional module on the host, the white list would be null
@@ -1308,7 +1310,8 @@ public class HostTrustBO {
 
                                 List<Measurement> unexpectedEntries = unexpectedEntriesFault.getUnexpectedEntries();
                                 for(Measurement m : unexpectedEntries) {
-                                    String mFullComponentName = m.getInfo().get("FullComponentName");
+                                    Map<String, String> mInfo = m.getInfo();
+                                    String mFullComponentName = mInfo.get("FullComponentName");
                                     log.debug("Unexpected Entry : " + mFullComponentName);
                                     // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
                                     if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()) == null ) {
@@ -1318,7 +1321,7 @@ public class HostTrustBO {
                                     List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()).getEventLog();
                                     if (actualEntries != null) {
                                         for(Measurement a : actualEntries) {
-                                            String aFullComponentName = a.getInfo().get("FullComponentName");
+                                            String aFullComponentName = mInfo.get("FullComponentName");
                                             if ( a != null && a.getInfo() != null && (!a.getInfo().isEmpty())) {
                                                 //log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + 
                                                  //       a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
@@ -1331,10 +1334,10 @@ public class HostTrustBO {
                                         }
                                     }
                                     // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.
-                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getInfo().get("ComponentName"));
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, mInfo.get("ComponentName"));
                                     if (findByTaLogIdAndName == null) {
                                         TblModuleManifestLog event = new TblModuleManifestLog();
-                                        event.setName(m.getInfo().get("FullComponentName"));
+                                        event.setName(mInfo.get("FullComponentName"));
                                         event.setTaLogId(pcr);
                                         event.setValue( found == null ? "" : found.getValue().toString() ); // we don't know from our report what the "actual" value is since we only logged that an expected value was missing... so maybe there's a module with the same name and wrong value in the host report, which we don't know here... see comment above,  this probably needs to change.
                                         event.setWhitelistValue(""); // since this is a additional module on the host, the white list would be null
@@ -1393,6 +1396,7 @@ public class HostTrustBO {
 
                                 Set<Measurement> mismatchEntries = mismatchEntriesFault.getMismatchEntries();
                                 for(Measurement m : mismatchEntries) {
+                                    Map<String, String> mInfo = m.getInfo();
                                     log.debug("Updated entry : " + m.getLabel() + "||" + m.getValue().toString());
                                     // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
                                     if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getMeasurementXml() == null ) {
@@ -1404,7 +1408,7 @@ public class HostTrustBO {
                                         TblModuleManifestLog event = new TblModuleManifestLog();
                                         event.setName("tbootxm-" + m.getLabel());
                                         event.setTaLogId(pcr);
-                                        event.setValue(m.getInfo().get("Actual_Value"));
+                                        event.setValue(mInfo.get("Actual_Value"));
                                         event.setWhitelistValue(m.getValue().toString());
                                         moduleLogJpa.create(event);
                                     } 
