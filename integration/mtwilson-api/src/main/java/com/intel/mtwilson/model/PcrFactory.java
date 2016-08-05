@@ -39,6 +39,6 @@ public class PcrFactory {
     }
     
     public static Pcr newInstance(String algorithm, PcrIndex index, byte[] value) {
-        return newInstance(DigestAlgorithm.valueOf(algorithm), index, value);
+        return PcrFactory.newInstance(DigestAlgorithm.valueOf(algorithm), index, value);
     }
 }

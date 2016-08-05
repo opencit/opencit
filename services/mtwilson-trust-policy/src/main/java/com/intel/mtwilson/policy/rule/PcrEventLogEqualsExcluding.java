@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrEventLog;
+import com.intel.mtwilson.model.PcrEventLogFactory;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.policy.HostReport;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class PcrEventLogEqualsExcluding extends PcrEventLogEquals {
 
     @Override
     protected PcrEventLog getPcrEventLog(HostReport hostReport) {
-        List<Measurement> modules = hostReport.pcrManifest.getPcrEventLog(getPcrModuleManifest().getPcrIndex()).getEventLog();
+        List<Measurement> modules = hostReport.pcrManifest.getPcrEventLog(getPcrModuleManifest().getPcrBank(), getPcrModuleManifest().getPcrIndex()).getEventLog();
         ArrayList<Measurement> modulesExcluding = new ArrayList<Measurement>();
         Iterator<Measurement> it = modules.iterator();
         while(it.hasNext()) {
@@ -63,7 +64,7 @@ public class PcrEventLogEqualsExcluding extends PcrEventLogEquals {
             // Add the module to be verified.
             modulesExcluding.add(measurement);
         }
-        PcrEventLog updatedPcrEventLog = new PcrEventLog(PcrIndex.PCR19, modulesExcluding);
+        PcrEventLog updatedPcrEventLog = PcrEventLogFactory.newInstance(getPcrModuleManifest().getPcrBank(), PcrIndex.PCR19, modulesExcluding);
         return updatedPcrEventLog; // the new instance 
     }
     

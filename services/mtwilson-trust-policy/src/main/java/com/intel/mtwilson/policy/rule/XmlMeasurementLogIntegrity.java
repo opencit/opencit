@@ -6,9 +6,11 @@ package com.intel.mtwilson.policy.rule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
@@ -31,21 +33,22 @@ import org.slf4j.LoggerFactory;
 public class XmlMeasurementLogIntegrity extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private Sha1Digest expectedValue;
+    private AbstractDigest expectedValue;
     private PcrIndex pcrIndex;
     
     protected XmlMeasurementLogIntegrity() { } // for desearializing jackson
     
-    public XmlMeasurementLogIntegrity(Sha1Digest expectedValue, PcrIndex pcrIndex) {
+    public XmlMeasurementLogIntegrity(AbstractDigest expectedValue, PcrIndex pcrIndex) {
         this.expectedValue = expectedValue;
         this.pcrIndex = pcrIndex;
     }
     
-    public Sha1Digest getSha1Digest() { return expectedValue; }
+    public AbstractDigest getExpectedValue() { return expectedValue; }
 
     public PcrIndex getPcrIndex() {
         return pcrIndex;
     }
+    
 
     @Override
     public RuleResult apply(HostReport hostReport) {
@@ -61,7 +64,7 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
             List<Measurement> measurements = new XmlMeasurementLog(this.pcrIndex, hostReport.pcrManifest.getMeasurementXml()).getMeasurements();
             log.debug("XmlMeasurementLogIntegrity: Retrieved #{} of measurements from the log.", measurements.size());
             if( measurements.size() > 0 ) {
-                Sha1Digest actualValue = computeHistory(measurements); // calculate expected' based on history
+                AbstractDigest actualValue = computeHistory(measurements); // calculate expected' based on history
                 log.debug("XmlMeasurementLogIntegrity: About to verify the calclated final hash {} with expected hash {}", actualValue.toString(), expectedValue.toString());
                 // make sure the expected pcr value matches the actual pcr value
                 if( !expectedValue.equals(actualValue) ) {
@@ -75,15 +78,29 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
         return report;
     }
     
-    private Sha1Digest computeHistory(List<Measurement> list) {
-        // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match
-        Sha1Digest result = Sha1Digest.ZERO;
-        for(Measurement m : list) {
-            //result = result.extend(m.getValue().toString().getBytes());
-            log.debug("XmlMeasurementLogIntegrity-computeHistory: Current value of result is {}", result.toString());
-            result = result.extend(Sha1Digest.valueOfHex(m.getValue().toString()));
-            log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
+    private AbstractDigest computeHistory(List<Measurement> list) {
+        // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match        
+        if(expectedValue instanceof Sha1Digest) {
+            Sha1Digest result = Sha1Digest.ZERO;
+            for (Measurement m : list) {
+                //result = result.extend(m.getValue().toString().getBytes());
+                log.debug("XmlMeasurementLogIntegrity-computeHistory: Current value of result is {}", result.toString());
+                result = result.extend(Sha1Digest.valueOfHex(m.getValue().toString()));
+                log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
+            }
+            return result;
+        } else if(expectedValue instanceof Sha256Digest) {
+            Sha256Digest result = new Sha256Digest(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});// Sha256Digest.ZERO;
+            for (Measurement m : list) {
+                //result = result.extend(m.getValue().toString().getBytes());
+                log.debug("XmlMeasurementLogIntegrity-computeHistory: Current value of result is {}", result.toString());
+                result = result.extend(Sha256Digest.valueOfHex(m.getValue().toString()));
+                log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
+            }
+            return result;
+        } else {
+            throw new UnsupportedOperationException("expectedValue is not of a supported Digest type");
         }
-        return result;
+        
     }
 }

@@ -8,6 +8,7 @@ import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.MeasurementSha1;
+import com.intel.mtwilson.model.PcrEventLogSha1;
 import com.intel.mtwilson.model.PcrSha1;
 import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.HostTpmAttestationReport;
@@ -59,13 +60,13 @@ public class VMWare51Esxi51   {
             int pcrIndex = logEntry.getPcrIndex();
             log.debug("PCR {}", pcrIndex);
             Measurement m = convertHostTpmEventLogEntryToMeasurement(logEntry);
-            if( pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex)) ) {
-                pcrManifest.getPcrEventLog(pcrIndex).getEventLog().add(m);
+            if( pcrManifest.containsPcrEventLog("SHA1", PcrIndex.valueOf(pcrIndex)) ) {
+                pcrManifest.getPcrEventLog("SHA1", pcrIndex).getEventLog().add(m);
             }
             else {
                 ArrayList<Measurement> list = new ArrayList<Measurement>();
                 list.add(m);
-                pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(pcrIndex),list));
+                pcrManifest.setPcrEventLog(new PcrEventLogSha1(PcrIndex.valueOf(pcrIndex), (List<MeasurementSha1>)(List<?>)list));
             }
         }
         }

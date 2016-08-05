@@ -511,10 +511,10 @@ Modules missing from PCR 8:
         ArrayList<Measurement> actualModuleSet = new ArrayList<Measurement>();
         actualModuleSet.add(new MeasurementSha1(new Sha1Digest("0011001100110011001100220022002200220022"), "vendorA-moduleXYZ-1.0.2"));
         actualModuleSet.add(new MeasurementSha1(new Sha1Digest("1012134056708910234580990553434570343245"), "vendorB-moduleABC-0.5.0"));
-        PcrEventLog actual = new PcrEventLog(new PcrIndex(8), actualModuleSet);
+        PcrEventLog actual = PcrEventLogFactory.newInstance("SHA1", new PcrIndex(8), actualModuleSet);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
-        hostReport.pcrManifest.setPcrEventLog(new PcrEventLog(new PcrIndex(8),actualModuleSet));
+        hostReport.pcrManifest.setPcrEventLog(PcrEventLogFactory.newInstance("SHA1", new PcrIndex(8),actualModuleSet));
         RuleResult report = policy.apply(hostReport);
         assertFalse(report.isTrusted());
 //        printFaults(report);

@@ -48,6 +48,7 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.MeasurementSha1;
 import com.intel.mtwilson.model.MeasurementSha256;
 import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.model.PcrEventLogFactory;
 import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
@@ -666,19 +667,21 @@ public class TAHelper {
         }
 
         // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report.
-        for (int pcrIndex = 0; pcrIndex < 24; pcrIndex++) {
-            if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex))) {
-                List<Measurement> eventLogs = pcrManifest.getPcrEventLog(pcrIndex).getEventLog();
-                for (Measurement eventLog : eventLogs) {
+        Map<DigestAlgorithm, List<PcrEventLog>> logs = pcrManifest.getPcrEventLogMap();
+        for(Map.Entry<DigestAlgorithm, List<PcrEventLog>> e : logs.entrySet()) {
+            for(PcrEventLog pel : e.getValue()) {
+                List<Measurement> eventLogs = pel.getEventLog();
+                for(Measurement m : eventLogs) {
                     xtw.writeStartElement("EventDetails");
                     xtw.writeAttribute("EventName", "OpenSource.EventName");
-                    xtw.writeAttribute("ComponentName", eventLog.getLabel());
-                    xtw.writeAttribute("DigestValue", eventLog.getValue().toString().toUpperCase());
-                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pcrIndex));
+                    xtw.writeAttribute("ComponentName", m.getLabel());                    
+                    xtw.writeAttribute("DigestValue", m.getValue().toString().toUpperCase());
+                    xtw.writeAttribute("DigestAlgorithm", pel.getPcrBank().toString().toUpperCase());
+                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pel.getPcrIndex()));
                     xtw.writeAttribute("PackageName", "");
                     xtw.writeAttribute("PackageVendor", "");
                     xtw.writeAttribute("PackageVersion", "");
-                    if (ArrayUtils.contains(openSourceHostSpecificModules, eventLog.getLabel())) {
+                    if (ArrayUtils.contains(openSourceHostSpecificModules, m.getLabel())) {
                         // For Xen, these modules would be vmlinuz and initrd and for KVM it would just be initrd.
                         xtw.writeAttribute("UseHostSpecificDigest", "true");
                     } else {
@@ -931,6 +934,13 @@ public class TAHelper {
                     if (reader.getEventType() == XMLStreamConstants.START_ELEMENT
                             && reader.getLocalName().equalsIgnoreCase("module")) {
                         reader.next();
+                        
+                        if(reader.getLocalName().equalsIgnoreCase("pcrBank")) {
+                            pcrBank = reader.getElementText();
+                        }
+                        
+                        reader.next();
+                        
                         // Get the PCR Number to which the module is extended to
                         if (reader.getLocalName().equalsIgnoreCase("pcrNumber")) {
                             extendedToPCR = Integer.parseInt(reader.getElementText());
@@ -938,7 +948,7 @@ public class TAHelper {
 
                         reader.next();
                         // Get the Module name
-                        if (reader.getLocalName().equalsIgnoreCase("name")) {
+                        if (reader.getLocalName().equalsIgnoreCase("name")) {                            
                             componentName = reader.getElementText();
                         }
 
@@ -946,19 +956,19 @@ public class TAHelper {
                         // Get the Module hash value
                         if (reader.getLocalName().equalsIgnoreCase("value")) {
                             digestValue = reader.getElementText();
-                        }
+                        }                                                
 
                         log.debug("Process module " + componentName + " getting extended to " + extendedToPCR);
 
                         // Attach the PcrEvent logs to the corresponding pcr indexes.
                         // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.                        
                         Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue, pcrBank);
-                        if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(extendedToPCR))) {
-                            pcrManifest.getPcrEventLog(extendedToPCR).getEventLog().add(m);
+                        if (pcrManifest.containsPcrEventLog(pcrBank, PcrIndex.valueOf(extendedToPCR))) {
+                            pcrManifest.getPcrEventLog(pcrBank, extendedToPCR).getEventLog().add(m);
                         } else {
                             ArrayList<Measurement> list = new ArrayList<Measurement>();
                             list.add(m);
-                            pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(extendedToPCR), list));
+                            pcrManifest.setPcrEventLog(PcrEventLogFactory.newInstance(pcrBank, PcrIndex.valueOf(extendedToPCR), list));
                         }
                     }
                     reader.next();

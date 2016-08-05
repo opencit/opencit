@@ -1046,7 +1046,8 @@ public class MleBO {
             newModuleRecord.setComponentName(fullComponentName);
 
             // Bug 375: If the white list is not valid, then an exception would be thrown.
-            validateWhitelistValue("sha1", moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
+            validateWhitelistValue(moduleData.getPcrBank(), moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
+            newModuleRecord.setPcrBank(moduleData.getPcrBank());
             newModuleRecord.setDigestValue(moduleData.getDigestValue());
 
             newModuleRecord.setPackageName(moduleData.getPackageName());

@@ -62,6 +62,16 @@ public class TblModuleManifest implements Serializable {
     @Basic(optional = false)
     @Column(name = "DigestValue")
     private String digestValue;
+    @Column(name = "pcr_bank")
+    private String pcrBank;
+
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
     @Column(name = "ExtendedToPCR")
     private String extendedToPCR;
     @Column(name = "PackageName")

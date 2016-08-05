@@ -870,7 +870,8 @@ public class HostBO {
         if (vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString()) && pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
             if (pcrEventLog != null) {
-                for (Measurement m : pcrEventLog.getEventLog()) {
+                List<? extends Measurement> eventLog = pcrEventLog.getEventLog();
+                for (Measurement m : eventLog) {
                     if (m != null && m.getInfo() != null && (!m.getInfo().isEmpty())) {
                         Map<String, String> mInfo = m.getInfo();
                         String mEventName = mInfo.get("EventName");

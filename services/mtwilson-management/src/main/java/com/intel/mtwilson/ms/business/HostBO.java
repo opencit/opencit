@@ -1497,7 +1497,7 @@ public class HostBO {
         emt.getTransaction().begin();
         
         // If in case we need to support additional pcrs for event logs, we need to just update this and add the new PCR
-        List<Integer> pcrsSupportedForEventLog = Arrays.asList(19);
+        List<Integer> pcrsSupportedForEventLog = Arrays.asList(17,19);
         // Since the attestation report has all the PCRs we need to upload only the required PCR values into the white list tables.
         // Location PCR (22) is added by default. We will check if PCR 22 is configured or not. If the digest value for PCR 22 exists, then
         // we will configure the location table as well.
@@ -1543,46 +1543,52 @@ public class HostBO {
 
                         // currently event details would be available for all host except for Citrix Xen. Also we should not process the event log information for all the PCRs. We just 
                         // need to do it for PCR 19
+                        // We also process PCR 17 for TPM 2.0 servers
                         // Bug#: 768: We need to process the modules only if the user has requested for verifying that PCR. If not, we should not process PCR 19 at all.
                         if ((pcrsSupportedForEventLog.contains(Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR")))) && 
                                 (pcrsToWhiteList.contains(reader.getAttributeValue("", "ExtendedToPCR")))) {
-                            ModuleWhiteList moduleObj = new ModuleWhiteList();
-                            // bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
-                            if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
-                                moduleObj.setComponentName(" ");
-                                log.info("uploadToDB: component name set to single-space");
-                            } else {
-                                moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
-                            }
-                            moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
-                            moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
-                            moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
-                            moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
-                            moduleObj.setPackageVendor(reader.getAttributeValue("", "PackageVendor"));
-                            moduleObj.setPackageVersion(reader.getAttributeValue("", "PackageVersion"));
-                            moduleObj.setUseHostSpecificDigest(Boolean.valueOf(reader.getAttributeValue("", "UseHostSpecificDigest")));
-                            moduleObj.setDescription("");
-                            moduleObj.setMleName(hostObj.VMM_Name);
-                            moduleObj.setMleVersion(hostObj.VMM_Version);
-                            moduleObj.setOsName(hostObj.VMM_OSName);
-                            moduleObj.setOsVersion(hostObj.VMM_OSVersion);
-                            moduleObj.setOemName("");
-
-                            if (!hostConfigObj.getOverWriteWhiteList()) {
-                                mleBO.addModuleWhiteList(moduleObj, emt, null, null);
-                                log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
-
-                            } else {
-                                try {
-                                    mleBO.updateModuleWhiteList(moduleObj, emt, null);
-                                    log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
-                                } catch (ASException ae) {
-                                    if (ae.getErrorCode() == ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST) {
-                                        mleBO.addModuleWhiteList(moduleObj, emt, null, null);
-                                        log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());                                        
-                                    }
+                            
+                            // only support EventLog for PCR 17 if it's TPM 2.0
+                            if(Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR")) != 17 && !"1.2".equals(hostConfigObj.getTxtHostRecord().TpmVersion)) {
+                                ModuleWhiteList moduleObj = new ModuleWhiteList();
+                                // bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
+                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                                    moduleObj.setComponentName(" ");
+                                    log.info("uploadToDB: component name set to single-space");
+                                } else {
+                                    moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
                                 }
-                            }
+                                moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
+                                moduleObj.setPcrBank(reader.getAttributeValue("", "DigestAlgorithm"));
+                                moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
+                                moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
+                                moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
+                                moduleObj.setPackageVendor(reader.getAttributeValue("", "PackageVendor"));
+                                moduleObj.setPackageVersion(reader.getAttributeValue("", "PackageVersion"));
+                                moduleObj.setUseHostSpecificDigest(Boolean.valueOf(reader.getAttributeValue("", "UseHostSpecificDigest")));
+                                moduleObj.setDescription("");
+                                moduleObj.setMleName(hostObj.VMM_Name);
+                                moduleObj.setMleVersion(hostObj.VMM_Version);
+                                moduleObj.setOsName(hostObj.VMM_OSName);
+                                moduleObj.setOsVersion(hostObj.VMM_OSVersion);
+                                moduleObj.setOemName("");
+
+                                if (!hostConfigObj.getOverWriteWhiteList()) {
+                                    mleBO.addModuleWhiteList(moduleObj, emt, null, null);
+                                    log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+
+                                } else {
+                                    try {
+                                        mleBO.updateModuleWhiteList(moduleObj, emt, null);
+                                        log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                    } catch (ASException ae) {
+                                        if (ae.getErrorCode() == ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST) {
+                                            mleBO.addModuleWhiteList(moduleObj, emt, null, null);
+                                            log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                        }
+                                    }
+                                }   
+                            }                            
                         }
                     } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) { // pcr information would be available for all the hosts.
                         // We need to white list only thos pcrs that were requested by the user. We will ignore the remaining ones

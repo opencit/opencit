@@ -48,7 +48,8 @@ public class PcrManifest extends ObjectModel {
     private final PcrSha256[] sha2pcrs = new PcrSha256[24];
     //private final Pcr<Sha512Digest>[] sha512pcrs = new Pcr[24];
     
-    private final PcrEventLog[] pcrEventLogs = new PcrEventLog[24];
+    private final PcrEventLogSha1[] pcrEventLogsSha1 = new PcrEventLogSha1[24];
+    private final PcrEventLogSha256[] pcrEventLogsSha256 = new PcrEventLogSha256[24];
     private String measurementXml;
     private byte[] ProvisionedTag; //this is additional field added to support the new way of assetag attestation -- Haidong
 
@@ -131,6 +132,18 @@ public class PcrManifest extends ObjectModel {
         return pcrsMap;
     }
     
+    public Map<DigestAlgorithm, List<PcrEventLog>> getPcrEventLogMap() {
+        Map<DigestAlgorithm, List<PcrEventLog>> eventLogMap = new LinkedHashMap<>();
+        
+        List<PcrEventLog> sha1 = getPcrEventLogs(DigestAlgorithm.SHA1);        
+        List<PcrEventLog> sha2 = getPcrEventLogs(DigestAlgorithm.SHA256);
+        
+        eventLogMap.put(DigestAlgorithm.SHA1, sha1);
+        eventLogMap.put(DigestAlgorithm.SHA256, sha2);
+        
+        return eventLogMap;
+    }
+    
     public List<Pcr> getPcrs() {
         List<Pcr> pcrs = new ArrayList<>();
         for(Pcr pcr : sha1pcrs) {
@@ -170,21 +183,43 @@ public class PcrManifest extends ObjectModel {
         }
     }
     
+    @Deprecated
     public List<PcrEventLog> getPcrEventLogs() {
         ArrayList<PcrEventLog> pcrEventLogsList = new ArrayList<>();
-        for (PcrEventLog pcrEventLog : pcrEventLogs) {
+        for (PcrEventLog pcrEventLog : pcrEventLogsSha1) {
             if (pcrEventLog != null)
                 pcrEventLogsList.add(pcrEventLog);
         }
         return pcrEventLogsList;
     }
     
+    public List<PcrEventLog> getPcrEventLogs(DigestAlgorithm bank) {
+        PcrEventLog[] logs = getEventLogBank(bank);
+        
+        ArrayList<PcrEventLog> pcrEventLogsList = new ArrayList<>();
+        for (PcrEventLog pcrEventLog : logs) {
+            if (pcrEventLog != null)
+                pcrEventLogsList.add(pcrEventLog);
+        }
+        return pcrEventLogsList;
+    }
+    
+    @Deprecated
     public void setPcrEventLogs(List<PcrEventLog> pcrEventLogsList) {
         for (int i = 0; i < 23; i++) {
-            pcrEventLogs[i] = null;
+            pcrEventLogsSha1[i] = null;
         }
         for (PcrEventLog pcrEventLog : pcrEventLogsList) {
             setPcrEventLog(pcrEventLog);
+        }
+    }
+    
+    public void setPcrEventLogs(DigestAlgorithm bank, List<PcrEventLog> pcrEventLogsList) {         
+        for (int i = 0; i < 23; i++) {
+            getEventLogBank(bank)[i] = null;
+        }
+        for (PcrEventLog pcrEventLog : pcrEventLogsList) {
+            setPcrEventLog(bank, pcrEventLog);
         }
     }
     
@@ -210,28 +245,53 @@ public class PcrManifest extends ObjectModel {
     public void clearPcr(PcrIndex pcrIndex) {
         clearPcr(DigestAlgorithm.SHA1, pcrIndex.toInteger());
     }
-    
+        
     public void setPcrEventLog(PcrEventLog pcrEventLog) {
-        pcrEventLogs[pcrEventLog.getPcrIndex().toInteger()] = pcrEventLog;
+        setPcrEventLog(pcrEventLog.getPcrBank(), pcrEventLog);
     }
     
+    private void setPcrEventLog(DigestAlgorithm bank, PcrEventLog pcrEventLog) {        
+        getEventLogBank(bank)[pcrEventLog.getPcrIndex().toInteger()] = pcrEventLog;
+    }
+    
+    @Deprecated
     public PcrEventLog getPcrEventLog(int index) {
-        return pcrEventLogs[index];
+        return pcrEventLogsSha1[index];
     }
-
+    
+    public PcrEventLog getPcrEventLog(String bank, int index) {
+        return getPcrEventLog(DigestAlgorithm.valueOf(bank), index);
+    }
+    
+    public PcrEventLog getPcrEventLog(DigestAlgorithm bank, int index) {
+        PcrEventLog[] log = getEventLogBank(bank);
+        return log[index];
+    }
+        
+    @Deprecated
     public PcrEventLog getPcrEventLog(PcrIndex pcrIndex) {
-        return pcrEventLogs[pcrIndex.toInteger()];
+        return pcrEventLogsSha1[pcrIndex.toInteger()];
     }
     
+    public PcrEventLog getPcrEventLog(DigestAlgorithm bank, PcrIndex pcrIndex) {
+        return getPcrEventLog(bank, pcrIndex.toInteger());
+    }
+    
+    @Deprecated
     public void clearPcrEventLog(int index) {
-        pcrEventLogs[index] = null;
+        pcrEventLogsSha1[index] = null;
     }
     
+    public void clearPcrEventLog(DigestAlgorithm bank, int index) {
+        PcrEventLog[] log = getEventLogBank(bank);
+        log[index] = null;
+    }
+    
+    @Deprecated
     public void clearPcrEventLog(PcrIndex pcrIndex) {
-        pcrEventLogs[pcrIndex.toInteger()] = null;
+        pcrEventLogsSha1[pcrIndex.toInteger()] = null;
     }
-    
-    
+       
     public boolean containsPcr(DigestAlgorithm bank, PcrIndex index) {
         if( index == null) return false;
         
@@ -260,9 +320,22 @@ public class PcrManifest extends ObjectModel {
      * @param pcr
      * @return true if the PcrManifest contains the given Pcr at its specified index and value, and false in all other cases
      */
+    @Deprecated
     public boolean containsPcrEventLog(PcrIndex index) {
         if( index == null ) { return false; }
-        if( pcrEventLogs[index.toInteger()] == null ) { return false; }
+        if( pcrEventLogsSha1[index.toInteger()] == null ) { return false; }
+        return true;
+    }
+    
+    public boolean containsPcrEventLog(String bank, PcrIndex index) {
+        DigestAlgorithm b = DigestAlgorithm.valueOf(bank.toUpperCase());
+        return containsPcrEventLog(b, index);
+    }
+    
+    public boolean containsPcrEventLog(DigestAlgorithm bank, PcrIndex index) {
+        if(index == null) { return false; }
+        PcrEventLog[] log = getEventLogBank(bank);
+        if(log[index.toInteger()] == null) { return false; };
         return true;
     }
     
@@ -339,4 +412,14 @@ public class PcrManifest extends ObjectModel {
         this.measurementXml = measurementXml;
     }
 
+    private PcrEventLog[] getEventLogBank(DigestAlgorithm bank) {
+        switch(bank) {
+            case SHA1:
+                return this.pcrEventLogsSha1;
+            case SHA256:
+                return this.pcrEventLogsSha256;
+            default:
+                throw new UnsupportedOperationException("PCRBank: " + bank + " not currently supported");
+        }
+    }
 }
