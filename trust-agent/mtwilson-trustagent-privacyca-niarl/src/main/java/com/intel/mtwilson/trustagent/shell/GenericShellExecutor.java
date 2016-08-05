@@ -42,8 +42,7 @@ abstract class GenericShellExecutor implements ShellExecutor {
             log.debug(tmp);
         }
         
-        ProcessBuilder pb = new ProcessBuilder(cmd);        
-        pb.directory(new File("/tmp"));
+        ProcessBuilder pb = new ProcessBuilder(cmd);                
         Process p = pb.start();
         
         String line = "";
