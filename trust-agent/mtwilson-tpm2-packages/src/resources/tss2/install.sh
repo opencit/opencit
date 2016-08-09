@@ -43,7 +43,7 @@
  /usr/bin/install -c -m 644 include/sapi/implementation.h include/sapi/sys_api_part3.h include/sapi/tpm20.h include/sapi/tpmb.h include/sapi/tss2_common.h include/sapi/tss2_sys.h include/sapi/tss2_tcti.h include/sapi/tss2_tpm2_types.h '/usr/local/include/sapi'
 
 # install the tcsd2.service
-ldconfig
+ldconfig /usr/local/lib/
 cp tcsd2.service /lib/systemd/system
 systemctl enable tcsd2.service
 #systemctl stop tcsd2.service
