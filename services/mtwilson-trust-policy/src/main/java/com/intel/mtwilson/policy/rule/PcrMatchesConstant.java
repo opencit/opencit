@@ -55,7 +55,7 @@ public class PcrMatchesConstant extends BaseRule {
             }
             else {
                 if( !expected.equals(actual) ) {
-                    report.fault(new PcrValueMismatch(expected.getIndex(), expected.getValue(), actual.getValue()) );
+                    report.fault(PcrValueMismatch.newInstance(expected.getPcrBank(), expected.getIndex(), expected.getValue(), actual.getValue()) );
                 }
             }
         }

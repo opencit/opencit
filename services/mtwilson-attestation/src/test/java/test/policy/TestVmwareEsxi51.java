@@ -152,9 +152,9 @@ public class TestVmwareEsxi51 {
                 My.jpa().mwSamlAssertion().destroy(samlRecord.getId());
             }
             // also delete the ONE host-specific module, if it was defined for this host.  done here and not below with other modules because 1) there can only be one host-specific module per host in mtwilson-1.1 -- which is weird, and 2) it is looked up by host id and after we delete the host we won't hav an id anymore...
-            TblHostSpecificManifest hostSpecificToDelete = My.jpa().mwHostSpecificManifest().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
+            List<TblHostSpecificManifest> hostSpecificToDelete = My.jpa().mwHostSpecificManifest().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
             if( hostSpecificToDelete != null ) {
-                My.jpa().mwHostSpecificManifest().destroy(hostSpecificToDelete.getId());
+                My.jpa().mwHostSpecificManifest().destroy(hostSpecificToDelete.get(0).getId());
             }
             My.jpa().mwHosts().destroy(host.getId());
         }

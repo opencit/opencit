@@ -7,6 +7,7 @@ package com.intel.mtwilson.policy.rule;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.dcsg.cpg.crypto.AbstractDigest;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
@@ -33,12 +34,12 @@ import org.slf4j.LoggerFactory;
 public class XmlMeasurementLogIntegrity extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private AbstractDigest expectedValue;
+    private Sha1Digest expectedValue;
     private PcrIndex pcrIndex;
     
     protected XmlMeasurementLogIntegrity() { } // for desearializing jackson
     
-    public XmlMeasurementLogIntegrity(AbstractDigest expectedValue, PcrIndex pcrIndex) {
+    public XmlMeasurementLogIntegrity(Sha1Digest expectedValue, PcrIndex pcrIndex) {
         this.expectedValue = expectedValue;
         this.pcrIndex = pcrIndex;
     }
@@ -69,7 +70,7 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
                 // make sure the expected pcr value matches the actual pcr value
                 if( !expectedValue.equals(actualValue) ) {
                     log.info("XmlMeasurementLogIntegrity: Mismatch in the expected final hash value for the XML Measurement log.");
-                    report.fault(new XmlMeasurementValueMismatch(expectedValue, actualValue) );
+                    report.fault(XmlMeasurementValueMismatch.newInstance(DigestAlgorithm.SHA1, expectedValue, actualValue) );
                 } else {
                     log.debug("Verified the integrity of the XML measurement log successfully.");
                 }
@@ -78,9 +79,8 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
         return report;
     }
     
-    private AbstractDigest computeHistory(List<Measurement> list) {
+    private Sha1Digest computeHistory(List<Measurement> list) {
         // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match        
-        if(expectedValue instanceof Sha1Digest) {
             Sha1Digest result = Sha1Digest.ZERO;
             for (Measurement m : list) {
                 //result = result.extend(m.getValue().toString().getBytes());
@@ -88,19 +88,6 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
                 result = result.extend(Sha1Digest.valueOfHex(m.getValue().toString()));
                 log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
             }
-            return result;
-        } else if(expectedValue instanceof Sha256Digest) {
-            Sha256Digest result = new Sha256Digest(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});// Sha256Digest.ZERO;
-            for (Measurement m : list) {
-                //result = result.extend(m.getValue().toString().getBytes());
-                log.debug("XmlMeasurementLogIntegrity-computeHistory: Current value of result is {}", result.toString());
-                result = result.extend(Sha256Digest.valueOfHex(m.getValue().toString()));
-                log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
-            }
-            return result;
-        } else {
-            throw new UnsupportedOperationException("expectedValue is not of a supported Digest type");
-        }
-        
+            return result;     
     }
 }

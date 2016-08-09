@@ -381,7 +381,7 @@ public class ReportsBO {
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
                         // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
                         //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
-                        String hostSpecificDigestValue = My.jpa().mwHostSpecificManifest().findByModuleAndHostID(hostId, moduleManifest.getId()).getDigestValue();
+                        String hostSpecificDigestValue = My.jpa().mwHostSpecificManifest().findByModuleIdHostIdPcrBank(hostId, moduleManifest.getId(), moduleManifest.getPcrBank()).getDigestValue();
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }

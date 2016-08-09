@@ -6,6 +6,8 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.HashMap;
@@ -16,6 +18,13 @@ import java.util.Map;
  * @param <T>
  * @since 1.2
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "digest_type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = MeasurementSha1.class),
+    @JsonSubTypes.Type(value = MeasurementSha256.class)
+})
 public abstract class Measurement<T extends AbstractDigest> extends ObjectModel {
 
     protected final T digest;

@@ -267,7 +267,7 @@ public class JpaPolicyReader {
         // Since we can call this function even without registering the host, the hostID will not be present. So, we need to skip adding this host specific module
         if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue()) {
             if (host.getId() != null && host.getId() != 0) {
-                TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  
+                TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleIdHostIdPcrBank(host.getId(), moduleInfo.getId(), moduleInfo.getPcrBank()); // returns null if not found;  
                 if( hostSpecificModule == null ) {
                     log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
                     Measurement m = MeasurementFactory.newInstance(host.getPcrBank(), "", "Missing host-specific module: " + moduleInfo.getComponentName(), info);
@@ -298,7 +298,7 @@ public class JpaPolicyReader {
         Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
         PcrEventLogIncludes rule = null;
         if (m != null)
-            rule = new PcrEventLogIncludes(pcrIndex, m);
+            rule = new PcrEventLogIncludes(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex, m);
         if (rule != null)
             rule.setMarkers(markers);
         return rule;
@@ -325,15 +325,15 @@ public class JpaPolicyReader {
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
-            if( pcrIndex.toInteger() == 19 ) {
+            if( pcrIndex.toInteger() == 19 || pcrIndex.toInteger() == 17 ) {
                 // event log rule
                 log.debug("Adding PcrEventLogIncludes rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
-                PcrEventLogIncludes eventLogIncludesRule = new PcrEventLogIncludes(pcrIndex, measurements.get(pcrIndex));
+                PcrEventLogIncludes eventLogIncludesRule = new PcrEventLogIncludes(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex, measurements.get(pcrIndex));
                 eventLogIncludesRule.setMarkers(markers);
                 list.add(eventLogIncludesRule);
                 // integrity rule
                 log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
-                PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(pcrIndex);
+                PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex);
                 integrityRule.setMarkers(markers);
                 list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity            
             }
@@ -377,7 +377,7 @@ public class JpaPolicyReader {
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
-            if( pcrIndex.toInteger() == 19 ) {
+            if( pcrIndex.toInteger() == 19 || pcrIndex.toInteger() == 17 ) {
                 // event log rule
                 List<Measurement> mList = measurements.get(pcrIndex);
                 log.debug("Adding PcrEventLogEqualsExcluding rule for PCR {} with {} events", pcrIndex.toString(), mList.size());
@@ -390,7 +390,7 @@ public class JpaPolicyReader {
                 // We need to add the integrity only only for attestation and not for verification of MLE
                 if (!verifyMLE) {
                     log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
-                    PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(pcrIndex);
+                    PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex);
                     integrityRule.setMarkers(markers);
                     list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity            
                 }
@@ -404,7 +404,7 @@ public class JpaPolicyReader {
 
         log.debug("loadXmlMeasurementLogRuleForVmm: Adding XmlMeasurementLogRules for verification");
         HashSet<Rule> list = new HashSet<>();
-        AbstractDigest finalXmlWhitelistValue = null;
+        Sha1Digest finalXmlWhitelistValue = null;
         
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
         Collection<TblModuleManifest> tblModuleManifestCollection = vmmMle.getTblModuleManifestCollection();

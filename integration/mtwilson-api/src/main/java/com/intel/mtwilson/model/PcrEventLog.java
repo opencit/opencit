@@ -2,6 +2,8 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
@@ -28,6 +30,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @since 1.2
  * @author jbuhacoff
  */
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "digest_type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PcrEventLogSha1.class),
+    @JsonSubTypes.Type(value = PcrEventLogSha256.class)
+})
 public abstract class PcrEventLog<T extends Measurement> extends ObjectModel {
     private final PcrIndex pcrIndex;
     private final List<T> eventLog = new ArrayList<>();

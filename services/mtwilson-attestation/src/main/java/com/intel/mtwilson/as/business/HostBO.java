@@ -27,6 +27,7 @@ import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -57,6 +58,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -226,14 +228,23 @@ public class HostBO {
 //                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
                         
                         // Bug: 749: We need to handle the host specific modules only if the PCR 19 is selected for attestation
+                        boolean useDaMode = "2.0".equals(tblHosts.getTpmVersion());
+                        
                         List<TblHostSpecificManifest>   tblHostSpecificManifests = null;
-                        if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
-                            log.info("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                        if(!useDaMode && vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                            log.info("LEGACY MODE: Host specific modules will be retrieved from the host that extends into PCR 19.");
                             // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                        }else if(useDaMode && biosMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
+                            log.info("DA MODE: Host specific modules will be retrieved from the host that extends into PCR 17.");
+                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(biosMleId, pcrManifest, hostType);
                         } else {
-                            log.info("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                            log.info("Host specific modules will not be configured since PCR 17 or 19 in the correct TPM mode are not selected for attestation");
                         }
+                        
+                        
+                        
+                        
                         
                         // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
 //                            pcrMap = getHostPcrManifest(tblHosts, host); 
@@ -502,12 +513,18 @@ public class HostBO {
 
                         // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
                         // the host specific modules.
-                        if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
-                            log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                        
+                        boolean useDaMode = "2.0".equals(tblHosts.getTpmVersion());
+                        
+                        if(!useDaMode && vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                            log.debug("LEGACY MODE: Host specific modules will be retrieved from the host that extends into PCR 19.");
                             // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                        } else if(useDaMode && biosMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
+                            log.debug("DA MODE: Host specific modules will be retrieved from the host that extends into PCR 17.");
+                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(biosMleId, pcrManifest, hostType);
                         } else {
-                            log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                            log.debug("Host specific modules will not be configured since PCR 17 or 19 with the correct TPM Mode are not selected for attestation");
                         }
 
                         log.debug("Saving Host in database");
@@ -622,13 +639,28 @@ public class HostBO {
                      if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
                         // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
                         //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
-                        TblHostSpecificManifest hostSpecificManifest = tblHostSpecificManifestJpaController.findByModuleAndHostID(tblHosts.getId(), moduleManifest.getId());
-                        if (hostSpecificManifest != null) {
+                        List<TblHostSpecificManifest> hostSpecificManifests = tblHostSpecificManifestJpaController.findByModuleAndHostID(tblHosts.getId(), moduleManifest.getId());
+                        if (hostSpecificManifests != null) {
+                            for(TblHostSpecificManifest hostSpecificManifest : hostSpecificManifests) {
                                 log.debug("Deleting Host specific manifest." + moduleManifest.getComponentName() + ":" + hostSpecificManifest.getDigestValue());
-                                tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());
+                                tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());   
+                            }
                         }                        
                     }
-                }                
+                }       
+                for(TblModuleManifest moduleManifest : tblHosts.getBiosMleId().getTblModuleManifestCollection()) {
+                    if (moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue()) {
+                        // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
+                        //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        List<TblHostSpecificManifest> hostSpecificManifests = tblHostSpecificManifestJpaController.findByModuleAndHostID(tblHosts.getId(), moduleManifest.getId());
+                        if (hostSpecificManifests != null) {
+                            for (TblHostSpecificManifest hostSpecificManifest : hostSpecificManifests) {
+                                log.debug("Deleting Host specific manifest." + moduleManifest.getComponentName() + ":" + hostSpecificManifest.getDigestValue());
+                                tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());
+                            }
+                        }
+                    }
+                }
         }
 
         private void deleteTALogs(Integer hostId) throws IllegalOrphanException, IOException {
@@ -852,6 +884,74 @@ public class HostBO {
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
         }
 
+        
+    private List<TblHostSpecificManifest> createHostSpecificManifestRecordsDaMode(TblMle mle, PcrManifest pcrManifest, Vendor hostType) throws IOException {
+        List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<>();
+        if(mle.getRequiredManifestList().contains(PcrIndex.PCR17.toString()) && pcrManifest != null) {
+            Map<DigestAlgorithm, List<PcrEventLog>> map = pcrManifest.getPcrEventLogMap();
+            for(DigestAlgorithm k : map.keySet()) {                
+                if(!pcrManifest.containsPcrEventLog(k, PcrIndex.PCR17)) {
+                    log.warn("Event logs for PCR17 not found for PCR Bank: " + k + ", skipping to next bank");
+                    continue;
+                }
+                PcrEventLog eventLog17 = pcrManifest.getPcrEventLog(k, PcrIndex.PCR17);
+                if(eventLog17 != null) {
+                    List< ? extends Measurement> eventLog = eventLog17.getEventLog();
+                    for(Measurement m : eventLog) {
+                        if(m != null && m.getInfo() != null && (!m.getInfo().isEmpty())) {
+                            Map<String, String> mInfo = m.getInfo();
+                            String mEventName = mInfo.get("EventName");
+                            String mComponentName = mInfo.get("ComponentName");
+                            log.debug("Checking host specific manifest for event '" + mEventName
+                                    + "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
+
+                            // we are looking for the "commandline" event specifically  (vmware)
+                            if (hostType.equals(Vendor.VMWARE) && mEventName != null && mComponentName != null
+                                    && mEventName.equals("Vim25Api.HostTpmCommandEventDetails")) {
+
+                                log.debug("Adding host specific manifest for event '" + mEventName
+                                        + "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
+                                log.debug("Querying manifest for event '" + mEventName
+                                        + "' MLE_ID '" + mle.getId() + "' component '" + mComponentName + "'");
+
+                                TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(mle.getId(),
+                                        mInfo.get("ComponentName"), mInfo.get("EventName"));
+
+                                if (tblModuleManifest != null) {
+                                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                    tblHostSpecificManifest.setPcrBank(k.toString().toUpperCase());
+                                    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                                    tblHostSpecificManifests.add(tblHostSpecificManifest);
+                                }
+                            } else if (hostType.equals(Vendor.INTEL) && mInfo.get("EventName") != null
+                                    && ArrayUtils.contains(openSourceHostSpecificModules, mInfo.get("ComponentName"))) {
+
+                                log.debug("Adding host specific manifest for event '" + mInfo.get("EventName")
+                                        + "' field '" + m.getLabel() + "' component '" + mInfo.get("ComponentName") + "'");
+                                log.debug("Querying manifest for event '" + mInfo.get("EventName")
+                                        + "' MLE_ID '" + mle.getId() + "' component '" + mInfo.get("ComponentName") + "'");
+
+                                // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
+                                TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(mle.getId(),
+                                        mInfo.get("ComponentName"), mInfo.get("EventName"));
+
+                                if (tblModuleManifest != null) {
+                                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                    tblHostSpecificManifest.setPcrBank(k.toString().toUpperCase());
+                                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                                    tblHostSpecificManifests.add(tblHostSpecificManifest);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return tblHostSpecificManifests;
+    }    
     /*
      * It looks for a very specific event that
      * is extended into pcr 19 in vmware hosts.  So the vmware host-specific policy factory creates a TrustPolicy

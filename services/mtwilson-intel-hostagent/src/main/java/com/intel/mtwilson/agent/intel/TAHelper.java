@@ -936,7 +936,7 @@ public class TAHelper {
                         reader.next();
                         
                         if(reader.getLocalName().equalsIgnoreCase("pcrBank")) {
-                            pcrBank = reader.getElementText();
+                            pcrBank = reader.getElementText().toUpperCase();
                         }
                         
                         reader.next();
