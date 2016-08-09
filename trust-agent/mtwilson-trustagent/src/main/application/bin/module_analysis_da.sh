@@ -102,8 +102,8 @@ getBankById()
   lAlgId=$1
 
   case $lAlgId in
-  4) echo sha1 ;;
-  11) echo sha256 ;;
+  4) echo SHA1 ;;
+  11) echo SHA256 ;;
   *) echo $lAlgId;;
   esac
 }
@@ -241,4 +241,3 @@ done
 echo "$BLANK2$BLANK2</modules>" >>$OUTFILE
 echo "$BLANK2</txt>" >>$OUTFILE
 echo "</measureLog>" >>$OUTFILE
-
