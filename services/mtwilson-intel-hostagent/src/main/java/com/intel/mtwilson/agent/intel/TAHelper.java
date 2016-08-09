@@ -937,9 +937,8 @@ public class TAHelper {
                         
                         if(reader.getLocalName().equalsIgnoreCase("pcrBank")) {
                             pcrBank = reader.getElementText().toUpperCase();
-                        }
-                        
-                        reader.next();
+                            reader.next();
+                        }                       
                         
                         // Get the PCR Number to which the module is extended to
                         if (reader.getLocalName().equalsIgnoreCase("pcrNumber")) {

@@ -1534,9 +1534,9 @@ public class HostBO {
                             // only support EventLog for PCR 17 if it's TPM 2.0
                             int pcr = Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR"));
                             String tpmVersion = hostConfigObj.getTxtHostRecord().TpmVersion;
-
+                            boolean useDaMode = "2.0".equals(tpmVersion);
                             ModuleWhiteList moduleObj = new ModuleWhiteList();
-                            if (pcr == 17 && "2.0".equals(tpmVersion)) {// bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
+                            if (pcr == 17 && useDaMode) {// bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
@@ -1557,7 +1557,7 @@ public class HostBO {
                                 //moduleObj.setOsName(hostObj.VMM_OSName);
                                 //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                 moduleObj.setOemName(hostObj.BIOS_Oem);
-                            } else {
+                            } else if(pcr == 19 && !useDaMode) {
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
@@ -1578,6 +1578,9 @@ public class HostBO {
                                 moduleObj.setOsName(hostObj.VMM_OSName);
                                 moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                 moduleObj.setOemName("");
+                            } else {
+                                reader.next();
+                                continue;
                             }
                             if (!hostConfigObj.getOverWriteWhiteList()) {
                                 mleBO.addModuleWhiteList(moduleObj, emt, null, null);

@@ -49,7 +49,7 @@ public class TblHostSpecificManifest implements Serializable {
     @Column(name = "DigestValue")
     private String digestValue;
     @Column(name = "pcr_bank")
-    private String pcrBank;
+    private String pcrBank = "SHA1";
 
     public String getPcrBank() {
         return pcrBank;
