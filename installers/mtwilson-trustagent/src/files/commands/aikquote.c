@@ -232,7 +232,7 @@ main (int ac, char **av)
 		memset (chalmd, 0, sizeof(chalmd));
 	}
         if(f_in != NULL)
-            f_in.close();
+            fclose(f_in);
 	/* Read AIK blob */
 	if ((f_in = fopen(av[1], "rb")) == NULL) {
             if(f_in != NULL)
