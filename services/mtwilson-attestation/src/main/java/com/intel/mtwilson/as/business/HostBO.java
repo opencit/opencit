@@ -914,8 +914,8 @@ public class HostBO {
                                 log.debug("Querying manifest for event '" + mEventName
                                         + "' MLE_ID '" + mle.getId() + "' component '" + mComponentName + "'");
 
-                                TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(mle.getId(),
-                                        mInfo.get("ComponentName"), mInfo.get("EventName"));
+                                TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventNamePcrBank(mle.getId(),
+                                        mInfo.get("ComponentName"), mInfo.get("EventName"), k.toString().toUpperCase());
 
                                 if (tblModuleManifest != null) {
                                     TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
@@ -934,8 +934,8 @@ public class HostBO {
                                         + "' MLE_ID '" + mle.getId() + "' component '" + mInfo.get("ComponentName") + "'");
 
                                 // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
-                                TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(mle.getId(),
-                                        mInfo.get("ComponentName"), mInfo.get("EventName"));
+                                TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventNamePcrBank(mle.getId(),
+                                        mInfo.get("ComponentName"), mInfo.get("EventName"), k.toString().toUpperCase());
 
                                 if (tblModuleManifest != null) {
                                     TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
@@ -988,8 +988,8 @@ public class HostBO {
                             log.debug("Querying manifest for event '"   +mEventName + 
                                     "' MLE_ID '" + vmmMleId.getId() + "' component '" + mComponentName + "'");
 
-                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                                    mInfo.get("ComponentName"),  mInfo.get("EventName"));
+                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventNamePcrBank(vmmMleId.getId(),
+                                    mInfo.get("ComponentName"),  mInfo.get("EventName"), "SHA1");
 
                             if (tblModuleManifest != null) {
                                 TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
@@ -1007,8 +1007,8 @@ public class HostBO {
                                     "' MLE_ID '" + vmmMleId.getId() + "' component '" + mInfo.get("ComponentName") + "'");
 
                             // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
-                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                                    mInfo.get("ComponentName"),  mInfo.get("EventName"));
+                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventNamePcrBank(vmmMleId.getId(),
+                                    mInfo.get("ComponentName"),  mInfo.get("EventName"), "SHA1");
 
                             if (tblModuleManifest != null) {
                                 TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();

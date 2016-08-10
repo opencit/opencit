@@ -1003,7 +1003,7 @@ public class MleBO {
             log.debug("ADDMLETIME: after retrieving Event info - {}", (addModule2 - addModule1));
 
             //tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
-            Integer componentID = moduleManifestJpaController.findByMleIdEventId(tblMle.getId(), fullComponentName, tblEvent.getId());
+            Integer componentID = moduleManifestJpaController.findByMleIdEventIdPcrBank(tblMle.getId(), fullComponentName, tblEvent.getId(), moduleData.getPcrBank());
 
             if (componentID != null && componentID != 0) {
                 throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
@@ -1111,7 +1111,7 @@ public class MleBO {
             } else {
 
                 try {
-                    // First check if the entry exists in the MLE table.
+                    // First check if the entry exists in the MLE table.                    
                     tblMle = getMleDetails(moduleData.getMleName(),
                             moduleData.getMleVersion(), moduleData.getOsName(),
                             moduleData.getOsVersion(), moduleData.getOemName());
@@ -1149,7 +1149,7 @@ public class MleBO {
                     }
                     log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
 
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+                    tblModule = moduleManifestJpaController.findByMleNameEventNamePcrBank(tblMle.getId(), fullComponentName, moduleData.getEventName(), moduleData.getPcrBank());
                     if (tblModule == null)
                         throw new NoResultException();
 
@@ -1204,7 +1204,7 @@ public class MleBO {
      * @param oemName : OEM vendor of the hardware system. OEM Details have to be provided only when the associated MLE is of BIOS type.
      * @return : "true" if everything is successful or else exception
      */
-    public String deleteModuleWhiteList(String componentName, String eventName, String mleName, String mleVersion,
+    public String deleteModuleWhiteList(String componentName, String eventName, String pcrBank, String mleName, String mleVersion,
             String osName, String osVersion, String oemName, String uuid) {
         TblMle tblMle;
         TblEventType tblEvent;
@@ -1251,8 +1251,8 @@ public class MleBO {
                     log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
 
                     log.debug("deleteModuleWhiteList searching for module manifest with field name '" + tblEvent.getFieldName() + "' component name '" + componentName + "' event name '" + eventName + "'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(),
-                            tblEvent.getFieldName() + "." + componentName, eventName);
+                    tblModule = moduleManifestJpaController.findByMleNameEventNamePcrBank(tblMle.getId(),
+                            tblEvent.getFieldName() + "." + componentName, eventName, pcrBank);
 
                 } catch (NoResultException nre) {
                     // If the module manifest that we are trying to delete does not exist, it is ok.
@@ -1323,6 +1323,7 @@ public class MleBO {
                     modObj.setEventName(tblModList.get(i).getEventID().getName());
                     modObj.setComponentName(tblModList.get(i).getComponentName());
                     modObj.setDigestValue(tblModList.get(i).getDigestValue());
+                    modObj.setPcrBank(tblModList.get(i).getPcrBank());
                     modObj.setExtendedToPCR(tblModList.get(i).getExtendedToPCR());
                     modObj.setPackageName(tblModList.get(i).getPackageName());
                     modObj.setPackageVendor(tblModList.get(i).getPackageVendor());

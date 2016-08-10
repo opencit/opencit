@@ -316,7 +316,7 @@ public class ReportsBO {
         manifest.setTrustStatus(getTrustStatus(log.getTrustStatus()));
         manifest.setWhiteListValue(tblPcrManifest.getValue());
 //        if (log.getTblModuleManifestLogCollection() != null && log.getTblModuleManifestLogCollection().size() > 0) {
-            addManifestLogs(tblHosts.getId(), manifest, log, failureOnly,tblPcrManifest);// 20130417 added host id to parameter list so addManifestLogs can find host-specific module values
+            addManifestLogs(tblHosts, manifest, log, failureOnly,tblPcrManifest);// 20130417 added host id to parameter list so addManifestLogs can find host-specific module values
 //        }
         return manifest;
     }
@@ -342,7 +342,9 @@ public class ReportsBO {
 //    }
     
     
-    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
+    private void addManifestLogs(TblHosts host, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
+        Integer hostId = host.getId();
+        String registeredPcrBank = host.getPcrBank();
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<>();
         ModuleLogReport tbootxmModuleLogReport = new ModuleLogReport();
         HashMap<String, ModuleLogReport> temptbootxmSubModuleReport = new HashMap<>();
@@ -376,7 +378,7 @@ public class ReportsBO {
                 logger.debug("addManifestLogs - {} - {}", moduleManifest.getComponentName(), moduleManifest.getDigestValue());
 
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
-                        !moduleReports.containsKey(moduleManifest.getComponentName())){
+                        !moduleReports.containsKey(moduleManifest.getComponentName()) && registeredPcrBank.equals(moduleManifest.getPcrBank())){
                     
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
                         // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.

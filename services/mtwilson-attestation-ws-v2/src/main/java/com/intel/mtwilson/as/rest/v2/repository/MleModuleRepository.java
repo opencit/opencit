@@ -146,7 +146,7 @@ public class MleModuleRepository implements DocumentRepository<MleModule, MleMod
         if (locator.id == null) { return; }
         log.debug("MleModule:Delete - Got request to delete Mle Module with id {}.", locator.id.toString());        
         try {
-            new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, locator.id.toString());
+            new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, null, locator.id.toString());
             log.debug("MleModule:Delete - Deleted the MleModule with id {} successfully.", locator.id.toString());            
         } catch (Exception ex) {
             log.error("MleModule:Delete - Error during module whitelist deletion.", ex);
