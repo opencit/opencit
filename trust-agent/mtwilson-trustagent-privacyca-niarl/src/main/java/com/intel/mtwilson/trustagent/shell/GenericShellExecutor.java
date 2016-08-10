@@ -30,7 +30,7 @@ abstract class GenericShellExecutor implements ShellExecutor {
                        
         List<String> cmd = new ArrayList<>();
         
-        cmd.add(Folders.application() + File.separator + "bin" + File.separator + commandName);
+        cmd.add(commandName);
         for(String param : commandArgs) {
             cmd.add(param);
         }                
