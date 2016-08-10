@@ -51,11 +51,13 @@ import org.slf4j.LoggerFactory;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogIntegrity extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
+    private DigestAlgorithm pcrBank;
     private PcrIndex pcrIndex;
     
     protected PcrEventLogIntegrity() { } // for desearializing jackson
     
-    public PcrEventLogIntegrity(PcrIndex pcrIndex) {
+    public PcrEventLogIntegrity(DigestAlgorithm bank, PcrIndex pcrIndex) {
+        this.pcrBank = bank;
         this.pcrIndex = pcrIndex;
     }
     
@@ -68,24 +70,23 @@ public class PcrEventLogIntegrity extends BaseRule {
             report.fault(new PcrManifestMissing());            
         }
         else {
-            Pcr actualValue = hostReport.pcrManifest.getPcr(pcrIndex);
-            DigestAlgorithm bank = actualValue.getPcrBank();
+            Pcr actualValue = hostReport.pcrManifest.getPcr(pcrBank, pcrIndex);
             if( actualValue == null ) {
                 report.fault(new PcrValueMissing(pcrIndex));
             }
             else {
-                PcrEventLog eventLog = hostReport.pcrManifest.getPcrEventLog(pcrIndex);
+                PcrEventLog eventLog = hostReport.pcrManifest.getPcrEventLog(pcrBank, pcrIndex);
                 if( eventLog == null ) {
                     report.fault(new PcrEventLogMissing(pcrIndex));
                 }
                 else {
                     List<Measurement> measurements = eventLog.getEventLog();
                     if( measurements != null ) {
-                        AbstractDigest expectedValue = computeHistory(measurements, bank); // calculate expected' based on history
+                        AbstractDigest expectedValue = computeHistory(measurements, pcrBank); // calculate expected' based on history
                         log.debug("PcrEventLogIntegrity: About to compare {} with {}.", actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
-                            report.fault(new PcrValueMismatch(pcrIndex, expectedValue, actualValue.getValue()) );
+                            report.fault(PcrValueMismatch.newInstance(pcrBank, pcrIndex, expectedValue, expectedValue));
                         }
                     }
                 }

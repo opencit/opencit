@@ -1,5 +1,6 @@
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
@@ -44,7 +45,10 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.MeasurementSha1;
+import com.intel.mtwilson.model.MeasurementSha256;
 import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.model.PcrEventLogFactory;
 import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
@@ -663,19 +667,21 @@ public class TAHelper {
         }
 
         // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report.
-        for (int pcrIndex = 0; pcrIndex < 24; pcrIndex++) {
-            if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex))) {
-                List<Measurement> eventLogs = pcrManifest.getPcrEventLog(pcrIndex).getEventLog();
-                for (Measurement eventLog : eventLogs) {
+        Map<DigestAlgorithm, List<PcrEventLog>> logs = pcrManifest.getPcrEventLogMap();
+        for(Map.Entry<DigestAlgorithm, List<PcrEventLog>> e : logs.entrySet()) {
+            for(PcrEventLog pel : e.getValue()) {
+                List<Measurement> eventLogs = pel.getEventLog();
+                for(Measurement m : eventLogs) {
                     xtw.writeStartElement("EventDetails");
                     xtw.writeAttribute("EventName", "OpenSource.EventName");
-                    xtw.writeAttribute("ComponentName", eventLog.getLabel());
-                    xtw.writeAttribute("DigestValue", eventLog.getValue().toString().toUpperCase());
-                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pcrIndex));
+                    xtw.writeAttribute("ComponentName", m.getLabel());                    
+                    xtw.writeAttribute("DigestValue", m.getValue().toString().toUpperCase());
+                    xtw.writeAttribute("DigestAlgorithm", pel.getPcrBank().toString().toUpperCase());
+                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pel.getPcrIndex()));
                     xtw.writeAttribute("PackageName", "");
                     xtw.writeAttribute("PackageVendor", "");
                     xtw.writeAttribute("PackageVersion", "");
-                    if (ArrayUtils.contains(openSourceHostSpecificModules, eventLog.getLabel())) {
+                    if (ArrayUtils.contains(openSourceHostSpecificModules, m.getLabel())) {
                         // For Xen, these modules would be vmlinuz and initrd and for KVM it would just be initrd.
                         xtw.writeAttribute("UseHostSpecificDigest", "true");
                     } else {
@@ -846,7 +852,7 @@ public class TAHelper {
     }
 
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
-//        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
+//        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();        
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s",
@@ -922,11 +928,18 @@ public class TAHelper {
                 int extendedToPCR = -1;
                 String digestValue = "";
                 String componentName = "";
+                String pcrBank = "SHA1";
 
                 while (reader.hasNext()) {
                     if (reader.getEventType() == XMLStreamConstants.START_ELEMENT
                             && reader.getLocalName().equalsIgnoreCase("module")) {
                         reader.next();
+                        
+                        if(reader.getLocalName().equalsIgnoreCase("pcrBank")) {
+                            pcrBank = reader.getElementText().toUpperCase();
+                            reader.next();
+                        }                       
+                        
                         // Get the PCR Number to which the module is extended to
                         if (reader.getLocalName().equalsIgnoreCase("pcrNumber")) {
                             extendedToPCR = Integer.parseInt(reader.getElementText());
@@ -934,7 +947,7 @@ public class TAHelper {
 
                         reader.next();
                         // Get the Module name
-                        if (reader.getLocalName().equalsIgnoreCase("name")) {
+                        if (reader.getLocalName().equalsIgnoreCase("name")) {                            
                             componentName = reader.getElementText();
                         }
 
@@ -942,19 +955,19 @@ public class TAHelper {
                         // Get the Module hash value
                         if (reader.getLocalName().equalsIgnoreCase("value")) {
                             digestValue = reader.getElementText();
-                        }
+                        }                                                
 
                         log.debug("Process module " + componentName + " getting extended to " + extendedToPCR);
 
                         // Attach the PcrEvent logs to the corresponding pcr indexes.
-                        // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.
-                        Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue);
-                        if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(extendedToPCR))) {
-                            pcrManifest.getPcrEventLog(extendedToPCR).getEventLog().add(m);
+                        // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.                        
+                        Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue, pcrBank);
+                        if (pcrManifest.containsPcrEventLog(pcrBank, PcrIndex.valueOf(extendedToPCR))) {
+                            pcrManifest.getPcrEventLog(pcrBank, extendedToPCR).getEventLog().add(m);
                         } else {
                             ArrayList<Measurement> list = new ArrayList<Measurement>();
                             list.add(m);
-                            pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(extendedToPCR), list));
+                            pcrManifest.setPcrEventLog(PcrEventLogFactory.newInstance(pcrBank, PcrIndex.valueOf(extendedToPCR), list));
                         }
                     }
                     reader.next();
@@ -978,7 +991,7 @@ public class TAHelper {
      * @param moduleHash
      * @return
      */
-    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash) {
+    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash, String pcrBank) {
         HashMap<String, String> info = new HashMap<String, String>();
         info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
         // Removing the prefix of "OpenSource" as it is being captured in the event type
@@ -987,7 +1000,15 @@ public class TAHelper {
         info.put("PackageVendor", "");
         info.put("PackageVersion", "");
 
-        return new Measurement(new Sha1Digest(moduleHash), moduleName, info);
+        DigestAlgorithm da = DigestAlgorithm.valueOf(pcrBank);        
+        switch(da) {
+            case SHA1:
+                return new MeasurementSha1(new Sha1Digest(moduleHash), moduleName, info);                
+            case SHA256:                
+                return new MeasurementSha256(new Sha256Digest(moduleHash), moduleName, info);                
+            default:
+                throw new UnsupportedOperationException("PCRBank: " + pcrBank + " not supported");
+        }        
     }
     /*
      public EntityManagerFactory getEntityManagerFactory() {

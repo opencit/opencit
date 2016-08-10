@@ -72,7 +72,7 @@ public class XmlMeasurementLog extends ObjectModel {
                             moduleInfo.put("Include", dirEntry.getInclude());
                             moduleInfo.put("Exclude", dirEntry.getExclude());
                             
-                            Measurement newDirModule = new Measurement(Sha1Digest.valueOfHex(dirEntry.getValue()), dirEntry.getPath(), moduleInfo);
+                            Measurement newDirModule = new MeasurementSha1(Sha1Digest.valueOfHex(dirEntry.getValue()), dirEntry.getPath(), moduleInfo);
                             this.measurements.add(newDirModule);
                         } else {
                             FileMeasurementType fileEntry = (FileMeasurementType) measurementLogEntry;
@@ -81,7 +81,7 @@ public class XmlMeasurementLog extends ObjectModel {
                             HashMap<String,String> moduleInfo = new HashMap<>();
                             moduleInfo.put("Type", FileMeasurementType.class.getSimpleName());
                             
-                            Measurement newFileModule = new Measurement(Sha1Digest.valueOfHex(fileEntry.getValue()), fileEntry.getPath(), moduleInfo);
+                            Measurement newFileModule = new MeasurementSha1(Sha1Digest.valueOfHex(fileEntry.getValue()), fileEntry.getPath(), moduleInfo);
                             this.measurements.add(newFileModule);
                         }                            
                     }

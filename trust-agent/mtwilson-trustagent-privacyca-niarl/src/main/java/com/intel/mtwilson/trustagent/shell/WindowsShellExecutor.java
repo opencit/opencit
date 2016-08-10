@@ -5,6 +5,8 @@
  */
 package com.intel.mtwilson.trustagent.shell;
 
+import com.intel.mtwilson.Folders;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -15,7 +17,8 @@ class WindowsShellExecutor extends GenericShellExecutor {
 
     @Override
     void PrepareCommandOverride(List<String> cmd) {        
-        cmd.add(0, "TPMTool.exe");
+        // add each to front, which means it will be cmd.exe /c TPMTool.exe
+        cmd.add(0, Folders.application() + File.separator + "bin" + File.separator + "TPMTool.exe");
         cmd.add(0, "/c");
         cmd.add(0, "cmd.exe");
     }

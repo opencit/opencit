@@ -7,6 +7,8 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mtwilson.model.MeasurementSha1;
+import com.intel.mtwilson.model.PcrEventLogSha1;
 import com.intel.mtwilson.model.PcrSha1;
 import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.HostTpmAttestationReport;
@@ -58,13 +60,13 @@ public class VMWare51Esxi51   {
             int pcrIndex = logEntry.getPcrIndex();
             log.debug("PCR {}", pcrIndex);
             Measurement m = convertHostTpmEventLogEntryToMeasurement(logEntry);
-            if( pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex)) ) {
-                pcrManifest.getPcrEventLog(pcrIndex).getEventLog().add(m);
+            if( pcrManifest.containsPcrEventLog("SHA1", PcrIndex.valueOf(pcrIndex)) ) {
+                pcrManifest.getPcrEventLog("SHA1", pcrIndex).getEventLog().add(m);
             }
             else {
                 ArrayList<Measurement> list = new ArrayList<Measurement>();
                 list.add(m);
-                pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(pcrIndex),list));
+                pcrManifest.setPcrEventLog(new PcrEventLogSha1(PcrIndex.valueOf(pcrIndex), (List<MeasurementSha1>)(List<?>)list));
             }
         }
         }
@@ -149,12 +151,12 @@ public class VMWare51Esxi51   {
                 
                 log.debug("Event Digest is {}", digest);
                 if( digest.length() == 40 ) { // sha1 is 20 bytes, so 40 hex digits
-                    return new Measurement(new Sha1Digest(digest), label, info );
+                    return new MeasurementSha1(new Sha1Digest(digest), label, info );
                     
                 }
                 if( digest.replace("0", "").trim().isEmpty() ) {
                     log.warn("Event Digest is zero longer than 20 bytes: {}  -- replacing with 20 bytes of zero", digest);
-                    return new Measurement(Sha1Digest.ZERO, label, info );
+                    return new MeasurementSha1(Sha1Digest.ZERO, label, info );
                 }
                 /**
                  * The following lines may cause a problem.  If you are reading this, it's probably because
@@ -166,7 +168,7 @@ public class VMWare51Esxi51   {
                  */
                 log.error("Event Digest is non-zero longer than 20 bytes: {}  -- trying to decode it", digest);
                 try{
-                return new Measurement(Sha1Digest.valueOf(Hex.decodeHex(digest.toCharArray())), label, info ); 
+                return new MeasurementSha1(Sha1Digest.valueOf(Hex.decodeHex(digest.toCharArray())), label, info ); 
                 }
                 catch(DecoderException e) {
                     throw new IllegalArgumentException(digest); 

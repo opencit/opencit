@@ -29,8 +29,8 @@ import org.apache.commons.io.IOUtils;
  */
 public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IntelHostTrustPolicyFactory.class);
-    private X509Certificate[] cacerts = null;
-    private JpaPolicyReader reader;
+    protected X509Certificate[] cacerts = null;
+    protected JpaPolicyReader reader;
     public IntelHostTrustPolicyFactory(JpaPolicyReader util) {
         this.reader = util;
     }
@@ -97,7 +97,7 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
         return rules;    
     }
 
-    private X509Certificate[] loadTrustedAikCertificateAuthorities() {
+    protected X509Certificate[] loadTrustedAikCertificateAuthorities() {
         HashSet<X509Certificate> pcaList = new HashSet<>();
         try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));

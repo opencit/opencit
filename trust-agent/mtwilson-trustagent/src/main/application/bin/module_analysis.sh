@@ -211,8 +211,11 @@ xml_pcr2() {
  for parm in $num;do
  if [ $parm -gt 0 ];then
    x401Data="`$INFILE | sed -n "$((parm+3)), $((parm+3)) p" | sed "s/ //g" | sed "s/\t//g"`"
-   if [ $x401Data = "00000000" ];then
-   txt_status=2
+   if [ $x401Data = "00000000" ]; then
+     txt_status=2
+   elif [ $x401Data = "01000000" ];then
+     `echo $0 | sed "s/\.sh/_da\.sh/g"` $1
+     exit 0
    fi
  fi
  done
@@ -347,7 +350,7 @@ else
 fi
 
 
-if [ $txt_status -eq 2 -a $x404Data!="EOF" ];then
+if [ $txt_status -eq 2 -a $x403Data!="EOF" ];then
   sinit_mle_data_bios_acm_id="${x403Data:0:40}"
   #echo "@@ sinit_mle_data_bios_acm_id = $sinit_mle_data_bios_acm_id"
 else
