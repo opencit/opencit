@@ -593,7 +593,7 @@ public class MleBO {
                     // pcrManifest.setUpdatedBy(getLoggedInUser());
                     // pcrManifest.setUpdatedOn(today);
                     pcrManifestJpaController.edit(pcrManifest);
-                    newPCRMap.remove(pcrManifest.getName());
+                    newPCRMap.remove(key);
                 } else {
                     log.debug(String.format("Deleting Pcr manifest value for mle %s  version %s pcr name %s",
                             pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
