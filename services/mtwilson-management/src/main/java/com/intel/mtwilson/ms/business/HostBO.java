@@ -1545,6 +1545,9 @@ public class HostBO {
                                 }
                                 moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
                                 moduleObj.setPcrBank(reader.getAttributeValue("", "DigestAlgorithm"));
+                                if(moduleObj.getPcrBank() == null) {
+                                    moduleObj.setPcrBank("SHA1");
+                                }
                                 moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
                                 moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
                                 moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
@@ -1566,6 +1569,9 @@ public class HostBO {
                                 }
                                 moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
                                 moduleObj.setPcrBank(reader.getAttributeValue("", "DigestAlgorithm"));
+                                if(moduleObj.getPcrBank() == null) {
+                                    moduleObj.setPcrBank("SHA1");
+                                }
                                 moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
                                 moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
                                 moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
@@ -1608,6 +1614,9 @@ public class HostBO {
                             pcrObj.setPcrName(reader.getAttributeValue(null, "ComponentName"));
                             pcrObj.setPcrDigest(reader.getAttributeValue(null, "DigestValue"));
                             pcrObj.setPcrBank(reader.getAttributeValue(null, "DigestAlgorithm"));
+                            if(pcrObj.getPcrBank() == null) {
+                                pcrObj.setPcrBank("SHA1");
+                            }
                             Integer mleID;
 
                             if (pcrObj.getPcrName() == null) {
