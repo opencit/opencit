@@ -20,7 +20,7 @@ class UnixShellExecutor extends GenericShellExecutor {
         if(cmd.size() > 0) {
             String bin = cmd.get(0);
             bin = Folders.application() + File.separator + "bin" + File.separator+ bin;
-            cmd.set(0, bin);
+            cmd.set(0, bin);    
         }
     }
     
