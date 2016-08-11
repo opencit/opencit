@@ -1007,7 +1007,7 @@ public class MleBO {
             log.debug("ADDMLETIME: after retrieving Event info - {}", (addModule2 - addModule1));
 
             //tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
-            Integer componentID = moduleManifestJpaController.findByMleIdEventIdPcrBank(tblMle.getId(), fullComponentName, tblEvent.getId(), moduleData.getPcrBank());
+            Integer componentID = moduleManifestJpaController.findByMleIdEventIdPcrBank(tblMle.getId(), fullComponentName, tblEvent.getId(), moduleData.getPcrBank()).getId();
 
             if (componentID != null && componentID != 0) {
                 throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
