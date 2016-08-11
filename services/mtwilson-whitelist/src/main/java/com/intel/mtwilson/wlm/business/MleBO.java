@@ -1007,9 +1007,9 @@ public class MleBO {
             log.debug("ADDMLETIME: after retrieving Event info - {}", (addModule2 - addModule1));
 
             //tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
-            Integer componentID = moduleManifestJpaController.findByMleIdEventIdPcrBank(tblMle.getId(), fullComponentName, tblEvent.getId(), moduleData.getPcrBank()).getId();
+            TblModuleManifest component = moduleManifestJpaController.findByMleIdEventIdPcrBank(tblMle.getId(), fullComponentName, tblEvent.getId(), moduleData.getPcrBank());
 
-            if (componentID != null && componentID != 0) {
+            if (component != null && component.getId() != 0) {
                 throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
             }
 //                } catch (NoResultException nre){
