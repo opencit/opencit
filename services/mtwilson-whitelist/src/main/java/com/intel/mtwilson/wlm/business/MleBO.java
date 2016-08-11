@@ -576,8 +576,9 @@ public class MleBO {
         if (tblMle.getTblPcrManifestCollection() != null) { // this can be null for MODULE Manifest
 
             for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
-                if (newPCRMap.containsKey(pcrManifest.getName() + pcrManifest.getPcrBank())) {
-                    ManifestData newPcrData = newPCRMap.get(pcrManifest.getName());
+                String key = pcrManifest.getName() + " " + pcrManifest.getPcrBank();
+                if (newPCRMap.containsKey(key)) {
+                    ManifestData newPcrData = newPCRMap.get(key);
                     if(!newPcrData.getPcrBank().equals(pcrManifest.getPcrBank())) {
                         continue;
                     }
@@ -585,8 +586,8 @@ public class MleBO {
                     log.debug(String.format("Updating Pcr manifest value for mle %s  version %s pcr name %s",
                             pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
                     // Bug 375
-                    validateWhitelistValue(pcrManifest.getPcrBank(), pcrManifest.getName(), newPCRMap.get(pcrManifest.getName()).getValue()); // throws exception if invalid
-                    pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()).getValue());                    
+                    validateWhitelistValue(pcrManifest.getPcrBank(), pcrManifest.getName(), newPCRMap.get(key).getValue()); // throws exception if invalid
+                    pcrManifest.setValue(newPCRMap.get(key).getValue());                    
 
                     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                     // pcrManifest.setUpdatedBy(getLoggedInUser());
@@ -600,12 +601,15 @@ public class MleBO {
                 }
             }
 
-            for (String pcrName : newPCRMap.keySet()) {
-
+            for (String pcrNameAndBank : newPCRMap.keySet()) {
+                String[] keyParts = StringUtils.split(pcrNameAndBank, ' ');
+                String pcrName = keyParts[0];
+                //String pcrBank = keyParts[1];
+                
                 TblPcrManifest pcrManifest = new TblPcrManifest();
                 pcrManifest.setName(pcrName);
                 // Bug 375
-                ManifestData newPcrData = newPCRMap.get(pcrName);
+                ManifestData newPcrData = newPCRMap.get(pcrNameAndBank);
                 
                 validateWhitelistValue(newPcrData.getPcrBank(), pcrName, newPcrData.getValue()); // throws exception if invalid
                 pcrManifest.setValue(newPcrData.getValue());
@@ -641,7 +645,7 @@ public class MleBO {
 
         if (mleData.getManifestList() != null) {
             for (ManifestData manifestData : mleData.getManifestList()) {
-                pcrMap.put(manifestData.getName() + manifestData.getPcrBank(), manifestData);
+                pcrMap.put(manifestData.getName() + " " + manifestData.getPcrBank(), manifestData);
             }
         }
 
