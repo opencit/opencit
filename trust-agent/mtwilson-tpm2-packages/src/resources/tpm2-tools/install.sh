@@ -1,4 +1,5 @@
 #!/bin/bash
 
 # copy over the tpm2-tools to /usr/local/sbin
-cp sbin/* /usr/local/sbin/
+chmod 0755 sbin/*
+cp -f sbin/* /usr/local/sbin/
