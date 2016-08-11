@@ -598,7 +598,7 @@ public class TblModuleManifestJpaController implements Serializable {
     }
 
     
-    public Integer findByMleIdEventIdPcrBank(Integer mleId, String componentName, Integer eventId, String pcrBank){
+    public TblModuleManifest findByMleIdEventIdPcrBank(Integer mleId, String componentName, Integer eventId, String pcrBank){
     
         EntityManager em = getEntityManager();
         try {
@@ -613,9 +613,7 @@ public class TblModuleManifestJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             
-            Integer componentId = (Integer) query.getSingleResult();
-            
-            return componentId;
+            return (TblModuleManifest) query.getSingleResult();                                    
             
         } catch(NoResultException e){
                 //log.error(String.format("Module Manifest for MLE %d Component %s Event %s  Not found in Database ", mleId,componentName, eventId), e);            
