@@ -168,8 +168,10 @@ public class HostBO {
                         // pull details from host to fill in null or invalid information
                         if(tblHosts.getTpmVersion() == null) {
                             tblHosts.setTpmVersion(detailsPulledFromHost.TpmVersion);
+                        } else {
+                            tblHosts.setTpmVersion("1.2");
                         }
-                        if(host.getPcrBanks() != null) {
+                        if(host.getPcrBanks() != null && detailsPulledFromHost.PcrBanks != null) {
                             // User has overidden PCR Bank List. Complain if we can't support it
                             String overrideList = host.getPcrBanks();
                             String supportedList = detailsPulledFromHost.PcrBanks;
@@ -994,6 +996,7 @@ public class HostBO {
                             if (tblModuleManifest != null) {
                                 TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
                                 tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                tblHostSpecificManifest.setPcrBank("SHA1");
                                 //					tblHostSpecificManifest.setHostID(tblHosts.getId());
                                 tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
                                 tblHostSpecificManifests.add(tblHostSpecificManifest);
@@ -1013,6 +1016,7 @@ public class HostBO {
                             if (tblModuleManifest != null) {
                                 TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
                                 tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                                tblHostSpecificManifest.setPcrBank("SHA1");
                                 tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
                                 tblHostSpecificManifests.add(tblHostSpecificManifest);                    
                             }

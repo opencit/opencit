@@ -34,7 +34,7 @@
 
 #install resourcemgr
  /bin/mkdir -p '/usr/local/sbin'
- /usr/bin/install -c sbin/resourcemgr '/usr/local/sbin'
+ /usr/bin/install -c -m 755 sbin/resourcemgr '/usr/local/sbin'
 
 #install header files
  /bin/mkdir -p '/usr/local/include/tcti'
@@ -46,5 +46,6 @@
 ldconfig /usr/local/lib/
 cp tcsd2.service /lib/systemd/system
 systemctl enable tcsd2.service
+systemctl daemon-reload
 #systemctl stop tcsd2.service
 systemctl start tcsd2

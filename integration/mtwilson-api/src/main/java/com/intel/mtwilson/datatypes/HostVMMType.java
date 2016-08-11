@@ -11,8 +11,8 @@ package com.intel.mtwilson.datatypes;
 public enum HostVMMType {
 
     CITRIX_XENSERVER("Citrix Xen","0,17,18,19"),
-    HOST_NO_VMM("Linux", "0,17,18,19"),
-    KVM("Linux KVM","0,17,18,19"),
+    HOST_NO_VMM("Linux", "0,17,18"),
+    KVM("Linux KVM","0,17,18"),
     XEN("Linux Xen","0,17,18"),
     VMWARE("VMware ESXi","0,17,18,19,20"),
     WINDOWS("Windows", "0,13,14");
