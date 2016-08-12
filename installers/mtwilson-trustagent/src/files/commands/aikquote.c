@@ -215,7 +215,7 @@ main (int ac, char **av)
 		if (bufLen > 0) {
 			buf = malloc (bufLen);
 			if(buf == NULL){
-				fprintf (stderr, "Unable to allocate memory for buf\n", chalfile);
+				fprintf (stderr, "Unable to allocate memory for buf\n");
 				exit (1);
 			}
 			
@@ -231,8 +231,7 @@ main (int ac, char **av)
 	} else {
 		memset (chalmd, 0, sizeof(chalmd));
 	}
-        if(f_in != NULL)
-            fclose(f_in);
+        
 	/* Read AIK blob */
 	if ((f_in = fopen(av[1], "rb")) == NULL) {
             if(f_in != NULL)
