@@ -271,6 +271,13 @@ openstack_extensions_uninstall() {
   fi
 }
 
+docker_proxy_uninstall() {
+  DOCKER_PROXY_UNINSTALL_SCRIPT="/opt/docker-proxy/bin/docker-proxy.sh"
+  if [ -f "$DOCKER_PROXY_UNINSTALL_SCRIPT" ]; then
+    "$DOCKER_PROXY_UNINSTALL_SCRIPT" uninstall --purge
+  fi
+}
+
 # backs up the configuration directory and removes all trustagent files,
 # except for configuration files which are saved and restored
 trustagent_uninstall() {
@@ -451,6 +458,7 @@ case "$1" in
     vrtm_uninstall
 	tbootxm_uninstall    
     openstack_extensions_uninstall
+	#docker_proxy_uninstall
     trustagent_uninstall
     groupdel trustagent > /dev/null 2>&1
     userdel trustagent > /dev/null 2>&1
