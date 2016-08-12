@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
  *
  */
 public class TpmKey {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmKey.class);
 	private byte [] structVer = {(byte)0x01, (byte)0x01, (byte)0x00, (byte)0x00};
 	private short tpmKeyUsage = 0;//UINT16
 	private int tpmKeyFlags = 0;//UINT32
@@ -51,18 +52,23 @@ public class TpmKey {
 	public TpmKey(byte [] blob) 
 			throws TpmBytestreamResouceException, 
 			TpmUnsignedConversionException{
-		ByteArrayInputStream bs = new ByteArrayInputStream(blob);
-		structVer = TpmUtils.getBytes(bs, 4); //4 bytes
-		tpmKeyUsage = TpmUtils.getUINT16(bs); //uint16
-		tpmKeyFlags = TpmUtils.getUINT32(bs); //uint32
-		tpmAuthDataUsage = TpmUtils.getBytes(bs, 1)[0]; //byte
-		keyParms = new TpmKeyParams(bs); //TpmKeyParams
-		int tempSize = TpmUtils.getUINT32(bs); //uint32
-		pcrInfo = TpmUtils.getBytes(bs, tempSize); //<tempSize> bytes
-		tempSize = TpmUtils.getUINT32(bs); //uint32
-		tpmStorePubkey = TpmUtils.getBytes(bs, tempSize); //<tempSize> bytes
-		tempSize = TpmUtils.getUINT32(bs); //uint32
-		encryptedData = TpmUtils.getBytes(bs, tempSize); //<tempSize> bytes
+            try (ByteArrayInputStream bs = new ByteArrayInputStream(blob)) {
+                //ByteArrayInputStream bs = new ByteArrayInputStream(blob);
+                structVer = TpmUtils.getBytes(bs, 4); //4 bytes
+                tpmKeyUsage = TpmUtils.getUINT16(bs); //uint16
+                tpmKeyFlags = TpmUtils.getUINT32(bs); //uint32
+                tpmAuthDataUsage = TpmUtils.getBytes(bs, 1)[0]; //byte
+                keyParms = new TpmKeyParams(bs); //TpmKeyParams
+                int tempSize = TpmUtils.getUINT32(bs); //uint32
+                pcrInfo = TpmUtils.getBytes(bs, tempSize); //<tempSize> bytes
+                tempSize = TpmUtils.getUINT32(bs); //uint32
+                tpmStorePubkey = TpmUtils.getBytes(bs, tempSize); //<tempSize> bytes
+                tempSize = TpmUtils.getUINT32(bs); //uint32
+                encryptedData = TpmUtils.getBytes(bs, tempSize); //<tempSize> bytes
+            } catch (Exception e) {
+                log.error("Error creating TpmKey from byte blob", e);
+                throw new TpmUtils.TpmBytestreamResouceException("Error creating TpmKey from byte blob");
+            }
 	}
 	/**
 	 * Get the stored key modulus.
