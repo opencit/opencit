@@ -114,18 +114,29 @@ public class TpmUtils {
 	public static int getUINT32(ByteArrayInputStream source) 
 			throws TpmUnsignedConversionException,
 			TpmBytestreamResouceException {
-		if (source.available() < 4) {
-			throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
-		}
-		int retval;
-		byte[] temp = new byte[4];
-		// int k =source.read(temp, 0, 4);
-		if ((temp[0]&0x80) == 0x80) throw new TpmUnsignedConversionException("Cannot convert UINT32 to signed Integer: too large - would be converted to negative.");
-		retval = (int)((temp[0]<<24&0xff000000) + 
-		         (int) (temp[1]<<16&0x00ff0000) + 
-		         (int) (temp[2]<< 8&0x0000ff00) + 
-		         (int) (temp[3]<< 0&0x000000ff));
-		return retval;
+
+            if (source.available() < 4) {
+                throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
+            }
+            int retval;
+            try {
+                byte[] temp = IOUtils.toByteArray(source,4);
+
+                //int k = source.read(temp, 0, 4);
+                if ((temp[0] & 0x80) == 0x80) {
+                    throw new TpmUnsignedConversionException("Cannot convert UINT32 to signed Integer: too large - would be converted to negative.");
+                }
+                retval = (int) ((temp[0] << 24 & 0xff000000)
+                        + (int) (temp[1] << 16 & 0x00ff0000)
+                        + (int) (temp[2] << 8 & 0x0000ff00)
+                        + (int) (temp[3] << 0 & 0x000000ff));
+                return retval;
+            } 
+            catch (IOException e) {
+                log.error("Error converting to UINT32, Exception: {}", e);
+                throw new TpmBytestreamResouceException("Error converting to UINT32");
+            }
+           
 	}
 	/**
 	 * Extracts a UINT16 from a bytestream and stores is as a short. See getUINT32 for issues that apply to this function.
@@ -142,12 +153,19 @@ public class TpmUtils {
 			throw new TpmBytestreamResouceException("There is not enough room in the bytestream to extract a UINT32.");
 		}
 		int retval;
-		byte[] temp = new byte[2];
-		// int k = source.read(temp, 0, 2);
+                try {
+		//byte[] temp = new byte[2];
+                byte[] temp = IOUtils.toByteArray(source,2);
+		//int k = source.read(temp, 0, 2);
 		if ((temp[0]&0x80) == 0x80) throw new TpmUnsignedConversionException("Cannot convert UINT16 to signed Short: too large - would be converted to negative.");
 		retval = (int)((temp[0]<<8)&0x0000ff00) + 
 			 	 (int)((temp[1]<<0)&0x000000ff);
 		return (short)retval;
+                }
+                catch (IOException e) {
+                log.error("Error converting to UINT16, Exception: {}", e);
+                throw new TpmBytestreamResouceException("Error converting to UINT16");
+            }
 	}
 	/**
 	 * This exception is thrown to indicate an error in converting between a signed and an unsigned 
@@ -191,9 +209,16 @@ public class TpmUtils {
 		if (source.available() < size) {
 			throw new TpmBytestreamResouceException("There are not enough available bytes in the bytestream to extract the requested number.");
 		}
-		byte[] retval = new byte[size];
-		// int k = source.read(retval, 0, size);
+                try{
+		//byte[] retval = new byte[size];
+                byte[] retval = IOUtils.toByteArray(source, size);
+		//int k = source.read(retval, 0, size);
 		return retval;
+                }
+                catch (IOException e) {
+                log.error("Error getting bytes, Exception: {}", e);
+                throw new TpmBytestreamResouceException("Error getting bytes");
+            }
 	}
 	/**
 	 * Creates a new X509 V3 certificate for use as an Attestation Identity Key (AIK) using the BouncyCastle provider. The certificate is designed in the 

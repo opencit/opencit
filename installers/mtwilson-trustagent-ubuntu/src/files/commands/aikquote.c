@@ -155,7 +155,7 @@ main (int ac, char **av)
 	TSS_VALIDATION	valid;
 	TPM_QUOTE_INFO	*quoteInfo;
 	BYTE		srkSecret[] = TSS_WELL_KNOWN_SECRET;
-	FILE		*f_in;
+	FILE		*f_in = NULL;
 	FILE		*f_out;
 	char		*chalfile = NULL;
 	char		*pass = NULL;
@@ -215,11 +215,12 @@ main (int ac, char **av)
 		if (bufLen > 0) {
 			buf = malloc (bufLen);
 			if(buf == NULL){
-				fprintf (stderr, "Unable to allocate memory for buf\n", chalfile);
+				fprintf (stderr, "Unable to allocate memory for buf\n");
 				exit (1);
 			}
 			
 			if (fread(buf, 1, bufLen, f_in) != bufLen) {
+                                free (buf);
 				fprintf (stderr, "Unable to readn file %s\n", chalfile);
 				exit (1);
 			}
@@ -230,7 +231,7 @@ main (int ac, char **av)
 	} else {
 		memset (chalmd, 0, sizeof(chalmd));
 	}
-
+        
 	/* Read AIK blob */
 	if ((f_in = fopen(av[1], "rb")) == NULL) {
             if(f_in != NULL)
