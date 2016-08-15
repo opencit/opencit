@@ -628,26 +628,27 @@ return_dir=`pwd`
 
 cd $return_dir
 
-if [ "$TPM_VERSION" == "1.2" ]; then
-    if [ "$(whoami)" == "root" ]; then
-      tcsdBinary=$(which tcsd)
-      if [ -z "$tcsdBinary" ]; then
-        echo_failure "Not able to resolve trousers binary location. trousers installed?"
-        exit 1
-      fi
-      # systemd enable trousers for RHEL 7.2 startup
-      systemctlCommand=`which systemctl 2>/dev/null`
-      if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
-        echo "systemctl enabling trousers service..."
-        "$systemctlCommand" enable tcsd.service 2>/dev/null
-        "$systemctlCommand" start tcsd.service 2>/dev/null
-      fi
-      echo "Registering tagent in start up"
-      register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
-      # trousers has N=20 startup number, need to lookup and do a N+1
-    else
-      echo_warning "Skipping startup script registration"
+
+if [ "$(whoami)" == "root" ]; then
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    tcsdBinary=$(which tcsd)
+    if [ -z "$tcsdBinary" ]; then
+      echo_failure "Not able to resolve trousers binary location. trousers installed?"
+      exit 1
     fi
+    # systemd enable trousers for RHEL 7.2 startup
+    systemctlCommand=`which systemctl 2>/dev/null`
+    if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
+      echo "systemctl enabling trousers service..."
+      "$systemctlCommand" enable tcsd.service 2>/dev/null
+      "$systemctlCommand" start tcsd.service 2>/dev/null
+    fi
+  fi
+  echo "Registering tagent in start up"
+  register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
+  # trousers has N=20 startup number, need to lookup and do a N+1
+else
+  echo_warning "Skipping startup script registration"
 fi
 
 fix_existing_aikcert() {
