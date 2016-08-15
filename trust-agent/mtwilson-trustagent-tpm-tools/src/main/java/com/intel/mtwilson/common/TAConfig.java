@@ -76,16 +76,16 @@ public class TAConfig {
         // first priority is the configuration file
         File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
         PropertiesConfiguration standard = new PropertiesConfiguration(file);
-        dumpConfiguration(standard, "file:"+file.getAbsolutePath());
+        //dumpConfiguration(standard, "file:"+file.getAbsolutePath());
         composite.addConfiguration(standard);
         
         // second priority are the defaults that were passed in, we use them if no better source was found
         if( defaults != null ) {
             MapConfiguration defaultconfig = new MapConfiguration(defaults);
-            dumpConfiguration(defaultconfig, "default");
+            //dumpConfiguration(defaultconfig, "default");
             composite.addConfiguration(defaultconfig);
         }
-        dumpConfiguration(composite, "composite");
+        //dumpConfiguration(composite, "composite");
         return composite;
         }
         catch(ConfigurationException e) {
