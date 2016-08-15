@@ -167,10 +167,13 @@ public class HostBO {
                         
                         // pull details from host to fill in null or invalid information
                         if(tblHosts.getTpmVersion() == null) {
-                            tblHosts.setTpmVersion(detailsPulledFromHost.TpmVersion);
-                        } else {
-                            tblHosts.setTpmVersion("1.2");
+                            if(detailsPulledFromHost.TpmVersion != null) {
+                                tblHosts.setTpmVersion(detailsPulledFromHost.TpmVersion);
+                            } else {
+                                tblHosts.setTpmVersion("1.2");
+                            }                            
                         }
+                        
                         if(host.getPcrBanks() != null && detailsPulledFromHost.PcrBanks != null) {
                             // User has overidden PCR Bank List. Complain if we can't support it
                             String overrideList = host.getPcrBanks();
