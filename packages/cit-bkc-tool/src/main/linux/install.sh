@@ -34,6 +34,7 @@ fi
 # mtwilson-server-2.1-SNAPSHOT.bin
 MTWILSON_BIN=`ls -1 mtwilson-server-*.bin | head -n 1`
 if [ -n "$MTWILSON_BIN" ]; then
+  cp mtwilson.env $HOME/mtwilson.env
   chmod +x $MTWILSON_BIN
   ./$MTWILSON_BIN
 fi
@@ -51,6 +52,7 @@ fi
 # mtwilson-trustagent-rhel-2.1-20160518.001429-5.bin
 TAGENT_BIN=`ls -1 mtwilson-trustagent-*.bin | head -n 1`
 if [ -n "$TAGENT_BIN" ]; then
+  cp trustagent.env $HOME/trustagent.env
   chmod +x $TAGENT_BIN
   ./$TAGENT_BIN
 fi

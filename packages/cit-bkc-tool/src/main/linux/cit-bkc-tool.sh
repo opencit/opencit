@@ -44,14 +44,45 @@ cit_bkc_clear() {
     rm -rf $CIT_BKC_DATA_PATH $CIT_BKC_REPORTS_PATH $CIT_BKC_RUN_PATH
 }
 
+# precondition:
+#   for new self-test the data has already been cleared with cit_bkc_clear()
+#   for continue self-test the data from prior run is stored in CIT_BKC_DATA_PATH
+# parameters:
+#   optional parameter '--reboot' if user wants automatic reboot
+# postcondition:
+#   test data is stored in CIT_BKC_DATA_PATH
+#   if test is complete, report is in CIT_BKC_REPORTS_PATH
 cit_bkc_run() {
     if [ "$1" == "--reboot" ]; then export CIT_BKC_REBOOT=yes; else export CIT_BKC_REBOOT=no; fi
     mkdir -p $CIT_BKC_DATA_PATH $CIT_BKC_REPORTS_PATH
     cit_bkc_setup_notification
     cit_bkc_setup_reboot
-    #  TODO: run next step based on current state
-    echo "TODO: run next step based on current state"
 
+    cit_bkc_run_next
+
+    # check if test is complete
+    if [ "$CIT_BKC_TEST_COMPLETE" == "yes" ]; then
+      if cit_bkc_run_next_report; then
+        cit_bkc_report
+      fi
+    fi
+}
+
+# precondition:
+#    directory CIT_BKC_DATA_PATH exists (may be empty)
+# postcondition:
+#    test data is stored in CIT_BKC_DATA_PATH
+#    if test is complete, variable is set CIT_BKC_TEST_COMPLETE=yes
+cit_bkc_run_next() {
+    #  TODO: run next step based on current state
+    echo "TODO: run next step based on current state; when complete set CIT_BKC_TEST_COMPLETE=yes"
+}
+
+# precondition:
+#    self-test has already completed by cit_bkc_run_next and CIT_BKC_TEST_COMPLETE=yes
+cit_bkc_run_next_report() {
+    # TODO:  generate the report based on test results
+    echo "TODO:  generate the report based on test results"
 }
 
 # precondition:
@@ -63,14 +94,15 @@ cit_bkc_run() {
 # ( export CIT_BKC_REBOOT=yes && cit_bkc_setup_reboot && crontab -l )
 # ( export CIT_BKC_REBOOT=no && cit_bkc_setup_reboot && crontab -l )
 cit_bkc_setup_reboot() {
-	touch /tmp/cit-bkc-tool.crontab && chmod 600 /tmp/cit-bkc-tool.crontab
+    touch /tmp/cit-bkc-tool.crontab && chmod 600 /tmp/cit-bkc-tool.crontab
     if [ "$CIT_BKC_REBOOT" == "yes" ]; then
         echo "# cit-bkc-tool auto-reboot mode" > /tmp/cit-bkc-tool.crontab
         echo "@reboot /usr/local/bin/cit-bkc-tool --reboot" >> /tmp/cit-bkc-tool.crontab
     else
         echo "# cit-bkc-tool interactive mode" > /tmp/cit-bkc-tool.crontab
     fi
-	crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
+    # remove any existing lines with cit-bkc-tool and then append new lines with cit-bkc-tool we just prepared
+    crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
 }
 
 # precondition: ~/.bashrc exists
@@ -89,7 +121,7 @@ cit_bkc_report() {
         # filename in $LATEST
         cat $CIT_BKC_REPORTS_PATH/$LATEST
     else
-		echo "No reports available" >&2
+        echo "No reports available" >&2
         exit 1
     fi
 }
@@ -137,7 +169,7 @@ cit_bkc_is_running() {
 cit_bkc_status() {
     echo "CIT BKC Tool:"
 #    if [ ! -d $CIT_BKC_DATA_PATH ]; then
-#		echo "* Ready for self-test; type 'cit-bkc-tool --help' for more information"
+#        echo "* Ready for self-test; type 'cit-bkc-tool --help' for more information"
 #    fi
     if cit_bkc_is_running; then
       echo "* CIT BKC tool is running"
@@ -146,7 +178,7 @@ cit_bkc_status() {
     if cit_bkc_report_is_available; then
         echo "* A report is available; type 'cit-bkc-tool report' to display"
     else
-		echo "* No reports available; type 'cit-bkc-tool' to run the tool"
+        echo "* No reports available; type 'cit-bkc-tool' to run the tool"
     fi
     
 }
@@ -155,10 +187,33 @@ cit_bkc_uninstall() {
     # clear data, reports, runtime info
     cit_bkc_clear
     # purge configuration
-    if [ "$1" == "--purge" ]; then
+    if [ "$1" == "--purge" ] || [ "$2" == "--purge" ]; then
       rm -rf $CIT_BKC_CONF_PATH
+      mtwilson_args="uninstall --purge"
+    else
+      mtwilson_args="uninstall"
     fi
-	rm -f $CIT_BKC_TOOL
+    if [ "$1" == "--clear-tpm" ] || [ "$2" == "--clear-tpm" ]; then
+      rm -rf $CIT_BKC_CONF_PATH
+      tagent_args="uninstall"
+    else
+      tagent_args="uninstall"
+      # TODO:  save tpm password for next bkc install
+    fi
+
+
+      mtwilson_ctl=$(which mtwilson)
+      if [ -n "$mtwilson_ctl" ]; then
+        $mtwilson_ctl $mtwilson_args
+      fi
+      tagent_ctl=$(which tagent)
+      if [ -n "$tagent_ctl" ]; then
+        $tagent_ctl $tagent_args
+      fi
+
+    # trustagent uninstall copies configuration backup to datestr=`date +%Y-%m-%d.%H%M`   /tmp/trustagent.configuration.$datestr
+    # so when unisntalling WITHOUT --purge, need to keep that and bkc installer can look for it on next install to read tpm password and set it in the trustagent.env file 
+    rm -f $CIT_BKC_TOOL
 }
 
 ###################################################################################################

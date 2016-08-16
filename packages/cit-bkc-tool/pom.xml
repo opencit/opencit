@@ -44,6 +44,7 @@
     <artifactId>mtwilson-server</artifactId>
         <version>${project.version}</version>
                                             <type>bin</type>
+                                            <classifier>jdk_glassfish_monit</classifier>
                 </dependency>
 <!-- Trust Agent -->
                 <dependency>
@@ -85,6 +86,7 @@
     <artifactId>mtwilson-server</artifactId>
         <version>${project.version}</version>
                                             <type>bin</type>
+                                            <classifier>jdk_glassfish_monit</classifier>
                                         </artifactItem>
                 <!-- Trust Agent -->
                                         <artifactItem>
