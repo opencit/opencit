@@ -122,7 +122,8 @@
 						<!-- <input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span> -->
 						<input type="checkbox" id="MainContent_check_gkvs12" name="12"><span>12</span>
 						<input type="checkbox" id="MainContent_check_gkvs13" name="13"><span>13</span>
-						<input type="checkbox" id="MainContent_check_gkvs14" name="14"><span>14</span>
+						<input type="checkbox" id="MainContent_check_gkvs14" disabled="disabled" name="14"><span>14</span>
+                                                <input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span>
 						<input type="checkbox" id="MainContent_check_gkvs18" name="18"><span>18</span>
 						<input type="checkbox" id="MainContent_check_gkvs19" name="19"><span>19</span>
 						<input type="checkbox" id="MainContent_check_gkvs20" name="20"><span>20</span>
