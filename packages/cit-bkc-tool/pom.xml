@@ -40,27 +40,27 @@
 
 
                 <dependency>
-    <groupId>com.intel.mtwilson.linux</groupId>
-    <artifactId>mtwilson-server</artifactId>
-        <version>${project.version}</version>
-                                            <type>bin</type>
-                                            <classifier>jdk_glassfish_monit</classifier>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-server</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                    <classifier>jdk_glassfish_monit</classifier>
                 </dependency>
-<!-- Trust Agent -->
+                <!-- Trust Agent -->
                 <dependency>
-    <groupId>com.intel.mtwilson.linux</groupId>
-    <artifactId>mtwilson-trustagent-rhel</artifactId>
-        <version>${project.version}</version>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-trustagent-rhel</artifactId>
+                    <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
 
-<!-- linux installer progress monitor script -->
-        <dependency>
-			<groupId>com.intel.mtwilson.linux</groupId>
-			<artifactId>mtwilson-core-linux-progress-monitor</artifactId>
-            <version>2.1-SNAPSHOT</version>
-            <type>sh</type>
-        </dependency>
+                <!-- linux installer progress monitor script -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
+                    <version>2.1-SNAPSHOT</version>
+                    <type>sh</type>
+                </dependency>
 
             </dependencies>
             
@@ -80,28 +80,28 @@
                                 </goals>
                                 <configuration>
                                     <artifactItems>
-                <!-- Attestation Service -->
+                                        <!-- Attestation Service -->
                                         <artifactItem>
-    <groupId>com.intel.mtwilson.linux</groupId>
-    <artifactId>mtwilson-server</artifactId>
-        <version>${project.version}</version>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-server</artifactId>
+                                            <version>${project.version}</version>
                                             <type>bin</type>
                                             <classifier>jdk_glassfish_monit</classifier>
                                         </artifactItem>
-                <!-- Trust Agent -->
+                                        <!-- Trust Agent -->
                                         <artifactItem>
-    <groupId>com.intel.mtwilson.linux</groupId>
-    <artifactId>mtwilson-trustagent-rhel</artifactId>
-        <version>${project.version}</version>
-                    <type>bin</type>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-trustagent-rhel</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
                                         </artifactItem>
-<artifactItem>
-			<groupId>com.intel.mtwilson.linux</groupId>
-			<artifactId>mtwilson-core-linux-progress-monitor</artifactId>
-            <version>2.1-SNAPSHOT</version>
-            <type>sh</type>
-	<destFileName>monitor.sh</destFileName>
-</artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
+                                            <version>2.1-SNAPSHOT</version>
+                                            <type>sh</type>
+                                            <destFileName>monitor.sh</destFileName>
+                                        </artifactItem>
                                     </artifactItems>
                                     <outputDirectory>${makeself.basic}</outputDirectory>
                                     <overWriteReleases>false</overWriteReleases>
