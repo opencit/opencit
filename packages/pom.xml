@@ -33,6 +33,7 @@
 	-->
     <module>mtwilson-server-zip</module>
     <module>trustagent-windows-installer</module>
+	<module>cit-bkc-tool</module>
   </modules>
 
 </project>
