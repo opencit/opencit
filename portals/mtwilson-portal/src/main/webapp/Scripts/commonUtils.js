@@ -713,6 +713,120 @@ function clearAllFiled(divID) {
 	});
 }
 
+function fnGetMleDataVO(isNewMle) {
+    var valid1 = true;
+	var valid2 = true;
+	var valid3 = true;
+	var valid4 = true;
+	var valid5 = true;
+	$('#successMessage').html('');
+	$('.validationErrorDiv').each(function() {
+		$(this).remove();
+	});
+	
+	valid1 = fnTestValidation('MainContent_tbVersion',normalReg);
+	valid2 =fnTestValidation('MainContent_ddlMLEName',normalReg);
+	
+	$('#manifestListDiv table tr').each(function() {
+		if($(this).find('td:eq(1)').find('input').attr('checked') == 'checked'){
+			if ($(this).find('td:eq(2) :input').val() == "") {
+				valid3 = false;
+			}
+		}
+	});
+	$('#manifestListDiv table tr').each(function() {
+		if($(this).find('td:eq(1)').find('input').attr('checked') == 'checked'){
+			if ($(this).find('td:eq(2) :input').val() != "") {
+				if(!manifestReg.test($.trim($(this).find('td:eq(2) :input').val()))){
+					valid4 = false;
+				}
+			}
+		}
+	});
+	$('#manifestListDiv table tr').each(function() {
+		if($(this).find('td:eq(1)').find('input').attr('checked') == 'checked'){
+			if ($(this).find('td:eq(2) :input').val() != "") {
+				if($.trim($(this).find('td:eq(2) :input').val()).indexOf(" ") >= 0){
+					valid5 = false;
+				}
+			}
+		}
+	});
+	if (!valid3) {
+		$('#mleMessage').html('<div class="errorMessage">Please provide value for selected Manifests.</div>');
+		return "";
+	}
+	if (!valid5) {
+		$('#mleMessage').html('<div class="errorMessage">No space is allowed between Manifest values.</div>');
+		return "";
+	}
+	if (!valid4) {
+		$('#mleMessage').html('<div class="errorMessage">Only HEX values are allowed for selected Manifests.</div>');
+		return "";
+	}
+        var mleObj = new mleDataVoObbject();
+	if (valid1 && valid2 && valid3 && valid4 && valid5) {
+		mleObj.mleType = $('#MainContent_ddlMLEType').val();
+		if ($('#MainContent_ddlMLEType').val() == 'VMM') {
+			mleObj.oemName = null;
+			if (isNewMle) {
+				for ( var name in hostNameList) {
+					if ($('#MainContent_ddlHostOs').val() == hostNameList[name].hostOS+' '+hostNameList[name].hostVersion) {
+						mleObj.osName = hostNameList[name].hostOS;
+						mleObj.osVersion = hostNameList[name].hostVersion;
+					}
+				}
+			}else {
+				for ( var name in hostNameList) {
+					if ($('#MainContent_ddlHostOs').val() == hostNameList[name].osName+' '+hostNameList[name].osVersion) {
+						mleObj.osName = hostNameList[name].osName;
+						mleObj.osVersion = hostNameList[name].osVersion;
+					}
+				}
+			}
+			
+		}else {
+			mleObj.oemName = $('#MainContent_ddlHostOs').val();
+			mleObj.osName = null;
+			mleObj.osVersion = null;
+		}
+		mleObj.mleName = $('#MainContent_ddlMLEName').val();
+		mleObj.mleVersion = $('#MainContent_tbVersion').val();
+                        // For Module Attestation types, we are displaying PCR + Module string. So, while retrieving the data we need to check if 
+                        // the value of the Attestation Type is PCR + Module and change it accordingly back to Module if needed.
+                        if ($('#MainContent_ddlAttestationType').val() == moduleAttestationDisplayString) {
+                            mleObj.attestation_Type = 'MODULE';
+                        } else {
+                            mleObj.attestation_Type = $('#MainContent_ddlAttestationType').val();
+                        }
+		mleObj.mleDescription = $('#MainContent_tbDesc').val();
+		var mani = [];
+		if (mleObj.attestation_Type == "Module" || mleObj.attestation_Type == "MODULE") {
+			$('#gkvs_register_checkbox input').each(function() {
+				var manifestObj = new manifestList();
+				if($(this).attr('checked') == 'checked'){
+					manifestObj.name = $(this).attr('name');
+					manifestObj.value= $(this).attr('value');
+                                                            // alert("Manifest Name is: " +  manifestObj.name + " Value is: " + manifestObj.value );
+					mani.push(manifestObj);
+				}
+			});
+		}else {
+			$('#manifestListDiv table tr').each(function() {
+				var manifestObj = new manifestList();
+				if($(this).find('td:eq(1)').find('input').attr('checked') == 'checked'){
+					manifestObj.name = $(this).find('td:eq(0)').text();
+					manifestObj.value=$(this).find('td:eq(2) :input').val();
+					mani.push(manifestObj);
+				}
+			});
+		}
+		
+		mleObj.manifestList = mani;
+	}
+	return mleObj;
+}
+
 function fnGetMleData(isNewMle) {
 	var valid1 = true;
 	var valid2 = true;
