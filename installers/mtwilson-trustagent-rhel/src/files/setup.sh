@@ -93,7 +93,7 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # make sure unzip and authbind are installed
 #java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb-core"
 TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
 TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
 TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
@@ -105,12 +105,12 @@ if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/ca
 else
 #  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
   TPM_VERSION=2.0
-  #install tpm2-tss, tpm2-tools, and tboot for tpm2
-  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
+  # Move to later phase of this script. install tpm2-tss, tpm2-tools, and tboot for tpm2
+  #./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 
   # not install trousers and its dev packages for tpm 2.0
-  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc"
-  TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev make gcc"
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc redhat-lsb-core"
+  TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev make gcc binutils"
   TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel make gcc"
   TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
 fi
@@ -292,6 +292,11 @@ if [ "$(whoami)" == "root" ]; then
 else
   echo_warning "Required packages:"
   auto_install_preview "TrustAgent requirements" "TRUSTAGENT"
+fi
+
+if [ "$TPM_VERSION" == "2.0" ]; then
+  # install tss2 and tpm2-tools for tpm2.0
+  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
@@ -627,6 +632,7 @@ return_dir=`pwd`
   echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
 
 cd $return_dir
+
 
 if [ "$(whoami)" == "root" ]; then
   if [ "$TPM_VERSION" == "1.2" ]; then
