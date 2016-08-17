@@ -22,6 +22,7 @@ import java.io.*;
  *
  */
 public class TpmSymmetricKey {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmSymmetricKey.class);
 	private byte[] keyBlob;
 	private int algorithmId;
 	private short encScheme;
@@ -39,11 +40,17 @@ public class TpmSymmetricKey {
 	public TpmSymmetricKey(byte [] blob)
 			throws TpmUtils.TpmUnsignedConversionException, 
 			TpmUtils.TpmBytestreamResouceException {
-		ByteArrayInputStream bs = new ByteArrayInputStream(blob);
+            try (ByteArrayInputStream bs = new ByteArrayInputStream(blob)) {
+		//ByteArrayInputStream bs = new ByteArrayInputStream(blob);
 		algorithmId = TpmUtils.getUINT32(bs);
 		encScheme = TpmUtils.getUINT16(bs);
 		short temp = TpmUtils.getUINT16(bs);
 		keyBlob = TpmUtils.getBytes(bs, (int)temp);
+            } 
+            catch (Exception e) {
+                log.error("Error Instantiating TpmSymetric Key", e);
+                throw new TpmUtils.TpmBytestreamResouceException("Error Instantiating TpmSymetric Key");
+            }
 	}
 	/**
 	 * 
