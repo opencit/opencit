@@ -164,7 +164,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	public List<ModuleWhiteList> getManifestListForModuleTypeMle(MLEDataVO dataVO, WhitelistService apiClientServices) throws WLMPortalException {
             log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle >>");
             try {
-                List<ModuleWhiteList> moduleManifestList = apiClientServices.listModuleWhiteListForMLE(dataVO.getMleName(), dataVO.getMleVersion(), dataVO.getOsName(), dataVO.getOsVersion(), "");
+                List<ModuleWhiteList> moduleManifestList = apiClientServices.listModuleWhiteListForMLE(dataVO.getMleName(), dataVO.getMleVersion(), dataVO.getOsName(), dataVO.getOsVersion(), dataVO.getOemName());
                 log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle <<");
                 return moduleManifestList;
             } catch (Exception e) {
