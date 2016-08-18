@@ -13,13 +13,13 @@
 
 # Outline:
 # 1. Add epel-release-latest-7.noarch repository
-# 2. Install tboot
-# 3. Add grub menu item for tboot and select as default
-# 4. Reboot (only if we are not already in trusted boot)
-# 5. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
-# 6. Install the patched tpm-tools
-# 7. Start tcsd (it already has an init script for next boot, but we need it now)
-# 8. Install redhat-lsb-core
+# 2. Install redhat-lsb-core and other redhat-specific packages
+# 3. Install tboot
+# 4. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
+# 5. Install the patched tpm-tools
+# 6. Add grub menu item for tboot and select as default
+# 7. Reboot (only if we are not already in trusted boot)
+# 8. Start tcsd (it already has an init script for next boot, but we need it now)
 # 9. Run mtwilson-trustagent-rhel.bin
 
 TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
@@ -37,7 +37,15 @@ fi
 
 add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
 
-# 2. Install tboot
+# 2. Install redhat-lsb-core and other redhat-specific packages
+
+if yum_detect; then
+  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools > /dev/null 2>&1
+fi
+
+# 3. Install tboot
+# 4. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
+# 5. Install the patched tpm-tools
 
 is_tboot_installed() {
   is_package_installed tboot
@@ -51,13 +59,50 @@ install_tboot() {
   auto_install "tboot" "TRUSTAGENT_TBOOT"
 }
 
+install_openssl() {
+  TRUSTAGENT_OPENSSL_YUM_PACKAGES="openssl openssl-devel"
+  TRUSTAGENT_OPENSSL_APT_PACKAGES="openssl libssl-dev"
+  TRUSTAGENT_OPENSSL_YAST_PACKAGES="openssl libopenssl-devel"
+  TRUSTAGENT_OPENSSL_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+  auto_install "openssl" "TRUSTAGENT_OPENSSL" > /dev/null 2>&1
+}
+
+install_trousers() {
+  TRUSTAGENT_TROUSERS_YUM_PACKAGES="trousers trousers-devel"
+  TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-dbg libtspi-dev libtspi1"
+  TRUSTAGENT_TROUSERS_YAST_PACKAGES="trousers trousers-devel"
+  TRUSTAGENT_TROUSERS_ZYPPER_PACKAGES="trousers trousers-devel"
+  auto_install "trousers" "TRUSTAGENT_TROUSERS" > /dev/null 2>&1
+}
+
+install_tpm_tools() {
+  TRUSTAGENT_TPMTOOLS_YUM_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_APT_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_YAST_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_ZYPPER_PACKAGES="tpm-tools"
+  auto_install "tpm-tools" "TRUSTAGENT_TPMTOOLS" > /dev/null 2>&1
+}
+
+install_patched_tpm_tools() {
+  local PATCHED_TPMTOOLS_BIN=`ls -1 patched-*.bin | head -n 1`
+  if [ -n "$PATCHED_TPMTOOLS_BIN" ]; then
+    chmod +x $PATCHED_TPMTOOLS_BIN
+    ./$PATCHED_TPMTOOLS_BIN
+  fi
+}
+
 if is_tboot_installed; then
     echo "tboot already installed"
 else
     install_tboot
 fi
 
-# 3. Add grub menu item for tboot and select as default
+install_openssl
+install_trousers
+install_tpm_tools
+install_patched_tpm_tools
+
+# 6. Add grub menu item for tboot and select as default
 
 is_uefi_boot() {
   if [ -d /sys/firmware/efi ]; then
@@ -94,7 +139,7 @@ configure_grub() {
 
 configure_grub
 
-# 4. Reboot (only if we are not already in trusted boot)
+# 7. Reboot (only if we are not already in trusted boot)
 
 is_txtstat_installed() {
   is_command_available txt-stat
@@ -196,49 +241,8 @@ reboot_maybe
 # crontab entry we may have already created
 no_resume_after_reboot
 
-# 5. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
 
-install_openssl() {
-  TRUSTAGENT_OPENSSL_YUM_PACKAGES="openssl openssl-devel"
-  TRUSTAGENT_OPENSSL_APT_PACKAGES="openssl libssl-dev"
-  TRUSTAGENT_OPENSSL_YAST_PACKAGES="openssl libopenssl-devel"
-  TRUSTAGENT_OPENSSL_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
-  auto_install "openssl" "TRUSTAGENT_OPENSSL" > /dev/null 2>&1
-}
-
-install_trousers() {
-  TRUSTAGENT_TROUSERS_YUM_PACKAGES="trousers trousers-devel"
-  TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-dbg libtspi-dev libtspi1"
-  TRUSTAGENT_TROUSERS_YAST_PACKAGES="trousers trousers-devel"
-  TRUSTAGENT_TROUSERS_ZYPPER_PACKAGES="trousers trousers-devel"
-  auto_install "trousers" "TRUSTAGENT_TROUSERS" > /dev/null 2>&1
-}
-
-install_openssl
-install_trousers
-
-# 6. Install the patched tpm-tools
-
-install_tpm_tools() {
-  TRUSTAGENT_TPMTOOLS_YUM_PACKAGES="tpm-tools"
-  TRUSTAGENT_TPMTOOLS_APT_PACKAGES="tpm-tools"
-  TRUSTAGENT_TPMTOOLS_YAST_PACKAGES="tpm-tools"
-  TRUSTAGENT_TPMTOOLS_ZYPPER_PACKAGES="tpm-tools"
-  auto_install "tpm-tools" "TRUSTAGENT_TPMTOOLS" > /dev/null 2>&1
-}
-
-install_patched_tpm_tools() {
-  local PATCHED_TPMTOOLS_BIN=`ls -1 patched-*.bin | head -n 1`
-  if [ -n "$PATCHED_TPMTOOLS_BIN" ]; then
-    chmod +x $PATCHED_TPMTOOLS_BIN
-    ./$PATCHED_TPMTOOLS_BIN
-  fi
-}
-
-install_tpm_tools
-install_patched_tpm_tools
-
-# 7. Start tcsd (it already has an init script for next boot, but we need it now)
+# 8. Start tcsd (it already has an init script for next boot, but we need it now)
 
 is_tcsd_running() {
   local tcsd_pid=$(ps aux | grep tcsd | grep -v grep)
@@ -261,13 +265,6 @@ if is_tcsd_running; then
   echo "tcsd already running"
 else
   start_tcsd
-fi
-
-# 8. Install redhat-lsb-core
-#    This is specific to redhat
-
-if yum_detect; then
-  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools > /dev/null 2>&1
 fi
 
 # 9. Run mtwilson-trustagent-rhel.bin
