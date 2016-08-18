@@ -85,13 +85,34 @@ fi
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
+directory_layout() {
+if [ "$TRUSTAGENT_LAYOUT" == "linux" ]; then
+  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-/etc/trustagent}
+  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-/var/opt/trustagent}
+  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-/var/log/trustagent}
+elif [ "$TRUSTAGENT_LAYOUT" == "home" ]; then
+  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
+  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
+  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
+fi
+export TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
+export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
+export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
+export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
+export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
+}
 
 # The version script is automatically generated at build time and looks like this:
 #ARTIFACT=mtwilson-trustagent-installer
 #VERSION=3.0
 #BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-3.0)"
 
-
+directory_layout
+if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
+  # set TRUSTAGENT_REBOOT=no (in trustagent.env) if you want to ensure it doesn't reboot
+  # set TRUSTAGENT_SETUP_PREREQS=no (in trustagent.env) if you want to skip this step 
+  source setup_prereqs.sh >> $INSTALL_LOG_FILE 2>&1
+fi
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -120,22 +141,9 @@ else
 fi
 
 # define application directory layout
-if [ "$TRUSTAGENT_LAYOUT" == "linux" ]; then
-  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-/etc/trustagent}
-  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-/var/opt/trustagent}
-  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-/var/log/trustagent}
-elif [ "$TRUSTAGENT_LAYOUT" == "home" ]; then
-  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
-  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
-  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
-fi
-export TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
-export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
-export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
-export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
+directory_layout
 
 # before we start, clear the install log (directory must already exist; created above)
-export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 mkdir -p $(dirname $INSTALL_LOG_FILE)
 if [ $? -ne 0 ]; then
   echo_failure "Cannot write to log directory: $(dirname $INSTALL_LOG_FILE)"
@@ -264,10 +272,10 @@ ASSET_TAG_SETUP="y"
 #Adding redhat-lsb libvirt for bug 5289
 #Adding net-tools for bug 5285
 #adding openssl-devel for bug 5284
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind make gcc dpkg-dev"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind make gcc"
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
