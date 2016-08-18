@@ -102,6 +102,21 @@ export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 }
 
+# identify tpm version
+# postcondition:
+#   variable TPM_VERSION is set to 1.2 or 2.0
+detect_tpm_version() {
+  export TPM_VERSION
+  if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+    TPM_VERSION=1.2
+  else
+  #  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+    TPM_VERSION=2.0
+  fi
+}
+
+detect_tpm_version
+
 # The version script is automatically generated at build time and looks like this:
 #ARTIFACT=mtwilson-trustagent-installer
 #VERSION=3.0
@@ -113,28 +128,30 @@ if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   # set TRUSTAGENT_SETUP_PREREQS=no (in trustagent.env) if you want to skip this step 
   source setup_prereqs.sh >> $INSTALL_LOG_FILE 2>&1
 fi
+
 # make sure unzip and authbind are installed
 #java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
 
-# identify tpm version and set the dependent packages based on version of TPM
-TPM_VERSION=1.2
-if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
-  TPM_VERSION=1.2
-else
-#  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
-  TPM_VERSION=2.0
+# set the dependent packages based on version of TPM
+if [ "$TPM_VERSION" == "1.2" ]; then
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
+  TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+  TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+  TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+elif [ "$TPM_VERSION" == "2.0" ]; then
   #install tpm2-tss, tpm2-tools, and tboot for tpm2
   ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
-
   # not install trousers and its dev packages for tpm 2.0
-  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc"
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc redhat-lsb libvirt net-tools openssl-devel"
   TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev make gcc"
   TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel make gcc"
   TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+elif [ -z "$TPM_VERSION" ]; then
+  echo_failure "Cannot detect TPM version"
+  exit 1
+else
+  echo_failure "Unrecognized TPM version: $TPM_VERSION"
+  exit 1
 fi
 
 # determine if we are installing as root or non-root
