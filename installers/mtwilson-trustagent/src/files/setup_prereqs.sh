@@ -135,6 +135,8 @@ configure_grub() {
   else
     echo "cannot find tboot menuentry in /etc/grub.d"
   fi
+
+  grub2-mkconfig -o $GRUB_FILE
 }
 
 configure_grub
@@ -152,6 +154,29 @@ is_measured_launch() {
   else
     return 1
   fi
+}
+
+is_tpm_driver_loaded() {
+  if [ ! -e /dev/tpm0 ]; then
+    local is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
+    local is_tpm_tis_force_any=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force')
+    if [ -n "$is_tpm_tis_force" ]; then
+      echo "TPM driver not loaded, tpm_tis.force=1 already in /etc/default/grub"
+    elif [ -n "$is_tpm_tis_force_any" ]; then
+      echo "TPM driver not loaded, tpm_tis.force present but disabled in /etc/default/grub"
+    else
+      #echo "TPM driver not loaded, adding tpm_tis.force=1 to /etc/default/grub"
+      sed -i -e '/^GRUB_CMDLINE_LINUX/ s/"$/ tpm_tis.force=1"/' /etc/default/grub
+      is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
+      if [ -n "$is_tpm_tis_force" ]; then
+        echo "TPM driver not loaded, added tpm_tis.force=1 to /etc/default/grub"
+      else
+        echo "TPM driver not loaded, failed to add tpm_tis.force=1 to /etc/default/grub"
+      fi
+    fi
+    return 1
+  fi
+  return 0
 }
 
 install_rsync() {
@@ -199,7 +224,10 @@ is_reboot_required() {
   if is_txtstat_installed; then
     if is_measured_launch; then
       echo "already in measured launch environment"
-      should_reboot=no
+      if is_tpm_driver_loaded; then
+        echo "TPM driver is already loaded"
+        should_reboot=no
+      fi
     fi
   fi
   if [ "$should_reboot" == "yes" ] && [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then
