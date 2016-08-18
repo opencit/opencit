@@ -19,6 +19,12 @@ if [ -f $HOME/cit.env ]; then
   if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
 fi
 
+
+#####
+# INSTALL BKC TOOL
+cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
+
+
 #####
 # INSTALL ATTESTATION SERVICE
 export MTWILSON_LOG_LEVEL=DEBUG
@@ -56,7 +62,3 @@ if [ -n "$TAGENT_BIN" ]; then
   chmod +x $TAGENT_BIN
   ./$TAGENT_BIN
 fi
-
-#####
-# INSTALL BKC TOOL
-cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool

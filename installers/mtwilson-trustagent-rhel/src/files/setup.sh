@@ -700,7 +700,7 @@ monit_install() {
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
   auto_install "Monit" "MONIT"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; return 1; fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
       echo_failure "Unable to auto-install Monit"
@@ -718,7 +718,7 @@ monit_src_install() {
   DEVELOPER_YUM_PACKAGES="make gcc"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
   auto_install "Developer tools" "DEVELOPER"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; return 1; fi
   monit_clear; monit_detect;
   if [[ -z "$monit" ]]; then
     if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then
