@@ -14,13 +14,13 @@
 
 # Outline:
 # 1. Add epel-release-latest-7.noarch repository
-# 2. Install tboot
-# 3. Add grub menu item for tboot and select as default
-# 4. Reboot (only if we are not already in trusted boot)
-# 5. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
-# 6. Install the patched tpm-tools
-# 7. Start tcsd (it already has an init script for next boot, but we need it now)
-# 8. Install redhat-lsb-core
+# 2. Install redhat-lsb-core and other redhat-specific packages
+# 3. Install tboot
+# 4. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
+# 5. Install the patched tpm-tools
+# 6. Add grub menu item for tboot and select as default
+# 7. Reboot (only if we are not already in trusted boot)
+# 8. Start tcsd (it already has an init script for next boot, but we need it now)
 # 9. Run mtwilson-trustagent-rhel.bin
 
 TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
@@ -55,12 +55,22 @@ fi
 
 add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
 
-# 2. Install tboot
+# 2. Install redhat-lsb-core and other redhat-specific packages
 
+if yum_detect; then
+  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools > /dev/null 2>&1
+fi
+
+# 3. Install tboot
+# 4. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
+# 5. Install the patched tpm-tools
+
+# tpm 1.2
 is_tboot_installed() {
   is_package_installed tboot
 }
 
+# tpm 1.2
 install_tboot() {
   TRUSTAGENT_TBOOT_YUM_PACKAGES="tboot"
   TRUSTAGENT_TBOOT_APT_PACKAGES="tboot"
@@ -69,11 +79,69 @@ install_tboot() {
   auto_install "tboot" "TRUSTAGENT_TBOOT"
 }
 
-if is_tboot_installed; then
+install_openssl() {
+  TRUSTAGENT_OPENSSL_YUM_PACKAGES="openssl openssl-devel"
+  TRUSTAGENT_OPENSSL_APT_PACKAGES="openssl libssl-dev"
+  TRUSTAGENT_OPENSSL_YAST_PACKAGES="openssl libopenssl-devel"
+  TRUSTAGENT_OPENSSL_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+  auto_install "openssl" "TRUSTAGENT_OPENSSL" > /dev/null 2>&1
+}
+
+# tpm 1.2
+install_trousers() {
+  TRUSTAGENT_TROUSERS_YUM_PACKAGES="trousers trousers-devel"
+  TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-dbg libtspi-dev libtspi1"
+  TRUSTAGENT_TROUSERS_YAST_PACKAGES="trousers trousers-devel"
+  TRUSTAGENT_TROUSERS_ZYPPER_PACKAGES="trousers trousers-devel"
+  auto_install "trousers" "TRUSTAGENT_TROUSERS" > /dev/null 2>&1
+}
+
+# tpm 1.2
+install_tpm_tools() {
+  TRUSTAGENT_TPMTOOLS_YUM_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_APT_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_YAST_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_ZYPPER_PACKAGES="tpm-tools"
+  auto_install "tpm-tools" "TRUSTAGENT_TPMTOOLS" > /dev/null 2>&1
+}
+
+# tpm 1.2
+install_patched_tpm_tools() {
+  local PATCHED_TPMTOOLS_BIN=`ls -1 patched-*.bin | head -n 1`
+  if [ -n "$PATCHED_TPMTOOLS_BIN" ]; then
+    chmod +x $PATCHED_TPMTOOLS_BIN
+    ./$PATCHED_TPMTOOLS_BIN
+  fi
+}
+
+# tpm 2.0
+install_tboot_tss2_tpmtools2() {
+  #install tpm2-tss, tpm2-tools, and tboot for tpm2
+  # not install trousers and its dev packages for tpm 2.0
+  # TODO:  currently this installs tboot, tpm-tools2, and tss2 ... we need to split it up so tboot can be in first section, and tpm-tools2 and tss2 can be here. 
+  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
+}
+
+install_openssl
+
+if [ "$TPM_VERSION" == "1.2" ]; then
+  if is_tboot_installed; then
     echo "tboot already installed"
-else
+  else
     install_tboot
+  fi
+  install_trousers
+  install_tpm_tools
+  install_patched_tpm_tools
+elif [ "$TPM_VERSION" == "2.0" ]; then
+  install_tboot_tss2_tpmtools2
+elif [ -z "$TPM_VERSION" ]; then
+  echo "Cannot detect TPM version"
+else
+  echo "Unrecognized TPM version: $TPM_VERSION"
 fi
+
+
 
 # TODO TPM2.0
 #    2. install tboot 1.9.4 rpm package 
@@ -83,8 +151,7 @@ fi
 #       * Run "grub2-mkconfig -o /boot/grub2/grub.cfg" command
 #       ? Reboot the host server and make sure TXT is enabled and tboot boots correctly
 
-
-# 3. Add grub menu item for tboot and select as default
+# 6. Add grub menu item for tboot and select as default
 
 is_uefi_boot() {
   if [ -d /sys/firmware/efi ]; then
@@ -132,7 +199,7 @@ configure_grub() {
 
 configure_grub
 
-# 4. Reboot (only if we are not already in trusted boot)
+# 7. Reboot (only if we are not already in trusted boot)
 
 is_txtstat_installed() {
   is_command_available txt-stat
@@ -234,65 +301,8 @@ reboot_maybe
 # crontab entry we may have already created
 no_resume_after_reboot
 
-# 5. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
 
-install_openssl() {
-  TRUSTAGENT_OPENSSL_YUM_PACKAGES="openssl openssl-devel"
-  TRUSTAGENT_OPENSSL_APT_PACKAGES="openssl libssl-dev"
-  TRUSTAGENT_OPENSSL_YAST_PACKAGES="openssl libopenssl-devel"
-  TRUSTAGENT_OPENSSL_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
-  auto_install "openssl" "TRUSTAGENT_OPENSSL" > /dev/null 2>&1
-}
-
-install_trousers_tpm12() {
-  TRUSTAGENT_TROUSERS_YUM_PACKAGES="trousers trousers-devel"
-  TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-dbg libtspi-dev libtspi1"
-  TRUSTAGENT_TROUSERS_YAST_PACKAGES="trousers trousers-devel"
-  TRUSTAGENT_TROUSERS_ZYPPER_PACKAGES="trousers trousers-devel"
-  auto_install "trousers" "TRUSTAGENT_TROUSERS" > /dev/null 2>&1
-}
-
-install_trousers_tpm20() {
-  #install tpm2-tss, tpm2-tools, and tboot for tpm2
-  # not install trousers and its dev packages for tpm 2.0
-  # TODO:  currently this installs tboot, tpm-tools2, and tss2 ... we need to split it up so tboot can be in first section, and tpm-tools2 and tss2 can be here. 
-  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
-}
-
-install_openssl
-
-if [ "$TPM_VERSION" == "1.2" ]; then
-  install_trousers_tpm12
-elif [ "$TPM_VERSION" == "2.0" ]; then
-  install_trousers_tpm20
-elif [ -z "$TPM_VERSION" ]; then
-  echo "Cannot detect TPM version"
-else
-  echo "Unrecognized TPM version: $TPM_VERSION"
-fi
-
-# 6. Install the patched tpm-tools
-
-install_tpm_tools() {
-  TRUSTAGENT_TPMTOOLS_YUM_PACKAGES="tpm-tools"
-  TRUSTAGENT_TPMTOOLS_APT_PACKAGES="tpm-tools"
-  TRUSTAGENT_TPMTOOLS_YAST_PACKAGES="tpm-tools"
-  TRUSTAGENT_TPMTOOLS_ZYPPER_PACKAGES="tpm-tools"
-  auto_install "tpm-tools" "TRUSTAGENT_TPMTOOLS" > /dev/null 2>&1
-}
-
-install_patched_tpm_tools() {
-  local PATCHED_TPMTOOLS_BIN=`ls -1 patched-*.bin | head -n 1`
-  if [ -n "$PATCHED_TPMTOOLS_BIN" ]; then
-    chmod +x $PATCHED_TPMTOOLS_BIN
-    ./$PATCHED_TPMTOOLS_BIN
-  fi
-}
-
-install_tpm_tools
-install_patched_tpm_tools
-
-# 7. Start tcsd (it already has an init script for next boot, but we need it now)
+# 8. Start tcsd (it already has an init script for next boot, but we need it now)
 
 is_tcsd_running() {
   local tcsd_pid=$(ps aux | grep tcsd | grep -v grep)
@@ -315,13 +325,6 @@ if is_tcsd_running; then
   echo "tcsd already running"
 else
   start_tcsd
-fi
-
-# 8. Install redhat-lsb-core
-#    This is specific to redhat
-
-if yum_detect; then
-  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools > /dev/null 2>&1
 fi
 
 # 9. Run mtwilson-trustagent-rhel.bin
