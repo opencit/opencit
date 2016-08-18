@@ -382,9 +382,28 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
+# enable epel-release repository for rhel
+flavor=$(getFlavour)
+case $flavor in
+  "rhel")
+    addRepoRequired=$(yum list xmlstarlet 2>/dev/null | grep -E 'Available Packages|Installed Packages')
+    repo_url="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+    #if xmlstarlet package already available, break; no need to add repo
+    if [ -n "$addRepoRequired" ]; then
+      break
+    fi
+    prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
+    if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
+      echo_failure "User declined to add EPEL Release repository to local package manager."
+      exit -1
+    fi
+    add_package_repository "${repo_url}"
+    ;;
+esac
+  
 # install prerequisites
 if [ "$(whoami)" == "root" ]; then
-  MTWILSON_YUM_PACKAGES="zip unzip authbind openssl xmlstarlet"
+  MTWILSON_YUM_PACKAGES="zip unzip authbind openssl xmlstarlet wget net-tools"
   MTWILSON_APT_PACKAGES="zip unzip authbind openssl xmlstarlet"
   MTWILSON_YAST_PACKAGES="zip unzip authbind openssl xmlstarlet"
   MTWILSON_ZYPPER_PACKAGES="zip unzip authbind openssl xmlstarlet"
@@ -749,9 +768,12 @@ if [ "$(whoami)" == "root" ]; then
       mkdir -p /etc/apt/trusted.gpg.d
       chmod 755 /etc/apt/trusted.gpg.d
       cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
-      POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
-      add_postgresql_install_packages "POSTGRES_SERVER"
     fi
+    POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
+    POSTGRES_SERVER_YUM_PACKAGES="postgresql93"
+    add_postgresql_install_packages "POSTGRES_SERVER"
+    if [ $? -ne 0 ]; then echo_failure "Failed to add postgresql repository to local package manager"; exit -1; fi
+    
     postgres_userinput_connection_properties
     if [ -n "$opt_postgres" ]; then
       # Install Postgres server (if user selected localhost)
@@ -1282,13 +1304,13 @@ rm -f $MTWILSON_ENV/mtwilson-setup
 #if [ -z "$MTWILSON_NOSETUP" ]; then mtwilson start; fi
 
 #Register mtwilson as a startup script
-if [ ! $(/sbin/initctl list | grep mtwilson) ]; then
+#if [ ! $(/sbin/initctl list | grep mtwilson) ]; then
   if [ "$(whoami)" == "root" ]; then
     register_startup_script /usr/local/bin/mtwilson mtwilson
   else
     echo_warning "You must be root to register mtwilson startup script"
   fi
-fi
+#fi
 
 if [ "$(whoami)" == "root" ]; then     
   #remove previous service startup scripts if they exist
