@@ -40,6 +40,83 @@ cit_bkc_help() {
     echo "    cit-bkc-tool uninstall --purge    remove CIT components and the CIT BKC tool including logs"
 }
 
+###################################################################################################
+
+
+# precondition:
+# variable CIT_BKC_REBOOT is set to 'yes' for auto-reboot or 'no' (or anything else) for interactive mode
+# postcondition:
+# crontab is edited to reflect auto-reboot or interactive mode
+# unit test:
+# crontab -l  # see what you already have
+# ( export CIT_BKC_REBOOT=yes && cit_bkc_setup_reboot && crontab -l )
+# ( export CIT_BKC_REBOOT=no && cit_bkc_setup_reboot && crontab -l )
+cit_bkc_setup_reboot() {
+    touch /tmp/cit-bkc-tool.crontab && chmod 600 /tmp/cit-bkc-tool.crontab
+    if [ "$CIT_BKC_REBOOT" == "yes" ]; then
+        echo "# cit-bkc-tool auto-reboot mode" > /tmp/cit-bkc-tool.crontab
+        echo "@reboot /usr/local/bin/cit-bkc-tool --reboot" >> /tmp/cit-bkc-tool.crontab
+    else
+        echo "# cit-bkc-tool interactive mode" > /tmp/cit-bkc-tool.crontab
+    fi
+    # remove any existing lines with cit-bkc-tool and then append new lines with cit-bkc-tool we just prepared
+    crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
+}
+
+# precondition: ~/.bashrc exists
+# postcondition:  the line 'cit-bkc-tool status' is added to it
+cit_bkc_setup_notification() {
+    SCRIPT=$HOME/.bashrc
+    notification=$(grep cit-bkc-tool $SCRIPT)
+    if [ -z "$notification" ]; then
+      echo >> $HOME/.bashrc
+      echo "/usr/local/bin/cit-bkc-tool status" >> $HOME/.bashrc
+    fi
+}
+
+
+# precondition:  CIT_BKC_REPORTS_PATH variable is defined, for EXAMPLE /usr/local/var/cit-bkc-tool
+# postcondition: LATEST set to filename of most recent report
+# return code: 0 if report is available, 1 if not available
+cit_bkc_report_is_available() {
+    if [ ! -d $CIT_BKC_REPORTS_PATH ]; then
+      return 1
+    fi
+    # look for most recent report
+    LATEST=$(ls -1t $CIT_BKC_REPORTS_PATH | head -n 1)
+    if [ -n "$LATEST" ]; then
+      return 0
+    else
+      return 1
+    fi
+}
+
+# returns 0 if CIT BKC tool is running, 1 if not running
+# side effects: sets CIT_BKC_PID if CIT is running, or to empty otherwise
+cit_bkc_is_running() {
+  CIT_BKC_PID=
+  if [ -f $CIT_BKC_PID_FILE ]; then
+    CIT_BKC_PID=$(cat $CIT_BKC_PID_FILE)
+    local is_running=`ps -A -o pid | grep "^\s*${CIT_BKC_PID}$"`
+    if [ -z "$is_running" ]; then
+      # stale PID file
+      CIT_BKC_PID=
+    fi
+  fi
+  if [ -z "$CIT_BKC_PID" ]; then
+    # check the process list just in case the pid file is stale
+    CIT_BKC_PID=$(ps -A ww | grep -v grep | grep "$CIT_BKC_TOOL run" | awk '{ print $1 }')
+  fi
+  if [ -z "$CIT_BKC_PID" ]; then
+    # CIT is not running
+    return 1
+  fi
+  # CIT is running and CIT_BKC_PID is set
+  return 0
+}
+
+###################################################################################################
+
 cit_bkc_clear() {
     rm -rf $CIT_BKC_DATA_PATH $CIT_BKC_REPORTS_PATH $CIT_BKC_RUN_PATH
 }
@@ -85,37 +162,6 @@ cit_bkc_run_next_report() {
     echo "TODO:  generate the report based on test results"
 }
 
-# precondition:
-# variable CIT_BKC_REBOOT is set to 'yes' for auto-reboot or 'no' (or anything else) for interactive mode
-# postcondition:
-# crontab is edited to reflect auto-reboot or interactive mode
-# unit test:
-# crontab -l  # see what you already have
-# ( export CIT_BKC_REBOOT=yes && cit_bkc_setup_reboot && crontab -l )
-# ( export CIT_BKC_REBOOT=no && cit_bkc_setup_reboot && crontab -l )
-cit_bkc_setup_reboot() {
-    touch /tmp/cit-bkc-tool.crontab && chmod 600 /tmp/cit-bkc-tool.crontab
-    if [ "$CIT_BKC_REBOOT" == "yes" ]; then
-        echo "# cit-bkc-tool auto-reboot mode" > /tmp/cit-bkc-tool.crontab
-        echo "@reboot /usr/local/bin/cit-bkc-tool --reboot" >> /tmp/cit-bkc-tool.crontab
-    else
-        echo "# cit-bkc-tool interactive mode" > /tmp/cit-bkc-tool.crontab
-    fi
-    # remove any existing lines with cit-bkc-tool and then append new lines with cit-bkc-tool we just prepared
-    crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
-}
-
-# precondition: ~/.bashrc exists
-# postcondition:  the line 'cit-bkc-tool status' is added to it
-cit_bkc_setup_notification() {
-    SCRIPT=$HOME/.bashrc
-    notification=$(grep cit-bkc-tool $SCRIPT)
-    if [ -z "$notification" ]; then
-      echo >> $HOME/.bashrc
-      echo "/usr/local/bin/cit-bkc-tool status" >> $HOME/.bashrc
-    fi
-}
-
 cit_bkc_report() {
     if cit_bkc_report_is_available; then
         # filename in $LATEST
@@ -124,46 +170,6 @@ cit_bkc_report() {
         echo "No reports available" >&2
         exit 1
     fi
-}
-
-# precondition:  CIT_BKC_REPORTS_PATH variable is defined, for EXAMPLE /usr/local/var/cit-bkc-tool
-# postcondition: LATEST set to filename of most recent report
-# return code: 0 if report is available, 1 if not available
-cit_bkc_report_is_available() {
-    if [ ! -d $CIT_BKC_REPORTS_PATH ]; then
-      return 1
-    fi
-    # look for most recent report
-    LATEST=$(ls -1t $CIT_BKC_REPORTS_PATH | head -n 1)
-    if [ -n "$LATEST" ]; then
-      return 0
-    else
-      return 1
-    fi
-}
-
-# returns 0 if CIT BKC tool is running, 1 if not running
-# side effects: sets CIT_BKC_PID if CIT is running, or to empty otherwise
-cit_bkc_is_running() {
-  CIT_BKC_PID=
-  if [ -f $CIT_BKC_PID_FILE ]; then
-    CIT_BKC_PID=$(cat $CIT_BKC_PID_FILE)
-    local is_running=`ps -A -o pid | grep "^\s*${CIT_BKC_PID}$"`
-    if [ -z "$is_running" ]; then
-      # stale PID file
-      CIT_BKC_PID=
-    fi
-  fi
-  if [ -z "$CIT_BKC_PID" ]; then
-    # check the process list just in case the pid file is stale
-    CIT_BKC_PID=$(ps -A ww | grep -v grep | grep "$CIT_BKC_TOOL run" | awk '{ print $1 }')
-  fi
-  if [ -z "$CIT_BKC_PID" ]; then
-    # CIT is not running
-    return 1
-  fi
-  # CIT is running and CIT_BKC_PID is set
-  return 0
 }
 
 cit_bkc_status() {
