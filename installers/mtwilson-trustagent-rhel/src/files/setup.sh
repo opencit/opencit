@@ -272,10 +272,10 @@ ASSET_TAG_SETUP="y"
 #Adding redhat-lsb libvirt for bug 5289
 #Adding net-tools for bug 5285
 #adding openssl-devel for bug 5284
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind make gcc dpkg-dev"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind make gcc"
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
@@ -336,14 +336,14 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
 fi
 
 ### INSTALL MEASUREMENT AGENT
-echo "Installing measurement agent..."
-TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
-if [ -z "$TBOOTXM_PACKAGE" ]; then
-  echo_failure "Failed to find measurement agent installer package"
-  exit -1
-fi
-./$TBOOTXM_PACKAGE
-if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
+#echo "Installing measurement agent..."
+#TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
+#if [ -z "$TBOOTXM_PACKAGE" ]; then
+#  echo_failure "Failed to find measurement agent installer package"
+#  exit -1
+#fi
+#./$TBOOTXM_PACKAGE
+#if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
 
 # Migrate any old data to the new locations  (should be rewritten in java)
 v1_aik=$TRUSTAGENT_V_1_2_CONFIGURATION/cert
@@ -667,7 +667,7 @@ monit_install() {
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
   auto_install "Monit" "MONIT"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; return 1; fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
       echo_failure "Unable to auto-install Monit"
@@ -685,7 +685,7 @@ monit_src_install() {
   DEVELOPER_YUM_PACKAGES="make gcc"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
   auto_install "Developer tools" "DEVELOPER"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; return 1; fi
   monit_clear; monit_detect;
   if [[ -z "$monit" ]]; then
     if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then
