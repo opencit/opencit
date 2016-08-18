@@ -115,10 +115,28 @@ install_patched_tpm_tools() {
 }
 
 # tpm 2.0
-install_tboot_tss2_tpmtools2() {
-  #install tpm2-tss, tpm2-tools, and tboot for tpm2
-  # not install trousers and its dev packages for tpm 2.0
-  # TODO:  currently this installs tboot, tpm-tools2, and tss2 ... we need to split it up so tboot can be in first section, and tpm-tools2 and tss2 can be here. 
+# install tboot 1.9.4 for tpm2
+# NOTE: eventually these should be available via package managers on central
+#       repositories, when that happens we can use code like install_tboot
+install_tboot_tpm2() {
+  if yum_detect; then
+    local TBOOT_RPM=`ls -1 tboot-*.rpm | head -n 1`
+    if [ -n "$TBOOT_RPM" ]; then
+      yum -y install $TBOOT_RPM
+    fi
+  elif aptget_detect; then
+    local TBOOT_DEB=`ls -1 tboot-*.deb | head -n 1`
+    if [ -n "$TBOOT_DEB" ]; then
+      dpkg -i $TBOOT_DEB
+      apt-get install -f
+    fi
+  fi
+}
+
+# tpm 2.0
+install_tss2_tpmtools2() {
+  #install tpm2-tss, tpm2-tools for tpm2
+  # (do not install trousers and its dev packages for tpm 2.0)
   ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 }
 
@@ -134,6 +152,7 @@ if [ "$TPM_VERSION" == "1.2" ]; then
   install_tpm_tools
   install_patched_tpm_tools
 elif [ "$TPM_VERSION" == "2.0" ]; then
+  install_tboot_tpm2
   install_tboot_tss2_tpmtools2
 elif [ -z "$TPM_VERSION" ]; then
   echo "Cannot detect TPM version"
@@ -184,6 +203,8 @@ configure_grub() {
   else
     echo "cannot find tboot menuentry in /etc/grub.d"
   fi
+
+  grub2-mkconfig -o $GRUB_FILE
 }
 
 # TODO TPM2.0 :
@@ -212,6 +233,29 @@ is_measured_launch() {
   else
     return 1
   fi
+}
+
+is_tpm_driver_loaded() {
+  if [ ! -e /dev/tpm0 ]; then
+    local is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
+    local is_tpm_tis_force_any=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force')
+    if [ -n "$is_tpm_tis_force" ]; then
+      echo "TPM driver not loaded, tpm_tis.force=1 already in /etc/default/grub"
+    elif [ -n "$is_tpm_tis_force_any" ]; then
+      echo "TPM driver not loaded, tpm_tis.force present but disabled in /etc/default/grub"
+    else
+      #echo "TPM driver not loaded, adding tpm_tis.force=1 to /etc/default/grub"
+      sed -i -e '/^GRUB_CMDLINE_LINUX/ s/"$/ tpm_tis.force=1"/' /etc/default/grub
+      is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
+      if [ -n "$is_tpm_tis_force" ]; then
+        echo "TPM driver not loaded, added tpm_tis.force=1 to /etc/default/grub"
+      else
+        echo "TPM driver not loaded, failed to add tpm_tis.force=1 to /etc/default/grub"
+      fi
+    fi
+    return 1
+  fi
+  return 0
 }
 
 install_rsync() {
@@ -259,7 +303,10 @@ is_reboot_required() {
   if is_txtstat_installed; then
     if is_measured_launch; then
       echo "already in measured launch environment"
-      should_reboot=no
+      if is_tpm_driver_loaded; then
+        echo "TPM driver is already loaded"
+        should_reboot=no
+      fi
     fi
   fi
   if [ "$should_reboot" == "yes" ] && [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then

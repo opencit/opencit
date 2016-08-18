@@ -73,7 +73,28 @@
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
-                                
+                
+                <!-- 
+                mtwilson-trustagent in cit-2.2 is for both ubuntu and
+                redhat even though there is a mtwilson-trustagent-rhel project
+                also... therefore both ubuntu and redhat dependencies are
+                included here for now.
+                -->
+                <dependency>
+                    <groupId>net.sourceforge.tboot</groupId>
+                    <artifactId>tboot</artifactId>
+                    <version>1.9.4</version>
+                    <classifier>x86_64</classifier>
+                    <type>rpm</type>
+                </dependency>
+                <dependency>
+                    <groupId>net.sourceforge.tboot</groupId>
+                    <artifactId>tboot</artifactId>
+                    <version>1.9.4</version>
+                    <classifier>amd64</classifier>
+                    <type>deb</type>
+                </dependency>
+
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
