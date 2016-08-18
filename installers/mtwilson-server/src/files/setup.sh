@@ -389,15 +389,14 @@ case $flavor in
     addRepoRequired=$(yum list xmlstarlet 2>/dev/null | grep -E 'Available Packages|Installed Packages')
     repo_url="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
     #if xmlstarlet package already available, break; no need to add repo
-    if [ -n "$addRepoRequired" ]; then
-      break
+    if [ -z "$addRepoRequired" ]; then
+      prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
+      if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
+        echo_failure "User declined to add EPEL Release repository to local package manager."
+        exit -1
+      fi
+      add_package_repository "${repo_url}"
     fi
-    prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
-    if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
-      echo_failure "User declined to add EPEL Release repository to local package manager."
-      exit -1
-    fi
-    add_package_repository "${repo_url}"
     ;;
 esac
   
