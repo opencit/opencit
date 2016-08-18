@@ -7,6 +7,7 @@
 #   (for add_package_repository, echo_success, echo_failure)
 # * TRUSTAGENT_HOME is set, for example /opt/trustagent
 # * INSTALL_LOG_FILE is set, for example /opt/trustagent/logs/install.log
+# * TPM_VERSION is set, for example 1.2 or else it will be auto-detected
 
 # Postconditions:
 # * All messages logged to stdout/stderr; caller redirect to logfile as needed
@@ -31,6 +32,23 @@ if [ "$1" == "--resume" ]; then
   TRUSTAGENT_RESUME_FLAG=yes
 fi
 
+# identify tpm version
+# postcondition:
+#   variable TPM_VERSION is set to 1.2 or 2.0
+detect_tpm_version() {
+  export TPM_VERSION
+  if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+    TPM_VERSION=1.2
+  else
+  #  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+    TPM_VERSION=2.0
+  fi
+}
+
+if [ -z "$TPM_VERSION" ]; then
+  detect_tpm_version
+fi
+
 ################################################################################
 
 # 1. Add epel-release-latest-7.noarch repository
@@ -47,10 +65,12 @@ fi
 # 4. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
 # 5. Install the patched tpm-tools
 
+# tpm 1.2
 is_tboot_installed() {
   is_package_installed tboot
 }
 
+# tpm 1.2
 install_tboot() {
   TRUSTAGENT_TBOOT_YUM_PACKAGES="tboot"
   TRUSTAGENT_TBOOT_APT_PACKAGES="tboot"
@@ -67,6 +87,7 @@ install_openssl() {
   auto_install "openssl" "TRUSTAGENT_OPENSSL" > /dev/null 2>&1
 }
 
+# tpm 1.2
 install_trousers() {
   TRUSTAGENT_TROUSERS_YUM_PACKAGES="trousers trousers-devel"
   TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-dbg libtspi-dev libtspi1"
@@ -75,6 +96,7 @@ install_trousers() {
   auto_install "trousers" "TRUSTAGENT_TROUSERS" > /dev/null 2>&1
 }
 
+# tpm 1.2
 install_tpm_tools() {
   TRUSTAGENT_TPMTOOLS_YUM_PACKAGES="tpm-tools"
   TRUSTAGENT_TPMTOOLS_APT_PACKAGES="tpm-tools"
@@ -83,6 +105,7 @@ install_tpm_tools() {
   auto_install "tpm-tools" "TRUSTAGENT_TPMTOOLS" > /dev/null 2>&1
 }
 
+# tpm 1.2
 install_patched_tpm_tools() {
   local PATCHED_TPMTOOLS_BIN=`ls -1 patched-*.bin | head -n 1`
   if [ -n "$PATCHED_TPMTOOLS_BIN" ]; then
@@ -91,16 +114,42 @@ install_patched_tpm_tools() {
   fi
 }
 
-if is_tboot_installed; then
-    echo "tboot already installed"
-else
-    install_tboot
-fi
+# tpm 2.0
+install_tboot_tss2_tpmtools2() {
+  #install tpm2-tss, tpm2-tools, and tboot for tpm2
+  # not install trousers and its dev packages for tpm 2.0
+  # TODO:  currently this installs tboot, tpm-tools2, and tss2 ... we need to split it up so tboot can be in first section, and tpm-tools2 and tss2 can be here. 
+  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
+}
 
 install_openssl
-install_trousers
-install_tpm_tools
-install_patched_tpm_tools
+
+if [ "$TPM_VERSION" == "1.2" ]; then
+  if is_tboot_installed; then
+    echo "tboot already installed"
+  else
+    install_tboot
+  fi
+  install_trousers
+  install_tpm_tools
+  install_patched_tpm_tools
+elif [ "$TPM_VERSION" == "2.0" ]; then
+  install_tboot_tss2_tpmtools2
+elif [ -z "$TPM_VERSION" ]; then
+  echo "Cannot detect TPM version"
+else
+  echo "Unrecognized TPM version: $TPM_VERSION"
+fi
+
+
+
+# TODO TPM2.0
+#    2. install tboot 1.9.4 rpm package 
+#       ? Download tboot_1.9.4-3.hd.x86_64.rpm to the host from \\10.1.68.140\cit\2.2 
+#       ? Install tboot ( #rpm -i tboot_1.9.4-3.hd.x86_64.rpm )
+#       * change the boot entry to tboot by editting the line GRUB_DEFAULT in file /etc/defaut/grub
+#       * Run "grub2-mkconfig -o /boot/grub2/grub.cfg" command
+#       ? Reboot the host server and make sure TXT is enabled and tboot boots correctly
 
 # 6. Add grub menu item for tboot and select as default
 
@@ -136,6 +185,17 @@ configure_grub() {
     echo "cannot find tboot menuentry in /etc/grub.d"
   fi
 }
+
+# TODO TPM2.0 :
+#    1. tpm2.0 driver: enable tpm2.0 driver on the host
+#       First check if /dev/tpm0 exist. if yes, go to next step, otherwise, follow the instruction below
+#       NOTE: tpm2.0 driver is not loaded correctly by the default OS installation. need to manually enable it
+#       * edit /etc/default/grub to add the parameter "tpm_tis.force=1" at the end of the line GRUB_CMDLINE_LINUX
+#         for example: GRUB_CMDLINE_LINUX="crashkernel=auto rd.lvm.lv=rhel/root rd.lvm.lv=rhel/swap rhgb quiet tpm_tis.force=1"
+#       * grub2-mkconfig -o /boot/grub2/grub.cfg
+#       * reboot the host
+#       * check if /dev/tpm0 exist. if so, go to next step. otherwise, stop and look for help
+
 
 configure_grub
 
