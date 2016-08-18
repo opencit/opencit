@@ -102,6 +102,21 @@ export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 }
 
+# identify tpm version
+# postcondition:
+#   variable TPM_VERSION is set to 1.2 or 2.0
+detect_tpm_version() {
+  export TPM_VERSION
+  if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+    TPM_VERSION=1.2
+  else
+  #  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+    TPM_VERSION=2.0
+  fi
+}
+
+detect_tpm_version
+
 # The version script is automatically generated at build time and looks like this:
 #ARTIFACT=mtwilson-trustagent-installer
 #VERSION=3.0
@@ -113,14 +128,6 @@ if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   # set TRUSTAGENT_SETUP_PREREQS=no (in trustagent.env) if you want to skip this step 
   source setup_prereqs.sh >> $INSTALL_LOG_FILE 2>&1
 fi
-
-# make sure unzip and authbind are installed
-#java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
-
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -346,15 +353,6 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
   ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
 fi
 
-### INSTALL MEASUREMENT AGENT
-#echo "Installing measurement agent..."
-#TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
-#if [ -z "$TBOOTXM_PACKAGE" ]; then
-#  echo_failure "Failed to find measurement agent installer package"
-#  exit -1
-#fi
-#./$TBOOTXM_PACKAGE
-#if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
 ### INSTALL MEASUREMENT AGENT --comment out for now for cit 2.2
 #echo "Installing measurement agent..."
 #TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
@@ -639,7 +637,6 @@ return_dir=`pwd`
   echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
 
 cd $return_dir
-
 
 if [ "$(whoami)" == "root" ]; then
   if [ "$TPM_VERSION" == "1.2" ]; then

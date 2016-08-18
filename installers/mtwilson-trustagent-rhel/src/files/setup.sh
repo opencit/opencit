@@ -129,9 +129,6 @@ if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   source setup_prereqs.sh >> $INSTALL_LOG_FILE 2>&1
 fi
 
-# make sure unzip and authbind are installed
-#java_required_version=1.7.0_51
-
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
   # create a trustagent user if there isn't already one created
