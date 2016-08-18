@@ -198,16 +198,34 @@ no_resume_after_reboot
 
 # 5. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
 
-# TODO: set up the yum_packages, apt_packages, etc. and call functions.sh 
+install_openssl() {
+  TRUSTAGENT_OPENSSL_YUM_PACKAGES="openssl openssl-devel"
+  TRUSTAGENT_OPENSSL_APT_PACKAGES="openssl libssl-dev"
+  TRUSTAGENT_OPENSSL_YAST_PACKAGES="openssl libopenssl-devel"
+  TRUSTAGENT_OPENSSL_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+  auto_install "openssl" "TRUSTAGENT_OPENSSL" > /dev/null 2>&1
+}
+
 install_trousers() {
   TRUSTAGENT_TROUSERS_YUM_PACKAGES="trousers trousers-devel"
-  TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-devel"
+  TRUSTAGENT_TROUSERS_APT_PACKAGES="trousers trousers-dbg libtspi-dev libtspi1"
   TRUSTAGENT_TROUSERS_YAST_PACKAGES="trousers trousers-devel"
   TRUSTAGENT_TROUSERS_ZYPPER_PACKAGES="trousers trousers-devel"
   auto_install "trousers" "TRUSTAGENT_TROUSERS" > /dev/null 2>&1
 }
 
+install_openssl
+install_trousers
+
 # 6. Install the patched tpm-tools
+
+install_tpm_tools() {
+  TRUSTAGENT_TPMTOOLS_YUM_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_APT_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_YAST_PACKAGES="tpm-tools"
+  TRUSTAGENT_TPMTOOLS_ZYPPER_PACKAGES="tpm-tools"
+  auto_install "tpm-tools" "TRUSTAGENT_TPMTOOLS" > /dev/null 2>&1
+}
 
 install_patched_tpm_tools() {
   local PATCHED_TPMTOOLS_BIN=`ls -1 patched-*.bin | head -n 1`
@@ -217,6 +235,7 @@ install_patched_tpm_tools() {
   fi
 }
 
+install_tpm_tools
 install_patched_tpm_tools
 
 # 7. Start tcsd (it already has an init script for next boot, but we need it now)
@@ -248,7 +267,7 @@ fi
 #    This is specific to redhat
 
 if yum_detect; then
-  yum -y install redhat-lsb redhat-lsb-core > /dev/null 2>&1
+  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools > /dev/null 2>&1
 fi
 
 # 9. Run mtwilson-trustagent-rhel.bin

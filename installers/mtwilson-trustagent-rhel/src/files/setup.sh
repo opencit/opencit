@@ -313,10 +313,10 @@ ASSET_TAG_SETUP="y"
 #Adding redhat-lsb libvirt for bug 5289
 #Adding net-tools for bug 5285
 #adding openssl-devel for bug 5284
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind make gcc dpkg-dev"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind make gcc"
 # save tpm version in trust agent configuration directory
 echo -n "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
