@@ -1176,11 +1176,11 @@ public class HostTrustBO {
                                 Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                                 for(Measurement m : missingEntries) {
                                     // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
-                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()) == null ) {
+                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(DigestAlgorithm.valueOf(host.getPcrBank()), missingEntriesFault.getPcrIndex()) == null ) {
                                         throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
                                     }
                                     Measurement found = null;
-                                    List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
+                                    List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(DigestAlgorithm.valueOf(host.getPcrBank()), missingEntriesFault.getPcrIndex()).getEventLog();
                                     for(Measurement a : actualEntries) {
                                         //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
                                         if( a.getLabel().equals(m.getLabel()) ) {
