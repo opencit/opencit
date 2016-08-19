@@ -227,7 +227,7 @@ function validate_path_configuration() {
   fi
   file_path=`readlink -m "$file_path"` #make file path absolute
   
-  if [[ "$file_path" != '/etc/'* && "$file_path" != '/opt/'* ]]; then
+  if [[ "$file_path" != '/etc/'* && "$file_path" != '/opt/'* && "$file_path" != *'.env' ]]; then
     echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
