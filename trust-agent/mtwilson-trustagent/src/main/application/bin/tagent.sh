@@ -442,8 +442,13 @@ case "$1" in
     trustagent_setup $*
     ;;
   localhost-integration)
-    shiro_localhost_integration "/opt/trustagent/configuration/shiro.ini"
-    /opt/trustagent/bin/tagent.sh restart
+    #shiro_localhost_integration "/opt/trustagent/configuration/shiro.ini"
+    #/opt/trustagent/bin/tagent.sh restart
+    if []; then
+      mv /opt/trustagent/configuration/shiro.ini /opt/trustagent/configuration/shiro.ini.bkup
+      mv /opt/trustagent/configuration/shiro-localhost.ini /opt/trustagent/configuration/shiro.ini
+      /opt/trustagent/bin/tagent.sh restart
+    fi
     ;;
   uninstall)
     trustagent_stop
