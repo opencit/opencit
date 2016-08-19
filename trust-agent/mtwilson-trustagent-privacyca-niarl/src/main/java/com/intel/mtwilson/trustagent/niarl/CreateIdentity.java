@@ -76,7 +76,7 @@ public class CreateIdentity implements Configurable, Runnable {
             
             // create the identity request
             //#5831: Test expression is always true.
-            boolean shortcut = false;
+            boolean shortcut = true;
             String HisIdentityLabel = "HIS_Identity_Key"; 
             
             TpmIdentity newId;
