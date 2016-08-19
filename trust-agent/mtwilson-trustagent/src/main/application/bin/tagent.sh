@@ -445,8 +445,8 @@ case "$1" in
     #shiro_localhost_integration "/opt/trustagent/configuration/shiro.ini"
     #/opt/trustagent/bin/tagent.sh restart
     if []; then
-      mv /opt/trustagent/configuration/shiro.ini /opt/trustagent/configuration/shiro.ini.bkup
-      mv /opt/trustagent/configuration/shiro-localhost.ini /opt/trustagent/configuration/shiro.ini
+      mv /opt/trustagent/configuration/shiro.ini /opt/trustagent/configuration/shiro.ini.bkup 2>/dev/null
+      mv /opt/trustagent/configuration/shiro-localhost.ini /opt/trustagent/configuration/shiro.ini 2>/dev/null
       /opt/trustagent/bin/tagent.sh restart
     fi
     ;;
