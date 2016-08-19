@@ -63,14 +63,17 @@ cit_bkc_setup_reboot() {
     crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
 }
 
-# precondition: ~/.bashrc exists
+# precondition: ~/.bash_profile exists
 # postcondition:  the line 'cit-bkc-tool status' is added to it
+# NOTES:
+#   the .bashrc file must be silent or else sftp connections will fail
+#   so the echo messages must be in .bash_profile, not in .bashrc
 cit_bkc_setup_notification() {
-    SCRIPT=$HOME/.bashrc
+    SCRIPT=$HOME/.bash_profile
     notification=$(grep cit-bkc-tool $SCRIPT)
     if [ -z "$notification" ]; then
-      echo >> $HOME/.bashrc
-      echo "/usr/local/bin/cit-bkc-tool status" >> $HOME/.bashrc
+      echo >> $HOME/.bash_profile
+      echo "/usr/local/bin/cit-bkc-tool status" >> $HOME/.bash_profile
     fi
 }
 
