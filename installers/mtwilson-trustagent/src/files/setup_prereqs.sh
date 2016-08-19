@@ -138,10 +138,10 @@ configure_grub() {
 
   # copy grub2-efi-modules into the modules directory
   if [ -f /usr/lib/grub/x86_64-efi/relocator.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
-    cp /usr/lib/grub/x86_64-efi/relocator.mod /boot/efi/EFI/redhat/x86_64-efi/
+    \cp /usr/lib/grub/x86_64-efi/relocator.mod /boot/efi/EFI/redhat/x86_64-efi/
   fi
   if [ -f /usr/lib/grub/x86_64-efi/multiboot2.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
-    cp /usr/lib/grub/x86_64-efi/multiboot2.mod /boot/efi/EFI/redhat/x86_64-efi/
+    \cp /usr/lib/grub/x86_64-efi/multiboot2.mod /boot/efi/EFI/redhat/x86_64-efi/
   fi
 
   grub2-mkconfig -o $GRUB_FILE
@@ -317,7 +317,7 @@ next_step() {
   if [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then
     echo "continuing CIT Agent installation after reboot"
     (cd $script_path && export TRUSTAGENT_SETUP_PREREQS=no && ./setup.sh)
-  else
+  #else
     # do nothing; either setup.sh called us and will continue when we exit,
     # or user called us directly from shell and expects us to exit when done.
   fi
