@@ -822,7 +822,11 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
     chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_CONFIGURATION/.trustagent_password
     tagent generate-password > $TRUSTAGENT_CONFIGURATION/.trustagent_password
   fi
-
+  
+  if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
+    /opt/trustagent/bin/tagent.sh localhost-integration
+  fi
+  
   tagent import-config --in="${TRUSTAGENT_CONFIGURATION}/trustagent.properties" --out="${TRUSTAGENT_CONFIGURATION}/trustagent.properties"
   #tagent config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,trustagent,jersey-media-multipart}" >/dev/null
   #tagent config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
