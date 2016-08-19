@@ -1035,6 +1035,18 @@ add_package_repository() {
   fi
 }
 
+update_packages() {
+  if yum_detect; then
+    yum -y -x 'kernel*,redhat-release*' update
+  elif aptget_detect; then
+    apt-get -y update
+  elif zypper_detect; then
+    zypper -y update
+  else
+    echo "Unsupported operation: auto update only implemented for yum, apt, and zypper at this time"
+  fi
+}
+
 # Ensure the package actually needs to be installed before calling this function.
 # takes arguments: component name (string), package list prefix (string)
 auto_install() {
