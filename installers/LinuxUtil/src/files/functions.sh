@@ -4855,14 +4855,30 @@ shiro_localhost_integration() {
   IFS=',' read -ra newIps <<< "$iplist"
   IFS=$OIFS
   
-  hostAllowPropertyName=iniHostRealm.allow
-  sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' "${shiroIniPath}"
-  hostAllow=`read_property_from_file $hostAllowPropertyName ${shiroIniPath}`
-  finalIps="$hostAllow"
-  if [ -z "$hostAllow" ]; then
-    iniHostRealmValue=`read_property_from_file iniHostRealm ${shiroIniPath}`
-    update_property_in_file iniHostRealm "${shiroIniPath}" "$iniHostRealmValue\n$hostAllowPropertyName="
+  iniHostRealmPropertyExists=$(cat "${shiroIniPath}" | grep '^iniHostRealm=' 2>/dev/null)
+  if [ -z "${iniHostRealmPropertyExists}" ]; then
+    sed -i 's|\(^securityManager.realms*\)|iniHostRealm=\n\1|' "${shiroIniPath}"
   fi
+  iniHostRealmAllowPropertyExists=$(cat "${shiroIniPath}" | grep '^iniHostRealm.allow=' 2>/dev/null)
+  if [ -z "${iniHostRealmAllowPropertyExists}" ]; then
+    sed -i 's|\(^securityManager.realms*\)|iniHostRealm.allow=\n\1|' "${shiroIniPath}"
+  fi
+  hostMatcherPropertyExists=$(cat "${shiroIniPath}" | grep '^hostMatcher=' 2>/dev/null)
+  if [ -z "${hostMatcherPropertyExists}" ]; then
+    sed -i 's|\(^securityManager.realms*\)|hostMatcher=\n\1|' "${shiroIniPath}"
+  fi
+  iniHostRealmCredentialsMatcherPropertyExists=$(cat "${shiroIniPath}" | grep '^iniHostRealm.credentialsMatcher=' 2>/dev/null)
+  if [ -z "${iniHostRealmCredentialsMatcherPropertyExists}" ]; then
+    sed -i 's|\(^securityManager.realms*\)|iniHostRealm.credentialsMatcher=\n\1|' "${shiroIniPath}"
+  fi
+  
+  update_property_in_file "iniHostRealm" "${shiroIniPath}" 'com.intel.mtwilson.shiro.authc.host.IniHostRealm'
+  update_property_in_file "hostMatcher" "${shiroIniPath}" 'com.intel.mtwilson.shiro.authc.host.HostCredentialsMatcher'
+  update_property_in_file "iniHostRealm.credentialsMatcher" "${shiroIniPath}" '$hostMatcher'
+  
+  #iniHostRealm.allow
+  hostAllow=$(read_property_from_file iniHostRealm.allow ${shiroIniPath})
+  finalIps="$hostAllow"
   for i in "${newIps[@]}"; do
     OIFS=$IFS
     IFS=',' read -ra oldIps <<< "$finalIps"
@@ -4875,5 +4891,11 @@ shiro_localhost_integration() {
       fi
     fi
   done
-  update_property_in_file "$hostAllowPropertyName" "${shiroIniPath}" "$finalIps";
+  update_property_in_file "iniHostRealm.allow" "${shiroIniPath}" "$finalIps";
+  
+  #securityManager.realms
+  securityManagerPropertyHasIniHostRealm=$(cat "${shiroIniPath}" | grep '^securityManager.realms' 2>/dev/null | grep '$iniHostRealm' 2>/dev/null)
+  if [ -z "${securityManagerPropertyHasIniHostRealm}" ]; then
+    sed -i 's|\(^securityManager.realms.*\)|\1, $iniHostRealm|' "${shiroIniPath}"
+  fi
 }
