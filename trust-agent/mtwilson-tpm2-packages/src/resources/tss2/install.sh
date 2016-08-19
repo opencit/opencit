@@ -30,7 +30,10 @@
  chmod 644 /usr/local/lib/libtcti-socket.a
  ranlib /usr/local/lib/libtcti-socket.a
  export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin"
- ldconfig -n /usr/local/lib
+
+#Add /usr/local/lib to Library Path
+echo "/usr/local/lib" > /etc/ld.so.conf.d/tss2.conf
+ldconfig
 
 #install resourcemgr
  /bin/mkdir -p '/usr/local/sbin'
@@ -43,7 +46,6 @@
  /usr/bin/install -c -m 644 include/sapi/implementation.h include/sapi/sys_api_part3.h include/sapi/tpm20.h include/sapi/tpmb.h include/sapi/tss2_common.h include/sapi/tss2_sys.h include/sapi/tss2_tcti.h include/sapi/tss2_tpm2_types.h '/usr/local/include/sapi'
 
 # install the tcsd2.service
-ldconfig /usr/local/lib/
 cp tcsd2.service /lib/systemd/system
 systemctl enable tcsd2.service
 systemctl daemon-reload
