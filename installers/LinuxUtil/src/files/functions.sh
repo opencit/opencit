@@ -4843,3 +4843,37 @@ key_restore() {
 
   echo_success "Keys restored from: $keyBackupFile"
 }
+
+# called by installer to automatically configure the server for localhost integration
+shiro_localhost_integration() {
+  local shiroIniPath="${1}"
+  local iplist;
+  local finalIps;
+  iplist="127.0.0.1"
+  
+  OIFS=$IFS
+  IFS=',' read -ra newIps <<< "$iplist"
+  IFS=$OIFS
+  
+  hostAllowPropertyName=iniHostRealm.allow
+  sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' "${shiroIniPath}"
+  hostAllow=`read_property_from_file $hostAllowPropertyName ${shiroIniPath}`
+  finalIps="$hostAllow"
+  if [ -z "$hostAllow" ]; then
+    iniHostRealmValue=`read_property_from_file iniHostRealm ${shiroIniPath}`
+    update_property_in_file iniHostRealm "${shiroIniPath}" "$iniHostRealmValue\n$hostAllowPropertyName="
+  fi
+  for i in "${newIps[@]}"; do
+    OIFS=$IFS
+    IFS=',' read -ra oldIps <<< "$finalIps"
+    IFS=$OIFS
+    if [[ "${oldIps[*]}" != *"$i"* ]]; then
+      if [ -z "$finalIps" ]; then
+        finalIps="$i"
+      else
+        finalIps+=",$i"
+      fi
+    fi
+  done
+  update_property_in_file "$hostAllowPropertyName" "${shiroIniPath}" "$finalIps";
+}

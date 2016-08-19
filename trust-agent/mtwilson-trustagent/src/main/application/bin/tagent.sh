@@ -42,7 +42,7 @@ trustagent_load_env() {
       env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
       if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
     fi
-  done  
+  done
 }
 
 # load environment variables; these override any existing environment variables.
@@ -440,6 +440,10 @@ case "$1" in
     trousers_detect_and_run
     shift
     trustagent_setup $*
+    ;;
+  localhost-integration)
+    shiro_localhost_integration "/opt/trustagent/configuration/shiro.ini"
+    /opt/trustagent/bin/tagent.sh restart
     ;;
   uninstall)
     trustagent_stop
