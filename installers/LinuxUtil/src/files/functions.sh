@@ -107,31 +107,30 @@ sed_escape() {
 }
 
 # FUNCTION LIBRARY: This function returns either rhel fedora ubuntu suse
-function getFlavour()
-{
-    flavour=""
-    grep -c -i ubuntu /etc/*-release > /dev/null
-    if [ $? -eq 0 ] ; then
-            flavour="ubuntu"
-    fi
-    grep -c -i "red hat" /etc/*-release > /dev/null
-    if [ $? -eq 0 ] ; then
-            flavour="rhel"
-    fi
-    grep -c -i fedora /etc/*-release > /dev/null
-    if [ $? -eq 0 ] ; then
-            flavour="fedora"
-    fi
-    grep -c -i suse /etc/*-release > /dev/null
-    if [ $? -eq 0 ] ; then
-            flavour="suse"
-    fi
-    if [ "$flavour" == "" ] ; then
-            echo "Unsupported linux flavor, Supported versions are ubuntu, rhel, fedora"
-            exit
-    else
-            echo $flavour
-    fi
+function getFlavour() {
+  flavour=""
+  grep -c -i ubuntu /etc/*-release > /dev/null
+  if [ $? -eq 0 ] ; then
+    echo "ubuntu"
+    return 0
+  fi
+  grep -c -i "red hat" /etc/*-release > /dev/null
+  if [ $? -eq 0 ] ; then
+    echo "rhel"
+    return 0
+  fi
+  grep -c -i fedora /etc/*-release > /dev/null
+  if [ $? -eq 0 ] ; then
+    echo "fedora"
+    return 0
+  fi
+  grep -c -i suse /etc/*-release > /dev/null
+  if [ $? -eq 0 ] ; then
+    echo "suse"
+    return 0
+  fi
+  echo "Unsupported linux flavor, Supported versions are ubuntu, rhel, fedora"
+  return 1
 }
 
 function getUserProfileFile()
@@ -841,6 +840,27 @@ zypper_detect() {
   zypper=`which zypper 2>/dev/null`
 }
 
+
+# Check if a package is already installed
+is_package_installed() {
+  local package_name="$1"
+  if yum_detect; then
+    yum list installed $package_name > /dev/null 2>&1
+    result=$?
+  elif aptget_detect; then
+    dpkg-query --show $package_name > /dev/null 2>&1
+    result=$?
+  fi
+  if [ $result -eq 0 ]; then return 0; else return 1; fi
+}
+
+# check if a command is already on path
+is_command_available() {
+  which $* > /dev/null 2>&1
+  local result=$?
+  if [ $result -eq 0 ]; then return 0; else return 1; fi
+}  
+
 trousers_detect() {
   trousers=`which tcsd 2>/dev/null`
 }
@@ -969,6 +989,50 @@ function disable_tcp_timestamps() {
   fi
   
   echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+}
+
+add_package_repository() {
+  local repo_url=${1}
+  local distro_release=${2}
+  local repo_key_path=${3}
+  
+  #Repository URL must be specified
+  if [ -z "${repo_url}" ]; then
+    echo_failure "Add package repository failed. Repository URL not defined."
+    return 1
+  fi
+  
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  
+  if [[ -n "$aptget" ]]; then
+    local sources_list_file="/etc/apt/sources.list"
+    if [ -z "${distro_release}" ]; then
+      echo_failure "Add package repository failed. Distribution release not defined."
+      return 1
+    fi
+    if [ -z "${repo_key_path}" ]; then
+      echo_failure "Add package repository failed. Repository key path not defined."
+      return 1
+    fi
+    local repo_not_already_added=$(cat ${sources_list_file} | grep ${repo_url})
+    if [ -z "${repo_not_already_added}" ]; then
+      echo "deb ${repo_url} ${distro_release} main" >> "${sources_list_file}"
+    fi
+    apt-key add "${repo_key_path}"
+    if [ $? -ne 0 ]; then echo_failure "Failed to add postgresql repository public key to local package manager utility."; return 1; fi
+    echo "Running apt-get update. This may take a while..."
+    apt-get update > /dev/null
+  #elif [[ -n "$yast" ]]; then
+    # code goes here
+  elif [[ -n "$yum" ]]; then
+    yum -y localinstall "${repo_url}"
+  #elif [[ -n "$zypper" ]]; then
+    # code goes here
+  else
+    echo_failure "Package manager not supported."
+    return 2
+  fi
 }
 
 # Ensure the package actually needs to be installed before calling this function.
@@ -1579,7 +1643,7 @@ postgres_version_report() {
 # we need the postgres client to create or patch the database, but
 # the server can be installed anywhere
 postgres_install() {
-  POSTGRES_CLIENT_YUM_PACKAGES=""
+  POSTGRES_CLIENT_YUM_PACKAGES="postgresql93"
   #POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-common"
   POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-9.3"
   postgres_detect >> $INSTALL_LOG_FILE
@@ -1607,45 +1671,50 @@ add_postgresql_install_packages() {
   local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
   local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
   
+  local repo_url=
+  local distro_release=
+  local repo_key_path=
+  
   # detect available package management tools. start with the less likely ones to differentiate.
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
-  #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
+  
+  echo "Checking to see if postgresql package is available for install..."
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
-    echo "Checking to see if postgresql package is available for install..."
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
-    #echo_warning "found packages $pgAddPackRequired"
-    if [ -z "$pgAddPackRequired" ]; then
-      prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
-      if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
-        echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
-        exit -1
-      fi
-      echo_warning "Adding \"$apt_packages\" package(s) to installer repository..."
-      codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
-      echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
-      # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d
-      # so we avoid a download
-      #echo "Postgresql apt-key add status: " `wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -`
-      apt-key add /etc/apt/trusted.gpg.d/ACCC4CF8.asc
-      echo "Running apt-get update; this may take a while..."
-      apt-get update >> $INSTALL_LOG_FILE
-      #echo "Running apt-get upgrade; this may take a while..."
-      #apt-get upgrade -y >> $INSTALL_LOG_FILE
-    fi
+    repo_url="http://apt.postgresql.org/pub/repos/apt/"
+    distro_release=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
+    distro_release="${distro_release}-pgdg"
+    repo_key_path="/etc/apt/trusted.gpg.d/ACCC4CF8.asc"
   #elif [[ -n "$yast" && -n "$yast_packages" ]]; then
     # code goes here
-  #elif [[ -n "$yum" && -n "$yum_packages" ]]; then
-    # code goes here
+  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+    pgAddPackRequired=$(yum list $yum_packages 2>/dev/null | grep -E 'Available Packages|Installed Packages')
+    repo_url="https://download.postgresql.org/pub/repos/yum/9.3/redhat/rhel-7-x86_64/pgdg-redhat93-9.3-2.noarch.rpm"
+    distro_release=
+    repo_key_path=
   #elif [[ -n "$zypper" && -n "$zypper_packages" ]]; then
     # code goes here
+  else
+    echo_failure "Package manager not supported."
+    return 2
   fi
+  #if postgresql package already available, return with no error code; no need to add repo
+  if [ -n "$pgAddPackRequired" ]; then
+    return 0
+  fi
+  prompt_with_default ADD_POSTGRESQL_REPO "Add postgresql repository to local package manager? " "no"
+  if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
+    echo_failure "User declined to add postgresql repository to local package manager."
+    return 1
+  fi
+  add_package_repository "${repo_url}" "${distro_release}" "${repo_key_path}"
 }
 
 # Environment:
 # - POSTGRES_REQUIRED_VERSION
 # installs postgres server 
 postgres_server_install(){
-  POSTGRES_SERVER_YUM_PACKAGES=""
+  POSTGRES_SERVER_YUM_PACKAGES="postgresql93-server pgadmin3_93 postgresql93-contrib"
   POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3 postgresql-contrib-9.3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
@@ -1663,12 +1732,27 @@ postgres_server_install(){
   fi
   
   if [[ -z "$postgres_com" ]]; then
-    echo_failure "Unable to auto-install Postgres server" | tee -a $INSTALL_LOG_FILE
-    echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
+    echo_failure "Unable to auto-install postgresql server" | tee -a $INSTALL_LOG_FILE
+    echo "Postgresql download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
     return 1
   fi
-
+  
+  flavor=$(getFlavour)
+  case $flavor in
+    "rhel")
+      short_version_number=$(echo $POSTGRES_SERVER_VERSION_SHORT | sed 's|\.||')
+      postgresql_setup_binary=$(find / -name postgresql${short_version_number}-setup 2>/dev/null)
+      $postgresql_setup_binary initdb
+      systemctlCommand=`which systemctl 2>/dev/null`
+      if [ -z "$systemctlCommand" ]; then
+        echo_failure "Cannot find systemd binary to enable postgresql startup service"
+        return 1
+      fi
+      "$systemctlCommand" enable "postgresql-${POSTGRES_SERVER_VERSION_SHORT}"
+      "$systemctlCommand" start "postgresql-${POSTGRES_SERVER_VERSION_SHORT}"
+      ;;
+  esac
 }
 
 # Environment:
@@ -1750,6 +1834,12 @@ postgres_server_detect() {
   if [ -n "$postgresql_installed" ]; then
     postgres_com="service postgresql"
   fi
+  
+  local is_systemd=$($postgres_com status 2>/dev/null | grep -E 'Active:')
+  if [ -n "$is_systemd" ]; then
+    postgres_com="service postgresql-${POSTGRES_SERVER_VERSION_SHORT}"
+  fi
+  
   postgres_pghb_conf=$(find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1)
   postgres_conf=$(find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1)
   if [ -z "$postgres_pghb_conf" ]; then postgres_pghb_conf=$(find / -name pg_hba.conf 2>/dev/null | head -n 1); fi
@@ -1796,7 +1886,6 @@ postgres_require() {
   fi
 }
 
-
 # Environment:
 # - POSTGRES_REQUIRED_VERSION\
 # format like this -> psql -h 127.0.0.1 -p 5432 -d mw_as -U root -c "\l"
@@ -1829,7 +1918,6 @@ postgres_test_connection() {
   #rm -f /tmp/intel.postgres.err
 
   return 1
-
 }
 
 # Environment:
@@ -1933,10 +2021,12 @@ if postgres_server_detect ; then
   fi
 
   if [ "$(whoami)" == "root" ]; then
+    #comment out ident line so our connection can be made
+    sed -i 's|\(^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*ident\)|#\1|g' $postgres_pghb_conf
+    
     postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
     if [ -z "$postgres_pghb_conf_has_entry" ]; then
-    
-      if [ -n "$postgres_pghb_conf" ]; then 
+      if [ -n "$postgres_pghb_conf" ]; then
         has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
         if [ -z "$has_host" ]; then
           echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
