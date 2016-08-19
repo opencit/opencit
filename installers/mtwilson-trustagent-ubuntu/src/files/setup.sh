@@ -93,10 +93,10 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # make sure unzip and authbind are installed
 #java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb-core"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl tpm-tools make gcc trousers trousers-devel redhat-lsb-core"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind vim-common openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
 
 # identify tpm version and set the dependent packages based on version of TPM
 TPM_VERSION=1.2
@@ -109,10 +109,10 @@ else
   #./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 
   # not install trousers and its dev packages for tpm 2.0
-  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl make gcc redhat-lsb-core"
-  TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev make gcc binutils"
-  TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel make gcc"
-  TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl make gcc redhat-lsb-core"
+  TRUSTAGENT_APT_PACKAGES="zip unzip authbind vim-common openssl libssl-dev make gcc binutils"
+  TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel make gcc"
+  TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
 fi
 
 # determine if we are installing as root or non-root
