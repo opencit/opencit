@@ -102,6 +102,8 @@ export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 }
 
+mkdir -p ${TRUSTAGENT_LOGS}
+
 # The version script is automatically generated at build time and looks like this:
 #ARTIFACT=mtwilson-trustagent-installer
 #VERSION=3.0
