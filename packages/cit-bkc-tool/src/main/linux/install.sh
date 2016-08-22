@@ -30,7 +30,9 @@ fi
 # INSTALL BKC TOOL
 chmod +x cit-bkc-tool.sh
 \cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
-
+mkdir -p /usr/local/share/cit-bkc-tool
+chmod +x cit-bkc-validation.sh
+\cp cit-bkc-validation.sh /usr/local/share/cit-bkc-tool
 
 #####
 # INSTALL ATTESTATION SERVICE

@@ -154,15 +154,45 @@ cit_bkc_run() {
 #    test data is stored in CIT_BKC_DATA_PATH
 #    if test is complete, variable is set CIT_BKC_TEST_COMPLETE=yes
 cit_bkc_run_next() {
+    local reboot_counter_file=$CIT_BKC_DATA_PATH/.reboot_counter
     #  TODO: run next step based on current state
-    echo "TODO: run next step based on current state; when complete set CIT_BKC_TEST_COMPLETE=yes"
+    if [ -f $reboot_counter_file ]; then
+        CIT_BKC_REBOOT_COUNTER=$(cat $reboot_counter_file)
+    else
+        CIT_BKC_REBOOT_COUNTER=0
+    fi
+    /usr/local/share/cit-bkc-tool/cit-bkc-validation.sh $CIT_BKC_REBOOT_COUNTER
+    local result=$?
+    if [ $result -eq 0 ]; then
+      CIT_BKC_TEST_COMPLETE=yes
+    elif [ $result -eq 1 ]; then
+      CIT_BKC_TEST_COMPLETE=no
+      CIT_BKC_TEST_ERROR=yes
+    elif [ $result -eq 255 ]; then
+      CIT_BKC_TEST_COMPLETE=no
+      # a reboot is needed
+      ((CIT_BKC_REBOOT_COUNTER+=1))
+      echo "$CIT_BKC_REBOOT_COUNTER" > $reboot_counter_file
+      echo "Rebooting in 60 seconds... kill $$ to cancel";
+      sleep 10
+      shutdown --reboot now
+      exit 0
+    fi
 }
 
 # precondition:
 #    self-test has already completed by cit_bkc_run_next and CIT_BKC_TEST_COMPLETE=yes
 cit_bkc_run_next_report() {
-    # TODO:  generate the report based on test results
-    echo "TODO:  generate the report based on test results"
+    mkdir -p $CIT_BKC_REPORTS_PATH
+    local current_date=$(date +%Y%m%d.%H%M%S)
+    local report_file_name="$CIT_BKC_REPORTS_PATH/report.$current_date"
+    local report_inputs=$(ls -1 $CIT_BKC_DATA_PATH/*.report 2>/dev/null)
+    if [ -n "$report_inputs" ]; then
+      cat $CIT_BKC_DATA_PATH/*.report > $report_file_name
+    else
+      echo "No data available to report" >&2
+      return 1
+    fi
 }
 
 cit_bkc_report() {
