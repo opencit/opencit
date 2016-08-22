@@ -124,7 +124,7 @@ if [ "$(whoami)" == "root" ]; then
     # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $TRUSTAGENT_USERNAME"
   fi
   # this section adds tagent sudoers file so that user can execute txt-stat command
-  txtStat=$(which txt-stat)
+  txtStat=$(which txt-stat 2>/dev/null)
   if [ -z "$txtStat" ]; then
     echo_failure "txt-stat binary does not exist"
     exit 1
