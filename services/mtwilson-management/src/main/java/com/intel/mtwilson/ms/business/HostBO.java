@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
@@ -65,12 +65,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.EntityManager;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.util.StringUtils;
 
 /**
  *
@@ -84,6 +87,7 @@ public class HostBO {
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18";
+    private static String OPENSOURCE_DA_PCRs = "17,18";
     private static String CITRIX_PCRs = "18"; //"17,18";
     private static String WINDOWS_BIOS_PCRs = "0";
     private static String WINDOWS_PCRs = "13,14";
@@ -652,7 +656,6 @@ public class HostBO {
                 } else {
                     hostConfigObj.setBiosPCRs(BIOS_PCRs);
                 }
-                hostConfigObj.setVmmPCRs(vmmPCRs);
             }
 
             configStatus = configureWhiteListFromCustomData(hostConfigObj);
@@ -807,6 +810,7 @@ public class HostBO {
                         + gkvHost.BIOS_Version + ":" + gkvHost.VMM_OSName + ":" + gkvHost.VMM_OSVersion
                         + ":" + gkvHost.VMM_Version + ":" + gkvHost.Processor_Info);
 
+                Set<String> reqdManifestSet = new TreeSet<>();
                 String reqdManifestList = "";
 
 //                TblHostsJpaController hostsJpaController =  My.jpa().mwHosts();//new TblHostsJpaController(getASEntityManagerFactory());
@@ -821,15 +825,21 @@ public class HostBO {
                 calibrateMLENames(hostConfigObj, false);
                 if (hostConfigObj.addBiosWhiteList()) {
                     reqdManifestList = hostConfigObj.getBiosPCRs();
+                    String[] pcrs = StringUtils.split(hostConfigObj.getBiosPCRs(), ',');
+                    reqdManifestSet.addAll(Arrays.asList(pcrs));
                 }
                 if (hostConfigObj.addVmmWhiteList()) {
+                    String[] pcrs = StringUtils.split(hostConfigObj.getVmmPCRs());
+                    reqdManifestSet.addAll(Arrays.asList(pcrs));
                     if (reqdManifestList.isEmpty()) {
                         reqdManifestList = hostConfigObj.getVmmPCRs();
                     } else {
                         reqdManifestList = reqdManifestList + "," + hostConfigObj.getVmmPCRs();
                     }
                 }
-
+                reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
+                
+                
                 log.debug("TIMETAKEN: for calibrating MLE names: {} ", (System.currentTimeMillis() - configWLStart));
 
                 // Now we need to spawn 2 threads. One for retriving the attestation report from the host and another one for checking whether MLE with

@@ -7,6 +7,7 @@ package com.intel.mtwilson.policy.impl.vendor;
 
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
+import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.policy.impl.TrustMarker;
@@ -39,10 +40,24 @@ public class IntelTpmDaHostTrustPolicyFactory extends IntelHostTrustPolicyFactor
         
         if(host.getBiosMleId().getRequiredManifestList().contains("17")) {
             // 17 is a host specific PCR TPM DA Mode
-            Set<Rule> pcrEventRules = reader.loadPcrEventLogIncludesRuleForBios(bios, host);
+            Set<Rule> pcrEventRules = reader.loadPcrEventLogIncludesRuleForBiosDaMode(bios, host);
             rules.addAll(pcrEventRules);
         }
         return rules;
     }
     
+    @Override
+    public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
+        HashSet<Rule> rules = new HashSet<>();
+        
+        Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+        rules.addAll(pcrConstantRules);
+        
+        if(host.getVmmMleId().getRequiredManifestList().contains("17")) {
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmmDaMode(vmm,host);
+            rules.addAll(pcrEventLogRules);
+        }
+        
+        return rules;
+    }
 }
