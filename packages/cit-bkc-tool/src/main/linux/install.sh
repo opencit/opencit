@@ -4,6 +4,8 @@
 # This script is responsible ONLY for ensuring all components are installed locally.
 # It DOES NOT run the CIT BKC tool.
 
+# NOTE:  \cp escapes alias, needed because some systems alias cp to always prompt before override
+
 # Outline:
 # 1. Install Attestation Service 
 # 2. Install Trust Agent
@@ -26,6 +28,7 @@ fi
 
 #####
 # INSTALL BKC TOOL
+chmod +x cit-bkc-tool.sh
 \cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
 
 
@@ -34,10 +37,10 @@ fi
 export MTWILSON_LOG_LEVEL=DEBUG
 
 # if Attestation Service is already installed, stop it while we upgrade/reinstall
-if which mtwilson; then
+if which mtwilson >/dev/null 2>&1; then
   mtwilson stop
 fi
-if which cit; then
+if which cit >/dev/null 2>&1; then
   cit stop
 fi
 
@@ -75,7 +78,7 @@ fi
 export TAGENT_LOG_LEVEL=DEBUG
 
 # if Trust Agent is already installed, stop it while we upgrade/reinstall
-if which tagent; then
+if which tagent >/dev/null 2>&1; then
   tagent stop
 fi
 
