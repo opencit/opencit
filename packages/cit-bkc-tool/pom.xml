@@ -58,7 +58,14 @@
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
-                    <version>2.1-SNAPSHOT</version>
+                    <version>${project.version}</version>
+                    <type>sh</type>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.version}</version>
                     <type>sh</type>
                 </dependency>
 
@@ -98,9 +105,16 @@
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
-                                            <version>2.1-SNAPSHOT</version>
+                                            <version>${project.version}</version>
                                             <type>sh</type>
                                             <destFileName>monitor.sh</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <destFileName>functions.sh</destFileName>
                                         </artifactItem>
                                     </artifactItems>
                                     <outputDirectory>${makeself.basic}</outputDirectory>

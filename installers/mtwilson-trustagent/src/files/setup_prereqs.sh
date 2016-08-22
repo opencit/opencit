@@ -58,7 +58,7 @@ add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest
 # 2. Install redhat-lsb-core and other redhat-specific packages
 
 if yum_detect; then
-  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools > /dev/null 2>&1
+  yum -y install redhat-lsb redhat-lsb-core libvirt net-tools grub2-efi-modules > /dev/null 2>&1
 fi
 
 # 3. Install tboot
@@ -202,6 +202,14 @@ configure_grub() {
     echo "already moved tboot menuentry to first position in /etc/grub.d"
   else
     echo "cannot find tboot menuentry in /etc/grub.d"
+  fi
+
+  # copy grub2-efi-modules into the modules directory
+  if [ -f /usr/lib/grub/x86_64-efi/relocator.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
+    cp /usr/lib/grub/x86_64-efi/relocator.mod /boot/efi/EFI/redhat/x86_64-efi/
+  fi
+  if [ -f /usr/lib/grub/x86_64-efi/multiboot2.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
+    cp /usr/lib/grub/x86_64-efi/multiboot2.mod /boot/efi/EFI/redhat/x86_64-efi/
   fi
 
   grub2-mkconfig -o $GRUB_FILE

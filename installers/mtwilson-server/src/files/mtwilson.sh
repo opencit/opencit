@@ -521,7 +521,9 @@ case "$1" in
         java_env_report
         ;;
   localhost-integration)
-        mtwilson_localhost_integration $@
+        #mtwilson_localhost_integration $@
+        shiro_localhost_integration "/opt/mtwilson/configuration/shiro.ini"
+        /opt/mtwilson/bin/mtwilson.sh restart
         ;;
   #api)
   #      shift

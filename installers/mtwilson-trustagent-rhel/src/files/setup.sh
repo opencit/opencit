@@ -139,7 +139,7 @@ if [ "$(whoami)" == "root" ]; then
     # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $TRUSTAGENT_USERNAME"
   fi
   # this section adds tagent sudoers file so that user can execute txt-stat command
-  txtStat=$(which txt-stat)
+  txtStat=$(which txt-stat 2>/dev/null)
   if [ -z "$txtStat" ]; then
     echo_failure "txt-stat binary does not exist"
     exit 1
@@ -852,7 +852,11 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
     chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_CONFIGURATION/.trustagent_password
     tagent generate-password > $TRUSTAGENT_CONFIGURATION/.trustagent_password
   fi
-
+  
+  if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
+    /opt/trustagent/bin/tagent.sh localhost-integration
+  fi
+  
   tagent import-config --in="${TRUSTAGENT_CONFIGURATION}/trustagent.properties" --out="${TRUSTAGENT_CONFIGURATION}/trustagent.properties"
   #tagent config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,trustagent,jersey-media-multipart}" >/dev/null
   #tagent config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null

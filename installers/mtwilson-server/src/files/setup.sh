@@ -95,6 +95,20 @@ else
 fi
 
 
+cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
+rm -f $MTWILSON_HOME/bin/mtwilson
+ln -s $MTWILSON_HOME/bin/mtwilson.sh $MTWILSON_HOME/bin/mtwilson
+chmod +x $MTWILSON_HOME/bin/*
+
+#If user is root then create mtwilson symlink to /usr/local/bin otherwise export path '$MTWILSON_HOME/bin'
+if [ "$(whoami)" == "root" ]; then
+ if [ ! -d /usr/local/bin ]; then
+   mkdir -p /usr/local/bin
+ fi
+ #Remove symbolic link if already exist
+ rm -f /usr/local/bin/mtwilson
+ ln -s $MTWILSON_HOME/bin/mtwilson /usr/local/bin/mtwilson
+fi
 
 #If user is non root make sure all prereq directories are created and owned by nonroot user
 if [ "$(whoami)" != "root" ]; then
@@ -389,15 +403,14 @@ case $flavor in
     addRepoRequired=$(yum list xmlstarlet 2>/dev/null | grep -E 'Available Packages|Installed Packages')
     repo_url="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
     #if xmlstarlet package already available, break; no need to add repo
-    if [ -n "$addRepoRequired" ]; then
-      break
+    if [ -z "$addRepoRequired" ]; then
+      prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
+      if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
+        echo_failure "User declined to add EPEL Release repository to local package manager."
+        exit -1
+      fi
+      add_package_repository "${repo_url}"
     fi
-    prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
-    if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
-      echo_failure "User declined to add EPEL Release repository to local package manager."
-      exit -1
-    fi
-    add_package_repository "${repo_url}"
     ;;
 esac
   
