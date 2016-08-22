@@ -12,6 +12,8 @@
 # Postconditions:
 # * All messages logged to stdout/stderr; caller redirect to logfile as needed
 
+# NOTE:  \cp escapes alias, needed because some systems alias cp to always prompt before override
+
 # Outline:
 # 1. Add epel-release-latest-7.noarch repository
 # 2. Install redhat-lsb-core and other redhat-specific packages
@@ -205,11 +207,14 @@ configure_grub() {
   fi
 
   # copy grub2-efi-modules into the modules directory
+  if [ -d /boot/efi/EFI/redhat ]; then
+    mkdir -p /boot/efi/EFI/redhat/x86_64-efi
+  fi
   if [ -f /usr/lib/grub/x86_64-efi/relocator.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
-    cp /usr/lib/grub/x86_64-efi/relocator.mod /boot/efi/EFI/redhat/x86_64-efi/
+    \cp /usr/lib/grub/x86_64-efi/relocator.mod /boot/efi/EFI/redhat/x86_64-efi/
   fi
   if [ -f /usr/lib/grub/x86_64-efi/multiboot2.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
-    cp /usr/lib/grub/x86_64-efi/multiboot2.mod /boot/efi/EFI/redhat/x86_64-efi/
+    \cp /usr/lib/grub/x86_64-efi/multiboot2.mod /boot/efi/EFI/redhat/x86_64-efi/
   fi
 
   grub2-mkconfig -o $GRUB_FILE
@@ -285,8 +290,9 @@ migrate_to_local() {
   fi
   # so if we are not already running from trustagent home, copy everything to it
   if [ "$script_path" != "$TRUSTAGENT_HOME/installer" ]; then
+    rm -f $TRUSTAGENT_HOME/installer
     mkdir -p $TRUSTAGENT_HOME/installer
-    rsync -trz --delete $script_path/ $TRUSTAGENT_HOME/installer/
+    \cp -r $script_path/* $TRUSTAGENT_HOME/installer/
   fi
 }
 
@@ -396,7 +402,7 @@ next_step() {
   if [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then
     echo "continuing CIT Agent installation after reboot"
     (cd $script_path && export TRUSTAGENT_SETUP_PREREQS=no && ./setup.sh)
-  else
+  #else
     # do nothing; either setup.sh called us and will continue when we exit,
     # or user called us directly from shell and expects us to exit when done.
   fi

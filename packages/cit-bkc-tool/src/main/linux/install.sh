@@ -4,6 +4,8 @@
 # This script is responsible ONLY for ensuring all components are installed locally.
 # It DOES NOT run the CIT BKC tool.
 
+# NOTE:  \cp escapes alias, needed because some systems alias cp to always prompt before override
+
 # Outline:
 # 1. Install Attestation Service 
 # 2. Install Trust Agent
@@ -27,7 +29,7 @@ fi
 #####
 # INSTALL BKC TOOL
 chmod +x cit-bkc-tool.sh
-cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
+\cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
 
 
 #####
@@ -49,7 +51,7 @@ preconfigure_mtwilson() {
     echo "using pre-configured mtwilson.env"
     return
   fi
-  cp mtwilson.env $HOME/mtwilson.env
+  \cp mtwilson.env $HOME/mtwilson.env
   local admin_passwd=$(generate_password 16)
   update_property_in_file MTWILSON_ADMIN_PASSWORD $HOME/mtwilson.env "$admin_passwd"
   local database_passwd=$(generate_password 16)
@@ -67,6 +69,7 @@ if [ -n "$MTWILSON_BIN" ]; then
   preconfigure_mtwilson
   chmod +x $MTWILSON_BIN
   ./$MTWILSON_BIN
+  if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Attestation Service"; exit 1; fi
 fi
 
 
@@ -86,7 +89,7 @@ preconfigure_trustagent() {
     echo "using pre-configured trustagent.env"
     return
   fi
-  cp trustagent.env $HOME/trustagent.env
+  \cp trustagent.env $HOME/trustagent.env
   local tls_sha1=$(/usr/bin/sha1sum /opt/mtwilson/configuration/ssl.crt | /usr/bin/awk '{print $1}')
   local tls_sha256=$(/usr/bin/sha256sum /opt/mtwilson/configuration/ssl.crt | /usr/bin/awk '{print $1}')
   update_property_in_file MTWILSON_TLS_CERT_SHA1 $HOME/trustagent.env "$tls_sha1"
@@ -99,4 +102,5 @@ if [ -n "$TAGENT_BIN" ]; then
   preconfigure_trustagent
   chmod +x $TAGENT_BIN
   ./$TAGENT_BIN
+  if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Trust Agent"; exit 1; fi
 fi

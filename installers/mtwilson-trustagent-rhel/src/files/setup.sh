@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Postconditions:
+# * exit with error code 1 only if there was a fatal error:
+#   functions.sh not found (must be adjacent to this file in the package)
+#   
+
 # TRUSTAGENT install script
 # Outline:
 # 1. load application environment variables if already defined from env directory
@@ -102,6 +107,8 @@ export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 }
 
+mkdir -p ${TRUSTAGENT_LOGS}
+
 # identify tpm version
 # postcondition:
 #   variable TPM_VERSION is set to 1.2 or 2.0
@@ -126,7 +133,7 @@ directory_layout
 if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   # set TRUSTAGENT_REBOOT=no (in trustagent.env) if you want to ensure it doesn't reboot
   # set TRUSTAGENT_SETUP_PREREQS=no (in trustagent.env) if you want to skip this step 
-  source setup_prereqs.sh >> $INSTALL_LOG_FILE 2>&1
+  source setup_prereqs.sh
 fi
 
 # determine if we are installing as root or non-root
@@ -138,14 +145,6 @@ if [ "$(whoami)" == "root" ]; then
     usermod --lock $TRUSTAGENT_USERNAME
     # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $TRUSTAGENT_USERNAME"
   fi
-  # this section adds tagent sudoers file so that user can execute txt-stat command
-  txtStat=$(which txt-stat 2>/dev/null)
-  if [ -z "$txtStat" ]; then
-    echo_failure "txt-stat binary does not exist"
-    exit 1
-  fi
-  echo -e "Cmnd_Alias PACKAGE_MANAGER = ${txtStat}\nDefaults:${TRUSTAGENT_USERNAME} "'!'"requiretty\n${TRUSTAGENT_USERNAME} ALL=(root) NOPASSWD: PACKAGE_MANAGER" > "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
-  chmod 440 "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
 else
   # already running as trustagent user
   TRUSTAGENT_USERNAME=$(whoami)
@@ -422,62 +421,75 @@ if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d
   chown $TRUSTAGENT_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
 fi
 
-### symlinks
+if [ "$(whoami)" == "root" ]; then
+  # this section adds tagent sudoers file so that user can execute txt-stat command
+  txtStat=$(which txt-stat 2>/dev/null)
+  if [ -z "$txtStat" ]; then
+    echo_failure "cannot find command: txt-stat (from tboot)"
+    exit 1
+  else
+    echo -e "Cmnd_Alias PACKAGE_MANAGER = ${txtStat}\nDefaults:${TRUSTAGENT_USERNAME} "'!'"requiretty\n${TRUSTAGENT_USERNAME} ALL=(root) NOPASSWD: PACKAGE_MANAGER" > "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
+    chmod 440 "/etc/sudoers.d/${TRUSTAGENT_USERNAME}"
+  fi
+fi
+
+
 if [ "$TPM_VERSION" == "1.2" ]; then
-    #tpm_nvinfo
-    tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
-    if [ -z "$tpmnvinfo" ]; then
-      echo_failure "Cannot find tpm_nvinfo"
-      echo_failure "tpm-tools must be installed"
-      exit -1
-    fi
-    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvinfo" ]]; then
-      ln -s "$tpmnvinfo" "$TRUSTAGENT_BIN"
-    fi
+### symlinks
+#tpm_nvinfo
+tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
+if [ -z "$tpmnvinfo" ]; then
+  echo_failure "cannot find command: tpm_nvinfo (from tpm-tools)"
+  exit 1
+else
+  if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvinfo" ]]; then
+    ln -s "$tpmnvinfo" "$TRUSTAGENT_BIN"
+  fi
+fi
 
-    #tpm_nvrelease
-    tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
-    if [ -z "$tpmnvrelease" ]; then
-      echo_failure "Cannot find tpm_nvrelease"
-      echo_failure "tpm-tools must be installed"
-      exit -1
-    fi
-    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvrelease" ]]; then
-      ln -s "$tpmnvrelease" "$TRUSTAGENT_BIN"
-    fi
+#tpm_nvrelease
+tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
+if [ -z "$tpmnvrelease" ]; then
+  echo_failure "cannot find command: tpm_nvrelease (from tpm-tools)"
+  exit 1
+else
+  if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvrelease" ]]; then
+    ln -s "$tpmnvrelease" "$TRUSTAGENT_BIN"
+  fi
+fi
 
-    #tpm_nvwrite
-    tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
-    if [ -z "$tpmnvwrite" ]; then
-      echo_failure "Cannot find tpm_nvwrite"
-      echo_failure "tpm-tools must be installed"
-      exit -1
-    fi
-    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvwrite" ]]; then
-      ln -s "$tpmnvwrite" "$TRUSTAGENT_BIN"
-    fi
+#tpm_nvwrite
+tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
+if [ -z "$tpmnvwrite" ]; then
+  echo_failure "cannot find command: tpm_nvwrite (from tpm-tools)"
+  exit 1
+else
+  if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvwrite" ]]; then
+    ln -s "$tpmnvwrite" "$TRUSTAGENT_BIN"
+  fi
+fi
 
-    #tpm_nvread
-    tpmnvread=`which tpm_nvread 2>/dev/null`
-    if [ -z "$tpmnvread" ]; then
-      echo_failure "Cannot find tpm_nvread"
-      echo_failure "tpm-tools must be installed"
-      exit -1
-    fi
-    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvread" ]]; then
-      ln -s "$tpmnvread" "$TRUSTAGENT_BIN"
-    fi
+#tpm_nvread
+tpmnvread=`which tpm_nvread 2>/dev/null`
+if [ -z "$tpmnvread" ]; then
+  echo_failure "cannot find command: tpm_nvread (from tpm-tools)"
+  exit 1
+else
+  if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvread" ]]; then
+    ln -s "$tpmnvread" "$TRUSTAGENT_BIN"
+  fi
+fi
 
-    #tpm_nvdefine
-    tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
-    if [ -z "$tpmnvdefine" ]; then
-      echo_failure "Cannot find tpm_nvdefine"
-      echo_failure "tpm-tools must be installed"
-      exit -1
-    fi
-    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvdefine" ]]; then
-      ln -s "$tpmnvdefine" "$TRUSTAGENT_BIN"
-    fi
+#tpm_nvdefine
+tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
+if [ -z "$tpmnvdefine" ]; then
+  echo_failure "cannot find command: tpm_nvdefine (from tpm-tools)"
+  exit 1
+else
+  if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvdefine" ]]; then
+    ln -s "$tpmnvdefine" "$TRUSTAGENT_BIN"
+  fi
+fi
 
     #tpm_bindaeskey
     if [ -h "/usr/local/bin/tpm_bindaeskey" ]; then
@@ -504,25 +516,28 @@ if [ "$TPM_VERSION" == "1.2" ]; then
     ln -s "$TRUSTAGENT_BIN/tpm_signdata" /usr/local/bin/tpm_signdata
 
 fi
+# end if [ "$TPM_VERSION" == "1.2" ]
+
 
 hex2bin_install() {
-  return_dir=`pwd`
-  cd hex2bin
-  make && cp hex2bin $TRUSTAGENT_BIN
-  chmod +x $TRUSTAGENT_BIN/hex2bin
-  cd $return_dir
+  # build hex2bin in sub-shell so we change of directory is temporary
+  (
+    cd hex2bin
+    make && cp hex2bin $TRUSTAGENT_BIN
+    chmod +x $TRUSTAGENT_BIN/hex2bin
+  )
 }
 
 hex2bin_install
 
 hex2bin=`which hex2bin 2>/dev/null`
 if [ -z "$hex2bin" ]; then
-  echo_failure "Cannot find hex2bin"
-  echo_failure "hex2bin must be installed"
-  exit -1
-fi
-if [[ ! -h "$TRUSTAGENT_BIN/hex2bin" ]] && [[ ! -f "$TRUSTAGENT_BIN/hex2bin" ]]; then
-  ln -s "$hex2bin" "$TRUSTAGENT_BIN"
+  echo_failure "cannot find command: hex2bin"
+  exit 1
+else
+  if [[ ! -h "$TRUSTAGENT_BIN/hex2bin" ]] && [[ ! -f "$TRUSTAGENT_BIN/hex2bin" ]]; then
+    ln -s "$hex2bin" "$TRUSTAGENT_BIN"
+  fi
 fi
 
 mkdir -p "$TRUSTAGENT_HOME"/share/scripts
@@ -856,7 +871,7 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
   if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
     /opt/trustagent/bin/tagent.sh localhost-integration
   fi
-  
+
   tagent import-config --in="${TRUSTAGENT_CONFIGURATION}/trustagent.properties" --out="${TRUSTAGENT_CONFIGURATION}/trustagent.properties"
   #tagent config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,trustagent,jersey-media-multipart}" >/dev/null
   #tagent config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
