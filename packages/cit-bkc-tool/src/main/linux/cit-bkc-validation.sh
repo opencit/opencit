@@ -1,117 +1,159 @@
 #!/bin/bash
+
+# Every test MUST:
+# * set variable "bkc_test_name" to the test name (for EXAMPLE "tpm_support")
+#   this affects where output is written
+# * return 0 on success
+# * return 1 on error
+# * return 255 on reboot required (for 2-part tests)
+
+# Exit codes:
+# 0 on success
+# 1 on error while running any test
+# 255 on reboot required from any test
+
 CIT_BKC_DATA_PATH=${CIT_BKC_DATA_PATH:-/usr/local/var/cit-bkc-tool/data}
-CIT_BKC_REPORT_PATH=${CIT_BKC_DATA_PATH:-/usr/local/var/cit-bkc-tool/reports}
 LOG_FILE=$CIT_BKC_DATA_PATH/validation.log
 mkdir -p $CIT_BKC_DATA_PATH
-mkdir -p $CIT_BKC_REPORT_PATH
+
+CIT_BKC_VALIDATION_REBOOT_REQUIRED=no
 
 ASSET_TAG_NVRAM_INDEX=0x40000011
 
-echo `date +%Y-%m-%d:%H:%M:%S` >> $LOG_FILE;
+  # if the user has passed in the reboot count, use it. Or else set it to 1 as default.
+  if [ -z "$1" ]; then
+    reboot_count="1"
+  else
+    reboot_count="$1"
+  fi
+
+echo "### Started CIT BKC validation ($reboot_count)" >> $LOG_FILE
+
 
 write_to_report_file() {
+  local output_message="$*"
   current_date=`date +%Y-%m-%d:%H:%M:%S`
   echo -e $output_message
-  echo -e $output_message >> $LOG_FILE;
-  echo -e $output_message > $CIT_BKC_REPORT_PATH/$report_file_name
-  output_message=""
-  report_file_name=""
+  echo -e "# $current_date" >> $LOG_FILE
+  echo -e $output_message >> $LOG_FILE
+  echo -e $output_message > $CIT_BKC_DATA_PATH/${bkc_test_name}.report
+}
+
+# records a successful test result from $bkc_test_name and given message
+result_ok() {
+  write_to_report_file "OK - $*"
+  bkc_test_name=""
+  return 0
+}
+
+# records an error result from $bkc_test_name and given message
+result_error() {
+  write_to_report_file "ERROR - $*"
+  bkc_test_name=""
+  return 1
+}
+
+# records a reboot-required result from $bkc_test_name and given message
+result_reboot() {
+  write_to_report_file "REBOOT - $*"
+  bkc_test_name=""
+  CIT_BKC_VALIDATION_REBOOT_REQUIRED=yes
+  return 255
 }
 
 # Determine the TPM Hardware support
 test_tpm_support() {
-  report_file_name="tpm_support.report"
-  file=$(ls --color=none /dev/tpm0)
-  if [ "$file" != "/dev/tpm0" ]; then
-    output_message="TPM is not supported."
-    write_to_report_file
-    return 1
+  bkc_test_name="tpm_support"
+  if [ -e "/dev/tpm0" ]; then
+    result_ok "TPM is supported."
+    return $?
+  else
+    result_error "TPM is not supported."
+    return $?
   fi
-  output_message="TPM is supported."  
-  write_to_report_file
 }
 
 test_tpm_ownership() {
-  report_file_name="tpm_ownership.report"
-  if [[ "$(cat /sys/class/misc/tpm0/device/owned)" != 1 ]]; then
-    output_message="TPM is not owned."
-    write_to_report_file
-    return 1
+  bkc_test_name="tpm_ownership"
+  if [[ "$(cat /sys/class/misc/tpm0/device/owned)" == 1 ]]; then
+    result_ok "TPM is owned."
+    return $?
+  else
+    result_error "TPM is not owned."
+    return $?
   fi
-  output_message="TPM is owned."
-  write_to_report_file
 }
 
 # Determine the TXT Hardware support
 test_txt_support() {
-  report_file_name="txt_support.report"
+  bkc_test_name="txt_support"
   TXT=$(cat /proc/cpuinfo | grep -o "smx" | head -1)
-  if [ "$TXT" != "smx" ]; then
-    output_message="TXT is not supported"
-    write_to_report_file
-    return 1    
+  if [ "$TXT" == "smx" ]; then
+    result_ok "TXT is supported."
+    return $?
+  else
+    result_error "TXT is not supported"
+    return $?
   fi
-  output_message="TXT is supported."
-  write_to_report_file
 }
 
 # Determine is AIK is present
 test_aik_present() {
-  report_file_name="aik_present.report"
+  bkc_test_name="aik_present"
   AIKCertFile="/opt/trustagent/configuration/aik.pem"
-  if [ ! -f $AIKCertFile ]; then
-    output_message="AIK certificate ($AIKCertFile) does not exist."
-    write_to_report_file
-    return 1
+  if [ -f $AIKCertFile ]; then
+    result_ok "AIK certificate exists."
+    return $?
+  else
+    result_error "AIK certificate ($AIKCertFile) does not exist."
+    return $?
   fi
-  output_message="AIK certificate exists."
-  write_to_report_file
 }
 
 # Determine if binding key is present
 test_bindingkey_present() {
-  report_file_name="bindingkey_present.report"
+  bkc_test_name="bindingkey_present"
   BindingKeyFile="/opt/trustagent/configuration/bindingkey.pem"
-  if [ ! -f $BindingKeyFile ]; then
-    output_message="Binding key certificate ($BindingKeyFile) does not exist."
-    write_to_report_file
-    return 1
+  if [ -f $BindingKeyFile ]; then
+    result_ok "Binding key certificate exists."
+    return $?
+  else
+    result_error "Binding key certificate ($BindingKeyFile) does not exist."
+    return $?
   fi
-  output_message="Binding key certificate exists."
-  write_to_report_file
 }
 
 # Determine if signing key is present
 test_signingkey_present() {
-  report_file_name="signingkey_present.report"
+  bkc_test_name="signingkey_present"
   SigningKeyFile="/opt/trustagent/configuration/signingkey.pem"
-  if [ ! -f $SigningKeyFile ]; then
-    output_message="Signing key certificate ($SigningKeyFile) does not exist."
-    write_to_report_file
-    return 1
+  if [ -f $SigningKeyFile ]; then
+    result_ok "Signing key certificate exists."
+    return $?
+  else
+    result_error "Signing key certificate ($SigningKeyFile) does not exist."
+    return $?
   fi
-  output_message="Signing key certificate exists."  
-  write_to_report_file
 }
 
 # Determine if NV index is defined for asset tag configuration
 test_nvindex_defined() {
-  report_file_name="nvindex_defined.report"
+  bkc_test_name="nvindex_defined"
   indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
-  if [ ! -n "$indexDefined" ]; then
-    output_message="NV index not defined. Asset tags cannot be configured."
-    write_to_report_file
-    return 1
+  if [ -n "$indexDefined" ]; then
+    result_ok "NV index defined."
+    return $?
+  else 
+    result_error "NV index not defined. Asset tags cannot be configured."
+    return $?
   fi
-  output_message="NV index defined."
-  write_to_report_file
 }
 
 # Creates the whitelist and registers the same
 test_create_whitelist() {
   whitelist_data_file="create_whitelist.data"
   whitelist_http_status_file="create_whitelist_http.status"
-  report_file_name="create_whitelist.report"
+  bkc_test_name="create_whitelist"
 
   #-s option removes the progress meter
   curl --noproxy 127.0.0.1 -k -vs \
@@ -123,13 +165,13 @@ test_create_whitelist() {
     1>$CIT_BKC_DATA_PATH/$whitelist_data_file 2>$CIT_BKC_DATA_PATH/$whitelist_http_status_file
 
   result=$(cat $CIT_BKC_DATA_PATH/$whitelist_http_status_file | grep "200 OK" )
-  if [ -z "$result" ]; then
-    output_message="Error during whitelisting & registration."
-    write_to_report_file
-    return 1
+  if [ -n "$result" ]; then
+    result_ok "Create whitelist with host registration successful."
+    return $?
+  else
+    result_error "Error during whitelisting & registration."
+    return $?
   fi
-  output_message="Create whitelist with host registration successful."
-  write_to_report_file
 }
 
 # Creates the asset tag certificate by retrieving the hardware UUID and then pushes the certificate to the target host.
@@ -138,7 +180,7 @@ test_write_assettag() {
   assettag_http_status_file="write_assettag_http.status"
   certificate_date_file="certificate.data"
   certificate_http_status_file="certificate_http.status"
-  report_file_name="write_assettag.report"
+  bkc_test_name="write_assettag"
   
   curl --noproxy 127.0.0.1 -k -vs \
     https://127.0.0.1:8443/mtwilson/v2/hosts?nameEqualTo=127.0.0.1 \
@@ -146,8 +188,8 @@ test_write_assettag() {
   
   result=$(cat $CIT_BKC_DATA_PATH/$assettag_http_status_file | grep "200 OK")
   if [ -z "$result" ]; then
-    echo "Error during retrieval of hardware UUID."
-    return 1
+    result_error "Error during retrieval of hardware UUID."
+    return $?
   fi
   echo "Successfully called into CIT to retrieve the hardware UUID of the host."
   
@@ -170,10 +212,10 @@ test_write_assettag() {
 
   result=$(cat $CIT_BKC_DATA_PATH/$certificate_http_status_file | grep "200 OK" )
   if [ -z "$result" ]; then
-    echo "Error during creation the asset tag certificate for host with hardware UUID $hostHardwareUuid ."
-    return 1
+    result_error "Error during creation the asset tag certificate for host with hardware UUID $hostHardwareUuid."
+    return $?
   fi
-  echo "Successfully created the asset tag certificate for host with hardware UUID $hostHardwareUuid ."
+  echo "Successfully created the asset tag certificate for host with hardware UUID $hostHardwareUuid."
 
   certificateId=$(xmlstarlet sel -t -v "(/certificate/id)" $CIT_BKC_DATA_PATH/$certificate_date_file)
   #certificateId=$(cat $CIT_BKC_DATA_PATH/$certificate_date_file | grep "<id>" | sed -n 's/.*<id> *\([^<]*\).*/\1/p')
@@ -191,12 +233,11 @@ test_write_assettag() {
   
   result=$(cat $CIT_BKC_DATA_PATH/$assettag_http_status_file | grep "200 OK" )
   if [ -z "$result" ]; then
-    output_message="Error during pushing the asset tag certificate for host."
-    write_to_report_file
-    return 1
+    result_error "Error during pushing the asset tag certificate for host."
+    return $?
   fi
-  output_message="Successfully pushed the asset tag certificate to host."
-  write_to_report_file
+  result_reboot "Successfully pushed the asset tag certificate to host. Reboot required to complete the test."
+  return $?
 }
 
 # Gets the attestation status of the host. Reboot counter would be appended to the file name to compare the
@@ -204,7 +245,7 @@ test_write_assettag() {
 test_host_attestation_status() {
   host_attestation_data_file="host_attestation_$reboot_count.data"
   host_attestation_http_status_file="host_attestation_http_$reboot_count.status"
-  report_file_name="host_attestation_$reboot_count.report"
+  bkc_test_name="host_attestation_$reboot_count"
   
   curl --noproxy 127.0.0.1 -k -vs \
     -H "Content-Type: application/json" \
@@ -216,12 +257,10 @@ test_host_attestation_status() {
 
   result=$(cat $CIT_BKC_DATA_PATH/$assettag_http_status_file | grep "200 OK" )
   if [ -z "$result" ]; then
-    output_message="Error retrieving the attestation information for the host."
-    write_to_report_file
-    return 1
+    result_error "Error retrieving the attestation information for the host."
+    return $?
   fi
-  output_message="Successfully retrieved the attestation information for the host."
-  write_to_report_file
+  echo "Successfully retrieved the attestation information for the host."
   
   #Extract the results of the attestation and write it to the report file. Since there will be new lines and white spaces
   #we need to remove them as well.
@@ -232,46 +271,33 @@ test_host_attestation_status() {
   VMM_status=$(xmlstarlet sel -t -v "(/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[@Name='Trusted_VMM'])"  $CIT_BKC_DATA_PATH/$host_attestation_data_file | sed '/^\s*$/d; s/ //g')
   
   Asset_Tag_status=$(xmlstarlet sel -t -v "(/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[@Name='Asset_Tag'])"  $CIT_BKC_DATA_PATH/$host_attestation_data_file | sed '/^\s*$/d; s/ //g')
-  
-  output_message="BIOS Trust status:$BIOS_status\nVMM Trust Status:$VMM_status\nAsset Tag Trust status:$Asset_Tag_status"
-  write_to_report_file
+
+  # TODO: we need to check for trusted values, since we are whitelisting localhost if it comes back as untrusted there is a problem
+  result_ok "BIOS Trust status:$BIOS_status\nVMM Trust Status:$VMM_status\nAsset Tag Trust status:$Asset_Tag_status"
+  return $?
 }
 
 main(){
-  # if the user has passed in the reboot count, use it. Or else set it to 1 as default.
-  if [ -z "$1" ]; then
-    reboot_count="1"
-  else
-    reboot_count="$1"
-  fi
-  
-  test_tpm_support
-  if [ "$?" != "0" ]; then  return 1; fi
-  
-  test_tpm_ownership
-  if [ "$?" != "0" ]; then return 1; fi
 
-  test_txt_support
-  if [ "$?" != "0" ]; then  return 1; fi
+  TEST_SEQUENCE="tpm_support tpm_ownership txt_support bindingkey_present signingkey_present nvindex_defined create_whitelist write_assettag host_attestation_status"
+  local result
 
-  test_bindingkey_present
-  if [ "$?" != "0" ]; then  return 1; fi
+  for testname in $TEST_SEQUENCE
+  do
+    echo "Running test: $testname"
+    # security note: this is safe because we are hard-coding test sequence above; there is no user input in $testname
+    eval "test_$testname"
+    result=$?
+    if [ $result -ne 0 ]; then return $result; fi
+  done
 
-  test_signingkey_present
-  if [ "$?" != "0" ]; then  return 1; fi
-
-  test_nvindex_defined
-  if [ "$?" != "0" ]; then  return 1; fi
-  
-  test_create_whitelist
-  if [ "$?" != "0" ]; then  return 1; fi
-
-  test_write_assettag
-  if [ "$?" != "0" ]; then  return 1; fi
-
-  test_host_attestation_status
-  if [ "$?" != "0" ]; then  return 1; fi
-  
+  return 0
 }
 main "$@"
+result=$?
 
+if [ "$CIT_BKC_VALIDATION_REBOOT_REQUIRED" == "yes" ]; then
+  exit 255
+else
+  exit $result
+fi
