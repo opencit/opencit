@@ -47,6 +47,7 @@
                     <classifier>jdk_glassfish_monit</classifier>
                 </dependency>
                 <!-- Trust Agent -->
+                <!-- NOTE: in v2.1 we use the "mtwilson-trustagent" project for both ubuntu and redhat even though there is a "mtwilson-trustagent-rhel" project; ask Ryan for explanation -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-trustagent</artifactId>
