@@ -95,6 +95,20 @@ else
 fi
 
 
+cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
+rm -f $MTWILSON_HOME/bin/mtwilson
+ln -s $MTWILSON_HOME/bin/mtwilson.sh $MTWILSON_HOME/bin/mtwilson
+chmod +x $MTWILSON_HOME/bin/*
+
+#If user is root then create mtwilson symlink to /usr/local/bin otherwise export path '$MTWILSON_HOME/bin'
+if [ "$(whoami)" == "root" ]; then
+ if [ ! -d /usr/local/bin ]; then
+   mkdir -p /usr/local/bin
+ fi
+ #Remove symbolic link if already exist
+ rm -f /usr/local/bin/mtwilson
+ ln -s $MTWILSON_HOME/bin/mtwilson /usr/local/bin/mtwilson
+fi
 
 #If user is non root make sure all prereq directories are created and owned by nonroot user
 if [ "$(whoami)" != "root" ]; then
