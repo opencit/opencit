@@ -2,7 +2,6 @@ Uncompressing mtwilson-trustagent
 gcc -o hex2bin hex2bin.c
 Compiling TPM commands...
 Registering tagent in start up
-Monit installed
 Updating system information
 Generated random keystore password
 Starting the process to configure the username and password.
