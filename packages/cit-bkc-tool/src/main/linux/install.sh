@@ -26,6 +26,7 @@ fi
 
 #####
 # INSTALL BKC TOOL
+chmod +x cit-bkc-tool.sh
 cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
 
 
@@ -34,10 +35,10 @@ cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
 export MTWILSON_LOG_LEVEL=DEBUG
 
 # if Attestation Service is already installed, stop it while we upgrade/reinstall
-if which mtwilson; then
+if which mtwilson >/dev/null 2>&1; then
   mtwilson stop
 fi
-if which cit; then
+if which cit >/dev/null 2>&1; then
   cit stop
 fi
 
@@ -74,7 +75,7 @@ fi
 export TAGENT_LOG_LEVEL=DEBUG
 
 # if Trust Agent is already installed, stop it while we upgrade/reinstall
-if which tagent; then
+if which tagent >/dev/null 2>&1; then
   tagent stop
 fi
 
