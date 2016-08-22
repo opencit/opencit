@@ -67,6 +67,7 @@ if [ -n "$MTWILSON_BIN" ]; then
   preconfigure_mtwilson
   chmod +x $MTWILSON_BIN
   ./$MTWILSON_BIN
+  if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Attestation Service"; exit 1; fi
 fi
 
 
@@ -99,4 +100,5 @@ if [ -n "$TAGENT_BIN" ]; then
   preconfigure_trustagent
   chmod +x $TAGENT_BIN
   ./$TAGENT_BIN
+  if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Trust Agent"; exit 1; fi
 fi

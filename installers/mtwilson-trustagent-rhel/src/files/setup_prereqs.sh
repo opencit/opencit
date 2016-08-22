@@ -317,7 +317,7 @@ next_step() {
   if [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then
     echo "continuing CIT Agent installation after reboot"
     (cd $script_path && export TRUSTAGENT_SETUP_PREREQS=no && ./setup.sh)
-  else
+  #else
     # do nothing; either setup.sh called us and will continue when we exit,
     # or user called us directly from shell and expects us to exit when done.
   fi
