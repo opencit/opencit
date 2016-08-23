@@ -20,6 +20,15 @@ CIT_BKC_VALIDATION_REBOOT_REQUIRED=no
 
 ASSET_TAG_NVRAM_INDEX=0x40000011
 
+# TERM_DISPLAY_MODE can be "plain" or "color"
+TERM_DISPLAY_MODE=color
+TERM_STATUS_COLUMN=60
+TERM_COLOR_GREEN="\\033[1;32m"
+TERM_COLOR_CYAN="\\033[1;36m"
+TERM_COLOR_RED="\\033[1;31m"
+TERM_COLOR_YELLOW="\\033[1;33m"
+TERM_COLOR_NORMAL="\\033[0;39m"
+
   # if the user has passed in the reboot count, use it. Or else set it to 1 as default.
   if [ -z "$1" ]; then
     reboot_count="1"
@@ -29,12 +38,17 @@ ASSET_TAG_NVRAM_INDEX=0x40000011
 
 echo "### Started CIT BKC validation ($reboot_count)" >> $LOG_FILE
 
+#  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_GREEN}"; fi
+#  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+#  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_RED}"; fi
+#  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+
 
 write_to_report_file() {
   local output_message="$*"
   current_date=`date +%Y-%m-%d:%H:%M:%S`
-  # write to console and log file for debugging
-  echo -e "$bkc_test_name: $output_message"
+  # write to log file for debugging
+  #echo -e "$bkc_test_name: $output_message"
   echo -e "[$current_date] $bkc_test_name: $output_message" >> $LOG_FILE
   # do NOT insert $bkc_test_name when writing to the .report file
   echo -e $output_message > $CIT_BKC_DATA_PATH/${bkc_test_name}.report
@@ -42,6 +56,11 @@ write_to_report_file() {
 
 # records a successful test result from $bkc_test_name and given message
 result_ok() {
+  # write to console for interactive use
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_GREEN}"; fi
+  echo -e "$bkc_test_name: OK - $*"
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+
   write_to_report_file "OK - $*"
   bkc_test_name=""
   return 0
@@ -49,6 +68,10 @@ result_ok() {
 
 # records an error result from $bkc_test_name and given message
 result_error() {
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_RED}"; fi
+  echo -e "$bkc_test_name: ERROR - $*"
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+
   write_to_report_file "ERROR - $*"
   bkc_test_name=""
   return 1
@@ -56,6 +79,10 @@ result_error() {
 
 # records a skipped-test result from $bkc_test_name and given message
 result_skip() {
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  echo -e "$bkc_test_name: SKIP - $*"
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+
   write_to_report_file "SKIP - $*"
   bkc_test_name=""
   return 2
@@ -63,6 +90,10 @@ result_skip() {
 
 # records a reboot-required result from $bkc_test_name and given message
 result_reboot() {
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_GREEN}"; fi
+  echo -e "$bkc_test_name: REBOOT - $*"
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+
   write_to_report_file "REBOOT - $*"
   bkc_test_name=""
   CIT_BKC_VALIDATION_REBOOT_REQUIRED=yes
@@ -113,7 +144,7 @@ test_aik_present() {
     result_ok "AIK certificate exists."
     return $?
   else
-    result_error "AIK certificate ($AIKCertFile) does not exist."
+    result_error "AIK certificate '$AIKCertFile' does not exist."
     return $?
   fi
 }
@@ -126,7 +157,7 @@ test_bindingkey_present() {
     result_ok "Binding key certificate exists."
     return $?
   else
-    result_error "Binding key certificate ($BindingKeyFile) does not exist."
+    result_error "Binding key certificate '$BindingKeyFile' does not exist."
     return $?
   fi
 }
@@ -139,7 +170,7 @@ test_signingkey_present() {
     result_ok "Signing key certificate exists."
     return $?
   else
-    result_error "Signing key certificate ($SigningKeyFile) does not exist."
+    result_error "Signing key certificate '$SigningKeyFile' does not exist."
     return $?
   fi
 }
