@@ -155,7 +155,7 @@ if [ "$TPM_VERSION" == "1.2" ]; then
   install_patched_tpm_tools
 elif [ "$TPM_VERSION" == "2.0" ]; then
   install_tboot_tpm2
-  install_tboot_tss2_tpmtools2
+  install_tss2_tpmtools2
 elif [ -z "$TPM_VERSION" ]; then
   echo "Cannot detect TPM version"
 else
