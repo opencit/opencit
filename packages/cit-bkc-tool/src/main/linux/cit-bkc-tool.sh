@@ -141,11 +141,13 @@ cit_bkc_run() {
     cit_bkc_run_next
 
     # check if test is complete
-    if [ "$CIT_BKC_TEST_COMPLETE" == "yes" ]; then
-      if cit_bkc_run_next_report; then
-        cit_bkc_report
-      fi
-    fi
+    #if [ "$CIT_BKC_TEST_COMPLETE" == "yes" ]; then
+    #  if cit_bkc_run_next_report; then
+    #    cit_bkc_report
+    #  fi
+    #fi
+    cit_bkc_run_next_report
+    #cit_bkc_status
 }
 
 # precondition:
@@ -186,9 +188,16 @@ cit_bkc_run_next_report() {
     mkdir -p $CIT_BKC_REPORTS_PATH
     local current_date=$(date +%Y%m%d.%H%M%S)
     local report_file_name="$CIT_BKC_REPORTS_PATH/report.$current_date"
-    local report_inputs=$(ls -1 $CIT_BKC_DATA_PATH/*.report 2>/dev/null)
+    local report_inputs=$(cd $CIT_BKC_DATA_PATH && ls -1tr *.report 2>/dev/null)
     if [ -n "$report_inputs" ]; then
-      cat $CIT_BKC_DATA_PATH/*.report > $report_file_name
+      # echo "# $report_file_name" > $report_file_name
+      rm -rf $report_file_name
+      for filename in $report_inputs
+      do
+        reportname=$(basename $filename .report)
+        echo "$reportname: $(cat $CIT_BKC_DATA_PATH/$filename)" >> $report_file_name
+      done
+      return 0
     else
       echo "No data available to report" >&2
       return 1

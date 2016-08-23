@@ -33,9 +33,10 @@ echo "### Started CIT BKC validation ($reboot_count)" >> $LOG_FILE
 write_to_report_file() {
   local output_message="$*"
   current_date=`date +%Y-%m-%d:%H:%M:%S`
-  echo -e $output_message
-  echo -e "# $current_date" >> $LOG_FILE
-  echo -e $output_message >> $LOG_FILE
+  # write to console and log file for debugging
+  echo -e "$bkc_test_name: $output_message"
+  echo -e "[$current_date] $bkc_test_name: $output_message" >> $LOG_FILE
+  # do NOT insert $bkc_test_name when writing to the .report file
   echo -e $output_message > $CIT_BKC_DATA_PATH/${bkc_test_name}.report
 }
 
@@ -75,7 +76,7 @@ test_tpm_support() {
 
 test_tpm_ownership() {
   bkc_test_name="tpm_ownership"
-  if [[ "$(cat /sys/class/misc/tpm0/device/owned)" == 1 ]]; then
+  if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
     result_ok "TPM is owned."
     return $?
   else
@@ -310,7 +311,7 @@ main(){
 
   for testname in $TEST_SEQUENCE
   do
-    echo "Running test: $testname"
+    # echo "Running test: $testname"
     # security note: this is safe because we are hard-coding test sequence above; there is no user input in $testname
     eval "test_$testname"
     result=$?
