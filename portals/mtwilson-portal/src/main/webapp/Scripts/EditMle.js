@@ -149,8 +149,7 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 		$('#MainContent_tbDesc').val(response.mleDescription);
 		$('#MainContent_tbMleSourceHost').val(mleSourceHostName);
 		
-		if (response.attestation_Type == "Module" || response.attestation_Type == "MODULE") {
-			//$('#mainfestGKVSCheck').remove();
+					//$('#mainfestGKVSCheck').remove();
 			//$('#manifestListDiv').html('<div style="font-size: 14px;padding-top: 55px;width: 644px;">Please use the White List Manifest loader tool to load the manifest values to database.</div>');
 			//$('#mleVmmLableInfo').hide();
 			$('#mainfestGKVSCheck').show();
@@ -173,13 +172,6 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 				'<input type="button" class="button" value="Show Manifest" onclick="getModuleTypeMleList(\''+dataToSend+'\')"/></div></div>';
                         $('#moduleTypeManifestList').html(str);
 			
-		}else {
-			for ( var pcr in response.manifestList) {
-				fnToggelRegisterValue(true,'MainContent_tb'+response.manifestList[pcr].Name);
-				$('#MainContent_check'+response.manifestList[pcr].Name).attr('checked','checked');
-				$('#MainContent_tb'+response.manifestList[pcr].Name).attr('value',response.manifestList[pcr].Value);
-			}
-		}
                 
                 // Bug: 565 : For some reason dynamically changing the attribute of the button to call the UpdateMLE function 
                 // is not working. As a workaround, we will create 2 buttons to start with, one button for adding the MLE and 
@@ -253,8 +245,10 @@ function getModuleTypeMleListSuccess(responseJSON){
 }
 
 function updateMleInfo() {
-	var dataToSent = fnGetMleData(false);
-	if (dataToSent != "") {
+	var dataToSent = fnGetMleDataVO(false);
+        dataToSent.manifestList = null;
+        dataToSent = $.toJSON(dataToSent);
+	if (dataToSent !== "") {
 		if (confirm($("#alert_update_mle").text())) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=false", updateMleSuccess, null);

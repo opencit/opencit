@@ -167,7 +167,7 @@ public class CreateIdentity implements Configurable, Runnable {
             String aikblobfilepath = config.getAikBlobFile().getAbsolutePath();
             if (os == 1) {//linux
                 HashMap<String, byte[]> results = Tpm.getModule().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asym2, sym2, config.getAikIndex());
-                System.out.println(results);
+                //System.out.println(results);
 
                 decrypted2 = results.get("aikcert");
                 aikblob = results.get("aikblob");
