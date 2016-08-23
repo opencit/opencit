@@ -271,7 +271,12 @@ public class ReportsBO {
                             if(!report.containsKey(log.getManifestName())) {
                                 report.put(log.getManifestName(), r);   
                             } else {
-                                report.get(log.getManifestName()).getModuleLogs().addAll(r.getModuleLogs());
+                                PcrLogReport existing = report.get(log.getManifestName());
+                                if(existing.getTrustStatus().intValue() != r.getTrustStatus().intValue()) {
+                                    existing.setTrustStatus(0);
+                                }
+                                existing.getModuleLogs().addAll(r.getModuleLogs());
+                                
                             }      
                         }
                     }
