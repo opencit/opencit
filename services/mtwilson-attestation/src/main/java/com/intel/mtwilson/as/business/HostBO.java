@@ -242,7 +242,7 @@ public class HostBO {
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                         }else if(useDaMode && biosMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
                             log.info("DA MODE: Host specific modules will be retrieved from the host that extends into PCR 17.");
-                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(biosMleId, pcrManifest, hostType);
+                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(vmmMleId, pcrManifest, hostType);
                         } else {
                             log.info("Host specific modules will not be configured since PCR 17 or 19 in the correct TPM mode are not selected for attestation");
                         }

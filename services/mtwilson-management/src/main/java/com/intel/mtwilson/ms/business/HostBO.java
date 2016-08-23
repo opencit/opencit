@@ -86,7 +86,7 @@ public class HostBO {
     private static int LOCATION_PCR_WINDOWS = 23;
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
-    private static String OPENSOURCE_PCRs = "18";
+    private static String OPENSOURCE_PCRs = "18,19";
     private static String OPENSOURCE_DA_PCRs = "17,18";
     private static String CITRIX_PCRs = "18"; //"17,18";
     private static String WINDOWS_BIOS_PCRs = "0";
@@ -610,6 +610,39 @@ public class HostBO {
         }
     }
 
+    private List<String> calculateBiosPCRMapForHost(TxtHostRecord gkvHost) throws MalformedURLException {
+        ConnectionString connString = ConnectionString.from(gkvHost);
+        
+        String biosPCRs;
+        
+        if(connString.getVendor().equals(Vendor.MICROSOFT)) {
+            biosPCRs = WINDOWS_BIOS_PCRs;
+        } else {
+            biosPCRs = BIOS_PCRs;
+        }
+        
+        return Arrays.asList(biosPCRs.split(","));
+    }
+    
+    private List<String> calculateVmmPCRMapForHost(TxtHostRecord gkvHost) throws MalformedURLException {
+        ConnectionString connString = ConnectionString.from(gkvHost);
+        
+        String vmmPCRs;
+        
+        if(connString.getVendor().equals(Vendor.VMWARE)) {
+            vmmPCRs = VMWARE_PCRs;            
+        } else if(connString.getVendor().equals(Vendor.CITRIX)) {
+            vmmPCRs = CITRIX_PCRs;
+        } else if(connString.getVendor().equals(Vendor.MICROSOFT)) {
+            vmmPCRs = WINDOWS_PCRs;
+        } else if(gkvHost.getDaMode()) {
+            vmmPCRs = OPENSOURCE_DA_PCRs;
+        } else {
+            vmmPCRs = OPENSOURCE_PCRs;
+        }
+        
+        return Arrays.asList(vmmPCRs.split(","));
+    }   
     /**
      * Configures the white list using the host specified.
      *
@@ -625,21 +658,6 @@ public class HostBO {
             if (gkvHost != null) {
 
                 hostConfigObj = new WhitelistConfigurationData();
-                String vmmPCRs;
-                TxtHost tempHostObj = new TxtHost(gkvHost);
-
-                ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
-                // The below changes are to address the bug in which if the REST API is directly called the default
-                // PCRs were being read from the property file which does not match the UI defaults.
-                if (connString.getVendor().equals(Vendor.VMWARE)) {
-                    vmmPCRs = VMWARE_PCRs;
-                } else if (connString.getVendor().equals(Vendor.CITRIX)) {
-                    vmmPCRs = CITRIX_PCRs;
-                } else if (connString.getVendor().equals(Vendor.MICROSOFT)) {
-                    vmmPCRs = WINDOWS_PCRs;
-                } else {
-                    vmmPCRs = OPENSOURCE_PCRs;
-                }
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
 
@@ -650,12 +668,6 @@ public class HostBO {
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
                 hostConfigObj.setOverWriteWhiteList(false);
                 hostConfigObj.setRegisterHost(false);
-
-                if (vmmPCRs == WINDOWS_PCRs) {
-                    hostConfigObj.setBiosPCRs(WINDOWS_BIOS_PCRs);
-                } else {
-                    hostConfigObj.setBiosPCRs(BIOS_PCRs);
-                }
             }
 
             configStatus = configureWhiteListFromCustomData(hostConfigObj);
@@ -687,6 +699,7 @@ public class HostBO {
      * This function using the white list configuration settings including pcr details, whether the whitelist is for an individual host/for OEM specific host/global white list, etc, configures the DB with the whitelist from the specified good known host.
      *
      * @param hostConfigObj : White List configuration object having all the details.
+     * @param challenge
      * @return : true on success.
      */
     public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj, Nonce challenge) {
@@ -706,17 +719,7 @@ public class HostBO {
             My.initDataEncryptionKey();
             // Let us ensure that the user has specified the PCRs to be used
             if (hostConfigObj != null) {
-
-                if ((hostConfigObj.addBiosWhiteList() == true) && (hostConfigObj.getBiosPCRs() == null
-                        || hostConfigObj.getBiosPCRs().isEmpty())) {
-                    throw new MSException(ErrorCode.MS_INVALID_PCRS);
-                }
-
-                if ((hostConfigObj.addVmmWhiteList() == true) && (hostConfigObj.getVmmPCRs() == null
-                        || hostConfigObj.getVmmPCRs().isEmpty())) {
-                    throw new MSException(ErrorCode.MS_INVALID_PCRS);
-                }
-
+                              
                 if ((hostConfigObj.addBiosWhiteList() == true) && (hostConfigObj.getBiosWLTarget() == null
                         || hostConfigObj.getBiosWLTarget().getValue().isEmpty())) {
                     throw new MSException(ErrorCode.MS_INVALID_WHITELIST_TARGET, hostConfigObj.getBiosWLTarget().toString());
@@ -809,7 +812,10 @@ public class HostBO {
                 log.debug("Successfully retrieved the host information. Details: {}", gkvHost.BIOS_Oem + ":"
                         + gkvHost.BIOS_Version + ":" + gkvHost.VMM_OSName + ":" + gkvHost.VMM_OSVersion
                         + ":" + gkvHost.VMM_Version + ":" + gkvHost.Processor_Info);
-
+                                                       
+                Set<String> biosManifestSet = new TreeSet<>();
+                Set<String> vmmManifestSet = new TreeSet<>();
+                
                 Set<String> reqdManifestSet = new TreeSet<>();
                 String reqdManifestList = "";
 
@@ -823,20 +829,29 @@ public class HostBO {
 
                 calibrateMLENames(hostConfigObj, true);
                 calibrateMLENames(hostConfigObj, false);
-                if (hostConfigObj.addBiosWhiteList()) {
-                    reqdManifestList = hostConfigObj.getBiosPCRs();
-                    String[] pcrs = StringUtils.split(hostConfigObj.getBiosPCRs(), ',');
-                    reqdManifestSet.addAll(Arrays.asList(pcrs));
+                if (hostConfigObj.addBiosWhiteList()) {  
+                    biosManifestSet.addAll(calculateBiosPCRMapForHost(gkvHost));
+                                                                
+                    if(hostConfigObj.getBiosPCRs() != null && !hostConfigObj.getBiosPCRs().isEmpty()) {
+                        // advanced user specified PCRs
+                        String[] pcrs = hostConfigObj.getBiosPCRs().split(",");
+                        biosManifestSet.addAll(Arrays.asList(pcrs));
+                    }                    
+                    hostConfigObj.setBiosPCRs(StringUtils.join(biosManifestSet.iterator(), ","));
+                    reqdManifestSet.addAll(biosManifestSet);                
                 }
+                                
                 if (hostConfigObj.addVmmWhiteList()) {
-                    String[] pcrs = StringUtils.split(hostConfigObj.getVmmPCRs());
-                    reqdManifestSet.addAll(Arrays.asList(pcrs));
-                    if (reqdManifestList.isEmpty()) {
-                        reqdManifestList = hostConfigObj.getVmmPCRs();
-                    } else {
-                        reqdManifestList = reqdManifestList + "," + hostConfigObj.getVmmPCRs();
+                    vmmManifestSet.addAll(calculateVmmPCRMapForHost(gkvHost));
+                    
+                    if(hostConfigObj.getVmmPCRs() != null && !hostConfigObj.getVmmPCRs().isEmpty()) {
+                       String[] pcrs = hostConfigObj.getVmmPCRs().split(",");
+                       vmmManifestSet.addAll(Arrays.asList(pcrs));
                     }
-                }
+                    hostConfigObj.setVmmPCRs(StringUtils.join(vmmManifestSet.iterator(), ","));
+                    reqdManifestSet.addAll(vmmManifestSet);
+                }                
+                
                 reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
                 
                 
@@ -1166,7 +1181,14 @@ public class HostBO {
 
                 List<ManifestData> biosMFList = new ArrayList<>();
                 for (String biosPCR : biosPCRList) {
-                    biosMFList.add(new ManifestData(biosPCR, "", hostObj.getBestPcrAlgorithmBank()));
+                    if(hostObj.PcrBanks != null && !hostObj.PcrBanks.isEmpty()) {
+                        List<String> banks = Arrays.asList(hostObj.PcrBanks.split(" "));
+                        for(String bank : banks) {
+                            biosMFList.add(new ManifestData(biosPCR, "", bank));
+                        }
+                    } else {
+                        biosMFList.add(new ManifestData(biosPCR, "", hostObj.getBestPcrAlgorithmBank()));
+                    }
                 }
 
                 mleObj.setManifestList(biosMFList);
@@ -1268,7 +1290,14 @@ public class HostBO {
 
                 List<ManifestData> vmmMFList = new ArrayList<>();
                 for (String vmmPCR : vmmPCRList) {
-                    vmmMFList.add(new ManifestData(vmmPCR, "", hostObj.getBestPcrAlgorithmBank())); // whitelist service now allows empty pcr's 
+                    if(hostObj.PcrBanks != null && !hostObj.PcrBanks.isEmpty()) {
+                        List<String> banks = Arrays.asList(hostObj.PcrBanks.split(" "));
+                        for (String bank : banks) {
+                            vmmMFList.add(new ManifestData(vmmPCR, "", bank));
+                        }   
+                    } else {
+                        vmmMFList.add(new ManifestData(vmmPCR, "", hostObj.getBestPcrAlgorithmBank())); // whitelist service now allows empty pcr's 
+                    }                    
                 }
 
                 mleVMMObj.setManifestList(vmmMFList);
@@ -1525,7 +1554,7 @@ public class HostBO {
             while (reader.hasNext()) {
                 if (reader.getEventType() == XMLStreamConstants.START_ELEMENT) {
                     if (reader.getLocalName().equalsIgnoreCase("Host_Attestation_Report")) {
-                    } else if (reader.getLocalName().equalsIgnoreCase("EventDetails") && (hostConfigObj.addVmmWhiteList() == true)) {
+                    } else if (reader.getLocalName().equalsIgnoreCase("EventDetails")) {
 
                         // Check if the package is a dynamic package. If it is, then we should not be storing it in the database
                         if (reader.getAttributeValue("", "PackageName").length() == 0
@@ -1542,9 +1571,8 @@ public class HostBO {
                                 && (pcrsToWhiteList.contains(reader.getAttributeValue("", "ExtendedToPCR")))) {
 
                             // only support EventLog for PCR 17 if it's TPM 2.0
-                            int pcr = Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR"));
-                            String tpmVersion = hostConfigObj.getTxtHostRecord().TpmVersion;
-                            boolean useDaMode = "2.0".equals(tpmVersion);
+                            int pcr = Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR"));                            
+                            boolean useDaMode = hostConfigObj.getTxtHostRecord().getDaMode();
                             ModuleWhiteList moduleObj = new ModuleWhiteList();
                             if (pcr == 17 && useDaMode) {// bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
@@ -1565,11 +1593,20 @@ public class HostBO {
                                 moduleObj.setPackageVersion(reader.getAttributeValue("", "PackageVersion"));
                                 moduleObj.setUseHostSpecificDigest(Boolean.valueOf(reader.getAttributeValue("", "UseHostSpecificDigest")));
                                 moduleObj.setDescription("");
-                                moduleObj.setMleName(hostObj.BIOS_Name);
-                                moduleObj.setMleVersion(hostObj.BIOS_Version);
-                                //moduleObj.setOsName(hostObj.VMM_OSName);
-                                //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
-                                moduleObj.setOemName(hostObj.BIOS_Oem);
+                                
+                                if(moduleObj.getUseHostSpecificDigest()) {
+                                    moduleObj.setMleName(hostObj.VMM_Name);
+                                    moduleObj.setMleVersion(hostObj.VMM_Version);
+                                    moduleObj.setOsName(hostObj.VMM_OSName);
+                                    moduleObj.setOsVersion(hostObj.VMM_OSVersion);
+                                    moduleObj.setOemName("");
+                                } else {
+                                    moduleObj.setMleName(hostObj.BIOS_Name);
+                                    moduleObj.setMleVersion(hostObj.BIOS_Version);
+                                    //moduleObj.setOsName(hostObj.VMM_OSName);
+                                    //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
+                                    moduleObj.setOemName(hostObj.BIOS_Oem);
+                                }
                             } else if(pcr == 19 && !useDaMode) {
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
@@ -1599,9 +1636,14 @@ public class HostBO {
                                 continue;
                             }
                             if (!hostConfigObj.getOverWriteWhiteList()) {
-                                mleBO.addModuleWhiteList(moduleObj, emt, null, null);
-                                log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
-
+                                // add the module if we are to add a new bios or vmm mle
+                                boolean addModuleToBios = !moduleObj.getUseHostSpecificDigest() && hostConfigObj.addBiosWhiteList();
+                                boolean addModuleToVmm = moduleObj.getUseHostSpecificDigest() && hostConfigObj.addVmmWhiteList();
+                                
+                                if(addModuleToBios || addModuleToVmm){
+                                    mleBO.addModuleWhiteList(moduleObj, emt, null, null);
+                                    log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                }
                             } else {
                                 try {
                                     mleBO.updateModuleWhiteList(moduleObj, emt, null);
@@ -1643,7 +1685,7 @@ public class HostBO {
                                     mleID = mleBiosSearchObj.getId();
 
                                     // if we are using TPM 2.0 (soon to be DA mode) we need to clear this pcr so its dynamic
-                                    if ("2.0".equals(hostObj.TpmVersion) && pcrObj.getPcrName().equals("17")) {
+                                    if (hostObj.getDaMode() && pcrObj.getPcrName().equals("17")) {
                                         pcrObj.setPcrDigest("");
                                     }
                                     //log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));

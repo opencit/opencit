@@ -250,16 +250,34 @@ public class ReportsBO {
                 assetTagPCR = ASSET_TAG_PCR;
             
             if (logs != null) {
+                Map<String, PcrLogReport> report = new TreeMap<>();
                 for (TblTaLog log : logs) {
                     logger.debug("getAttestationReport - Processing the PCR {} with trust status {}.", log.getManifestName(), log.getTrustStatus());
                     boolean value = (failureOnly && log.getTrustStatus() == false);
+                    
                     if (!failureOnly || value) {
                         if (log.getManifestName().equalsIgnoreCase(assetTagPCR)) {
-                            attestationReport.getPcrLogs().add(getPcrLogReportForAssetTag(log, tblHosts.getId()));
-                        } else {
-                            attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
+                            //attestationReport.getPcrLogs().add(getPcrLogReportForAssetTag(log, tblHosts.getId()));
+                            PcrLogReport r = getPcrLogReportForAssetTag(log, tblHosts.getId());
+                            if(!report.containsKey(log.getManifestName())) {
+                                report.put(log.getManifestName(), r);   
+                            } else {
+                                report.get(log.getManifestName()).getModuleLogs().addAll(r.getModuleLogs());
+                            }                            
+                        } else {                            
+                            //attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
+                            
+                            PcrLogReport r = getPcrManifestLog(tblHosts, log, failureOnly);
+                            if(!report.containsKey(log.getManifestName())) {
+                                report.put(log.getManifestName(), r);   
+                            } else {
+                                report.get(log.getManifestName()).getModuleLogs().addAll(r.getModuleLogs());
+                            }      
                         }
                     }
+                }
+                for(PcrLogReport r: report.values()) {
+                    attestationReport.getPcrLogs().add(r);
                 }
             }
         }

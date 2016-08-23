@@ -376,16 +376,7 @@ function showHelpForLocation() {
 
 function checkForPCRConstrain(checkBoxID,pcrID,textValue) {
 	if ($('#'+checkBoxID).attr('checked') == 'checked') {
-		var check = false;
-		$('#'+pcrID).find('input:checkbox').each(function() {
-			if($(this).attr('checked') == 'checked'){
-				check =true;
-			}
-		});
-		if (!check) {
-			$('#whiteListMessage').html('<div class="errorMessage"> Please select at least one PCR for '+textValue+".</div>");
-			return false;
-		}
+		
 	}
 	return true;
 }
@@ -454,6 +445,7 @@ function fnGetWhiteListConfigData() {
 
 //function to select required PCR Values While changing HostType in White List Configuration Page.
 function changeRequiredPCR(){
+    return;
 	var requiredPCR="";
 	$('#MainContent_ddlHOSTType').find('option').each(function() {
 		if($(this).text()==$('#MainContent_ddlHOSTType').val()){
