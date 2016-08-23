@@ -290,7 +290,7 @@ migrate_to_local() {
   fi
   # so if we are not already running from trustagent home, copy everything to it
   if [ "$script_path" != "$TRUSTAGENT_HOME/installer" ]; then
-    rm -f $TRUSTAGENT_HOME/installer
+    rm -rf $TRUSTAGENT_HOME/installer
     mkdir -p $TRUSTAGENT_HOME/installer
     \cp -r $script_path/* $TRUSTAGENT_HOME/installer/
   fi
