@@ -417,8 +417,9 @@ public class ConverterUtil {
 	}
 
 	private static List<ManifestData> getApiClientManifestData(List<Map<String, String>> manifestList) {
-		List<ManifestData> list = new ArrayList<ManifestData>();
+		List<ManifestData> list = null;
 		if (manifestList != null) {
+                    list = new ArrayList<ManifestData>();
 			for (Map<String,String> map : manifestList) {
 				list.add(new ManifestData(map.get("name"), map.get("value")));
 			}

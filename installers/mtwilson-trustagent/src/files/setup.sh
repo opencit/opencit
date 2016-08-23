@@ -287,10 +287,10 @@ ASSET_TAG_SETUP="y"
 #Adding redhat-lsb libvirt for bug 5289
 #Adding net-tools for bug 5285
 #adding openssl-devel for bug 5284
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind make gcc"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind make gcc dpkg-dev"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind make gcc"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind make gcc"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind make gcc vim-common"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind make gcc dpkg-dev vim-common"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind make gcc vim-common"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind make gcc vim-common"
 # save tpm version in trust agent configuration directory
 echo -n "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
@@ -301,6 +301,11 @@ if [ "$(whoami)" == "root" ]; then
 else
   echo_warning "Required packages:"
   auto_install_preview "TrustAgent requirements" "TRUSTAGENT"
+fi
+
+if [ "$TPM_VERSION" == "2.0" ]; then
+  # install tss2 and tpm2-tools for tpm2.0
+  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 

@@ -365,6 +365,7 @@ no_resume_after_reboot
 
 # 8. Start tcsd (it already has an init script for next boot, but we need it now)
 
+# tpm 1.2
 is_tcsd_running() {
   local tcsd_pid=$(ps aux | grep tcsd | grep -v grep)
   if [ -n "$tcsd_pid" ]; then
@@ -374,12 +375,22 @@ is_tcsd_running() {
   fi
 }
 
+# tpm 1.2
 start_tcsd() {
-  local tcsd_cmd=$(which tcsd)
+  local tcsd_cmd=$(which tcsd 2>/dev/null)
   if [ -n "$tcsd_cmd" ]; then
     echo "starting tcsd"
     tcsd
   fi
+}
+
+# tpm 2.0
+is_tcsd2_running() {
+  systemctl status tcsd2 >/dev/null 2>&1
+}
+
+start_tcsd2() {
+  systemctl start tcsd2 >/dev/null 2>&1
 }
 
 if is_tcsd_running; then
@@ -387,6 +398,27 @@ if is_tcsd_running; then
 else
   start_tcsd
 fi
+
+if [ "$TPM_VERSION" == "1.2" ]; then
+  if is_tcsd_running; then
+    echo "tcsd already running"
+  else
+    start_tcsd
+  fi
+elif [ "$TPM_VERSION" == "2.0" ]; then
+  if is_tcsd2_running; then
+    echo "tcsd2 already running"
+  else
+    start_tcsd2
+  fi
+elif [ -z "$TPM_VERSION" ]; then
+  echo "Cannot detect TPM version"
+else
+  echo "Unrecognized TPM version: $TPM_VERSION"
+fi
+
+
+
 
 # 9. Run mtwilson-trustagent-rhel.bin
 
