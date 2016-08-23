@@ -100,6 +100,11 @@ result_reboot() {
   return 255
 }
 
+is_command_available() {
+  which $* > /dev/null 2>&1
+}  
+
+
 # Determine the TPM Hardware support
 test_tpm_support() {
   #bkc_test_name="tpm_support"
@@ -112,14 +117,59 @@ test_tpm_support() {
   fi
 }
 
-test_tpm_ownership() {
-  #bkc_test_name="tpm_ownership"
-  if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
-    result_ok "TPM is owned."
+test_txtstat_present() {
+  if is_command_available txt-stat; then
+    result_ok "txt-stat is present."
     return $?
   else
-    result_error "TPM is not owned."
+    result_error "txt-stat is missing."
     return $?
+  fi
+}
+
+# identify tpm version
+# postcondition:
+#   variable TPM_VERSION is set to 1.2 or 2.0
+test_tpm_version() {
+  export TPM_VERSION
+  #local txtstat_tpm2=$(txt-stat | grep "TPM: discrete TPM2.0" | head -n 1)
+  if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+    TPM_VERSION=1.2
+    result_ok "TPM 1.2"
+    return $?
+  elif [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+    TPM_VERSION=2.0
+    result_ok "TPM 2.0"
+    return $?
+  else
+    TPM_VERSION=
+    result_error "Unknown TPM version"
+    return $?
+  fi
+}
+
+
+# depends on test_tpm_version to run first
+test_tpm_ownership() {
+  #bkc_test_name="tpm_ownership"
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    local tpm_owned=$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)
+    if [ "$tpm_owned" == 1 ]; then
+      result_ok "TPM is owned."
+      return $?
+    else
+      result_error "TPM is not owned."
+      return $?
+    fi
+  elif [ "$TPM_VERSION" == "2.0" ]; then
+    local tpm2_owned=$(/opt/trustagent/bin/tpm2-isowned 2>/dev/null)
+    if [ "$tpm2_owned" == "1" ]; then
+      result_ok "TPM is owned."
+      return $?
+    else
+      result_error "TPM is not owned."
+      return $?
+    fi
   fi
 }
 
@@ -178,13 +228,24 @@ test_signingkey_present() {
 # Determine if NV index is defined for asset tag configuration
 test_nvindex_defined() {
   #bkc_test_name="nvindex_defined"
-  indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
-  if [ -n "$indexDefined" ]; then
-    result_ok "NV index defined."
-    return $?
-  else 
-    result_error "NV index not defined. Asset tags cannot be configured."
-    return $?
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    local indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
+    if [ -n "$indexDefined" ]; then
+      result_ok "NV index defined."
+      return $?
+    else 
+      result_error "NV index not defined. Asset tags cannot be configured."
+      return $?
+    fi
+  elif [ "$TPM_VERSION" == "2.0" ]; then
+    local indexDefined=$(/opt/trustagent/bin/tpm2-nvindex-exists.sh 0x40000001 2>/dev/null)
+    if [ "$indexDefined" == "1" ]; then
+      result_ok "NV index defined."
+      return $?
+    else
+      result_error "NV index not defined. Asset tags cannot be configured."
+      return $?
+    fi
   fi
 }
 
@@ -342,8 +403,8 @@ test_host_attestation_status() {
 }
 
 main(){
-
-  TEST_SEQUENCE="tpm_support tpm_ownership txt_support bindingkey_present signingkey_present nvindex_defined create_whitelist write_assettag host_attestation_status"
+  # binding key and signing key are removed from tagent 2.2 setup so cannot test for them at this time: bindingkey_present signingkey_present 
+  TEST_SEQUENCE="txt_support tpm_support txtstat_present tpm_version tpm_ownership aik_present nvindex_defined create_whitelist write_assettag host_attestation_status"
   local result
   local failed=""
 
