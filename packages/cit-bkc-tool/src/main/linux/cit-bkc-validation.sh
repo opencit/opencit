@@ -180,7 +180,23 @@ test_write_assettag() {
   assettag_http_status_file="write_assettag_http.status"
   certificate_date_file="certificate.data"
   certificate_http_status_file="certificate_http.status"
+  host_attestation_result_file="host_attestation_result_$reboot_count.data"
   bkc_test_name="write_assettag"
+
+  if [ -f "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" ]; then
+    local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" | awk '{print $1}')
+    if [ "$last_status" == "REBOOT" ]; then
+       test_host_attestation_status 
+       local asset_tag_trusted=$(grep 'AssetTag Trusted' "$CIT_BKC_DATA_PATH/$host_attestation_result_file" | awk '{print $3 }')
+       if [ "$asset_tag_trusted" == "true" ]; then
+         result_ok "AssetTag validated."
+         return $?
+       else
+         result_error "AssetTag validation failed."
+         return $?
+       fi
+    fi
+  fi
   
   curl --noproxy 127.0.0.1 -k -vs \
     https://127.0.0.1:8443/mtwilson/v2/hosts?nameEqualTo=127.0.0.1 \
@@ -242,10 +258,12 @@ test_write_assettag() {
 
 # Gets the attestation status of the host. Reboot counter would be appended to the file name to compare the
 # status of the host after reboot.
+# NOTE: the $host_attestation_result_file is used by the test_write_assettag
 test_host_attestation_status() {
   host_attestation_data_file="host_attestation_$reboot_count.data"
   host_attestation_http_status_file="host_attestation_http_$reboot_count.status"
-  bkc_test_name="host_attestation_$reboot_count"
+  host_attestation_result_file="host_attestation_result_$reboot_count.data"
+  bkc_test_name="host_attestation_status"
   
   curl --noproxy 127.0.0.1 -k -vs \
     -H "Content-Type: application/json" \
@@ -272,9 +290,17 @@ test_host_attestation_status() {
   
   Asset_Tag_status=$(xmlstarlet sel -t -v "(/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[@Name='Asset_Tag'])"  $CIT_BKC_DATA_PATH/$host_attestation_data_file | sed '/^\s*$/d; s/ //g')
 
-  # TODO: we need to check for trusted values, since we are whitelisting localhost if it comes back as untrusted there is a problem
-  result_ok "BIOS Trust status:$BIOS_status\nVMM Trust Status:$VMM_status\nAsset Tag Trust status:$Asset_Tag_status"
-  return $?
+  echo "BIOS Trusted: $BIOS_status" >> $host_attestation_result_file
+  echo "VMM Trusted: $VMM_status" >> $host_attestation_result_file
+  echo "AssetTag Trusted: $Asset_Tag_status" >> $host_attestation_result_file
+  echo "Overall Trusted: $Trust_status" >> $host_attestation_result_file
+  if [ "$Trust_status" == "true" ]; then
+    result_ok "Host is trusted";
+    return $?
+  else
+    result_error "Host is not trusted: BIOS=$BIOS_status, VMM=$VMM_status, AssetTag=$Asset_Tag_status"
+    return $?
+  fi
 }
 
 main(){
