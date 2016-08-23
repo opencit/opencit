@@ -437,6 +437,7 @@ run_tests() {
 main(){
   PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
   CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
+  CIT_TPM20_TESTS="aik_present"
   CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
 
   run_tests $PLATFORM_TESTS
@@ -445,6 +446,10 @@ main(){
 
   if [ "$TPM_VERSION" == "1.2" ]; then
     run_tests $CIT_TPM12_TESTS
+    result=$?
+    if [ $result -ne 0 ]; then return $result; fi
+  elif [ "$TPM_VERSION" == "2.0" ]; then
+    run_tests $CIT_TPM20_TESTS
     result=$?
     if [ $result -ne 0 ]; then return $result; fi
   fi
