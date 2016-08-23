@@ -117,6 +117,7 @@ test_tpm_support() {
   fi
 }
 
+
 test_txtstat_present() {
   if is_command_available txt-stat; then
     result_ok "txt-stat is present."
@@ -126,6 +127,7 @@ test_txtstat_present() {
     return $?
   fi
 }
+
 
 # identify tpm version
 # postcondition:
@@ -402,13 +404,12 @@ test_host_attestation_status() {
   fi
 }
 
-main(){
-  # binding key and signing key are removed from tagent 2.2 setup so cannot test for them at this time: bindingkey_present signingkey_present 
-  TEST_SEQUENCE="txt_support tpm_support txtstat_present tpm_version tpm_ownership aik_present nvindex_defined create_whitelist write_assettag host_attestation_status"
+# input: list of tests to run
+run_tests() {
   local result
   local failed=""
 
-  for testname in $TEST_SEQUENCE
+  for testname in $*
   do
     bkc_test_name="$testname"
     # echo "Running test: $testname"
@@ -432,6 +433,28 @@ main(){
   if [ -n "$failed" ]; then return 1; fi
   return 0
 }
+
+main(){
+  PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
+  CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
+  CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
+
+  run_tests $PLATFORM_TESTS
+  result=$?
+  if [ $result -ne 0 ]; then return $result; fi
+
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    run_tests $CIT_TPM12_TESTS
+    result=$?
+    if [ $result -ne 0 ]; then return $result; fi
+  fi
+  run_tests $CIT_FUNCTIONAL_TESTS
+  result=$?
+  if [ $result -ne 0 ]; then return $result; fi
+
+  return 0
+}
+
 main "$@"
 result=$?
 
