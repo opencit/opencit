@@ -54,6 +54,13 @@ result_error() {
   return 1
 }
 
+# records a skipped-test result from $bkc_test_name and given message
+result_skip() {
+  write_to_report_file "SKIP - $*"
+  bkc_test_name=""
+  return 2
+}
+
 # records a reboot-required result from $bkc_test_name and given message
 result_reboot() {
   write_to_report_file "REBOOT - $*"
@@ -64,7 +71,7 @@ result_reboot() {
 
 # Determine the TPM Hardware support
 test_tpm_support() {
-  bkc_test_name="tpm_support"
+  #bkc_test_name="tpm_support"
   if [ -e "/dev/tpm0" ]; then
     result_ok "TPM is supported."
     return $?
@@ -75,7 +82,7 @@ test_tpm_support() {
 }
 
 test_tpm_ownership() {
-  bkc_test_name="tpm_ownership"
+  #bkc_test_name="tpm_ownership"
   if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
     result_ok "TPM is owned."
     return $?
@@ -87,7 +94,7 @@ test_tpm_ownership() {
 
 # Determine the TXT Hardware support
 test_txt_support() {
-  bkc_test_name="txt_support"
+  #bkc_test_name="txt_support"
   TXT=$(cat /proc/cpuinfo | grep -o "smx" | head -1)
   if [ "$TXT" == "smx" ]; then
     result_ok "TXT is supported."
@@ -100,7 +107,7 @@ test_txt_support() {
 
 # Determine is AIK is present
 test_aik_present() {
-  bkc_test_name="aik_present"
+  #bkc_test_name="aik_present"
   AIKCertFile="/opt/trustagent/configuration/aik.pem"
   if [ -f $AIKCertFile ]; then
     result_ok "AIK certificate exists."
@@ -113,7 +120,7 @@ test_aik_present() {
 
 # Determine if binding key is present
 test_bindingkey_present() {
-  bkc_test_name="bindingkey_present"
+  #bkc_test_name="bindingkey_present"
   BindingKeyFile="/opt/trustagent/configuration/bindingkey.pem"
   if [ -f $BindingKeyFile ]; then
     result_ok "Binding key certificate exists."
@@ -126,7 +133,7 @@ test_bindingkey_present() {
 
 # Determine if signing key is present
 test_signingkey_present() {
-  bkc_test_name="signingkey_present"
+  #bkc_test_name="signingkey_present"
   SigningKeyFile="/opt/trustagent/configuration/signingkey.pem"
   if [ -f $SigningKeyFile ]; then
     result_ok "Signing key certificate exists."
@@ -139,7 +146,7 @@ test_signingkey_present() {
 
 # Determine if NV index is defined for asset tag configuration
 test_nvindex_defined() {
-  bkc_test_name="nvindex_defined"
+  #bkc_test_name="nvindex_defined"
   indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
   if [ -n "$indexDefined" ]; then
     result_ok "NV index defined."
@@ -154,7 +161,7 @@ test_nvindex_defined() {
 test_create_whitelist() {
   whitelist_data_file="create_whitelist.data"
   whitelist_http_status_file="create_whitelist_http.status"
-  bkc_test_name="create_whitelist"
+  #bkc_test_name="create_whitelist"
 
   #-s option removes the progress meter
   curl --noproxy 127.0.0.1 -k -vs \
@@ -182,7 +189,7 @@ test_write_assettag() {
   certificate_date_file="certificate.data"
   certificate_http_status_file="certificate_http.status"
   host_attestation_result_file="host_attestation_result_$reboot_count.data"
-  bkc_test_name="write_assettag"
+  #bkc_test_name="write_assettag"
 
   if [ -f "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" ]; then
     local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" | awk '{print $1}')
@@ -264,7 +271,6 @@ test_host_attestation_status() {
   host_attestation_data_file="host_attestation_$reboot_count.data"
   host_attestation_http_status_file="host_attestation_http_$reboot_count.status"
   host_attestation_result_file="host_attestation_result_$reboot_count.data"
-  bkc_test_name="host_attestation_status"
   
   curl --noproxy 127.0.0.1 -k -vs \
     -H "Content-Type: application/json" \
@@ -308,16 +314,30 @@ main(){
 
   TEST_SEQUENCE="tpm_support tpm_ownership txt_support bindingkey_present signingkey_present nvindex_defined create_whitelist write_assettag host_attestation_status"
   local result
+  local failed=""
 
   for testname in $TEST_SEQUENCE
   do
+    bkc_test_name="$testname"
     # echo "Running test: $testname"
-    # security note: this is safe because we are hard-coding test sequence above; there is no user input in $testname
-    eval "test_$testname"
-    result=$?
-    if [ $result -ne 0 ]; then return $result; fi
+    if [ -n "$failed" ]; then
+      result_skip "depends on $failed"
+    else
+      # security note: this is safe because we are hard-coding test sequence above; there is no user input in $testname
+      eval "test_$testname"
+      result=$?
+      if [ $result -eq 1 ]; then
+        # when a test fails, we record the test name then skip rest of tests (see above)
+        failed="$testname"
+      elif [ $result -eq 255 ]; then
+        # reboot required
+        return $result
+      fi
+    fi
+    #if [ $result -ne 0 ]; then return $result; fi
   done
 
+  if [ -n "$failed" ]; then return 1; fi
   return 0
 }
 main "$@"
