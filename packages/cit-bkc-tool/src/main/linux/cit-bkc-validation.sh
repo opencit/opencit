@@ -309,15 +309,15 @@ test_write_assettag() {
     result_error "Error during retrieval of hardware UUID."
     return $?
   fi
-  echo "Successfully called into CIT to retrieve the hardware UUID of the host."
+  echo "Successfully called into CIT to retrieve the hardware UUID of the host." >> $LOG_FILE
   
   hostHardwareUuid=$(xmlstarlet sel -t -v "(/host_collection/hosts/host/hardwareUuid)" $CIT_BKC_DATA_PATH/$assettag_data_file)
   #hostHardwareUuid=$(cat $CIT_BKC_DATA_PATH/$assettag_data_file | grep "hardwareUuid" | sed -n 's/.*<hardwareUuid> *\([^<]*\).*/\1/p')
-  echo "Successfully retrieved the hardware UUID of the host - $hostHardwareUuid"
+  echo "Successfully retrieved the hardware UUID of the host - $hostHardwareUuid" >> $LOG_FILE
   
   hostUuid=$(xmlstarlet sel -t -v "(/host_collection/hosts/host/id)" $CIT_BKC_DATA_PATH/$assettag_data_file)
   #hostUuid=$(cat $CIT_BKC_DATA_PATH/$assettag_data_file | grep "<id>" | sed -n 's/.*<id> *\([^<]*\).*/\1/p')
-  echo "Successfully retrieved the UUID of the host - $hostUuid"
+  echo "Successfully retrieved the UUID of the host - $hostUuid" >> $LOG_FILE
 
   #Now that we have the hardware UUID, create the asset tag certificate
   curl --noproxy 127.0.0.1 -k -vs \
