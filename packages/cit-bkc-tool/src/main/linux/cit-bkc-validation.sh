@@ -112,6 +112,32 @@ test_tpm_support() {
   fi
 }
 
+test_txtstat_present() {
+  if is_command_available txt-stat; then
+    result_ok "txt-stat is present."
+    return $?
+  else
+    result_error "txt-stat is missing."
+    return $?
+  fi
+}
+
+# identify tpm version
+# postcondition:
+#   variable TPM_VERSION is set to 1.2 or 2.0
+test_tpm_version() {
+  export TPM_VERSION
+  if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+    TPM_VERSION=1.2
+    result_ok "TPM 1.2"
+    return $?
+  else
+    TPM_VERSION=
+    result_error "Unknown TPM version"
+    return $?
+  fi
+}
+
 test_tpm_ownership() {
   #bkc_test_name="tpm_ownership"
   if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
@@ -372,7 +398,7 @@ run_tests() {
 }
 
 main(){
-  PLATFORM_TESTS="txt_support tpm_support tpm_version tpm_ownership"
+  PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
   CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
   CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
 
