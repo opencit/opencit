@@ -167,6 +167,24 @@
                                             <type>bin</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
+                                        
+                                        <artifactItem>
+                                            <groupId>net.sourceforge.tboot</groupId>
+                                            <artifactId>tboot</artifactId>
+                                            <version>1.9.4</version>
+                                            <classifier>x86_64</classifier>
+                                            <type>rpm</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>net.sourceforge.tboot</groupId>
+                                            <artifactId>tboot</artifactId>
+                                            <version>1.9.4</version>
+                                            <classifier>amd64</classifier>
+                                            <type>deb</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                        </artifactItem>
+                                        
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
                                     <overWriteReleases>false</overWriteReleases>
