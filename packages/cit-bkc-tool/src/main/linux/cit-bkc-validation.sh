@@ -100,6 +100,11 @@ result_reboot() {
   return 255
 }
 
+is_command_available() {
+  which $* > /dev/null 2>&1
+}  
+
+
 # Determine the TPM Hardware support
 test_tpm_support() {
   #bkc_test_name="tpm_support"
@@ -112,14 +117,61 @@ test_tpm_support() {
   fi
 }
 
-test_tpm_ownership() {
-  #bkc_test_name="tpm_ownership"
-  if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
-    result_ok "TPM is owned."
+
+test_txtstat_present() {
+  if is_command_available txt-stat; then
+    result_ok "txt-stat is present."
     return $?
   else
-    result_error "TPM is not owned."
+    result_error "txt-stat is missing."
     return $?
+  fi
+}
+
+
+# identify tpm version
+# postcondition:
+#   variable TPM_VERSION is set to 1.2 or 2.0
+test_tpm_version() {
+  export TPM_VERSION
+  #local txtstat_tpm2=$(txt-stat | grep "TPM: discrete TPM2.0" | head -n 1)
+  if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+    TPM_VERSION=1.2
+    result_ok "TPM 1.2"
+    return $?
+  elif [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+    TPM_VERSION=2.0
+    result_ok "TPM 2.0"
+    return $?
+  else
+    TPM_VERSION=
+    result_error "Unknown TPM version"
+    return $?
+  fi
+}
+
+
+# depends on test_tpm_version to run first
+test_tpm_ownership() {
+  #bkc_test_name="tpm_ownership"
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    local tpm_owned=$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)
+    if [ "$tpm_owned" == 1 ]; then
+      result_ok "TPM is owned."
+      return $?
+    else
+      result_error "TPM is not owned."
+      return $?
+    fi
+  elif [ "$TPM_VERSION" == "2.0" ]; then
+    local tpm2_owned=$(/opt/trustagent/bin/tpm2-isowned 2>/dev/null)
+    if [ "$tpm2_owned" == "1" ]; then
+      result_ok "TPM is owned."
+      return $?
+    else
+      result_error "TPM is not owned."
+      return $?
+    fi
   fi
 }
 
@@ -178,13 +230,24 @@ test_signingkey_present() {
 # Determine if NV index is defined for asset tag configuration
 test_nvindex_defined() {
   #bkc_test_name="nvindex_defined"
-  indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
-  if [ -n "$indexDefined" ]; then
-    result_ok "NV index defined."
-    return $?
-  else 
-    result_error "NV index not defined. Asset tags cannot be configured."
-    return $?
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    local indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
+    if [ -n "$indexDefined" ]; then
+      result_ok "NV index defined."
+      return $?
+    else 
+      result_error "NV index not defined. Asset tags cannot be configured."
+      return $?
+    fi
+  elif [ "$TPM_VERSION" == "2.0" ]; then
+    local indexDefined=$(/opt/trustagent/bin/tpm2-nvindex-exists.sh 0x40000001 2>/dev/null)
+    if [ "$indexDefined" == "1" ]; then
+      result_ok "NV index defined."
+      return $?
+    else
+      result_error "NV index not defined. Asset tags cannot be configured."
+      return $?
+    fi
   fi
 }
 
@@ -199,7 +262,7 @@ test_create_whitelist() {
     -H "Content-Type: application/json" \
     -H "accept: application/json" \
     -X POST \
-    -d  '{"wl_config":{"add_bios_white_list":"true","add_vmm_white_list":"true","bios_white_list_target":"BIOS_HOST","vmm_white_list_target":"VMM_HOST","bios_pcrs":"0,17","vmm_pcrs":"18,19","register_host":"true","overwrite_whitelist": "true","bios_mle_name":"","vmm_mle_name":"","txt_host_record":{"host_name":"127.0.0.1","add_on_connection_string":"intel:https://127.0.0.1:1443","tls_policy_choice": {"tls_policy_id":"TRUST_FIRST_CERTIFICATE"}}}}' \
+    -d  '{"wl_config":{"add_bios_white_list":"true","add_vmm_white_list":"true","bios_white_list_target":"BIOS_HOST","vmm_white_list_target":"VMM_HOST","bios_pcrs":"0,17","vmm_pcrs":"18","register_host":"true","overwrite_whitelist": "true","bios_mle_name":"","vmm_mle_name":"","txt_host_record":{"host_name":"127.0.0.1","add_on_connection_string":"intel:https://127.0.0.1:1443","tls_policy_choice": {"tls_policy_id":"TRUST_FIRST_CERTIFICATE"}}}}' \
     https://127.0.0.1:8443/mtwilson/v2/rpc/create-whitelist-with-options \
     1>$CIT_BKC_DATA_PATH/$whitelist_data_file 2>$CIT_BKC_DATA_PATH/$whitelist_http_status_file
 
@@ -246,15 +309,15 @@ test_write_assettag() {
     result_error "Error during retrieval of hardware UUID."
     return $?
   fi
-  echo "Successfully called into CIT to retrieve the hardware UUID of the host."
+  echo "Successfully called into CIT to retrieve the hardware UUID of the host." >> $LOG_FILE
   
   hostHardwareUuid=$(xmlstarlet sel -t -v "(/host_collection/hosts/host/hardwareUuid)" $CIT_BKC_DATA_PATH/$assettag_data_file)
   #hostHardwareUuid=$(cat $CIT_BKC_DATA_PATH/$assettag_data_file | grep "hardwareUuid" | sed -n 's/.*<hardwareUuid> *\([^<]*\).*/\1/p')
-  echo "Successfully retrieved the hardware UUID of the host - $hostHardwareUuid"
+  echo "Successfully retrieved the hardware UUID of the host - $hostHardwareUuid" >> $LOG_FILE
   
   hostUuid=$(xmlstarlet sel -t -v "(/host_collection/hosts/host/id)" $CIT_BKC_DATA_PATH/$assettag_data_file)
   #hostUuid=$(cat $CIT_BKC_DATA_PATH/$assettag_data_file | grep "<id>" | sed -n 's/.*<id> *\([^<]*\).*/\1/p')
-  echo "Successfully retrieved the UUID of the host - $hostUuid"
+  echo "Successfully retrieved the UUID of the host - $hostUuid" >> $LOG_FILE
 
   #Now that we have the hardware UUID, create the asset tag certificate
   curl --noproxy 127.0.0.1 -k -vs \
@@ -341,13 +404,12 @@ test_host_attestation_status() {
   fi
 }
 
-main(){
-
-  TEST_SEQUENCE="tpm_support tpm_ownership txt_support bindingkey_present signingkey_present nvindex_defined create_whitelist write_assettag host_attestation_status"
+# input: list of tests to run
+run_tests() {
   local result
   local failed=""
 
-  for testname in $TEST_SEQUENCE
+  for testname in $*
   do
     bkc_test_name="$testname"
     # echo "Running test: $testname"
@@ -371,6 +433,33 @@ main(){
   if [ -n "$failed" ]; then return 1; fi
   return 0
 }
+
+main(){
+  PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
+  CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
+  CIT_TPM20_TESTS="aik_present"
+  CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
+
+  run_tests $PLATFORM_TESTS
+  result=$?
+  if [ $result -ne 0 ]; then return $result; fi
+
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    run_tests $CIT_TPM12_TESTS
+    result=$?
+    if [ $result -ne 0 ]; then return $result; fi
+  elif [ "$TPM_VERSION" == "2.0" ]; then
+    run_tests $CIT_TPM20_TESTS
+    result=$?
+    if [ $result -ne 0 ]; then return $result; fi
+  fi
+  run_tests $CIT_FUNCTIONAL_TESTS
+  result=$?
+  if [ $result -ne 0 ]; then return $result; fi
+
+  return 0
+}
+
 main "$@"
 result=$?
 
