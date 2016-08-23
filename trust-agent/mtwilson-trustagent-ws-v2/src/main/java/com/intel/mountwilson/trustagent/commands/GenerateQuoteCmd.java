@@ -150,11 +150,17 @@ public class GenerateQuoteCmd implements ICommand {
                                 quoteAlgWithPcrs = quoteAlgWithPcrs + "0x04" + ":" + selectedPcrList;
                             else if (pcrBanks[i].equals("SHA256"))
                                 quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0B" + ":" + selectedPcrList;  
+                            else if (pcrBanks[i].equals("SHA384"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0C" + ":" + selectedPcrList;  
+                            else if (pcrBanks[i].equals("SHA512"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0D" + ":" + selectedPcrList;  
+                            else if (pcrBanks[i].equals("SM3_256"))
+                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x12" + ":" + selectedPcrList;                              
                             else
-                                log.debug("Unrecognized pcrbank value: {}", pcrBanks[i]);
+                                log.error("Unsupported pcrbank value: {}", pcrBanks[i]);
                         }
                     }
-                    
+
                     /* 1st: get pcrs - tpm2_listpcrs -g 0x4 -o pcrs.out
                      *      This commmand returns specified PCR bank pcr values (all 24 pcrs in the bank)
                     */
