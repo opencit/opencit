@@ -155,7 +155,7 @@ if [ "$TPM_VERSION" == "1.2" ]; then
   install_patched_tpm_tools
 elif [ "$TPM_VERSION" == "2.0" ]; then
   install_tboot_tpm2
-  install_tboot_tss2_tpmtools2
+  install_tss2_tpmtools2
 elif [ -z "$TPM_VERSION" ]; then
   echo "Cannot detect TPM version"
 else
@@ -290,7 +290,7 @@ migrate_to_local() {
   fi
   # so if we are not already running from trustagent home, copy everything to it
   if [ "$script_path" != "$TRUSTAGENT_HOME/installer" ]; then
-    rm -f $TRUSTAGENT_HOME/installer
+    rm -rf $TRUSTAGENT_HOME/installer
     mkdir -p $TRUSTAGENT_HOME/installer
     \cp -r $script_path/* $TRUSTAGENT_HOME/installer/
   fi
