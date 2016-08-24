@@ -1,0 +1,9 @@
+tpm_support:
+tpm_ownership:
+txt_support:
+bindingkey_present:
+signingkey_present:
+create_whitelist:
+write_assettag:
+nvindex_defined:
+host_attestation_status:
