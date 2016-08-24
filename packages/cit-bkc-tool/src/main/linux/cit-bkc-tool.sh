@@ -58,7 +58,16 @@ cit_bkc_help() {
 }
 
 cit_bkc_print_env() {
-  env | grep -E "^CIT_BKC"
+  env | grep -E "^CIT_BKC|^http_proxy|^https_proxy"
+}
+
+cit_bkc_store_proxy_env() {
+  if [ -n "$http_proxy" ]; then
+    echo "http_proxy=$http_proxy" > $CIT_BKC_CONF_PATH/http_proxy.env
+  fi
+  if [ -n "$https_proxy" ]; then
+    echo "https_proxy=$https_proxy" > $CIT_BKC_CONF_PATH/https_proxy.env
+  fi
 }
 
 ###################################################################################################
@@ -553,6 +562,7 @@ cit_bkc_uninstall() {
 
 ###################################################################################################
 
+cit_bkc_store_proxy_env
 load_util
 load_env_dir "$CIT_BKC_CONF_PATH"
 parse_args $*
