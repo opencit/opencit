@@ -242,6 +242,9 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
 done
 set_owner_for_mtwilson_directories
 
+#cp version script to configuration directory
+cp version $MTWILSON_HOME/configuration/version
+
 #cp mtwilson control script and setup symlinks
 cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
 rm -f $MTWILSON_HOME/bin/mtwilson
