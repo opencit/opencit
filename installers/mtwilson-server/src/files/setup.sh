@@ -524,7 +524,7 @@ unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
 mkdir -p $MTWILSON_HOME/share/scripts
 
 #this is now done in LinuxUtil setup.sh
-#cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
 
 # deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
 cp functions "$MTWILSON_BIN/functions.sh"
@@ -663,7 +663,6 @@ find_installer() {
 
 monit_installer=`find_installer monit`
 logrotate_installer=`find_installer logrotate`
-mtwilson_util=`find_installer mtwilson-linux-util` #MtWilsonLinuxUtil`
 management_service=`find_installer mtwilson-management-service` #ManagementService`
 whitelist_service=`find_installer mtwilson-whitelist-service` #WLMService`
 attestation_service=`find_installer mtwilson-attestation-service` #AttestationService`
@@ -672,10 +671,6 @@ glassfish_installer=`find_installer glassfish`
 tomcat_installer=`find_installer tomcat`
 
 # Verify the installers we need are present before we start installing
-if [ ! -e "$mtwilson_util" ]; then
-  echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
-  exit -1;
-fi
 if [ -n "$opt_glassfish" ] && [ ! -e "$glassfish_installer" ]; then
   echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
   exit -1;
@@ -960,11 +955,6 @@ fi
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 chmod +x *.bin
-
-echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
-./$mtwilson_util  >> $INSTALL_LOG_FILE
-if [ $? -ne 0 ]; then echo_failure "Failed to install linux utility"; exit -1; fi
-echo "Mt Wilson linux utility installation done" | tee -a  $INSTALL_LOG_FILE
 
 mkdir -p /opt/mtwilson/logs
 touch /opt/mtwilson/logs/mtwilson.log
