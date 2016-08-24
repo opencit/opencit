@@ -367,22 +367,10 @@ cit_bkc_run() {
         cit_bkc_reboot
         return $?
     else
-        echo_failure "cit-bkc-tool: validation error $result, exiting"
+        echo_failure "cit-bkc-tool: validation error"
+        cit_bkc_report
         return $result
     fi
-
-    cit_bkc_report
-
-    #cit_bkc_run_next
-    #
-    # check if test is complete
-    #if [ "$CIT_BKC_TEST_COMPLETE" == "yes" ]; then
-    #  if cit_bkc_run_next_report; then
-    #    cit_bkc_report
-    #  fi
-    #fi
-    
-    #cit_bkc_status
 }
 
 
