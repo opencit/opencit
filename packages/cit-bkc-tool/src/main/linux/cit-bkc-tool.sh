@@ -90,6 +90,15 @@ is_done() {
   return 1
 }
 
+is_error() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "ERROR" ]; then
+    return 0
+  fi
+  return 1
+}
+
 # Run the installer with console progress bar, using a combined marker file
 # for both Attestation Service and Trust Agent
 install_bkc_tool() {
@@ -226,6 +235,11 @@ cit_bkc_run_installation() {
     elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
         #echo "cit-bkc-tool is installed; run 'cit-bkc-tool' to continue"
         result=0
+    elif is_error $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        #echo "cit-bkc-tool installation error; run 'cit-bkc-tool' to continue"
+        rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
+        install_bkc_tool
+        result=$?
     else
         #echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
         rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
@@ -254,6 +268,11 @@ cit_bkc_run_validation() {
     elif is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
         #echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
         result=0
+    elif is_error $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        #echo "cit-bkc-tool validation error; run 'cit-bkc-tool report' to see report"
+        rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
+        run_bkc_tool
+        result=$?
     else
         rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
         run_bkc_tool
@@ -293,8 +312,10 @@ cit_bkc_reboot() {
         export_cit_bkc_reboot_counter
         increment_cit_bkc_reboot_counter
         # a reboot is needed
-        echo "Rebooting in 1 minute... 'shutdown -c' to cancel";
-        shutdown --reboot +1 >/dev/null
+        echo
+        echo_info "Rebooting in 1 minute... 'shutdown -c' to cancel";
+        echo
+        shutdown --reboot +1 >/dev/null 2>&1
         exit 255
     else
       echo_warning "cit-bkc-tool: reboot required, run 'cit-bkc-tool' after reboot to continue"
@@ -318,7 +339,7 @@ cit_bkc_run() {
     cit_bkc_run_installation
     result=$?
     if [ $result -eq 0 ]; then
-        echo_success "cit-bkc-tool: installation complete"
+        echo "cit-bkc-tool is installed" >/dev/null
     elif [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
         return $?
@@ -331,7 +352,7 @@ cit_bkc_run() {
     result=$?
     cit_bkc_run_next_report
     if [ $result -eq 0 ]; then
-        echo_success "cit-bkc-tool: validation complete"
+        echo_success "cit-bkc-tool validation complete" >/dev/null
     elif [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_report
         cit_bkc_reboot
@@ -366,15 +387,18 @@ cit_bkc_status_installation() {
           echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
           $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $CIT_BKC_MONITOR_PATH/install-bkc-tool
           if is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-              echo "cit-bkc-tool installation complete; run 'cit-bkc-tool' to continue"
+              echo "cit-bkc-tool is installed"
               return 0
           fi
         else
           echo "cit-bkc-tool was interrupted during installation; run 'cit-bkc-tool' to continue"
         fi
     elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        echo "cit-bkc-tool is installed; run 'cit-bkc-tool' to continue"
+        echo "cit-bkc-tool is installed"
         return 0
+    elif is_error $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        echo "cit-bkc-tool installation error;  run 'cit-bkc-tool' to continue"
+        return 1
     else
         echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
     fi
@@ -400,6 +424,9 @@ cit_bkc_status_validation() {
     elif is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
         echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
         return 0
+    elif is_error $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        echo "cit-bkc-tool validation error; run 'cit-bkc-tool report' to see report"
+        return 1
     else
         rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
         echo "cit-bkc-tool validation status unknown; run 'cit-bkc-tool' to continue"
