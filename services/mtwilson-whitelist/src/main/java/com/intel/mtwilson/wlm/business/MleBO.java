@@ -470,7 +470,12 @@ public class MleBO {
      * @return
      */
     private String getRequiredManifestList(List<ManifestData> mleManifests) {
-        String manifestList = mleManifests == null ? "" : StringUtils.join(manifestNames(mleManifests), ",");
+        Set<String> names = new TreeSet<>();
+        String manifestList = "";
+        if(mleManifests != null) {
+            names.addAll(manifestNames(mleManifests));
+            manifestList = StringUtils.join(names, ",");
+        }      
         log.debug("Required Manifest list: " + manifestList);
         return manifestList;
     }
