@@ -266,9 +266,10 @@ reboot_maybe() {
     # reboot is required
       migrate_to_local
       resume_after_reboot
-      echo "Rebooting in 60 seconds... kill $$ to cancel";
-      sleep 10
-      shutdown --reboot now
+      echo
+      echo "Rebooting in 1 minute... use 'shutdown -c' to cancel";
+      echo
+      shutdown --reboot +1 "CIT Trust Agent: Rebooting in 1 minute... use 'shutdown -c' to cancel" >/dev/null 2>&1
       exit 0
   elif [ $result -eq 255 ]; then
       # reboot is required but will not be automatic
