@@ -142,12 +142,15 @@ test_txtstat_present() {
 #   variable TPM_VERSION is set to 1.2 or 2.0
 test_tpm_version() {
   export TPM_VERSION
-  #local txtstat_tpm2=$(txt-stat | grep "TPM: discrete TPM2.0" | head -n 1)
   if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
     TPM_VERSION=1.2
     result_ok "TPM 1.2"
     return $?
   elif [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+    TPM_VERSION=2.0
+    result_ok "TPM 2.0"
+    return $?
+  elif [[ -n $(txt-stat | grep "TPM: discrete TPM2.0" | head -n 1) ]]; then
     TPM_VERSION=2.0
     result_ok "TPM 2.0"
     return $?
