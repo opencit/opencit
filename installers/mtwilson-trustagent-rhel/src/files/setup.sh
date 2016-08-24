@@ -658,7 +658,6 @@ return_dir=`pwd`
 
 cd $return_dir
 
-
 if [ "$(whoami)" == "root" ]; then
   if [ "$TPM_VERSION" == "1.2" ]; then
     tcsdBinary=$(which tcsd)
@@ -829,6 +828,35 @@ fi
 
 # before running any tagent commands update the extensions cache file
 tagent setup update-extensions-cache-file --force 2>/dev/null
+
+# for tpm2.0, check if we own the tpm and if not just clear ownership here so
+# other setup steps will succeed
+maybe_clear_tpm2() {
+    local is_owned=$($TRUSTAGENT_HOME/bin/tpm2-isowned)
+    if [ "$is_owned" == "1" ]; then
+        # it's owned, do we have the password?
+        local tpm_passwd="$TPM_OWNER_SECRET"
+        if [ -z "$tpm_passwd" ]; then
+            tpm_passwd=$(tagent config tpm.owner.secret)
+        fi
+        if [ -n "$tpm_passwd" ]; then
+            local is_owner=$(TRUSTAGENT_HOME/bin/tpm2-isowner "$tpm_passwd")
+            if [ "$is_owner" == "0" ]; then
+                # we are not the owner. clear it.
+                tpm2_takeownership -c
+                return $?
+            fi
+        else
+            # we don't have the password. clear it.
+            tpm2_takeownership -c
+            return $?
+        fi
+    fi
+}
+
+if [ "$TPM_VERSION" == "2.0" ]; then
+    maybe_clear_tpm2
+fi
 
   # create a trustagent username "mtwilson" with no password and all privileges
   # which allows mtwilson to access it until mtwilson UI is updated to allow
