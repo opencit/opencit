@@ -558,6 +558,10 @@ cit_bkc_uninstall() {
 
     cit_bkc_uninstall_mtwilson
     cit_bkc_uninstall_tagent
+
+    rm_file "$HOME/mtwilson.env"
+    rm_file "$HOME/trustagent.env"
+
 }
 
 ###################################################################################################
