@@ -338,11 +338,11 @@ test_write_assettag() {
     result_error "Error during creation the asset tag certificate for host with hardware UUID $hostHardwareUuid."
     return $?
   fi
-  echo "Successfully created the asset tag certificate for host with hardware UUID $hostHardwareUuid."
+  echo "Successfully created the asset tag certificate for host with hardware UUID $hostHardwareUuid." >> $LOG_FILE
 
   certificateId=$(xmlstarlet sel -t -v "(/certificate/id)" $CIT_BKC_DATA_PATH/$certificate_date_file)
   #certificateId=$(cat $CIT_BKC_DATA_PATH/$certificate_date_file | grep "<id>" | sed -n 's/.*<id> *\([^<]*\).*/\1/p')
-  echo "Successfully retrieved the certificate id - $certificateId"
+  echo "Successfully retrieved the certificate id - $certificateId" >> $LOG_FILE
   
   #Push the tag
   #We are using the -a tag to append to the file instead of overwriting it.
@@ -367,24 +367,44 @@ test_write_assettag() {
 # status of the host after reboot.
 # NOTE: the $host_attestation_result_file is used by the test_write_assettag
 test_host_attestation_status() {
+  host_information_data_file="host_information.data"
+  host_information_http_status_file="host_information_http.status"
   host_attestation_data_file="host_attestation_$reboot_count.data"
   host_attestation_http_status_file="host_attestation_http_$reboot_count.status"
   host_attestation_result_file="host_attestation_result_$reboot_count.data"
+  
+  if [ -z "${hostUuid}" ]; then
+    curl --noproxy 127.0.0.1 -k -vs \
+      -H "Content-Type: application/xml" \
+      -H "Accept: application/xml" \
+      https://127.0.0.1:8443/mtwilson/v2/hosts?nameEqualTo=127.0.0.1 \
+      1>$CIT_BKC_DATA_PATH/$host_information_data_file 2>$CIT_BKC_DATA_PATH/$host_information_http_status_file
+    
+    result=$(cat $CIT_BKC_DATA_PATH/$host_information_http_status_file | grep "200 OK")
+    if [ -z "$result" ]; then
+      result_error "Error during retrieval of host information."
+      return $?
+    fi
+    echo "Successfully called into CIT to retrieve the host information." >> $LOG_FILE
+    
+    hostUuid=$(xmlstarlet sel -t -v "(/host_collection/hosts/host/id)" $CIT_BKC_DATA_PATH/$host_information_data_file)
+    echo "Successfully retrieved the host UUID - $hostUuid" >> $LOG_FILE
+  fi
   
   curl --noproxy 127.0.0.1 -k -vs \
     -H "Content-Type: application/json" \
     -H "accept: application/samlassertion+xml" \
     -X POST \
-    -d '{"host_uuid":"HostID"}' \
+    -d "{\"host_uuid\":\"$hostUuid\"}" \
     https://127.0.0.1:8443/mtwilson/v2/host-attestations \
     1>$CIT_BKC_DATA_PATH/$host_attestation_data_file 2>$CIT_BKC_DATA_PATH/$host_attestation_http_status_file
 
-  result=$(cat $CIT_BKC_DATA_PATH/$assettag_http_status_file | grep "200 OK" )
+  result=$(cat $CIT_BKC_DATA_PATH/$host_attestation_http_status_file | grep "200 OK" )
   if [ -z "$result" ]; then
     result_error "Error retrieving the attestation information for the host."
     return $?
   fi
-  echo "Successfully retrieved the attestation information for the host."
+  echo "Successfully retrieved the attestation information for the host." >> $LOG_FILE
   
   #Extract the results of the attestation and write it to the report file. Since there will be new lines and white spaces
   #we need to remove them as well.
@@ -396,7 +416,7 @@ test_host_attestation_status() {
   
   Asset_Tag_status=$(xmlstarlet sel -t -v "(/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[@Name='Asset_Tag'])"  $CIT_BKC_DATA_PATH/$host_attestation_data_file | sed '/^\s*$/d; s/ //g')
 
-  echo "BIOS Trusted: $BIOS_status" >> $host_attestation_result_file
+  echo "BIOS Trusted: $BIOS_status" > $host_attestation_result_file
   echo "VMM Trusted: $VMM_status" >> $host_attestation_result_file
   echo "AssetTag Trusted: $Asset_Tag_status" >> $host_attestation_result_file
   echo "Overall Trusted: $Trust_status" >> $host_attestation_result_file
