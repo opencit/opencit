@@ -13,47 +13,40 @@
 
 #####
 
-# load installer environment file, if present
-if [ -f $HOME/cit.env ]; then
-  echo "Loading environment variables from $HOME/cit.env"
-  source $HOME/cit.env
-  env_file_exports=$(cat $HOME/cit.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
-fi
 
-# load functions file, if present
-if [ -f functions.sh ]; then
-  source functions.sh
-fi
+load_util() {
+  if [ -f /usr/local/share/cit-bkc-tool/functions.sh ]; then
+    source /usr/local/share/cit-bkc-tool/functions.sh
+  fi
+  if [ -f /usr/local/share/cit-bkc-tool/util.sh ]; then
+    source /usr/local/share/cit-bkc-tool/util.sh
+  fi
+}
 
-#####
-# INSTALL BKC TOOL
-chmod +x cit-bkc-tool.sh
-\cp cit-bkc-tool.sh /usr/local/bin/cit-bkc-tool
-mkdir -p /usr/local/share/cit-bkc-tool
-chmod +x cit-bkc-validation.sh
-\cp cit-bkc-validation.sh /usr/local/share/cit-bkc-tool
+mtwilson_stop() {
+  if which mtwilson >/dev/null 2>&1; then
+    mtwilson stop
+  fi
+  if which cit >/dev/null 2>&1; then
+    cit stop
+  fi
+}
 
-#####
-# INSTALL ATTESTATION SERVICE
-export MTWILSON_LOG_LEVEL=DEBUG
+tagent_stop() {
+  if which tagent >/dev/null 2>&1; then
+    tagent stop
+  fi
+}
 
-# if Attestation Service is already installed, stop it while we upgrade/reinstall
-if which mtwilson >/dev/null 2>&1; then
-  mtwilson stop
-fi
-if which cit >/dev/null 2>&1; then
-  cit stop
-fi
 
 # mtwilson-server-2.1-SNAPSHOT.bin
 
-preconfigure_mtwilson() {
+mtwilson_preconfigure() {
   if [ -f $HOME/mtwilson.env ]; then
     echo "using pre-configured mtwilson.env"
     return
   fi
-  \cp mtwilson.env $HOME/mtwilson.env
+  cp $CIT_BKC_PACKAGE_PATH/mtwilson.env $HOME/mtwilson.env
   local admin_passwd=$(generate_password 16)
   update_property_in_file MTWILSON_ADMIN_PASSWORD $HOME/mtwilson.env "$admin_passwd"
   local database_passwd=$(generate_password 16)
@@ -66,43 +59,57 @@ preconfigure_mtwilson() {
   update_property_in_file MTWILSON_TAG_XML_PASSWORD $HOME/mtwilson.env "$tagxml_passwd"
 }
 
-MTWILSON_BIN=`ls -1 mtwilson-server-*.bin | head -n 1`
-if [ -n "$MTWILSON_BIN" ]; then
-  preconfigure_mtwilson
-  chmod +x $MTWILSON_BIN
-  ./$MTWILSON_BIN
-  if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Attestation Service"; exit 1; fi
-fi
+mtwilson_install() {
+  local mtwilson_bin=$(ls -1 $CIT_BKC_PACKAGE_PATH/mtwilson-server-*.bin | head -n 1 2>/dev/null)
+  if [ -n "$mtwilson_bin" ]; then
+    mtwilson_preconfigure
+    chmod +x $mtwilson_bin
+    export MTWILSON_LOG_LEVEL=DEBUG
+    $mtwilson_bin
+    if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Attestation Service"; exit 1; fi
+  fi
+}
 
-
-#####
-# INSTALL TRUST AGENT
-export TAGENT_LOG_LEVEL=DEBUG
-
-# if Trust Agent is already installed, stop it while we upgrade/reinstall
-if which tagent >/dev/null 2>&1; then
-  tagent stop
-fi
 
 # mtwilson-trustagent-rhel-2.1-20160518.001429-5.bin
 
-preconfigure_trustagent() {
+tagent_preconfigure() {
   if [ -f $HOME/trustagent.env ]; then
     echo "using pre-configured trustagent.env"
     return
   fi
-  \cp trustagent.env $HOME/trustagent.env
+  cp $CIT_BKC_PACKAGE_PATH/trustagent.env $HOME/trustagent.env
   local tls_sha1=$(/usr/bin/sha1sum /opt/mtwilson/configuration/ssl.crt | /usr/bin/awk '{print $1}')
   local tls_sha256=$(/usr/bin/sha256sum /opt/mtwilson/configuration/ssl.crt | /usr/bin/awk '{print $1}')
   update_property_in_file MTWILSON_TLS_CERT_SHA1 $HOME/trustagent.env "$tls_sha1"
   update_property_in_file MTWILSON_TLS_CERT_SHA256 $HOME/trustagent.env "$tls_sha256"
 }
 
+tagent_install() {
+  local tagent_bin=$(ls -1 $CIT_BKC_PACKAGE_PATH/mtwilson-trustagent-*.bin | head -n 1 2>/dev/null)
+  if [ -n "$tagent_bin" ]; then
+    tagent_preconfigure
+    chmod +x $tagent_bin
+    export TAGENT_LOG_LEVEL=DEBUG
+    export TRUSTAGENT_REBOOT=${CIT_BKC_REBOOT:-yes}
+    $tagent_bin
+    if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Trust Agent"; exit 1; fi
+  fi
+}
 
-TAGENT_BIN=`ls -1 mtwilson-trustagent-*.bin | head -n 1`
-if [ -n "$TAGENT_BIN" ]; then
-  preconfigure_trustagent
-  chmod +x $TAGENT_BIN
-  ./$TAGENT_BIN
-  if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Trust Agent"; exit 1; fi
-fi
+
+load_util
+load_env_dir /usr/local/etc/cit-bkc-tool
+
+# INSTALL ATTESTATION SERVICE
+
+# if Attestation Service is already installed, stop it while we upgrade/reinstall
+mtwilson_stop
+mtwilson_install
+
+# INSTALL TRUST AGENT
+
+# if Trust Agent is already installed, stop it while we upgrade/reinstall
+tagent_stop
+tagent_install
+
