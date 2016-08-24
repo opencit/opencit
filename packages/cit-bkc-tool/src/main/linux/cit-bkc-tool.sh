@@ -110,7 +110,7 @@ run_bkc_tool() {
     echo "Running BKC Tool for Intel(R) Cloud Integrity Technology..."
     rm -rf $CIT_BKC_MONITOR_PATH/run-bkc-tool
     mkdir -p $CIT_BKC_MONITOR_PATH/run-bkc-tool
-    cp cit-bkc-tool.mark $CIT_BKC_MONITOR_PATH/run-bkc-tool/.markers
+    cp $CIT_BKC_PACKAGE_PATH/cit-bkc-tool.mark $CIT_BKC_MONITOR_PATH/run-bkc-tool/.markers
     export_cit_bkc_reboot_counter
     $CIT_BKC_PACKAGE_PATH/monitor.sh $CIT_BKC_PACKAGE_PATH/cit-bkc-validation.sh $CIT_BKC_MONITOR_PATH/run-bkc-tool/.markers $CIT_BKC_MONITOR_PATH/run-bkc-tool
     local result=$?
@@ -318,11 +318,10 @@ cit_bkc_run() {
     cit_bkc_run_installation
     result=$?
     if [ $result -eq 0 ]; then
-        if is_reboot_required; then
-            cit_bkc_reboot
-            return $?
-        fi
         echo_success "cit-bkc-tool: installation complete"
+    elif [ $result -eq 255 ] || is_reboot_required; then
+        cit_bkc_reboot
+        return $?
     else
         echo_failure "cit-bkc-tool: installation error $result, exiting"
         return $result
@@ -332,14 +331,13 @@ cit_bkc_run() {
     result=$?
     cit_bkc_run_next_report
     if [ $result -eq 0 ]; then
-        if is_reboot_required; then
-            cit_bkc_reboot
-            return $?
-        fi
-        #echo_success "cit-bkc-tool: validation complete"
-    #else
-        #echo_failure "cit-bkc-tool: validation error $result, exiting"
-        #return $result
+        echo_success "cit-bkc-tool: validation complete"
+    elif [ $result -eq 255 ] || is_reboot_required; then
+        cit_bkc_reboot
+        return $?
+    else
+        echo_failure "cit-bkc-tool: validation error $result, exiting"
+        return $result
     fi
 
     cit_bkc_report
@@ -417,38 +415,6 @@ cit_bkc_status() {
           return 0
         fi
       fi
-    fi
-}
-
-# precondition:
-#    directory CIT_BKC_DATA_PATH exists (may be empty)
-# postcondition:
-#    test data is stored in CIT_BKC_DATA_PATH
-#    if test is complete, variable is set CIT_BKC_TEST_COMPLETE=yes
-cit_bkc_run_next() {
-    local reboot_counter_file=$CIT_BKC_DATA_PATH/.reboot_counter
-    #  TODO: run next step based on current state
-    if [ -f $reboot_counter_file ]; then
-        CIT_BKC_REBOOT_COUNTER=$(cat $reboot_counter_file)
-    else
-        CIT_BKC_REBOOT_COUNTER=0
-    fi
-    /usr/local/share/cit-bkc-tool/cit-bkc-validation.sh $CIT_BKC_REBOOT_COUNTER
-    local result=$?
-    if [ $result -eq 0 ]; then
-      CIT_BKC_TEST_COMPLETE=yes
-    elif [ $result -eq 1 ]; then
-      CIT_BKC_TEST_COMPLETE=no
-      CIT_BKC_TEST_ERROR=yes
-    elif [ $result -eq 255 ]; then
-      CIT_BKC_TEST_COMPLETE=no
-      # a reboot is needed
-      ((CIT_BKC_REBOOT_COUNTER+=1))
-      echo "$CIT_BKC_REBOOT_COUNTER" > $reboot_counter_file
-      echo "Rebooting in 60 seconds... kill $$ to cancel";
-      sleep 10
-      shutdown --reboot now
-      exit 0
     fi
 }
 
