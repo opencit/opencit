@@ -328,7 +328,7 @@ test_write_assettag() {
     -H "Content-Type: application/xml" \
     -H "accept: application/xml" \
     -X POST \
-    -d '<?xml version="1.0" encoding="UTF-8"?><selections xmlns="urn:mtwilson-tag-selection"><selection><subject><uuid>$hostHardwareUuid</uuid></subject><attribute oid="2.5.4.789.1"><text> Country=US</text></attribute><attribute oid="2.5.4.789.1"><text>State=CA</text></attribute><attribute oid="2.5.4.789.1"><text> City=Folsom</text></attribute></selection></selections>' \
+    -d "<?xml version=\"1.0\" encoding=\"UTF-8\"?><selections xmlns=\"urn:mtwilson-tag-selection\"><selection><subject><uuid>$hostHardwareUuid</uuid></subject><attribute oid=\"2.5.4.789.1\"><text>Country=US</text></attribute><attribute oid=\"2.5.4.789.1\"><text>State=CA</text></attribute><attribute oid=\"2.5.4.789.1\"><text>City=Folsom</text></attribute></selection></selections>" \
     https://127.0.0.1:8443/mtwilson/v2/tag-certificate-requests-rpc/provision?subject=$hostHardwareUuid \
     1>$CIT_BKC_DATA_PATH/$certificate_date_file 2>$CIT_BKC_DATA_PATH/$certificate_http_status_file
 
@@ -349,7 +349,7 @@ test_write_assettag() {
     -H "Content-Type: application/json" \
     -H "accept: application/json" \
     -X POST \
-    -d '{"certificate_id":"$certificateId","host":"$hostUuid"}' \
+    -d "{\"certificate_id\":\"$certificateId\",\"host\":\"$hostUuid\"}" \
     https://127.0.0.1:8443/mtwilson/v2/rpc/deploy-tag-certificate \
     1>$CIT_BKC_DATA_PATH/$assettag_data_file 2>$CIT_BKC_DATA_PATH/$assettag_http_status_file
   
