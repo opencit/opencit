@@ -5,7 +5,6 @@
     <artifactId>cit-bkc-tool</artifactId>
     
     <packaging>pom</packaging>
-    <name>CIT BKC Tool</name>
     <description>Installs a tool to validate Intel Cloud Integrity Technology (CIT) with the Best Known Configuration (BKC)</description>
     
     <parent>

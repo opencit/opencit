@@ -12,7 +12,13 @@
 # 1 on error while running any test
 # 255 on reboot required from any test
 
+# import environment variables defined by the main script
+eval $(cit-bkc-tool print-env)
+
+CIT_BKC_PACKAGE_PATH=${CIT_BKC_PACKAGE_PATH:-/usr/local/share/cit-bkc-tool}
+CIT_BKC_CONF_PATH=${CIT_BKC_CONF_PATH:-/usr/local/etc/cit-bkc-tool}
 CIT_BKC_DATA_PATH=${CIT_BKC_DATA_PATH:-/usr/local/var/cit-bkc-tool/data}
+
 LOG_FILE=$CIT_BKC_DATA_PATH/validation.log
 mkdir -p $CIT_BKC_DATA_PATH
 
@@ -20,14 +26,16 @@ CIT_BKC_VALIDATION_REBOOT_REQUIRED=no
 
 ASSET_TAG_NVRAM_INDEX=0x40000011
 
-# TERM_DISPLAY_MODE can be "plain" or "color"
-TERM_DISPLAY_MODE=color
-TERM_STATUS_COLUMN=60
-TERM_COLOR_GREEN="\\033[1;32m"
-TERM_COLOR_CYAN="\\033[1;36m"
-TERM_COLOR_RED="\\033[1;31m"
-TERM_COLOR_YELLOW="\\033[1;33m"
-TERM_COLOR_NORMAL="\\033[0;39m"
+#load_util() {
+  if [ -f $CIT_BKC_PACKAGE_PATH/functions.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/functions.sh
+  fi
+  if [ -f $CIT_BKC_PACKAGE_PATH/util.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/util.sh
+  fi
+#}
+#load_util
+#load_env_dir "$CIT_BKC_CONF_PATH"
 
   # if the user has passed in the reboot count, use it. Or else set it to 1 as default.
   if [ -z "$1" ]; then
@@ -90,7 +98,7 @@ result_skip() {
 
 # records a reboot-required result from $bkc_test_name and given message
 result_reboot() {
-  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_GREEN}"; fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
   echo -e "$bkc_test_name: REBOOT - $*"
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
@@ -133,7 +141,7 @@ test_tpm_version() {
     return $?
   else
     TPM_VERSION=
-    result_error "Unknown TPM version"
+    result_error "Unsupported TPM version"
     return $?
   fi
 }
@@ -390,9 +398,11 @@ test_host_attestation_status() {
 }
 
 # input: list of tests to run
+# postcondition:
+#   if a test fails,  the variable "failed" will contain the name of the test
 run_tests() {
   local result
-  local failed=""
+  failed=""
 
   for testname in $*
   do
@@ -419,6 +429,21 @@ run_tests() {
   return 0
 }
 
+skip_tests() {
+  for testname in $*
+  do
+    bkc_test_name="$testname"
+    # echo "Running test: $testname"
+    if [ -n "$failed" ]; then
+      result_skip "depends on $failed"
+    else
+      result_skip "due to errors in preceding tests"
+    fi
+    #if [ $result -ne 0 ]; then return $result; fi
+  done
+  return 2
+}
+
 main(){
   PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
   CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
@@ -426,7 +451,10 @@ main(){
 
   run_tests $PLATFORM_TESTS
   result=$?
-  if [ $result -ne 0 ]; then return $result; fi
+  if [ $result -ne 0 ]; then
+    skip_tests $CIT_TPM12_TESTS $CIT_FUNCTIONAL_TESTS
+    return $result
+  fi
 
   if [ "$TPM_VERSION" == "1.2" ]; then
     run_tests $CIT_TPM12_TESTS

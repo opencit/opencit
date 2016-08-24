@@ -41,7 +41,7 @@ tagent_stop() {
 
 # mtwilson-server-2.1-SNAPSHOT.bin
 
-preconfigure_mtwilson() {
+mtwilson_preconfigure() {
   if [ -f $HOME/mtwilson.env ]; then
     echo "using pre-configured mtwilson.env"
     return
@@ -59,10 +59,10 @@ preconfigure_mtwilson() {
   update_property_in_file MTWILSON_TAG_XML_PASSWORD $HOME/mtwilson.env "$tagxml_passwd"
 }
 
-install_mtwilson() {
+mtwilson_install() {
   local mtwilson_bin=$(ls -1 $CIT_BKC_PACKAGE_PATH/mtwilson-server-*.bin | head -n 1 2>/dev/null)
   if [ -n "$mtwilson_bin" ]; then
-    preconfigure_mtwilson
+    mtwilson_preconfigure
     chmod +x $mtwilson_bin
     export MTWILSON_LOG_LEVEL=DEBUG
     $mtwilson_bin
@@ -73,7 +73,7 @@ install_mtwilson() {
 
 # mtwilson-trustagent-rhel-2.1-20160518.001429-5.bin
 
-preconfigure_trustagent() {
+tagent_preconfigure() {
   if [ -f $HOME/trustagent.env ]; then
     echo "using pre-configured trustagent.env"
     return
@@ -85,10 +85,10 @@ preconfigure_trustagent() {
   update_property_in_file MTWILSON_TLS_CERT_SHA256 $HOME/trustagent.env "$tls_sha256"
 }
 
-install_tagent() {
+tagent_install() {
   local tagent_bin=$(ls -1 $CIT_BKC_PACKAGE_PATH/mtwilson-trustagent-*.bin | head -n 1 2>/dev/null)
   if [ -n "$tagent_bin" ]; then
-    preconfigure_trustagent
+    tagent_preconfigure
     chmod +x $tagent_bin
     export TAGENT_LOG_LEVEL=DEBUG
     export TRUSTAGENT_REBOOT=${CIT_BKC_REBOOT:-yes}

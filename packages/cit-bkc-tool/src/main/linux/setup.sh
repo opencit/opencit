@@ -5,13 +5,16 @@
 # 2. run the "install.sh" script from the destination folder
 #    that script will run subordinate installers and automatically resume after reboot
 
-source cit-bkc-tool.env
+source ./cit-bkc-tool.env
 
 chmod +x *.sh *.bin
 
-rm -rf $CIT_BKC_PACKAGE_PATH
-mkdir -p $CIT_BKC_PACKAGE_PATH
-cp * $CIT_BKC_PACKAGE_PATH
+pwd=$(pwd)
+if [ "$pwd" != "$CIT_BKC_PACKAGE_PATH" ]; then
+    rm -rf $CIT_BKC_PACKAGE_PATH
+    mkdir -p $CIT_BKC_PACKAGE_PATH
+    cp * $CIT_BKC_PACKAGE_PATH
+fi
 
 mkdir -p $CIT_BKC_BIN_PATH
 rm -f $CIT_BKC_BIN_PATH/cit-bkc-tool

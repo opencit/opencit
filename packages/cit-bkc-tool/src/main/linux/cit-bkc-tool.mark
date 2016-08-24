@@ -1,6 +1,9 @@
-tpm_support:
-tpm_ownership:
 txt_support:
+txtstat_present:
+tpm_support:
+tpm_version:
+tpm_ownership:
+aik_present:
 bindingkey_present:
 signingkey_present:
 create_whitelist:
