@@ -403,7 +403,8 @@ test_host_attestation_status() {
     -H "Content-Type: application/json" \
     -H "accept: application/samlassertion+xml" \
     -X POST \
-    -d "{\"host_uuid\":\"$hostUuid\"}" \
+    #-d "{\"host_uuid\":\"$hostUuid\"}" \
+    -d "{\"host_name\":\"127.0.0.1\"}" \
     https://127.0.0.1:8443/mtwilson/v2/host-attestations \
     1>$CIT_BKC_DATA_PATH/$host_attestation_data_file 2>$CIT_BKC_DATA_PATH/$host_attestation_http_status_file
 
