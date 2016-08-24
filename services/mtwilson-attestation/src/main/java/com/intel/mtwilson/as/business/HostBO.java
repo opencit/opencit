@@ -555,9 +555,9 @@ public class HostBO {
                             log.debug("LEGACY MODE: Host specific modules will be retrieved from the host that extends into PCR 19.");
                             // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
-                        } else if(useDaMode && biosMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
+                        } else if(useDaMode && vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
                             log.debug("DA MODE: Host specific modules will be retrieved from the host that extends into PCR 17.");
-                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(biosMleId, pcrManifest, hostType);
+                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(vmmMleId, pcrManifest, hostType);
                         } else {
                             log.debug("Host specific modules will not be configured since PCR 17 or 19 with the correct TPM Mode are not selected for attestation");
                         }

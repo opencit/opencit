@@ -9,7 +9,7 @@ var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
 var regIPAddress = new RegExp(/^[0-9_.]+$/);
 var regPortNo = new RegExp(/^[0-9]+$/);
-// 0 = TA,  1 == vmware, 2 == citrix
+// 0 = TA,  1 == vmware, 2 == citrix, 3 == microsoft
 var isVMWare = 0;
 
 
@@ -371,15 +371,22 @@ function fnChangehostType(element,isWhiteListConfigPage) {
         $('#vmwareHostType').hide();
 		$('#citrixHostType').show();
         
-	}else{
-        isVMWare= 0;
-        
-        $('#vmwareHostType').hide();
-        $('#citrixHostType').hide();
-        $('#openSourcesHostType').show();
-        $('#openSourcesHostType_username').hide();
-        $('#openSourcesHostType_password').hide();
-        
+	}else if (type.indexOf("Windows") != -1) {
+            isVMWare = 3;
+            $('#vmwareHostType').hide();
+          $('#citrixHostType').hide();
+          $('#openSourcesHostType').show();
+          $('#openSourcesHostType_username').hide();
+          $('#openSourcesHostType_password').hide();      
+        } else {
+            isVMWare= 0;
+
+            $('#vmwareHostType').hide();
+            $('#citrixHostType').hide();
+            $('#openSourcesHostType').show();
+            $('#openSourcesHostType_username').hide();
+            $('#openSourcesHostType_password').hide();
+
         if (type == "Linux") {
             document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Kernel and OS";
         }

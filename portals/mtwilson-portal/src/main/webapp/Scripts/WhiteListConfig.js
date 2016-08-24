@@ -209,7 +209,7 @@ function fnUploadWhiteListConfigurationData() {
                 if (valid1 && valid2) {
                     validation = true;
                     hostVo.vmWareType = false;
-                    hostVo.hostType = "intel";
+                    hostVo.hostType = isVMWare === 3 ? "microsoft": "intel";
                     hostVo.hostName = $('#whiteListOpenSource_Host').val();
                     hostVo.hostPortNo = $('#whiteListOpenSource_portNO').val();
                     hostVo.vCenterString = "https://" + $('#whiteListOpenSource_Host').val() + ":" + $('#whiteListOpenSource_portNO').val() +
