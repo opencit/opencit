@@ -70,7 +70,6 @@ result_ok() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "OK - $*"
-  bkc_test_name=""
   return 0
 }
 
@@ -81,7 +80,6 @@ result_error() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "ERROR - $*"
-  bkc_test_name=""
   return 1
 }
 
@@ -92,7 +90,6 @@ result_skip() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "SKIP - $*"
-  bkc_test_name=""
   return 2
 }
 
@@ -103,14 +100,12 @@ result_reboot() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "REBOOT - $*"
-  bkc_test_name=""
   CIT_BKC_VALIDATION_REBOOT_REQUIRED=yes
   return 255
 }
 
 # Determine the TPM Hardware support
 test_tpm_support() {
-  #bkc_test_name="tpm_support"
   if [ -e "/dev/tpm0" ]; then
     result_ok "TPM is supported."
     return $?
@@ -147,7 +142,6 @@ test_tpm_version() {
 }
 
 test_tpm_ownership() {
-  #bkc_test_name="tpm_ownership"
   if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
     result_ok "TPM is owned."
     return $?
@@ -159,7 +153,6 @@ test_tpm_ownership() {
 
 # Determine the TXT Hardware support
 test_txt_support() {
-  #bkc_test_name="txt_support"
   TXT=$(cat /proc/cpuinfo | grep -o "smx" | head -1)
   if [ "$TXT" == "smx" ]; then
     result_ok "TXT is supported."
@@ -172,7 +165,6 @@ test_txt_support() {
 
 # Determine is AIK is present
 test_aik_present() {
-  #bkc_test_name="aik_present"
   AIKCertFile="/opt/trustagent/configuration/aik.pem"
   if [ -f $AIKCertFile ]; then
     result_ok "AIK certificate exists."
@@ -185,7 +177,6 @@ test_aik_present() {
 
 # Determine if binding key is present
 test_bindingkey_present() {
-  #bkc_test_name="bindingkey_present"
   BindingKeyFile="/opt/trustagent/configuration/bindingkey.pem"
   if [ -f $BindingKeyFile ]; then
     result_ok "Binding key certificate exists."
@@ -198,7 +189,6 @@ test_bindingkey_present() {
 
 # Determine if signing key is present
 test_signingkey_present() {
-  #bkc_test_name="signingkey_present"
   SigningKeyFile="/opt/trustagent/configuration/signingkey.pem"
   if [ -f $SigningKeyFile ]; then
     result_ok "Signing key certificate exists."
@@ -211,7 +201,6 @@ test_signingkey_present() {
 
 # Determine if NV index is defined for asset tag configuration
 test_nvindex_defined() {
-  #bkc_test_name="nvindex_defined"
   indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
   if [ -n "$indexDefined" ]; then
     result_ok "NV index defined."
@@ -226,7 +215,6 @@ test_nvindex_defined() {
 test_create_whitelist() {
   whitelist_data_file="create_whitelist.data"
   whitelist_http_status_file="create_whitelist_http.status"
-  #bkc_test_name="create_whitelist"
 
   #-s option removes the progress meter
   curl --noproxy 127.0.0.1 -k -vs \
@@ -254,12 +242,16 @@ test_write_assettag() {
   certificate_date_file="certificate.data"
   certificate_http_status_file="certificate_http.status"
   host_attestation_result_file="host_attestation_result_$reboot_count.data"
-  #bkc_test_name="write_assettag"
 
   if [ -f "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" ]; then
     local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" | awk '{print $1}')
     if [ "$last_status" == "REBOOT" ]; then
        test_host_attestation_status 
+       local attestation_result=$?
+       if [ $attestation_result -ne 0 ]; then
+        result_error "Host attestation failed; cannot validate asset tag"
+        return $?
+       fi
        local asset_tag_trusted=$(grep 'AssetTag Trusted' "$CIT_BKC_DATA_PATH/$host_attestation_result_file" | awk '{print $3 }')
        if [ "$asset_tag_trusted" == "true" ]; then
          result_ok "AssetTag validated."
