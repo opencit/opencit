@@ -362,7 +362,7 @@ function fnChangehostType(element,isWhiteListConfigPage) {
 	if (isWhiteListConfigPage == true) {
 		$('#whiteListMessage').html('');
 		fnClearAllConfigFiled();
-		changeRequiredPCR();
+		//changeRequiredPCR();
 		fnDisableOrEnableUploadButton(false);
 	}
 }
