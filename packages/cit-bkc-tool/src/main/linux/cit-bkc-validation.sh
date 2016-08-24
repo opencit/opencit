@@ -12,7 +12,13 @@
 # 1 on error while running any test
 # 255 on reboot required from any test
 
+# import environment variables defined by the main script
+eval $(cit-bkc-tool print-env)
+
+CIT_BKC_PACKAGE_PATH=${CIT_BKC_PACKAGE_PATH:-/usr/local/share/cit-bkc-tool}
+CIT_BKC_CONF_PATH=${CIT_BKC_CONF_PATH:-/usr/local/etc/cit-bkc-tool}
 CIT_BKC_DATA_PATH=${CIT_BKC_DATA_PATH:-/usr/local/var/cit-bkc-tool/data}
+
 LOG_FILE=$CIT_BKC_DATA_PATH/validation.log
 mkdir -p $CIT_BKC_DATA_PATH
 
@@ -20,14 +26,16 @@ CIT_BKC_VALIDATION_REBOOT_REQUIRED=no
 
 ASSET_TAG_NVRAM_INDEX=0x40000011
 
-# TERM_DISPLAY_MODE can be "plain" or "color"
-TERM_DISPLAY_MODE=color
-TERM_STATUS_COLUMN=60
-TERM_COLOR_GREEN="\\033[1;32m"
-TERM_COLOR_CYAN="\\033[1;36m"
-TERM_COLOR_RED="\\033[1;31m"
-TERM_COLOR_YELLOW="\\033[1;33m"
-TERM_COLOR_NORMAL="\\033[0;39m"
+#load_util() {
+  if [ -f $CIT_BKC_PACKAGE_PATH/functions.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/functions.sh
+  fi
+  if [ -f $CIT_BKC_PACKAGE_PATH/util.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/util.sh
+  fi
+#}
+#load_util
+#load_env_dir "$CIT_BKC_CONF_PATH"
 
   # if the user has passed in the reboot count, use it. Or else set it to 1 as default.
   if [ -z "$1" ]; then
@@ -62,7 +70,6 @@ result_ok() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "OK - $*"
-  bkc_test_name=""
   return 0
 }
 
@@ -73,7 +80,6 @@ result_error() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "ERROR - $*"
-  bkc_test_name=""
   return 1
 }
 
@@ -84,25 +90,22 @@ result_skip() {
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "SKIP - $*"
-  bkc_test_name=""
   return 2
 }
 
 # records a reboot-required result from $bkc_test_name and given message
 result_reboot() {
-  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_GREEN}"; fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
   echo -e "$bkc_test_name: REBOOT - $*"
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
 
   write_to_report_file "REBOOT - $*"
-  bkc_test_name=""
   CIT_BKC_VALIDATION_REBOOT_REQUIRED=yes
   return 255
 }
 
 # Determine the TPM Hardware support
 test_tpm_support() {
-  #bkc_test_name="tpm_support"
   if [ -e "/dev/tpm0" ]; then
     result_ok "TPM is supported."
     return $?
@@ -133,13 +136,12 @@ test_tpm_version() {
     return $?
   else
     TPM_VERSION=
-    result_error "Unknown TPM version"
+    result_error "Unsupported TPM version"
     return $?
   fi
 }
 
 test_tpm_ownership() {
-  #bkc_test_name="tpm_ownership"
   if [[ "$(cat /sys/class/misc/tpm0/device/owned 2>/dev/null)" == 1 ]]; then
     result_ok "TPM is owned."
     return $?
@@ -151,7 +153,6 @@ test_tpm_ownership() {
 
 # Determine the TXT Hardware support
 test_txt_support() {
-  #bkc_test_name="txt_support"
   TXT=$(cat /proc/cpuinfo | grep -o "smx" | head -1)
   if [ "$TXT" == "smx" ]; then
     result_ok "TXT is supported."
@@ -164,7 +165,6 @@ test_txt_support() {
 
 # Determine is AIK is present
 test_aik_present() {
-  #bkc_test_name="aik_present"
   AIKCertFile="/opt/trustagent/configuration/aik.pem"
   if [ -f $AIKCertFile ]; then
     result_ok "AIK certificate exists."
@@ -177,7 +177,6 @@ test_aik_present() {
 
 # Determine if binding key is present
 test_bindingkey_present() {
-  #bkc_test_name="bindingkey_present"
   BindingKeyFile="/opt/trustagent/configuration/bindingkey.pem"
   if [ -f $BindingKeyFile ]; then
     result_ok "Binding key certificate exists."
@@ -190,7 +189,6 @@ test_bindingkey_present() {
 
 # Determine if signing key is present
 test_signingkey_present() {
-  #bkc_test_name="signingkey_present"
   SigningKeyFile="/opt/trustagent/configuration/signingkey.pem"
   if [ -f $SigningKeyFile ]; then
     result_ok "Signing key certificate exists."
@@ -203,7 +201,6 @@ test_signingkey_present() {
 
 # Determine if NV index is defined for asset tag configuration
 test_nvindex_defined() {
-  #bkc_test_name="nvindex_defined"
   indexDefined=$(tpm_nvinfo -i "$ASSET_TAG_NVRAM_INDEX" 2>/dev/null)
   if [ -n "$indexDefined" ]; then
     result_ok "NV index defined."
@@ -218,7 +215,6 @@ test_nvindex_defined() {
 test_create_whitelist() {
   whitelist_data_file="create_whitelist.data"
   whitelist_http_status_file="create_whitelist_http.status"
-  #bkc_test_name="create_whitelist"
 
   #-s option removes the progress meter
   curl --noproxy 127.0.0.1 -k -vs \
@@ -246,12 +242,16 @@ test_write_assettag() {
   certificate_date_file="certificate.data"
   certificate_http_status_file="certificate_http.status"
   host_attestation_result_file="host_attestation_result_$reboot_count.data"
-  #bkc_test_name="write_assettag"
 
   if [ -f "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" ]; then
     local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${bkc_test_name}.report" | awk '{print $1}')
     if [ "$last_status" == "REBOOT" ]; then
        test_host_attestation_status 
+       local attestation_result=$?
+       if [ $attestation_result -ne 0 ]; then
+        result_error "Host attestation failed; cannot validate asset tag"
+        return $?
+       fi
        local asset_tag_trusted=$(grep 'AssetTag Trusted' "$CIT_BKC_DATA_PATH/$host_attestation_result_file" | awk '{print $3 }')
        if [ "$asset_tag_trusted" == "true" ]; then
          result_ok "AssetTag validated."
@@ -355,7 +355,8 @@ test_host_attestation_status() {
     -H "Content-Type: application/json" \
     -H "accept: application/samlassertion+xml" \
     -X POST \
-    -d "{\"host_uuid\":\"$hostUuid\"}" \
+    #-d "{\"host_uuid\":\"$hostUuid\"}" \
+    -d "{\"host_name\":\"127.0.0.1\"}" \
     https://127.0.0.1:8443/mtwilson/v2/host-attestations \
     1>$CIT_BKC_DATA_PATH/$host_attestation_data_file 2>$CIT_BKC_DATA_PATH/$host_attestation_http_status_file
 
@@ -390,9 +391,11 @@ test_host_attestation_status() {
 }
 
 # input: list of tests to run
+# postcondition:
+#   if a test fails,  the variable "failed" will contain the name of the test
 run_tests() {
   local result
-  local failed=""
+  failed=""
 
   for testname in $*
   do
@@ -419,6 +422,21 @@ run_tests() {
   return 0
 }
 
+skip_tests() {
+  for testname in $*
+  do
+    bkc_test_name="$testname"
+    # echo "Running test: $testname"
+    if [ -n "$failed" ]; then
+      result_skip "depends on $failed"
+    else
+      result_skip "due to errors in preceding tests"
+    fi
+    #if [ $result -ne 0 ]; then return $result; fi
+  done
+  return 2
+}
+
 main(){
   PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
   CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
@@ -426,16 +444,25 @@ main(){
 
   run_tests $PLATFORM_TESTS
   result=$?
-  if [ $result -ne 0 ]; then return $result; fi
+  if [ $result -ne 0 ]; then
+    skip_tests $CIT_TPM12_TESTS $CIT_FUNCTIONAL_TESTS
+    return $result
+  fi
 
   if [ "$TPM_VERSION" == "1.2" ]; then
     run_tests $CIT_TPM12_TESTS
     result=$?
-    if [ $result -ne 0 ]; then return $result; fi
+    if [ $result -ne 0 ]; then
+      skip_tests $CIT_FUNCTIONAL_TESTS
+      return $result
+    fi
   fi
+
   run_tests $CIT_FUNCTIONAL_TESTS
   result=$?
-  if [ $result -ne 0 ]; then return $result; fi
+  if [ $result -ne 0 ]; then
+    return $result
+  fi
 
   return 0
 }

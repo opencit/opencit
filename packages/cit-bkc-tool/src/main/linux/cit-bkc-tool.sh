@@ -1,47 +1,151 @@
 #!/bin/bash
 
-# chkconfig: 2345 80 30
-# description: CIT BKC TOOL
+CIT_BKC_PACKAGE_PATH=${CIT_BKC_PACKAGE_PATH:-/usr/local/share/cit-bkc-tool}
+CIT_BKC_CONF_PATH=${CIT_BKC_CONF_PATH:-/usr/local/etc/cit-bkc-tool}
 
-### BEGIN INIT INFO
-# Provides:          cit
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
-# Should-Start:      $portmap
-# Should-Stop:       $portmap
-# X-Start-Before:    nis
-# X-Stop-After:      nis
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# X-Interactive:     true
-# Short-Description: cit
-# Description:       Main script to run cit-bkc commands
-### END INIT INFO
+parse_args() {
+  case "$1" in
+    help)
+      shift
+      cit_bkc_help
+      return $?
+      ;;
+    clear)
+      shift
+      cit_bkc_clear
+      return $?
+      ;;
+    report)
+      shift
+      cit_bkc_report $*
+      return $?
+      ;;
+    status)
+      shift
+      cit_bkc_status $*
+      return $?
+      ;;
+    uninstall)
+      shift
+      cit_bkc_uninstall $*
+      return $?
+      ;;
+    print-env)
+      shift
+      cit_bkc_print_env $*
+      return $?
+      ;;
+    *)
+      cit_bkc_run $*
+      return $?
+      ;;
+  esac
+}
 
-export CIT_BKC_TOOL=/usr/local/bin/cit-bkc-tool
-export CIT_BKC_CONF_PATH=/usr/local/etc/cit-bkc-tool
-export CIT_BKC_DATA_PATH=/usr/local/var/cit-bkc-tool/data
-export CIT_BKC_REPORTS_PATH=/usr/local/var/cit-bkc-tool/reports
-export CIT_BKC_RUN_PATH=/run/cit-bkc-tool
-export CIT_BKC_PID_FILE=/run/cit-bkc-tool/pid
-
-
-###################################################################################################
-
-cit_bkc_help() {
-    echo "Available commands:"
-    echo "    cit-bkc-tool help                 display available commands"
-    echo "    cit-bkc-tool                      run CIT BKC self-test but do not reboot"
-    echo "    cit-bkc-tool --reboot             run CIT BKC self-test and automatically reboot as needed"
-    echo "    cit-bkc-tool clear                clear CIT BKC self-test data (must do this to start a new self-test)"
-    echo "    cit-bkc-tool status               prints current status (not started, in progress, report is ready, etc.)"
-    echo "    cit-bkc-tool report               prints most recent report to stdout"
-    echo "    cit-bkc-tool uninstall            remove CIT components and the CIT BKC tool (but keep logs)"
-    echo "    cit-bkc-tool uninstall --purge    remove CIT components and the CIT BKC tool including logs"
+load_util() {
+  if [ -f $CIT_BKC_PACKAGE_PATH/functions.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/functions.sh
+  fi
+  if [ -f $CIT_BKC_PACKAGE_PATH/util.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/util.sh
+  fi
 }
 
 ###################################################################################################
 
+cit_bkc_help() {
+  cat $CIT_BKC_PACKAGE_PATH/README.md
+}
+
+cit_bkc_print_env() {
+  env | grep -E "^CIT_BKC|^http_proxy|^https_proxy"
+}
+
+cit_bkc_store_proxy_env() {
+  if [ -n "$http_proxy" ]; then
+    echo "http_proxy=$http_proxy" > $CIT_BKC_CONF_PATH/http_proxy.env
+  fi
+  if [ -n "$https_proxy" ]; then
+    echo "https_proxy=$https_proxy" > $CIT_BKC_CONF_PATH/https_proxy.env
+  fi
+}
+
+###################################################################################################
+
+is_active() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "ACTIVE" ]; then
+    return 0
+  fi
+  return 1
+}
+
+
+is_running() {
+  local target_pid=$($CIT_BKC_PACKAGE_PATH/monitor.sh --pid $1)
+  if [ -n "$target_pid" ]; then
+    return 0
+  fi
+  return 1
+}
+
+is_done() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "DONE" ]; then
+    return 0
+  fi
+  return 1
+}
+
+is_error() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "ERROR" ]; then
+    return 0
+  fi
+  return 1
+}
+
+# Run the installer with console progress bar, using a combined marker file
+# for both Attestation Service and Trust Agent
+install_bkc_tool() {
+    echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
+    rm -rf $CIT_BKC_MONITOR_PATH/install-bkc-tool
+    mkdir -p $CIT_BKC_MONITOR_PATH/install-bkc-tool
+    cat $CIT_BKC_PACKAGE_PATH/cit-service.mark $CIT_BKC_PACKAGE_PATH/cit-agent.mark > $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers
+    $CIT_BKC_PACKAGE_PATH/monitor.sh $CIT_BKC_PACKAGE_PATH/install.sh $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers $CIT_BKC_MONITOR_PATH/install-bkc-tool
+    local result=$?
+    if [ $result -ne 0 ]; then
+      echo_failure "Installation failed"
+      echo_info "Log file: $CIT_BKC_MONITOR_PATH/install-bkc-tool/stdout"
+    fi
+    return $result
+}
+
+run_bkc_tool() {
+    echo "Running BKC Tool for Intel(R) Cloud Integrity Technology..."
+    rm -rf $CIT_BKC_MONITOR_PATH/run-bkc-tool
+    mkdir -p $CIT_BKC_MONITOR_PATH/run-bkc-tool
+    cp $CIT_BKC_PACKAGE_PATH/cit-bkc-tool.mark $CIT_BKC_MONITOR_PATH/run-bkc-tool/.markers
+    export_cit_bkc_reboot_counter
+    $CIT_BKC_PACKAGE_PATH/monitor.sh $CIT_BKC_PACKAGE_PATH/cit-bkc-validation.sh $CIT_BKC_MONITOR_PATH/run-bkc-tool/.markers $CIT_BKC_MONITOR_PATH/run-bkc-tool
+    local result=$?
+    if [ $result -eq 0 ]; then
+      CIT_BKC_TEST_COMPLETE=yes
+    elif [ $result -eq 1 ]; then
+      CIT_BKC_TEST_COMPLETE=no
+      CIT_BKC_TEST_ERROR=yes
+      #echo_failure "Validation failed"
+      #echo_info "Log file: $CIT_BKC_MONITOR_PATH/run-bkc-tool/stdout"
+    elif [ $result -eq 255 ]; then
+      CIT_BKC_TEST_COMPLETE=no
+      mkdir -p $(dirname $CIT_BKC_REBOOT_FILE)
+      touch $CIT_BKC_REBOOT_FILE
+    fi
+    return $result
+}
 
 # precondition:
 # variable CIT_BKC_REBOOT is set to 'yes' for auto-reboot or 'no' (or anything else) for interactive mode
@@ -53,14 +157,11 @@ cit_bkc_help() {
 # ( export CIT_BKC_REBOOT=no && cit_bkc_setup_reboot && crontab -l )
 cit_bkc_setup_reboot() {
     touch /tmp/cit-bkc-tool.crontab && chmod 600 /tmp/cit-bkc-tool.crontab
-    if [ "$CIT_BKC_REBOOT" == "yes" ]; then
-        echo "# cit-bkc-tool auto-reboot mode" > /tmp/cit-bkc-tool.crontab
-        echo "@reboot /usr/local/bin/cit-bkc-tool --reboot" >> /tmp/cit-bkc-tool.crontab
-    else
-        echo "# cit-bkc-tool interactive mode" > /tmp/cit-bkc-tool.crontab
-    fi
+    echo "# cit-bkc-tool auto-resume after reboot" > /tmp/cit-bkc-tool.crontab
+    echo "@reboot /usr/local/bin/cit-bkc-tool" >> /tmp/cit-bkc-tool.crontab
     # remove any existing lines with cit-bkc-tool and then append new lines with cit-bkc-tool we just prepared
     crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
+    rm -f /tmp/cit-bkc-tool.crontab
 }
 
 # precondition: ~/.bash_profile exists
@@ -108,7 +209,7 @@ cit_bkc_is_running() {
   fi
   if [ -z "$CIT_BKC_PID" ]; then
     # check the process list just in case the pid file is stale
-    CIT_BKC_PID=$(ps -A ww | grep -v grep | grep "$CIT_BKC_TOOL run" | awk '{ print $1 }')
+    CIT_BKC_PID=$(ps -A ww | grep -v grep | grep "cit-bkc-tool run" | awk '{ print $1 }')
   fi
   if [ -z "$CIT_BKC_PID" ]; then
     # CIT is not running
@@ -124,68 +225,242 @@ cit_bkc_clear() {
     rm -rf $CIT_BKC_DATA_PATH $CIT_BKC_REPORTS_PATH $CIT_BKC_RUN_PATH
 }
 
+# return: 0 if installation complete and ready for validation, 1 otherwise
+cit_bkc_run_installation() {
+    local result
+    # did the mtwilson and tagent installers run already? check combined status
+    if [ ! -d "$CIT_BKC_MONITOR_PATH/install-bkc-tool" ]; then
+        # no monitor files, so run the installer with progress bar
+        install_bkc_tool
+        result=$?
+    elif is_active $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        if is_running $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+            echo "cit-bkc-tool already running, run 'cit-bkc-tool status' to monitor"
+            result=1
+        else
+            install_bkc_tool
+            result=$?
+        fi
+    elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        #echo "cit-bkc-tool is installed; run 'cit-bkc-tool' to continue"
+        result=0
+    elif is_error $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        #echo "cit-bkc-tool installation error; run 'cit-bkc-tool' to continue"
+        rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
+        install_bkc_tool
+        result=$?
+    else
+        #echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
+        rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
+        install_bkc_tool
+        result=$?
+    fi
+    return $result
+}
+
+# return: 0 if validation complete and ready for reporting, 1 otherwise
+cit_bkc_run_validation() {
+    local result
+    # did the validation script run already? check status
+    if [ ! -d "$CIT_BKC_MONITOR_PATH/run-bkc-tool" ]; then
+        # no monitor files, so run the installer with progress bar
+        run_bkc_tool
+        result=$?
+    elif is_active $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        if is_running $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+            echo "cit-bkc-tool already running, run 'cit-bkc-tool status' to monitor"
+            result=1
+        else
+            run_bkc_tool
+            result=$?
+        fi
+    elif is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        #echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
+        result=0
+    elif is_error $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        #echo "cit-bkc-tool validation error; run 'cit-bkc-tool report' to see report"
+        rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
+        run_bkc_tool
+        result=$?
+    else
+        rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
+        run_bkc_tool
+        result=$?
+    fi
+    return $result
+}
+
+is_reboot_required() {
+  if [ -f "$CIT_BKC_REBOOT_FILE" ]; then
+    return 0
+  fi
+  return 1
+}
+
+# reads the reboot counter and exports CIT_BKC_REBOOT_COUNTER
+export_cit_bkc_reboot_counter() {
+    local reboot_counter_file=$CIT_BKC_DATA_PATH/.reboot_counter
+    if [ -f $reboot_counter_file ]; then
+        export CIT_BKC_REBOOT_COUNTER=$(cat $reboot_counter_file)
+    else
+        export CIT_BKC_REBOOT_COUNTER=0
+    fi
+}
+
+# depends on export_cit_bkc_reboot_counter
+increment_cit_bkc_reboot_counter() {
+    local reboot_counter_file=$CIT_BKC_DATA_PATH/.reboot_counter
+    ((CIT_BKC_REBOOT_COUNTER+=1))
+    echo "$CIT_BKC_REBOOT_COUNTER" > $reboot_counter_file
+}
+
+cit_bkc_reboot() {
+    cit_bkc_setup_reboot
+    cit_bkc_setup_notification
+    if [ "$CIT_BKC_REBOOT" == "yes" ]; then
+        export_cit_bkc_reboot_counter
+        increment_cit_bkc_reboot_counter
+        # a reboot is needed
+        echo
+        echo_info "Rebooting in 1 minute... 'shutdown -c' to cancel";
+        echo
+        shutdown --reboot +1 >/dev/null 2>&1
+        exit 255
+    else
+      echo_warning "cit-bkc-tool: reboot required, run 'cit-bkc-tool' after reboot to continue"
+      exit 255
+    fi
+}
+
 # precondition:
 #   for new self-test the data has already been cleared with cit_bkc_clear()
 #   for continue self-test the data from prior run is stored in CIT_BKC_DATA_PATH
 # parameters:
-#   optional parameter '--reboot' if user wants automatic reboot
+#   none; export CIT_BKC_REBOOT=no to turn off automatic reboots
 # postcondition:
 #   test data is stored in CIT_BKC_DATA_PATH
 #   if test is complete, report is in CIT_BKC_REPORTS_PATH
 cit_bkc_run() {
-    if [ "$1" == "--reboot" ]; then export CIT_BKC_REBOOT=yes; else export CIT_BKC_REBOOT=no; fi
-    mkdir -p $CIT_BKC_DATA_PATH $CIT_BKC_REPORTS_PATH
-    cit_bkc_setup_notification
-    cit_bkc_setup_reboot
+    export CIT_BKC_REBOOT=${CIT_BKC_REBOOT:-yes}
+    local result
 
-    cit_bkc_run_next
+    # did the mtwilson and tagent installers run already? check combined status
+    cit_bkc_run_installation
+    result=$?
+    if [ $result -eq 0 ]; then
+        echo "cit-bkc-tool is installed" >/dev/null
+    elif [ $result -eq 255 ] || is_reboot_required; then
+        cit_bkc_reboot
+        return $?
+    else
+        echo_failure "cit-bkc-tool: installation error $result, exiting"
+        return $result
+    fi
 
+    cit_bkc_run_validation
+    result=$?
+    cit_bkc_run_next_report
+    if [ $result -eq 0 ]; then
+        echo_success "cit-bkc-tool validation complete" >/dev/null
+    elif [ $result -eq 255 ] || is_reboot_required; then
+        cit_bkc_report
+        cit_bkc_reboot
+        return $?
+    else
+        echo_failure "cit-bkc-tool: validation error $result, exiting"
+        return $result
+    fi
+
+    cit_bkc_report
+
+    #cit_bkc_run_next
+    #
     # check if test is complete
     #if [ "$CIT_BKC_TEST_COMPLETE" == "yes" ]; then
     #  if cit_bkc_run_next_report; then
     #    cit_bkc_report
     #  fi
     #fi
-    cit_bkc_run_next_report
+    
     #cit_bkc_status
 }
 
-# precondition:
-#    directory CIT_BKC_DATA_PATH exists (may be empty)
-# postcondition:
-#    test data is stored in CIT_BKC_DATA_PATH
-#    if test is complete, variable is set CIT_BKC_TEST_COMPLETE=yes
-cit_bkc_run_next() {
-    local reboot_counter_file=$CIT_BKC_DATA_PATH/.reboot_counter
-    #  TODO: run next step based on current state
-    if [ -f $reboot_counter_file ]; then
-        CIT_BKC_REBOOT_COUNTER=$(cat $reboot_counter_file)
+
+cit_bkc_status_installation() {
+    # are mtwilson and tagent installed?
+    if [ ! -d "$CIT_BKC_MONITOR_PATH/install-bkc-tool" ]; then
+        echo "cit-bkc-tool is not installed; run 'cit-bkc-tool' to continue"
+    elif is_active $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        if is_running $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+          # install in progress, so monitor the other process
+          echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
+          $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $CIT_BKC_MONITOR_PATH/install-bkc-tool
+          if is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+              echo "cit-bkc-tool is installed"
+              return 0
+          fi
+        else
+          echo "cit-bkc-tool was interrupted during installation; run 'cit-bkc-tool' to continue"
+        fi
+    elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        echo "cit-bkc-tool is installed"
+        return 0
+    elif is_error $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
+        echo "cit-bkc-tool installation error;  run 'cit-bkc-tool' to continue"
+        return 1
     else
-        CIT_BKC_REBOOT_COUNTER=0
+        echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
     fi
-    /usr/local/share/cit-bkc-tool/cit-bkc-validation.sh $CIT_BKC_REBOOT_COUNTER
-    local result=$?
-    if [ $result -eq 0 ]; then
-      CIT_BKC_TEST_COMPLETE=yes
-    elif [ $result -eq 1 ]; then
-      CIT_BKC_TEST_COMPLETE=no
-      CIT_BKC_TEST_ERROR=yes
-    elif [ $result -eq 255 ]; then
-      CIT_BKC_TEST_COMPLETE=no
-      # a reboot is needed
-      ((CIT_BKC_REBOOT_COUNTER+=1))
-      echo "$CIT_BKC_REBOOT_COUNTER" > $reboot_counter_file
-      echo "Rebooting in 60 seconds... kill $$ to cancel";
-      sleep 10
-      shutdown --reboot now
-      exit 0
+    return 1
+}
+
+cit_bkc_status_validation() {
+    # assume mtwilson and tagent are installed, now check on validation tests
+    if [ ! -d "$CIT_BKC_MONITOR_PATH/run-bkc-tool" ]; then
+        echo "cit-bkc-tool ready; run 'cit-bkc-tool' to continue"
+    elif is_active $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        if is_running $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+          # test in progress, so monitor the other process
+          echo "Running BKC Tool for Intel(R) Cloud Integrity Technology..."
+          $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $CIT_BKC_MONITOR_PATH/run-bkc-tool
+          if is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+              echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
+              return 0
+          fi
+        else
+          echo "cit-bkc-tool was interrupted during validation; run 'cit-bkc-tool' to continue"
+        fi
+    elif is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
+        return 0
+    elif is_error $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
+        echo "cit-bkc-tool validation error; run 'cit-bkc-tool report' to see report"
+        return 1
+    else
+        rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
+        echo "cit-bkc-tool validation status unknown; run 'cit-bkc-tool' to continue"
+    fi
+    return 1
+}
+
+# displays current status only, does not install or test anything
+cit_bkc_status() {
+    if cit_bkc_status_installation; then
+      if cit_bkc_status_validation; then
+        if cit_bkc_report_is_available; then
+          echo "cit-bkc-tool: report is available, type 'cit-bkc-tool report' to display"
+          return 0
+        fi
+      fi
     fi
 }
 
 # precondition:
 #    self-test has already completed by cit_bkc_run_next and CIT_BKC_TEST_COMPLETE=yes
+# postcondition:
+#    generates two files:  report.date (color) and report.date.txt (plain)
 cit_bkc_run_next_report() {
-    mkdir -p $CIT_BKC_REPORTS_PATH
+    mkdir -p "$CIT_BKC_DATA_PATH" "$CIT_BKC_REPORTS_PATH"
     local current_date=$(date +%Y%m%d.%H%M%S)
     local report_file_name="$CIT_BKC_REPORTS_PATH/report.$current_date"
     local report_inputs=$(cd $CIT_BKC_DATA_PATH && ls -1tr *.report 2>/dev/null)
@@ -195,7 +470,22 @@ cit_bkc_run_next_report() {
       for filename in $report_inputs
       do
         reportname=$(basename $filename .report)
-        echo "$reportname: $(cat $CIT_BKC_DATA_PATH/$filename)" >> $report_file_name
+        reportcontent=$(cat $CIT_BKC_DATA_PATH/$filename)
+        echo "$reportname: $reportcontent" >> $report_file_name.txt
+        case "$reportcontent" in
+            OK*)
+                echo -e "$TERM_COLOR_GREEN$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+            REBOOT*)
+                echo -e "$TERM_COLOR_CYAN$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+            ERROR*)
+                echo -e "$TERM_COLOR_RED$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+            SKIP*)
+                echo -e "$TERM_COLOR_YELLOW$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+        esac
       done
       return 0
     else
@@ -214,89 +504,66 @@ cit_bkc_report() {
     fi
 }
 
-cit_bkc_status() {
-    echo "CIT BKC Tool:"
-#    if [ ! -d $CIT_BKC_DATA_PATH ]; then
-#        echo "* Ready for self-test; type 'cit-bkc-tool --help' for more information"
-#    fi
-    if cit_bkc_is_running; then
-      echo "* CIT BKC tool is running"
-    fi
 
-    if cit_bkc_report_is_available; then
-        echo "* A report is available; type 'cit-bkc-tool report' to display"
-    else
-        echo "* No reports available; type 'cit-bkc-tool' to run the tool"
+cit_bkc_stop() {
+  if cit_bkc_is_running; then
+    kill -9 $CIT_BKC_PID
+    return $?
+  fi
+}
+
+cit_bkc_uninstall_mtwilson() {
+    # uninstall mtwilson
+    if which mtwilson >/dev/null 2>&1; then
+      mtwilson uninstall --purge
     fi
-    
+    rm -rf /etc/intel/ /opt/intel/ /opt/mtwilson/
+    # completely remove postgresql to avoid problems when reinstalling mtwilson
+    if yum_detect; then
+      yum -y remove postgresql*
+    elif apt_detect; then
+      apt-get -y purge postgresql*
+    fi
+    rm -rf /var/lib/pgsql/
+}
+
+cit_bkc_uninstall_tagent() {
+  # clear tpm
+  local istpm2=$(which tpm2_takeownership 2>/dev/null)
+  if [ -n "$istpm2" ]; then
+    tpm2_takeownership -c
+  fi
+  # uninstall tagent
+  local is_tagent=$(which tagent 2>/dev/null)
+  if which tagent >/dev/null 2>&1; then
+    TPM_OWNER_SECRET=$(tagent config tpm.owner.secret)
+    if [ -n "$TPM_OWNER_SECRET" ]; then      
+      update_property_in_file TPM_OWNER_SECRET /root/trustagent.env "$TPM_OWNER_SECRET"
+    fi
+    tagent uninstall --purge
+  fi
 }
 
 cit_bkc_uninstall() {
+    cit_bkc_stop
+
     # clear data, reports, runtime info
-    cit_bkc_clear
-    # purge configuration
-    if [ "$1" == "--purge" ] || [ "$2" == "--purge" ]; then
-      rm -rf $CIT_BKC_CONF_PATH
-      mtwilson_args="uninstall --purge"
-    else
-      mtwilson_args="uninstall"
-    fi
-    if [ "$1" == "--clear-tpm" ] || [ "$2" == "--clear-tpm" ]; then
-      rm -rf $CIT_BKC_CONF_PATH
-      tagent_args="uninstall"
-    else
-      tagent_args="uninstall"
-      # TODO:  save tpm password for next bkc install
-    fi
+    rm_file "$CIT_BKC_BIN_PATH/cit-bkc-tool"
+    rm_dir "$CIT_BKC_CONF_PATH"
+    rm_dir "$CIT_BKC_DATA_PATH"
+    rm_dir "$CIT_BKC_REPORTS_PATH"
+    rm_dir "$CIT_BKC_MONITOR_PATH"
+    rm_dir "$CIT_BKC_PACKAGE_PATH"
+    rm_dir "$CIT_BKC_RUN_PATH"
 
-
-      mtwilson_ctl=$(which mtwilson)
-      if [ -n "$mtwilson_ctl" ]; then
-        $mtwilson_ctl $mtwilson_args
-      fi
-      tagent_ctl=$(which tagent)
-      if [ -n "$tagent_ctl" ]; then
-        $tagent_ctl $tagent_args
-      fi
-
-    # trustagent uninstall copies configuration backup to datestr=`date +%Y-%m-%d.%H%M`   /tmp/trustagent.configuration.$datestr
-    # so when unisntalling WITHOUT --purge, need to keep that and bkc installer can look for it on next install to read tpm password and set it in the trustagent.env file 
-    rm -f $CIT_BKC_TOOL
+    cit_bkc_uninstall_mtwilson
+    cit_bkc_uninstall_tagent
 }
 
 ###################################################################################################
 
-# here we look for specific commands first that we will handle in the
-# script, and anything else we send to the java application
-
-case "$1" in
-  --help)
-    cit_bkc_help
-    ;;
-  help)
-    cit_bkc_help
-    ;;
-  clear)
-    cit_bkc_clear
-    ;;
-  run)
-    cit_bkc_run $*
-    ;;
-  report)
-    cit_bkc_report $*
-    ;;
-  status)
-    cit_bkc_status $*
-    ;;
-  uninstall)
-    shift
-    cit_bkc_uninstall $*
-    ;;
-  *)
-    # start a new process with 'run' command
-    $CIT_BKC_TOOL run $*
-    ;;
-esac
-
-
+cit_bkc_store_proxy_env
+load_util
+load_env_dir "$CIT_BKC_CONF_PATH"
+parse_args $*
 exit $?
