@@ -94,22 +94,6 @@ else
   echo "No environment file"
 fi
 
-
-cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
-rm -f $MTWILSON_HOME/bin/mtwilson
-ln -s $MTWILSON_HOME/bin/mtwilson.sh $MTWILSON_HOME/bin/mtwilson
-chmod +x $MTWILSON_HOME/bin/*
-
-#If user is root then create mtwilson symlink to /usr/local/bin otherwise export path '$MTWILSON_HOME/bin'
-if [ "$(whoami)" == "root" ]; then
- if [ ! -d /usr/local/bin ]; then
-   mkdir -p /usr/local/bin
- fi
- #Remove symbolic link if already exist
- rm -f /usr/local/bin/mtwilson
- ln -s $MTWILSON_HOME/bin/mtwilson /usr/local/bin/mtwilson
-fi
-
 #If user is non root make sure all prereq directories are created and owned by nonroot user
 if [ "$(whoami)" != "root" ]; then
   if [ ! -d $MTWILSON_HOME ]; then
@@ -223,7 +207,6 @@ else
   fi
 fi
 
-
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
 export MTWILSON_OPT_INTEL=/opt/intel
 export MTWILSON_ETC_INTEL=/etc/intel
@@ -258,6 +241,22 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
   chmod 700 $directory
 done
 set_owner_for_mtwilson_directories
+
+#cp mtwilson control script and setup symlinks
+cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
+rm -f $MTWILSON_HOME/bin/mtwilson
+ln -s $MTWILSON_HOME/bin/mtwilson.sh $MTWILSON_HOME/bin/mtwilson
+chmod +x $MTWILSON_HOME/bin/*
+
+#If user is root then create mtwilson symlink to /usr/local/bin otherwise export path '$MTWILSON_HOME/bin'
+if [ "$(whoami)" == "root" ]; then
+ if [ ! -d /usr/local/bin ]; then
+   mkdir -p /usr/local/bin
+ fi
+ #Remove symbolic link if already exist
+ rm -f /usr/local/bin/mtwilson
+ ln -s $MTWILSON_HOME/bin/mtwilson /usr/local/bin/mtwilson
+fi
 
 # make aikverify directories, set ownership and permissions
 if [ "$(whoami)" == "root" ]; then
