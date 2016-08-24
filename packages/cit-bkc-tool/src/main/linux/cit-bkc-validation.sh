@@ -183,6 +183,7 @@ test_write_assettag() {
   bkc_test_name="write_assettag"
   
   curl --noproxy 127.0.0.1 -k -vs \
+    -H "Content-Type: application/xml" \
     https://127.0.0.1:8443/mtwilson/v2/hosts?nameEqualTo=127.0.0.1 \
     1>$CIT_BKC_DATA_PATH/$assettag_data_file 2>$CIT_BKC_DATA_PATH/$assettag_http_status_file
   
