@@ -1,5 +1,8 @@
 #!/bin/bash
 
+CIT_BKC_PACKAGE_PATH=${CIT_BKC_PACKAGE_PATH:-/usr/local/share/cit-bkc-tool}
+CIT_BKC_CONF_PATH=${CIT_BKC_CONF_PATH:-/usr/local/etc/cit-bkc-tool}
+
 parse_args() {
   case "$1" in
     help)
@@ -27,6 +30,11 @@ parse_args() {
       cit_bkc_uninstall $*
       return $?
       ;;
+    print-env)
+      shift
+      cit_bkc_print_env $*
+      return $?
+      ;;
     *)
       cit_bkc_run $*
       return $?
@@ -35,11 +43,11 @@ parse_args() {
 }
 
 load_util() {
-  if [ -f /usr/local/share/cit-bkc-tool/functions.sh ]; then
-    source /usr/local/share/cit-bkc-tool/functions.sh
+  if [ -f $CIT_BKC_PACKAGE_PATH/functions.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/functions.sh
   fi
-  if [ -f /usr/local/share/cit-bkc-tool/util.sh ]; then
-    source /usr/local/share/cit-bkc-tool/util.sh
+  if [ -f $CIT_BKC_PACKAGE_PATH/util.sh ]; then
+    source $CIT_BKC_PACKAGE_PATH/util.sh
   fi
 }
 
@@ -47,6 +55,10 @@ load_util() {
 
 cit_bkc_help() {
   cat $CIT_BKC_PACKAGE_PATH/README.md
+}
+
+cit_bkc_print_env() {
+  env | grep -E "^CIT_BKC"
 }
 
 ###################################################################################################
@@ -81,7 +93,7 @@ is_done() {
 # Run the installer with console progress bar, using a combined marker file
 # for both Attestation Service and Trust Agent
 install_bkc_tool() {
-    echo "Installing BKC Tool for Cloud Integrity Technology (R)..."
+    echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
     rm -rf $CIT_BKC_MONITOR_PATH/install-bkc-tool
     mkdir -p $CIT_BKC_MONITOR_PATH/install-bkc-tool
     cat $CIT_BKC_PACKAGE_PATH/cit-service.mark $CIT_BKC_PACKAGE_PATH/cit-agent.mark > $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers
@@ -95,7 +107,7 @@ install_bkc_tool() {
 }
 
 run_bkc_tool() {
-    echo "Running BKC Tool for Cloud Integrity Technology (R)..."
+    echo "Running BKC Tool for Intel(R) Cloud Integrity Technology..."
     rm -rf $CIT_BKC_MONITOR_PATH/run-bkc-tool
     mkdir -p $CIT_BKC_MONITOR_PATH/run-bkc-tool
     cp cit-bkc-tool.mark $CIT_BKC_MONITOR_PATH/run-bkc-tool/.markers
@@ -107,8 +119,8 @@ run_bkc_tool() {
     elif [ $result -eq 1 ]; then
       CIT_BKC_TEST_COMPLETE=no
       CIT_BKC_TEST_ERROR=yes
-      echo_failure "Validation failed"
-      echo_info "Log file: $CIT_BKC_MONITOR_PATH/run-bkc-tool/stdout"
+      #echo_failure "Validation failed"
+      #echo_info "Log file: $CIT_BKC_MONITOR_PATH/run-bkc-tool/stdout"
     elif [ $result -eq 255 ]; then
       CIT_BKC_TEST_COMPLETE=no
       touch $CIT_BKC_REBOOT_FILE
@@ -211,10 +223,10 @@ cit_bkc_run_installation() {
             result=$?
         fi
     elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        echo "cit-bkc-tool is installed; run 'cit-bkc-tool' to continue"
+        #echo "cit-bkc-tool is installed; run 'cit-bkc-tool' to continue"
         result=0
     else
-        echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
+        #echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
         rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
         install_bkc_tool
         result=$?
@@ -239,7 +251,7 @@ cit_bkc_run_validation() {
             result=$?
         fi
     elif is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
-        echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
+        #echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
         result=0
     else
         rm_dir "$CIT_BKC_MONITOR_PATH/run-bkc-tool"
@@ -323,11 +335,13 @@ cit_bkc_run() {
             cit_bkc_reboot
             return $?
         fi
-        echo_success "cit-bkc-tool: validation complete"
-    else
-        echo_failure "cit-bkc-tool: validation error $result, exiting"
-        return $result
+        #echo_success "cit-bkc-tool: validation complete"
+    #else
+        #echo_failure "cit-bkc-tool: validation error $result, exiting"
+        #return $result
     fi
+
+    cit_bkc_report
 
     #cit_bkc_run_next
     #
@@ -349,6 +363,7 @@ cit_bkc_status_installation() {
     elif is_active $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
         if is_running $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
           # install in progress, so monitor the other process
+          echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
           $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $CIT_BKC_MONITOR_PATH/install-bkc-tool
           if is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
               echo "cit-bkc-tool installation complete; run 'cit-bkc-tool' to continue"
@@ -373,6 +388,7 @@ cit_bkc_status_validation() {
     elif is_active $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
         if is_running $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
           # test in progress, so monitor the other process
+          echo "Running BKC Tool for Intel(R) Cloud Integrity Technology..."
           $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $CIT_BKC_MONITOR_PATH/run-bkc-tool
           if is_done $CIT_BKC_MONITOR_PATH/run-bkc-tool; then
               echo "cit-bkc-tool validation complete; run 'cit-bkc-tool report' to see report"
@@ -437,6 +453,8 @@ cit_bkc_run_next() {
 
 # precondition:
 #    self-test has already completed by cit_bkc_run_next and CIT_BKC_TEST_COMPLETE=yes
+# postcondition:
+#    generates two files:  report.date (color) and report.date.txt (plain)
 cit_bkc_run_next_report() {
     mkdir -p "$CIT_BKC_DATA_PATH" "$CIT_BKC_REPORTS_PATH"
     local current_date=$(date +%Y%m%d.%H%M%S)
@@ -448,7 +466,22 @@ cit_bkc_run_next_report() {
       for filename in $report_inputs
       do
         reportname=$(basename $filename .report)
-        echo "$reportname: $(cat $CIT_BKC_DATA_PATH/$filename)" >> $report_file_name
+        reportcontent=$(cat $CIT_BKC_DATA_PATH/$filename)
+        echo "$reportname: $reportcontent" >> $report_file_name.txt
+        case "$reportcontent" in
+            OK*)
+                echo -e "$TERM_COLOR_GREEN$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+            REBOOT*)
+                echo -e "$TERM_COLOR_CYAN$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+            ERROR*)
+                echo -e "$TERM_COLOR_RED$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+            SKIP*)
+                echo -e "$TERM_COLOR_YELLOW$reportname: $reportcontent$TERM_COLOR_NORMAL" >> $report_file_name
+                ;;
+        esac
       done
       return 0
     else
@@ -526,6 +559,6 @@ cit_bkc_uninstall() {
 ###################################################################################################
 
 load_util
-load_env_dir /usr/local/etc/cit-bkc-tool
+load_env_dir "$CIT_BKC_CONF_PATH"
 parse_args $*
 exit $?
