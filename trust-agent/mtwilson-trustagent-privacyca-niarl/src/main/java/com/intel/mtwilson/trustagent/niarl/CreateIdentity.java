@@ -127,13 +127,19 @@ public class CreateIdentity implements Configurable, Runnable {
 
                 decrypted1 = results.get("aikcert");
             } else {
-                byte[] asymEKblob = new byte[256];
-                // Struct is [asym1 || sym1 || {ekBlob}] where ekBlob is optional
-                int index = asym1.length + sym1.length;
-                System.arraycopy(challenge, index, asymEKblob, 0, challenge.length - (index));
-                //Tpm tpm = new Tpm();
-                HashMap<String, byte[]> results = Tpm.getModule().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
-                decrypted1 = results.get("aikcert");
+                    if (Tpm.getTpmVersion().equals("1.2")) {
+                    byte[] asymEKblob = new byte[256];
+                    // Struct is [asym1 || sym1 || {ekBlob}] where ekBlob is optional
+                    int index = asym1.length + sym1.length;
+                    System.arraycopy(challenge, index, asymEKblob, 0, challenge.length - (index));
+                    //Tpm tpm = new Tpm();
+                    HashMap<String, byte[]> results = Tpm.getModule().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asymEKblob, sym1, config.getAikIndex());
+                    decrypted1 = results.get("aikcert");
+                }
+                else {
+                    HashMap<String, byte[]> results = Tpm.getModule().activateIdentity2(config.getTpmOwnerSecret(), config.getAikSecret(), asym1, sym1, config.getAikIndex());
+                    decrypted1 = results.get("aikcert"); 
+                }
             }
 
             // send the answer and receive the AIK certificate
