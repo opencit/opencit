@@ -535,13 +535,6 @@ echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
 chmod 755 $MTWILSON_BIN/*
 
-# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
-# with a symlink to /opt/mtwilson/bin/mtwilson
-if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
-  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
-  rm -f /usr/local/bin/mtwilson
-fi
-
 # configure mtwilson TLS policies
 echo "Configuring TLS policies..." >>$INSTALL_LOG_FILE
 if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
