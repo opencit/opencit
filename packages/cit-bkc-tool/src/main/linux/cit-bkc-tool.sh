@@ -293,11 +293,11 @@ cit_bkc_reboot() {
         export_cit_bkc_reboot_counter
         increment_cit_bkc_reboot_counter
         # a reboot is needed
-        echo "Rebooting in 60 seconds... 'shutdown -c' to cancel";
-        shutdown --reboot +1 
+        echo "Rebooting in 1 minute... 'shutdown -c' to cancel";
+        shutdown --reboot +1 >/dev/null
         exit 255
     else
-      echo_warning "cit-bkc-tool reboot required, run 'cit-bkc-tool' after reboot to continue"
+      echo_warning "cit-bkc-tool: reboot required, run 'cit-bkc-tool' after reboot to continue"
       exit 255
     fi
 }
@@ -333,6 +333,7 @@ cit_bkc_run() {
     if [ $result -eq 0 ]; then
         echo_success "cit-bkc-tool: validation complete"
     elif [ $result -eq 255 ] || is_reboot_required; then
+        cit_bkc_report
         cit_bkc_reboot
         return $?
     else
