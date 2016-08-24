@@ -272,6 +272,7 @@
         "config_wl_for": "Configure Whitelist For:",
         "wl_applicable_for": "Whitelist Applicable For:",
         "required_pcrs": "Required PCRs:",
+        "optional_pcrs": "Optional PCRs:",
         "config_host_location": "Configure Host Location To:",
         "locale": "Locale:",
         "ip_address": "IP Address:",
