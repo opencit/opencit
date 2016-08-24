@@ -524,6 +524,8 @@ mkdir -p $MTWILSON_HOME/share/scripts
 
 #this is now done in LinuxUtil setup.sh
 cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+rm -f "$MTWILSON_HOME/share/scripts/functions"
+ln -s "$MTWILSON_HOME/share/scripts/functions.sh" "$MTWILSON_HOME/share/scripts/functions"
 
 # deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
 cp functions "$MTWILSON_BIN/functions.sh"
