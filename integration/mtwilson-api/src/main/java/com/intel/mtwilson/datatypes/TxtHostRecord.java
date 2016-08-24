@@ -182,5 +182,9 @@ public class TxtHostRecord {
         return best;
     }
 
+    @JsonIgnore
+    public boolean getDaMode() {
+        return "2.0".equals(this.TpmVersion);
+    }
 
 }
