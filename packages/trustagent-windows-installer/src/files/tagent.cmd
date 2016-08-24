@@ -123,12 +123,10 @@ GOTO:EOF
   IF "%TASTATUS%"=="Stopped" (
      echo.   Trustagent was not running
   ) ELSE (
-     sc stop trustagent >null
-     echo.   Trustagent stopped
-  )
-  echo. Starting trustagent
-  sc start trustagent > null
-  echo.   Trustagent started
+     call:trustagent_stop
+     timeout /t 1 /NOBREAK
+  )  
+  call:trustagent_start
 GOTO:EOF
 
 :trustagent_status
