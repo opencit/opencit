@@ -191,6 +191,7 @@ public class HostTrustBO {
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor
+            tblHosts.setTpmVersion(hostObj.TpmVersion);
             tblHosts.setPcrBank(hostObj.getBestPcrAlgorithmBank());
             
             tblHosts.setIPAddress(hostObj.HostName);
@@ -2261,6 +2262,11 @@ public class HostTrustBO {
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
+            
+            TxtHostRecord hostRecord = agent.getHostDetails();
+            tblHosts.setTpmVersion(hostRecord.TpmVersion);
+            tblHosts.setPcrBank(hostRecord.getBestPcrAlgorithmBank());
+            
             tblHosts.setAddOnConnectionInfo(factory.getHostConnectionString());
 
 //            PcrManifest pcrManifest = agent.getPcrManifest();
