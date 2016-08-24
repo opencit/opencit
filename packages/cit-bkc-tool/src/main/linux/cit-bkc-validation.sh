@@ -396,10 +396,10 @@ test_host_attestation_status() {
   
   Asset_Tag_status=$(xmlstarlet sel -t -v "(/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[@Name='Asset_Tag'])"  $CIT_BKC_DATA_PATH/$host_attestation_data_file | sed '/^\s*$/d; s/ //g')
 
-  echo "BIOS Trusted: $BIOS_status" > $host_attestation_result_file
-  echo "VMM Trusted: $VMM_status" >> $host_attestation_result_file
-  echo "AssetTag Trusted: $Asset_Tag_status" >> $host_attestation_result_file
-  echo "Overall Trusted: $Trust_status" >> $host_attestation_result_file
+  echo "BIOS Trusted: $BIOS_status" > $CIT_BKC_DATA_PATH/$host_attestation_result_file
+  echo "VMM Trusted: $VMM_status" >> $CIT_BKC_DATA_PATH/$host_attestation_result_file
+  echo "AssetTag Trusted: $Asset_Tag_status" >> $CIT_BKC_DATA_PATH/$host_attestation_result_file
+  echo "Overall Trusted: $Trust_status" >> $CIT_BKC_DATA_PATH/$host_attestation_result_file
   if [ "$Trust_status" == "true" ]; then
     result_ok "Host is trusted";
     return $?
