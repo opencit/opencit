@@ -500,15 +500,21 @@ main(){
   if [ "$TPM_VERSION" == "1.2" ]; then
     run_tests $CIT_TPM12_TESTS
     result=$?
-    if [ $result -ne 0 ]; then return $result; fi
+    if [ $result -ne 0 ]; then
+      skip_tests $CIT_FUNCTIONAL_TESTS
+      return $result
+    fi
   elif [ "$TPM_VERSION" == "2.0" ]; then
     run_tests $CIT_TPM20_TESTS
     result=$?
     if [ $result -ne 0 ]; then return $result; fi
   fi
+
   run_tests $CIT_FUNCTIONAL_TESTS
   result=$?
-  if [ $result -ne 0 ]; then return $result; fi
+  if [ $result -ne 0 ]; then
+    return $result
+  fi
 
   return 0
 }

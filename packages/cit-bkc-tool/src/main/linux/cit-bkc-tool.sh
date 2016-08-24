@@ -123,6 +123,7 @@ run_bkc_tool() {
       #echo_info "Log file: $CIT_BKC_MONITOR_PATH/run-bkc-tool/stdout"
     elif [ $result -eq 255 ]; then
       CIT_BKC_TEST_COMPLETE=no
+      mkdir -p $(dirname $CIT_BKC_REBOOT_FILE)
       touch $CIT_BKC_REBOOT_FILE
     fi
     return $result
