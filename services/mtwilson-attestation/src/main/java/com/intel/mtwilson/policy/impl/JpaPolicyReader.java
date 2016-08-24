@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManagerFactory;
@@ -346,6 +347,39 @@ public class JpaPolicyReader {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
         Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection();  
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.BIOS.name());
+    }
+    
+    public Set<Rule> loadPcrEventLogIncludesRuleForBiosDaMode(Bios bios, TblHosts tblHosts) {        
+        //HashSet<String> biosSpecificModules = new HashSet<>();
+        //biosSpecificModules.add("BIOSAC_REG_DATA");
+        //biosSpecificModules.add("LCP_DETAILS_HAHS");
+        //biosSpecificModules.add("NV_INFO_HASH");
+        //biosSpecificModules.add("STM_HASH");
+        //biosSpecificModules.add("CPU_SCRTM_STAT");
+        
+        TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
+        Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection();  
+        for(Iterator<TblModuleManifest> it = pcrModuleInfoList.iterator(); it.hasNext();) {
+            TblModuleManifest m = it.next();
+            if(m.getUseHostSpecificDigestValue()) {
+                it.remove();
+            }
+        }
+        return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.BIOS.name());
+    }
+    
+    public Set<Rule> loadPcrEventLogIncludesRuleForVmmDaMode(Vmm vmm, TblHosts tblHosts) {
+        //HashSet<String> vmmSpecificModules = new HashSet<>();
+        
+        TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
+        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();  
+        for (Iterator<TblModuleManifest> it = pcrModuleInfoList.iterator(); it.hasNext();) {
+            TblModuleManifest m = it.next();
+            if (!m.getUseHostSpecificDigestValue()) {
+                it.remove();
+            }
+        }
+        return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.VMM.name());
     }
     
     public Set<Rule> loadPcrEventLogIncludesRuleForVmm(Vmm vmm, TblHosts tblHosts) {

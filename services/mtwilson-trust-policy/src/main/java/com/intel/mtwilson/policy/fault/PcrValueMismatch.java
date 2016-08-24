@@ -23,13 +23,6 @@ import com.intel.mtwilson.policy.Fault;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "digest_type")
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = PcrValueMismatchSha1.class),
-    @JsonSubTypes.Type(value = PcrValueMismatchSha256.class)
-})
 public abstract class PcrValueMismatch<T extends AbstractDigest> extends Fault {
     protected PcrIndex pcrIndex;
     protected T expectedValue;
