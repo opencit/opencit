@@ -242,6 +242,9 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
 done
 set_owner_for_mtwilson_directories
 
+#cp version script to configuration directory
+cp version $MTWILSON_HOME/configuration/version
+
 #cp mtwilson control script and setup symlinks
 cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
 rm -f $MTWILSON_HOME/bin/mtwilson
@@ -534,13 +537,6 @@ cp functions "$MTWILSON_BIN/functions.sh"
 echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL_LOG_FILE
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
 chmod 755 $MTWILSON_BIN/*
-
-# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
-# with a symlink to /opt/mtwilson/bin/mtwilson
-if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
-  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
-  rm -f /usr/local/bin/mtwilson
-fi
 
 # configure mtwilson TLS policies
 echo "Configuring TLS policies..." >>$INSTALL_LOG_FILE
