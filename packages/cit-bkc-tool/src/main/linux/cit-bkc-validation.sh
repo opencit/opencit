@@ -161,10 +161,12 @@ test_tpm_version() {
     return $?
   elif [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
     TPM_VERSION=2.0
+    write_test_vars TPM_VERSION
     result_ok "TPM 2.0"
     return $?
   elif [[ -n $(txt-stat | grep "TPM: discrete TPM2.0" | head -n 1) ]]; then
     TPM_VERSION=2.0
+    write_test_vars TPM_VERSION
     result_ok "TPM 2.0"
     return $?
   else
