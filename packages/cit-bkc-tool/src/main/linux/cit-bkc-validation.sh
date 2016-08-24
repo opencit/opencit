@@ -104,6 +104,23 @@ result_reboot() {
   return 255
 }
 
+
+write_test_vars() {
+    echo > "$CIT_BKC_DATA_PATH/${bkc_test_name}.var"
+    for varname in $*
+    do
+        eval value="\$$varname"
+        echo "${varname}=${value}" >> "$CIT_BKC_DATA_PATH/${bkc_test_name}.var"
+    done
+}
+read_test_vars() {
+    if [ -f "$CIT_BKC_DATA_PATH/${bkc_test_name}.var" ]; then
+        load_env_file "$CIT_BKC_DATA_PATH/${bkc_test_name}.var"
+    fi
+}
+
+
+
 # Determine the TPM Hardware support
 test_tpm_support() {
   if [ -e "/dev/tpm0" ]; then
@@ -132,10 +149,12 @@ test_tpm_version() {
   export TPM_VERSION
   if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
     TPM_VERSION=1.2
+    write_test_vars TPM_VERSION
     result_ok "TPM 1.2"
     return $?
   else
     TPM_VERSION=
+    write_test_vars TPM_VERSION
     result_error "Unsupported TPM version"
     return $?
   fi
@@ -387,6 +406,7 @@ run_tests() {
         local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${testname}.report" | awk '{print $1}')
         if [ "$last_status" == "OK" ]; then
           touch "$CIT_BKC_DATA_PATH/${testname}.report"
+          read_test_vars
           continue
         fi
       fi
