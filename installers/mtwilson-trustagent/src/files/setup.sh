@@ -113,7 +113,6 @@ export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 #BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-3.0)"
 
 directory_layout
-mkdir -p ${TRUSTAGENT_LOGS}
 
 if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   # set TRUSTAGENT_REBOOT=no (in trustagent.env) if you want to ensure it doesn't reboot
