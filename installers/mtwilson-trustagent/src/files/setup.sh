@@ -107,14 +107,13 @@ export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
 }
 
-mkdir -p ${TRUSTAGENT_LOGS}
-
 # The version script is automatically generated at build time and looks like this:
 #ARTIFACT=mtwilson-trustagent-installer
 #VERSION=3.0
 #BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-3.0)"
 
 directory_layout
+
 if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   # set TRUSTAGENT_REBOOT=no (in trustagent.env) if you want to ensure it doesn't reboot
   # set TRUSTAGENT_SETUP_PREREQS=no (in trustagent.env) if you want to skip this step 
