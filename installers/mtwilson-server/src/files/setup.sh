@@ -625,6 +625,23 @@ chmod 600 logback.xml logback-stderr.xml
 chown $MTWILSON_USERNAME:$MTWILSON_USERNAME logback.xml logback-stderr.xml
 cp logback.xml logback-stderr.xml "$MTWILSON_CONFIGURATION"
 
+
+# Gather default configuration
+MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
+
+# Prompt for installation settings
+echo "Configuring Mt Wilson Server Name..."
+echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
+This address will be used in the server SSL certificate and in all Mt Wilson URLs.
+For example, if you enter '$MTWILSON_SERVER_IP_ADDRESS' then the Mt Wilson URL is 
+https://$MTWILSON_SERVER_IP_ADDRESS:8181 (for Glassfish deployments) or 
+https://$MTWILSON_SERVER_IP_ADDRESS:8443 (for Tomcat deployments)
+Detected the following options on this server:"
+for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
+prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
+export MTWILSON_SERVER
+echo
+
 # copy shiro.ini api security file
 if [ ! -f "$MTWILSON_CONFIGURATION/shiro.ini" ]; then
   echo "Copying shiro.ini to $MTWILSON_CONFIGURATION" >> $INSTALL_LOG_FILE
@@ -644,8 +661,8 @@ if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
   update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_SERVER";
 fi
 hostAllow=`read_property_from_file $hostAllowPropertyName "$MTWILSON_CONFIGURATION/shiro.ini"`
-if [[ $hostAllow != *$MTWILSON_IP* ]]; then
-  update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_IP";
+if [[ $hostAllow != *$MTWILSON_SERVER_IP_ADDRESS* ]]; then
+  update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_SERVER_IP_ADDRESS";
 fi
 sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION/shiro.ini"
 
@@ -699,22 +716,6 @@ fi
 
 # Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
 export MTWILSON_SETUP_NODEPLOY=
-
-# Gather default configuration
-MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
-
-# Prompt for installation settings
-echo "Configuring Mt Wilson Server Name..."
-echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
-This address will be used in the server SSL certificate and in all Mt Wilson URLs.
-For example, if you enter '$MTWILSON_SERVER_IP_ADDRESS' then the Mt Wilson URL is 
-https://$MTWILSON_SERVER_IP_ADDRESS:8181 (for Glassfish deployments) or 
-https://$MTWILSON_SERVER_IP_ADDRESS:8443 (for Tomcat deployments)
-Detected the following options on this server:"
-for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
-prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
-export MTWILSON_SERVER
-echo
 
 if [[ -z "$opt_postgres" && -z "$opt_mysql" ]]; then
  echo_warning "Relying on an existing database installation"
@@ -1296,6 +1297,10 @@ if [ -z "$MTWILSON_NOSETUP" ]; then
 
   #mtwilson setup
 fi
+
+# store server hostname or ip address (whatever user configured) for server
+# to use when constructing self-references
+mtwilson config mtwilson.host "$MTWILSON_SERVER"
 
 # delete the temporary setup environment variables file
 rm -f $MTWILSON_ENV/mtwilson-setup
