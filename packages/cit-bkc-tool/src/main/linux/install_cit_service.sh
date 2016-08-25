@@ -48,8 +48,8 @@ mtwilson_install_status() {
         echo "CIT Attestation Service is already installed"
         return 0
     fi
-    if is_error $CIT_AGENT_MONITOR_PATH; then
-        echo "CIT Trust Agent installation failed"
+    if is_error $CIT_SERVICE_MONITOR_PATH; then
+        echo "CIT Attestation Service installation failed"
         return 1
     fi
     if is_active $CIT_SERVICE_MONITOR_PATH; then
@@ -73,7 +73,7 @@ mtwilson_install() {
         exit 1
     fi
 
-    echo "Installing CIT Trust Agent..."
+    echo "Installing CIT Attestation Service..."
     mtwilson_preconfigure
     chmod +x $mtwilson_bin
     export MTWILSON_LOG_LEVEL=DEBUG
@@ -81,14 +81,14 @@ mtwilson_install() {
     mkdir -p $CIT_SERVICE_MONITOR_PATH
     $CIT_BKC_PACKAGE_PATH/monitor.sh $mtwilson_bin $CIT_BKC_PACKAGE_PATH/cit-service.mark $CIT_SERVICE_MONITOR_PATH
     result=$?
-    if [ $result -eq 255 ] || [ -f "/opt/trustagent/var/reboot_required" ]; then
-       rm -f /opt/trustagent/var/reboot_required
-       echo_info "CIT Trust Agent requires reboot to continue";
+    if [ $result -eq 255 ] || [ -f "/opt/mtwilson/var/reboot_required" ]; then
+       rm -f /opt/mtwilson/var/reboot_required
+       echo_info "CIT Attestation Service requires reboot to continue";
        exit 255
     fi
     if [ $result -ne 0 ]; then
-        echo_failure "Failed to install CIT Trust Agent";
-        echo_info "Log file: $CIT_AGENT_MONITOR_PATH/stdout"
+        echo_failure "Failed to install CIT Attestation Service";
+        echo_info "Log file: $CIT_SERVICE_MONITOR_PATH/stdout"
         exit 1
     fi
 }
