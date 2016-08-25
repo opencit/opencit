@@ -214,11 +214,7 @@ public class JpaPolicyReader {
             PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(PcrFactory.newInstance(DigestAlgorithm.SHA1, new PcrIndex(assetTagPCR), atagCert.getPCREvent()));            
             tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagPcrRule); 
-        }   
-                
-        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
-        tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
-        rules.add(tagRule);
+        }                   
         
         return rules;
     }
