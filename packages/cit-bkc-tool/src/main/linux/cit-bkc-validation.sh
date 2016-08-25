@@ -513,10 +513,6 @@ main(){
       return $result
     fi
   elif [ "$TPM_VERSION" == "2.0" ]; then
-    # first skip tpm 1.2 specific tests
-    failed="tpm_version"
-    skip_tests "bindingkey_present signingkey_present"
-    # second run tpm 2.0 tests
     run_tests $CIT_TPM20_TESTS
     result=$?
     if [ $result -ne 0 ]; then
