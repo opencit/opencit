@@ -310,6 +310,7 @@ export_cit_bkc_reboot_counter() {
 # depends on export_cit_bkc_reboot_counter
 increment_cit_bkc_reboot_counter() {
     local reboot_counter_file=$CIT_BKC_DATA_PATH/.reboot_counter
+    mkdir -p ${CIT_BKC_DATA_PATH}
     ((CIT_BKC_REBOOT_COUNTER+=1))
     echo "$CIT_BKC_REBOOT_COUNTER" > $reboot_counter_file
 }
