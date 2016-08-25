@@ -261,8 +261,8 @@ test_nvindex_defined() {
       return $?
     fi
   elif [ "$TPM_VERSION" == "2.0" ]; then
-    local indexDefined=$(/opt/trustagent/bin/tpm2-nvindex-exists.sh 0x40000001 2>/dev/null)
-    if [ "$indexDefined" == "1" ]; then
+    local indexDefined=$(/usr/local/sbin/tpm2_nvlist 2>/dev/null | grep '0x1c10110')
+    if [ -n "$indexDefined" ]; then
       result_ok "NV index defined."
       return $?
     else
