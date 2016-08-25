@@ -450,7 +450,9 @@ skip_tests() {
 
 main(){
   PLATFORM_TESTS="txt_support txtstat_present tpm_support tpm_version tpm_ownership"
-  CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
+  # disabling bindingkey and signingkey tests in 2.x branches
+  #CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
+  CIT_TPM12_TESTS="aik_present"
   CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
 
   run_tests $PLATFORM_TESTS
