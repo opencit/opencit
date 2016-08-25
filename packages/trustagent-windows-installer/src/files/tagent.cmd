@@ -111,10 +111,10 @@ REM functions
   echo. Trustagent started
 GOTO:EOF
 
-:trustagent_stop
-  echo. Stopping the trust agent
-  sc stop trustagent > null
-  echo. Trustagent stopped
+:trustagent_status
+  REM set TASTATUS=
+  call :get_status
+  echo. Trustagent status: %TASTATUS%
 GOTO:EOF
 
 :trustagent_restart
@@ -123,16 +123,16 @@ GOTO:EOF
   IF "%TASTATUS%"=="Stopped" (
      echo.   Trustagent was not running
   ) ELSE (
-     call:trustagent_stop
-     timeout /t 1 /NOBREAK
-  )  
-  call:trustagent_start
+    call:trustagent_stop
+    timeout /t 1 /NOBREAK
+  )
+  call :trustagent_start
 GOTO:EOF
 
-:trustagent_status
-  REM set TASTATUS=
-  call :get_status
-  echo. Trustagent status: %TASTATUS%
+:trustagent_stop
+  echo. Stopping the trust agent
+  sc stop trustagent > null
+  echo. Trustagent stopped
 GOTO:EOF
 
 :trustagent_setup
