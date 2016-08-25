@@ -455,6 +455,13 @@ main(){
   CIT_TPM12_TESTS="aik_present"
   CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
 
+  #Need to ensure that the validation script does not run before CIT attestations service starts
+  mtwilson_running=$(mtwilson_running_report_wait 2>/dev/null | grep 'Running')
+  if [ -z "$mtwilson_running" ]; then
+      echo_failure "CIT attestation service not running"
+      return 3
+  fi
+
   run_tests $PLATFORM_TESTS
   result=$?
   if [ $result -ne 0 ]; then
