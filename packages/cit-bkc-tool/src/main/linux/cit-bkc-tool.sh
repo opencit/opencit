@@ -117,7 +117,10 @@ install_bkc_tool() {
     cat $CIT_BKC_PACKAGE_PATH/cit-service.mark $CIT_BKC_PACKAGE_PATH/cit-agent.mark > $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers
     $CIT_BKC_PACKAGE_PATH/monitor.sh $CIT_BKC_PACKAGE_PATH/install.sh $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers $CIT_BKC_MONITOR_PATH/install-bkc-tool
     local result=$?
-    if [ $result -ne 0 ]; then
+    if [ $result -eq 255 ]; then
+      mkdir -p $(dirname $CIT_BKC_REBOOT_FILE)
+      touch $CIT_BKC_REBOOT_FILE
+    elif [ $result -ne 0 ]; then
       echo_failure "Installation failed"
       echo_info "Log file: $CIT_BKC_MONITOR_PATH/install-bkc-tool/stdout"
     fi
@@ -162,6 +165,11 @@ cit_bkc_setup_reboot() {
     # remove any existing lines with cit-bkc-tool and then append new lines with cit-bkc-tool we just prepared
     crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
     rm -f /tmp/cit-bkc-tool.crontab
+}
+
+cit_bkc_setup_reboot_clear() {
+    # remove any existing lines with cit-bkc-tool
+    crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | crontab -u root - 2>/dev/null
 }
 
 # precondition: ~/.bash_profile exists
@@ -318,6 +326,7 @@ cit_bkc_reboot() {
     cit_bkc_setup_reboot
     cit_bkc_setup_notification
     if [ "$CIT_BKC_REBOOT" == "yes" ]; then
+        rm -f $CIT_BKC_REBOOT_FILE
         export_cit_bkc_reboot_counter
         increment_cit_bkc_reboot_counter
         # a reboot is needed
