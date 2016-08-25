@@ -72,61 +72,6 @@ cit_bkc_store_proxy_env() {
 
 ###################################################################################################
 
-is_active() {
-  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
-  result=$?
-  if [ $result -eq 0 ] && [ "$status" == "ACTIVE" ]; then
-    return 0
-  fi
-  return 1
-}
-
-
-is_running() {
-  local target_pid=$($CIT_BKC_PACKAGE_PATH/monitor.sh --pid $1)
-  if [ -n "$target_pid" ]; then
-    return 0
-  fi
-  return 1
-}
-
-is_done() {
-  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
-  result=$?
-  if [ $result -eq 0 ] && [ "$status" == "DONE" ]; then
-    return 0
-  fi
-  return 1
-}
-
-is_error() {
-  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
-  result=$?
-  if [ $result -eq 0 ] && [ "$status" == "ERROR" ]; then
-    return 0
-  fi
-  return 1
-}
-
-# Run the installer with console progress bar, using a combined marker file
-# for both Attestation Service and Trust Agent
-install_bkc_tool() {
-    echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
-    rm -rf $CIT_BKC_MONITOR_PATH/install-bkc-tool
-    mkdir -p $CIT_BKC_MONITOR_PATH/install-bkc-tool
-    cat $CIT_BKC_PACKAGE_PATH/cit-service.mark $CIT_BKC_PACKAGE_PATH/cit-agent.mark > $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers
-    $CIT_BKC_PACKAGE_PATH/monitor.sh $CIT_BKC_PACKAGE_PATH/install.sh $CIT_BKC_MONITOR_PATH/install-bkc-tool/.markers $CIT_BKC_MONITOR_PATH/install-bkc-tool
-    local result=$?
-    if [ $result -eq 255 ]; then
-      mkdir -p $(dirname $CIT_BKC_REBOOT_FILE)
-      touch $CIT_BKC_REBOOT_FILE
-    elif [ $result -ne 0 ]; then
-      echo_failure "Installation failed"
-      echo_info "Log file: $CIT_BKC_MONITOR_PATH/install-bkc-tool/stdout"
-    fi
-    return $result
-}
-
 run_bkc_tool() {
     echo "Running BKC Tool for Intel(R) Cloud Integrity Technology..."
     rm -rf $CIT_BKC_MONITOR_PATH/run-bkc-tool
@@ -233,39 +178,6 @@ cit_bkc_clear() {
     rm -rf $CIT_BKC_DATA_PATH $CIT_BKC_REPORTS_PATH $CIT_BKC_RUN_PATH
 }
 
-# return: 0 if installation complete and ready for validation, 1 otherwise
-cit_bkc_run_installation() {
-    local result
-    # did the mtwilson and tagent installers run already? check combined status
-    if [ ! -d "$CIT_BKC_MONITOR_PATH/install-bkc-tool" ]; then
-        # no monitor files, so run the installer with progress bar
-        install_bkc_tool
-        result=$?
-    elif is_active $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        if is_running $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-            echo "cit-bkc-tool already running, run 'cit-bkc-tool status' to monitor"
-            result=1
-        else
-            install_bkc_tool
-            result=$?
-        fi
-    elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        #echo "cit-bkc-tool is installed; run 'cit-bkc-tool' to continue"
-        result=0
-    elif is_error $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        #echo "cit-bkc-tool installation error; run 'cit-bkc-tool' to continue"
-        rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
-        install_bkc_tool
-        result=$?
-    else
-        #echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
-        rm_dir "$CIT_BKC_MONITOR_PATH/install-bkc-tool"
-        install_bkc_tool
-        result=$?
-    fi
-    return $result
-}
-
 # return: 0 if validation complete and ready for reporting, 1 otherwise
 cit_bkc_run_validation() {
     local result
@@ -354,16 +266,29 @@ cit_bkc_run() {
     export CIT_BKC_REBOOT=${CIT_BKC_REBOOT:-yes}
     local result
 
-    # did the mtwilson and tagent installers run already? check combined status
-    cit_bkc_run_installation
+    # is mtwilson installed?
+    cit_bkc_run_mtwilson_installation
     result=$?
     if [ $result -eq 0 ]; then
-        echo "cit-bkc-tool is installed" >/dev/null
+        echo "CIT Attestation Service is installed" >/dev/null
     elif [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
         return $?
     else
-        echo_failure "cit-bkc-tool: installation error $result, exiting"
+        echo_failure "cit-bkc-tool: installation error from CIT Attestation Service $result, exiting"
+        return $result
+    fi
+
+    # is tagent installed?
+    cit_bkc_run_tagent_installation
+    result=$?
+    if [ $result -eq 0 ]; then
+        echo "CIT Trust Agent is installed" >/dev/null
+    elif [ $result -eq 255 ] || is_reboot_required; then
+        cit_bkc_reboot
+        return $?
+    else
+        echo_failure "cit-bkc-tool: installation error from CIT Trust Agent $result, exiting"
         return $result
     fi
 
@@ -384,32 +309,43 @@ cit_bkc_run() {
 }
 
 
+# return codes (forwarding the install_cit_agent exit code)
+# 0 if already installed
+# 1 if installation failed
+# 2 if another process is already installing
+# 255 if reboot required to continue installation
+cit_bkc_run_mtwilson_installation() {
+    $CIT_BKC_PACKAGE_PATH/install_cit_service.sh
+}
+
+# return codes (forwarding the install_cit_agent exit code)
+# 0 if already installed
+# 1 if installation failed
+# 2 if another process is already installing
+# 255 if reboot required to continue installation
+cit_bkc_run_tagent_installation() {
+    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh
+}
+
+
 cit_bkc_status_installation() {
-    # are mtwilson and tagent installed?
-    if [ ! -d "$CIT_BKC_MONITOR_PATH/install-bkc-tool" ]; then
-        echo "cit-bkc-tool is not installed; run 'cit-bkc-tool' to continue"
-    elif is_active $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        if is_running $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-          # install in progress, so monitor the other process
-          echo "Installing BKC Tool for Intel(R) Cloud Integrity Technology..."
-          $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $CIT_BKC_MONITOR_PATH/install-bkc-tool
-          if is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-              echo "cit-bkc-tool is installed"
-              return 0
-          fi
-        else
-          echo "cit-bkc-tool was interrupted during installation; run 'cit-bkc-tool' to continue"
-        fi
-    elif is_done $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        echo "cit-bkc-tool is installed"
-        return 0
-    elif is_error $CIT_BKC_MONITOR_PATH/install-bkc-tool; then
-        echo "cit-bkc-tool installation error;  run 'cit-bkc-tool' to continue"
-        return 1
-    else
-        echo "cit-bkc-tool installation status unknown; run 'cit-bkc-tool' to continue"
+    # get status of attestation service installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
+    local result=$?
+    if [ $result -eq 2 ]; then
+        local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_agent.sh print-monitor-path)
+        $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
     fi
-    return 1
+
+    # get status of trust agent installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
+    local result=$?
+    if [ $result -eq 2 ]; then
+        local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_service.sh print-monitor-path)
+        $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
+    fi
+
+    return $result
 }
 
 cit_bkc_status_validation() {
