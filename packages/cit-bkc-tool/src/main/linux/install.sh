@@ -91,9 +91,13 @@ tagent_install() {
     tagent_preconfigure
     chmod +x $tagent_bin
     export TAGENT_LOG_LEVEL=DEBUG
-    export TRUSTAGENT_REBOOT=${CIT_BKC_REBOOT:-yes}
     $tagent_bin
-    if [ $? -ne 0 ]; then echo_failure "Failed to install CIT Trust Agent"; exit 1; fi
+    result=$?
+    if [ -f "/opt/trustagent/var/reboot_required" ]; then
+       echo_info "CIT Trust Agent requires reboot to continue";
+       exit 255
+    fi
+    if [ $result -ne 0 ]; then echo_failure "Failed to install CIT Trust Agent"; exit 1; fi
   fi
 }
 
