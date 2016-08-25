@@ -206,7 +206,6 @@ public class CreateIdentity implements Configurable, Runnable {
 
                     writecert(aikcertfilepath, decrypted2);
                     writeblob(aikblobfilepath, aikblob);
-                    Runtime.getRuntime().exec("chmod 600 " + aikblobfilepath);
                 } else {
 
                     //decrypted1 = TpmModuleJava.ActivateIdentity(asym1, sym1, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw); 
