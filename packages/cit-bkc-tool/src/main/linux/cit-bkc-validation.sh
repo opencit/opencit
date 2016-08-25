@@ -272,6 +272,35 @@ test_nvindex_defined() {
   fi
 }
 
+
+# The other functional tests depend on CIT Attestation Service running for APIs
+test_cit_service_up() {
+  mtwilson_running=$(mtwilson_running_report_wait 2>/dev/null | grep 'Running')
+
+  if [ -n "$mtwilson_running" ]; then
+    result_ok "CIT Attestation Service is running."
+    return $?
+  else
+    result_error "CIT Attestation Service not running."
+    return $?
+  fi
+
+}
+
+# The other functional tests depend on CIT Trust Agent running for APIs
+test_cit_agent_up() {
+  tagent_running=$(tagent_running_report_wait 2>/dev/null | grep 'Running')
+
+  if [ -n "$tagent_running" ]; then
+    result_ok "CIT Trust Agent is running."
+    return $?
+  else
+    result_error "CIT Trust Agent not running."
+    return $?
+  fi
+}
+
+
 # Creates the whitelist and registers the same
 test_create_whitelist() {
   whitelist_data_file="create_whitelist.data"
@@ -496,14 +525,7 @@ main(){
   #CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
   CIT_TPM12_TESTS="aik_present"
   CIT_TPM20_TESTS="aik_present"
-  CIT_FUNCTIONAL_TESTS="create_whitelist write_assettag nvindex_defined host_attestation_status"
-
-  #Need to ensure that the validation script does not run before CIT attestations service starts
-  mtwilson_running=$(mtwilson_running_report_wait 2>/dev/null | grep 'Running')
-  if [ -z "$mtwilson_running" ]; then
-      echo_failure "CIT attestation service not running"
-      return 3
-  fi
+  CIT_FUNCTIONAL_TESTS="cit_service_up cit_agent_up create_whitelist write_assettag nvindex_defined host_attestation_status"
 
   run_tests $PLATFORM_TESTS
   result=$?
