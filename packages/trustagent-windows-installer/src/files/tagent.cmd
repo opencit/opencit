@@ -98,7 +98,7 @@ if "%wcommand%"=="start" (
   call:tagent_uninstall
 ) ELSE (
   IF "%*"=="" (
-    call:print_helpfds
+    call:print_help
     echo. Running command: %*
     >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
@@ -193,7 +193,7 @@ GOTO:EOF
 GOTO:EOF
 
 :tagent_uninstall
-    start /d "%TRUSTAGENT_HOME% Uninstall.exe
+    start /d "%TRUSTAGENT_HOME%" Uninstall.exe
 GOTO:EOF
 
 :get_status
