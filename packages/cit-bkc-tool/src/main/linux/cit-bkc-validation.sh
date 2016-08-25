@@ -37,14 +37,9 @@ ASSET_TAG_NVRAM_INDEX=0x40000011
 #load_util
 #load_env_dir "$CIT_BKC_CONF_PATH"
 
-  # if the user has passed in the reboot count, use it. Or else set it to 1 as default.
-  if [ -z "$1" ]; then
-    reboot_count="1"
-  else
-    reboot_count="$1"
-  fi
+CIT_BKC_REBOOT_COUNTER=${CIT_BKC_REBOOT_COUNTER:-0}
 
-echo "### Started CIT BKC validation ($reboot_count)" >> $LOG_FILE
+echo "### Started CIT BKC validation ($CIT_BKC_REBOOT_COUNTER)" >> $LOG_FILE
 
 #  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_GREEN}"; fi
 #  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
@@ -289,7 +284,7 @@ test_write_assettag() {
   assettag_http_status_file="write_assettag_http.status"
   certificate_date_file="certificate.data"
   certificate_http_status_file="certificate_http.status"
-  host_attestation_result_file="host_attestation_result_$reboot_count.data"
+  host_attestation_result_file="host_attestation_result.$CIT_BKC_REBOOT_COUNTER.data"
 
   if [ -f "$CIT_BKC_DATA_PATH/write_assettag.report" ]; then
     local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/write_assettag.report" | awk '{print $1}')
@@ -375,9 +370,9 @@ test_write_assettag() {
 # status of the host after reboot.
 # NOTE: the $host_attestation_result_file is used by the test_write_assettag
 test_host_attestation_status() {
-  host_attestation_data_file="host_attestation_$reboot_count.data"
-  host_attestation_http_status_file="host_attestation_http_$reboot_count.status"
-  host_attestation_result_file="host_attestation_result_$reboot_count.data"
+  host_attestation_data_file="host_attestation.$CIT_BKC_REBOOT_COUNTER.data"
+  host_attestation_http_status_file="host_attestation_http.$CIT_BKC_REBOOT_COUNTER.status"
+  host_attestation_result_file="host_attestation_result.$CIT_BKC_REBOOT_COUNTER.data"
   
   curl --noproxy 127.0.0.1 -k -vs \
     -H "Content-Type: application/json" \
@@ -416,6 +411,55 @@ test_host_attestation_status() {
     return $?
   fi
 }
+
+
+# obtains the pcr 0 value once, then checks to ensure it is the 
+# same as that each time we obtain it.  clear test data to start over.
+# sets the reboot flag after first value is stored.
+test_consistent_pcr0() {
+  local manifest_file="$CIT_BKC_DATA_PATH/consistent_pcr0.attestation.data"
+  local pcr0_data1_file="$CIT_BKC_DATA_PATH/consistent_pcr0.expected.data"
+  local pcr0_data2_file="$CIT_BKC_DATA_PATH/consistent_pcr0.observed.data"
+
+    curl --noproxy 127.0.0.1 -k -vs -X GET -H "Accept: application/xml" \
+    'https://127.0.0.1:8443/mtwilson/v1/AttestationService/resources/hosts/reports/manifest?hostName=127.0.0.1' \
+      1>$manifest_file 2>${manifest_file}.err
+
+    local result=$(cat ${manifest_file}.err | grep "200 OK" )
+    if [ -z "$result" ]; then
+      result_error "Cannot retrieve PCR 0."
+      return $?
+    fi
+
+    # parse the manifest file
+    local pcr0=$(xmlstarlet sel -t -v '//Host/Manifest[@Name="0"]/@Value' $manifest_file)
+    if [ -z "$pcr0" ]; then
+      result_error "Cannot read PCR 0."
+      return $?
+    fi
+
+  if [ ! -f "$pcr0_data1_file" ]; then
+    # store expected data first time and ask for reboot
+    echo $pcr0 > $pcr0_data1_file
+    result_reboot "Successfully retrieved PCR 0. Reboot required to complete the test."
+    return $?
+  else
+    # store observed data in second file (in case user needs to see it later)
+    echo $pcr0 > $pcr0_data2_file
+    # compare to expected data and ok if match
+    local expected_pcr0=$(cat $pcr0_data1_file)
+
+    # TODO: extract pcr 0, store in $pcr0_data2_file
+    if [ "$pcr0" == "$expected_pcr0" ]; then
+      result_ok "PCR 0 is consistent."
+      return $?
+    else
+      result_error "PCR 0 is inconsistent."
+      return $?
+    fi
+  fi
+}
+
 
 # input: list of tests to run
 # postcondition:
@@ -482,7 +526,7 @@ main(){
   # disabling bindingkey and signingkey tests in 2.x branches
   #CIT_TPM12_TESTS="aik_present bindingkey_present signingkey_present"
   CIT_TPM12_TESTS="aik_present"
-  CIT_FUNCTIONAL_TESTS="cit_service_up cit_agent_up create_whitelist write_assettag nvindex_defined host_attestation_status"
+  CIT_FUNCTIONAL_TESTS="cit_service_up cit_agent_up create_whitelist write_assettag nvindex_defined host_attestation_status consistent_pcr0"
 
   run_tests $PLATFORM_TESTS
   result=$?
