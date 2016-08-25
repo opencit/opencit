@@ -6,7 +6,7 @@
 # * the mtwilson linux util functions already sourced
 #   (for add_package_repository, echo_success, echo_failure)
 # * TRUSTAGENT_HOME is set, for example /opt/trustagent
-# * INSTALL_LOG_FILE is set, for example /opt/trustagent/logs/install.log
+# * TRUSTAGENT_INSTALL_LOG_FILE is set, for example /opt/trustagent/logs/install.log
 # * TPM_VERSION is set, for example 1.2 or else it will be auto-detected
 
 # Postconditions:
@@ -25,8 +25,11 @@
 # 8. Start tcsd (it already has an init script for next boot, but we need it now)
 # 9. Run mtwilson-trustagent-rhel.bin
 
+# source functions file
+if [ -f functions ]; then . functions; fi
+
 TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
-LOGFILE=${INSTALL_LOG_FILE:-$TRUSTAGENT_HOME/logs/install.log}
+LOGFILE=${TRUSTAGENT_INSTALL_LOG_FILE:-$TRUSTAGENT_HOME/logs/install.log}
 mkdir -p $(dirname $LOGFILE)
 
 TRUSTAGENT_RESUME_FLAG=no
@@ -301,7 +304,7 @@ migrate_to_local() {
 #   the variable TRUSTAGENT_REBOOT is set to 'no' if user wants to disable automatic
 resume_after_reboot() {
     touch /tmp/trustagent.crontab && chmod 600 /tmp/trustagent.crontab
-    echo "@reboot $TRUSTAGENT_HOME/installer/setup_prereqs.sh --resume >> $LOGFILE" > /tmp/trustagent.crontab
+    echo "@reboot $TRUSTAGENT_HOME/installer/setup_prereqs.sh --resume >> $LOGFILE 2>&1" > /tmp/trustagent.crontab
     # remove any existing lines with setup_prereqs and then append new lines with setup_prereqs we just prepared
     crontab -u root -l 2>/dev/null | grep -v setup_prereqs | cat - /tmp/trustagent.crontab | crontab -u root - 2>/dev/null
 }
