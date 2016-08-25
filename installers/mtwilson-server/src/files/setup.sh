@@ -1298,6 +1298,10 @@ if [ -z "$MTWILSON_NOSETUP" ]; then
   #mtwilson setup
 fi
 
+# store server hostname or ip address (whatever user configured) for server
+# to use when constructing self-references
+mtwilson config mtwilson.host "$MTWILSON_SERVER"
+
 # delete the temporary setup environment variables file
 rm -f $MTWILSON_ENV/mtwilson-setup
 
