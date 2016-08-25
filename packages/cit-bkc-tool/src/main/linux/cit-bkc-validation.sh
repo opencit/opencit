@@ -402,11 +402,16 @@ run_tests() {
     if [ -n "$failed" ]; then
       result_skip "depends on $failed"
     else
+      # read in any stored variables for this test. these can be used by 
+      # the test itself to keep track of things across invocations/reboots,
+      # and also since we skip tests already at OK status we still read the
+      # variables so they can be used by other dependent tests as needed -
+      # for example the TPM_VERSION defined by test_tpm_version
+      read_test_vars
       if [ -f "$CIT_BKC_DATA_PATH/${testname}.report" ]; then
         local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${testname}.report" | awk '{print $1}')
         if [ "$last_status" == "OK" ]; then
           touch "$CIT_BKC_DATA_PATH/${testname}.report"
-          read_test_vars
           continue
         fi
       fi
