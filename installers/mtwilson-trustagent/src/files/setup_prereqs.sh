@@ -225,7 +225,7 @@ migrate_to_local() {
 #   the variable TRUSTAGENT_REBOOT is set to 'no' if user wants to disable automatic
 resume_after_reboot() {
     touch /tmp/trustagent.crontab && chmod 600 /tmp/trustagent.crontab
-    echo "@reboot $TRUSTAGENT_HOME/installer/setup_prereqs.sh --resume >> $LOGFILE 2>&1" > /tmp/trustagent.crontab
+    echo "@reboot /bin/sleep 180 ; $TRUSTAGENT_HOME/installer/setup_prereqs.sh --resume >> $LOGFILE 2>&1" > /tmp/trustagent.crontab
     # remove any existing lines with setup_prereqs and then append new lines with setup_prereqs we just prepared
     crontab -u root -l 2>/dev/null | grep -v setup_prereqs | cat - /tmp/trustagent.crontab | crontab -u root - 2>/dev/null
 }
