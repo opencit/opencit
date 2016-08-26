@@ -6,6 +6,7 @@ package com.intel.mtwilson.shiro.jdbi;
 
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,12 +29,9 @@ public class MyJdbi {
         private static final DataSource ds = createDataSource();
 
         private static DataSource createDataSource() {
-            try {
-                Properties jpaProperties = My.persistenceManager().getASDataJpaProperties(My.configuration());
-                return PersistenceManager.createDataSource(jpaProperties);
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot initialize datasource", e);
-            }
+            //#5820: Call to static method 'com.intel.mtwilson.MyPersistenceManager.getASDataJpaProperties' via instance reference.
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(My.configuration());
+            return PersistenceManager.createDataSource(jpaProperties);
         }
     }
 

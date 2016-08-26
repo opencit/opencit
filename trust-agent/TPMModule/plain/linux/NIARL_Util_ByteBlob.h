@@ -41,6 +41,10 @@ public:
 	~NIARL_Util_ByteBlob();
 
 	void		Print();
+	
+private:
+	NIARL_Util_ByteBlob(const NIARL_Util_ByteBlob& src);
+	NIARL_Util_ByteBlob& operator=(const NIARL_Util_ByteBlob&);
 };
 
 #endif

@@ -285,6 +285,16 @@ ASSET_TAG_SETUP="y"
 # save tpm version in trust agent configuration directory
 echo -n "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
+# make sure unzip and authbind are installed
+#java_required_version=1.7.0_51
+#Adding redhat-lsb libvirt for bug 5289
+#Adding net-tools for bug 5285
+#adding openssl-devel for bug 5284
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
   auto_install "Installer requirements" "TRUSTAGENT"
@@ -693,7 +703,7 @@ monit_install() {
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
   auto_install "Monit" "MONIT"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; return 1; fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
       echo_failure "Unable to auto-install Monit"
@@ -711,7 +721,7 @@ monit_src_install() {
   DEVELOPER_YUM_PACKAGES="make gcc"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
   auto_install "Developer tools" "DEVELOPER"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; return 1; fi
   monit_clear; monit_detect;
   if [[ -z "$monit" ]]; then
     if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then

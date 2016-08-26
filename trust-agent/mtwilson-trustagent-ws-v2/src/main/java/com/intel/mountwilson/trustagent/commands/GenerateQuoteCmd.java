@@ -88,7 +88,7 @@ public class GenerateQuoteCmd implements ICommand {
         }
                 
         String osName = context.getOsName();
-        String commandLine = "";
+        String commandLine;
         String keyName = "HIS_Identity_Key";
         byte[] nonce = Base64.decodeBase64(context.getNonce());
 

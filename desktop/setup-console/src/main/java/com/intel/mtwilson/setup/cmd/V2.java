@@ -47,6 +47,7 @@ public class V2 implements Command {
                 break;
             }
             catch(Exception e) {
+                log.debug("The class wasn't found in the specified package",e);
                 // didn't find the class in this package or it's not the right interface
             }
         }

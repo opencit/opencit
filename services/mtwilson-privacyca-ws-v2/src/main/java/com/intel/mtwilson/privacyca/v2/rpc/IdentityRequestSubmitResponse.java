@@ -138,7 +138,7 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
     private IdentityBlob createReturn(TpmPubKey aik, RSAPublicKey pubEk, byte[] aicBytes) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, TpmUtils.TpmUnsignedConversionException, IOException, ShortBufferException {
         byte[] key = TpmUtils.createRandomBytes(16);
         byte[] iv = TpmUtils.createRandomBytes(16);
-        byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(aicBytes, key, iv));
+        byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.tcgSymEncrypt(aicBytes, key, iv));
         byte[] credSize = TpmUtils.intToByteArray(encryptedBlob.length);
 
         TpmSymmetricKey symKey = new TpmSymmetricKey();
@@ -263,9 +263,10 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
             byte[] loczero = new byte[1];
             loczero[0] = (byte) 0x01; //TPM_LOC_ZERO
             System.arraycopy(loczero, 0, activationBlob, index, 1);
-            index = index + 1;
+            //#5830: Variable 'index' was never read after being assigned.
+            //index = index + 1;
             // the digest is 0, so no need to copy
-            index = index + 20;
+            //index = index + 20;
             log.debug("Activation blob size: " + cbActivation);
             log.debug("Activatoin blob: " + TpmUtils.byteArrayToHexString(activationBlob));
             return activationBlob;

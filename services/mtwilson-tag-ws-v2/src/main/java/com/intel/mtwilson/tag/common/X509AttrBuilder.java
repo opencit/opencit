@@ -221,6 +221,9 @@ public class X509AttrBuilder extends BuilderModel {
             if (getFaults().isEmpty()) {
                 AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
                 AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+                if (issuerPrivateKey == null) {
+                    return null;
+                }
                 ContentSigner authority = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(PrivateKeyFactory.createKey(issuerPrivateKey.getEncoded())); // create a bouncy castle content signer convert using our existing private key
                 // second, prepare the attribute certificate
                 AttributeCertificateHolder holder = new AttributeCertificateHolder(subjectName); // which is expected to be a UUID  like this: 33766a63-5c55-4461-8a84-5936577df450
