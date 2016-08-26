@@ -245,16 +245,28 @@ increment_cit_bkc_reboot_counter() {
 }
 
 cit_bkc_reboot() {
+    shutdown_cmd=$(which shutdown 2>/dev/null)
+    if [ -z "${shutdown_cmd}" ]; then
+        shutdown_cmd=/usr/sbin/shutdown
+    fi
+    if [ ! -f "${shutdown_cmd}" ]; then
+        shutdown_cmd=/sbin/shutdown
+    fi
+    
     cit_bkc_setup_reboot
     if [ "$CIT_BKC_REBOOT" == "yes" ]; then
         rm -f $CIT_BKC_REBOOT_FILE
         export_cit_bkc_reboot_counter
         increment_cit_bkc_reboot_counter
         # a reboot is needed
+        if [ ! -f "${shutdown_cmd}" ]; then
+            echo_warning "cit-bkc-tool: \"shutdown\" command not found, cannot reboot system automatically"
+            exit 255
+        fi
         echo
         echo_info "Rebooting in 1 minute... 'shutdown -c' to cancel";
         echo
-        shutdown --reboot +1 >/dev/null 2>&1
+        $shutdown_cmd --reboot +1 >/dev/null 2>&1
         exit 255
     else
       echo_warning "cit-bkc-tool: reboot required, run 'cit-bkc-tool' after reboot to continue"
