@@ -220,47 +220,53 @@ public class TpmUtils {
                 throw new TpmBytestreamResouceException("Error getting bytes");
             }
 	}
-	/**
-	 * Creates a new X509 V3 certificate for use as an Attestation Identity Key (AIK) using the BouncyCastle provider. The certificate is designed in the 
-	 * direction of the Trusted Computing Group's specification of certificates for the Trusted Platform Module, although in its current form this 
-	 * function does not meet the standard. To that extent, the Subject Name field is left blank, and the V3 Subject Alternative Name field is marked 
-	 * critical and populated with the ID Label specified in the supplied TPM_Identity_Proof structure.  
-	 * 
-	 * @param idProof The TPM_Identity_Proof structure, used for the identity label field.
-	 * @param privKey The Privacy CA's private key for signing the certificate.
-	 * @param caCert The Privacy CA's public key certificate.
-	 * @param validityDays The number of days until the created certificate expires, from the time this function is run.
-	 * @param level Currently not used.
-	 * @return An AIK certificate.
-	 * @throws InvalidKeySpecException Passed on from the BouncyCastle certificate generator.
-	 * @throws NoSuchAlgorithmException Passed on from the BouncyCastle certificate generator.
-	 * @throws CertificateEncodingException Passed on from the BouncyCastle certificate generator.
-	 * @throws NoSuchProviderException Thrown if the BouncyCastle provider cannot be found.
-	 * @throws SignatureException Passed on from the BouncyCastle certificate generator.
-	 * @throws InvalidKeyException Passed on from the BouncyCastle certificate generator.
-	 */
-	public static X509Certificate makeCert(TpmIdentityProof idProof, RSAPrivateKey privKey, X509Certificate caCert, int validityDays, int level) 
-			throws InvalidKeySpecException, 
-			NoSuchAlgorithmException, 
-			CertificateEncodingException, 
-			NoSuchProviderException, 
-			SignatureException, 
-			InvalidKeyException {
-		Security.addProvider(new BouncyCastleProvider());
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-		certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-		certGen.setIssuerDN(caCert.getSubjectX500Principal());
-		certGen.setNotBefore(new java.sql.Time(System.currentTimeMillis()));
-		Calendar expiry = Calendar.getInstance();
-		expiry.add(Calendar.DAY_OF_YEAR, validityDays);
-		certGen.setNotAfter(expiry.getTime());
-		certGen.setSubjectDN(new X500Principal(""));
-		certGen.setPublicKey(idProof.getAik().getKey());
-		certGen.setSignatureAlgorithm("SHA256withRSA");
-		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, new String(idProof.getIdLableBytes()))));
-		X509Certificate cert = certGen.generate(privKey, "BC");
-		return cert;
-	}
+    public static X509Certificate makeCert(TpmPubKey aik, String sanLabel, RSAPrivateKey privKey, X509Certificate caCert, int validityDays, int level) throws InvalidKeySpecException,
+            NoSuchAlgorithmException,
+            CertificateEncodingException,
+            NoSuchProviderException,
+            SignatureException,
+            InvalidKeyException {
+        Security.addProvider(new BouncyCastleProvider());
+        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+        certGen.setIssuerDN(caCert.getSubjectX500Principal());
+        certGen.setNotBefore(new java.sql.Time(System.currentTimeMillis()));
+        Calendar expiry = Calendar.getInstance();
+        expiry.add(Calendar.DAY_OF_YEAR, validityDays);
+        certGen.setNotAfter(expiry.getTime());
+        certGen.setSubjectDN(new X500Principal(""));
+        certGen.setPublicKey(aik.getKey());
+        certGen.setSignatureAlgorithm("SHA256withRSA");
+        certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, sanLabel)));
+        X509Certificate cert = certGen.generate(privKey, "BC");
+        return cert;
+    }
+
+    /**
+     * Creates a new X509 V3 certificate for use as an Attestation Identity Key (AIK) using the BouncyCastle provider. The certificate is designed in the direction of the Trusted Computing Group's specification of certificates for the Trusted Platform Module, although in its current form this function does not meet the standard. To that extent, the Subject Name field is left blank, and the V3 Subject Alternative Name field is marked critical and populated with the ID Label specified in the supplied TPM_Identity_Proof structure.
+     *
+     * @param idProof The TPM_Identity_Proof structure, used for the identity label field.
+     * @param privKey The Privacy CA's private key for signing the certificate.
+     * @param caCert The Privacy CA's public key certificate.
+     * @param validityDays The number of days until the created certificate expires, from the time this function is run.
+     * @param level Currently not used.
+     * @return An AIK certificate.
+     * @throws InvalidKeySpecException Passed on from the BouncyCastle certificate generator.
+     * @throws NoSuchAlgorithmException Passed on from the BouncyCastle certificate generator.
+     * @throws CertificateEncodingException Passed on from the BouncyCastle certificate generator.
+     * @throws NoSuchProviderException Thrown if the BouncyCastle provider cannot be found.
+     * @throws SignatureException Passed on from the BouncyCastle certificate generator.
+     * @throws InvalidKeyException Passed on from the BouncyCastle certificate generator.
+     */
+    public static X509Certificate makeCert(TpmIdentityProof idProof, RSAPrivateKey privKey, X509Certificate caCert, int validityDays, int level)
+            throws InvalidKeySpecException,
+            NoSuchAlgorithmException,
+            CertificateEncodingException,
+            NoSuchProviderException,
+            SignatureException,
+            InvalidKeyException {
+        return makeCert(idProof.getAik(), new String(idProof.getIdLableBytes()), privKey, caCert, validityDays, level);
+    }
 	/**
 	 * Pulls the system time in "MMM d, yyyy h:mm:ss a" format as a string, suitable for use in a log file.
 	 * @return String as described above.

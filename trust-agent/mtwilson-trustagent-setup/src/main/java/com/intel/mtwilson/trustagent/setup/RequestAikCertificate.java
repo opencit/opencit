@@ -85,7 +85,7 @@ public class RequestAikCertificate extends AbstractSetupTask {
             try {
                 //#5819: Call to static method 'com.intel.mtwilson.trustagent.tpmmodules.Tpm.getTpm' via instance reference.
                 //Tpm tpm = new Tpm();
-                byte[] ekCert = Tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                byte[] ekCert = Tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
                 if( ekCert == null || ekCert.length == 0 ) {
                     configuration("Endorsement Certificate is null or zero-length");
                 }
