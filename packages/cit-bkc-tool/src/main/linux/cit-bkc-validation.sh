@@ -481,7 +481,7 @@ run_tests() {
       # variables so they can be used by other dependent tests as needed -
       # for example the TPM_VERSION defined by test_tpm_version
       read_test_vars
-      if [ -f "$CIT_BKC_DATA_PATH/${testname}.report" ] && [ "${testname}" != "cit_service_up" ] && [ "${testname}" != "cit_agent_up" ]; then
+      if [ -f "$CIT_BKC_DATA_PATH/${testname}.report" ] && [ "${testname}" != "cit_service_up" ] && [ "${testname}" != "cit_agent_up" ] && [ "${testname}" != "host_attestation_status" ]; then
         local last_status=$(head -n 1 "$CIT_BKC_DATA_PATH/${testname}.report" | awk '{print $1}')
         if [ "$last_status" == "OK" ]; then
           touch "$CIT_BKC_DATA_PATH/${testname}.report"
@@ -491,7 +491,7 @@ run_tests() {
       # security note: this is safe because we are hard-coding test sequence above; there is no user input in $testname
       eval "test_$testname"
       result=$?
-      if [ $result -eq 1 ]; then
+      if [ $result -eq 1 ] && [ "${testname}" != "host_attestation_status" ]; then
         # when a test fails, we record the test name then skip rest of tests (see above)
         failed="$testname"
       fi
