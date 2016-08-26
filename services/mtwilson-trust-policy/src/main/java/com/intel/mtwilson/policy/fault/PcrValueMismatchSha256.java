@@ -20,7 +20,7 @@ public class PcrValueMismatchSha256 extends PcrValueMismatch<Sha256Digest> {
     }
     
     @JsonCreator
-    public PcrValueMismatchSha256(@JsonProperty("pcr_index") PcrIndex pcrIndex, @JsonProperty("expected_value") String expectedValue, @JsonProperty("actual_vlaue") String actualValue) {
+    public PcrValueMismatchSha256(@JsonProperty("pcr_index") PcrIndex pcrIndex, @JsonProperty("expected_value") String expectedValue, @JsonProperty("actual_value") String actualValue) {
         super(pcrIndex, new Sha256Digest(expectedValue), new Sha256Digest(actualValue));
     }    
 }

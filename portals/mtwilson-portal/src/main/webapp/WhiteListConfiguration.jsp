@@ -57,7 +57,7 @@
                                 </div>
                             </div>     
                             <div class="singleDiv">
-                                <div class="labelDiv"><span data-i18n="input.required_pcrs">Required PCRs:</span> <input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
+                                <div class="labelDiv"><span data-i18n="input.optional_pcrs">Optional PCRs:</span> <input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
                                 <div class="valueDivConfig" id="biosPCRsValues">
                                     <input type="checkbox" id="required_pcrs_0" name="0">
                                     <span>0</span>

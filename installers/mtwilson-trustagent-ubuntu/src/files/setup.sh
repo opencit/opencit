@@ -557,7 +557,7 @@ fi
 # 5. run ldconfig -p to ensure it is found
 fix_libcrypto() {
   #yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
-  local has_libcrypto=`find / -name libcrypto.so.1.0.0 | head -1`
+  local has_libcrypto=`find / -name libcrypto.so.1.0.0 2>/dev/null | head -1`
   local libdir=`dirname $has_libcrypto`
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
