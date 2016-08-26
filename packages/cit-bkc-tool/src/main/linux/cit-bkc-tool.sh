@@ -131,6 +131,15 @@ cit_bkc_setup_notification() {
     fi
 }
 
+# removes the notification from bash profile, called from uninstall
+cit_bkc_setup_notification_clear() {
+    SCRIPT=$HOME/.bash_profile
+    notification=$(grep cit-bkc-tool $SCRIPT)
+    if [ -n "$notification" ]; then
+        sed -i '/cit-bkc-tool status/d' $SCRIPT
+    fi
+}
+
 
 # precondition:  CIT_BKC_REPORTS_PATH variable is defined, for EXAMPLE /usr/local/var/cit-bkc-tool
 # postcondition: LATEST set to filename of most recent report
@@ -237,7 +246,6 @@ increment_cit_bkc_reboot_counter() {
 
 cit_bkc_reboot() {
     cit_bkc_setup_reboot
-    cit_bkc_setup_notification
     if [ "$CIT_BKC_REBOOT" == "yes" ]; then
         rm -f $CIT_BKC_REBOOT_FILE
         export_cit_bkc_reboot_counter
@@ -265,6 +273,8 @@ cit_bkc_reboot() {
 cit_bkc_run() {
     export CIT_BKC_REBOOT=${CIT_BKC_REBOOT:-yes}
     local result
+
+    cit_bkc_setup_notification
 
     # is mtwilson installed?
     $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
@@ -482,6 +492,8 @@ cit_bkc_uninstall_tagent() {
 
 cit_bkc_uninstall() {
     cit_bkc_stop
+
+    cit_bkc_setup_notification_clear
 
     # clear data, reports, runtime info
     rm_file "$CIT_BKC_BIN_PATH/cit-bkc-tool"
