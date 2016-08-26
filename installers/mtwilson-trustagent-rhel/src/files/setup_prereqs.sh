@@ -185,15 +185,18 @@ is_uefi_boot() {
   fi
 }
 
-configure_grub() {
+define_grub_file() {
   if is_uefi_boot; then
     DEFAULT_GRUB_FILE=/boot/efi/EFI/redhat/grub.cfg
   else
     DEFAULT_GRUB_FILE=/boot/grub2/grub.cfg  
   fi
-
   GRUB_FILE=${GRUB_FILE:-$DEFAULT_GRUB_FILE}
+}
 
+configure_grub() {
+  define_grub_file
+  
   # /etc/default/grub appears in both ubuntu and redhat
   if [ -f /etc/default/grub ]; then
     update_property_in_file GRUB_DEFAULT /etc/default/grub 0
@@ -252,6 +255,8 @@ is_measured_launch() {
 }
 
 is_tpm_driver_loaded() {
+  define_grub_file
+  
   if [ ! -e /dev/tpm0 ]; then
     local is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
     local is_tpm_tis_force_any=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force')
@@ -265,6 +270,7 @@ is_tpm_driver_loaded() {
       is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
       if [ -n "$is_tpm_tis_force" ]; then
         echo "TPM driver not loaded, added tpm_tis.force=1 to /etc/default/grub"
+        grub2-mkconfig -o $GRUB_FILE
       else
         echo "TPM driver not loaded, failed to add tpm_tis.force=1 to /etc/default/grub"
       fi
