@@ -131,6 +131,15 @@ cit_bkc_setup_notification() {
     fi
 }
 
+# removes the notification from bash profile, called from uninstall
+cit_bkc_setup_notification_clear() {
+    SCRIPT=$HOME/.bash_profile
+    notification=$(grep cit-bkc-tool $SCRIPT)
+    if [ -n "$notification" ]; then
+        sed -i '/cit-bkc-tool status/d' $SCRIPT
+    fi
+}
+
 
 # precondition:  CIT_BKC_REPORTS_PATH variable is defined, for EXAMPLE /usr/local/var/cit-bkc-tool
 # postcondition: LATEST set to filename of most recent report
@@ -237,7 +246,6 @@ increment_cit_bkc_reboot_counter() {
 
 cit_bkc_reboot() {
     cit_bkc_setup_reboot
-    cit_bkc_setup_notification
     if [ "$CIT_BKC_REBOOT" == "yes" ]; then
         rm -f $CIT_BKC_REBOOT_FILE
         export_cit_bkc_reboot_counter
@@ -266,29 +274,33 @@ cit_bkc_run() {
     export CIT_BKC_REBOOT=${CIT_BKC_REBOOT:-yes}
     local result
 
+    cit_bkc_setup_notification
+
     # is mtwilson installed?
-    cit_bkc_run_mtwilson_installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
     result=$?
-    if [ $result -eq 0 ]; then
-        echo "CIT Attestation Service is installed" >/dev/null
-    elif [ $result -eq 255 ] || is_reboot_required; then
+    if [ $result -eq 1 ]; then
+        cit_bkc_run_mtwilson_installation
+        result=$?
+    fi
+    if [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
         return $?
-    else
-        echo_failure "cit-bkc-tool: installation error from CIT Attestation Service $result, exiting"
+    elif [ $result -ne 0 ]; then
         return $result
     fi
 
     # is tagent installed?
-    cit_bkc_run_tagent_installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
     result=$?
-    if [ $result -eq 0 ]; then
-        echo "CIT Trust Agent is installed" >/dev/null
-    elif [ $result -eq 255 ] || is_reboot_required; then
+    if [ $result -eq 1 ]; then
+        cit_bkc_run_tagent_installation
+        result=$?
+    fi
+    if [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
         return $?
-    else
-        echo_failure "cit-bkc-tool: installation error from CIT Trust Agent $result, exiting"
+    elif [ $result -ne 0 ]; then
         return $result
     fi
 
@@ -329,19 +341,19 @@ cit_bkc_run_tagent_installation() {
 
 
 cit_bkc_status_installation() {
-    # get status of attestation service installation
-    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
-    local result=$?
-    if [ $result -eq 2 ]; then
-        local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_agent.sh print-monitor-path)
-        $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
-    fi
-
     # get status of trust agent installation
     $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
     local result=$?
     if [ $result -eq 2 ]; then
         local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_service.sh print-monitor-path)
+        $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
+    fi
+
+    # get status of attestation service installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
+    local result=$?
+    if [ $result -eq 2 ]; then
+        local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_agent.sh print-monitor-path)
         $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
     fi
 
@@ -480,6 +492,8 @@ cit_bkc_uninstall_tagent() {
 
 cit_bkc_uninstall() {
     cit_bkc_stop
+
+    cit_bkc_setup_notification_clear
 
     # clear data, reports, runtime info
     rm_file "$CIT_BKC_BIN_PATH/cit-bkc-tool"
