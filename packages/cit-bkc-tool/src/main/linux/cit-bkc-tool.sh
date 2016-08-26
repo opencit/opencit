@@ -307,17 +307,12 @@ cit_bkc_run() {
     cit_bkc_run_validation
     result=$?
     cit_bkc_run_next_report
-    if [ $result -eq 0 ]; then
-        echo_success "cit-bkc-tool validation complete" >/dev/null
-    elif [ $result -eq 255 ] || is_reboot_required; then
-        cit_bkc_report
+    cit_bkc_report
+    if [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
-        return $?
-    else
-        echo_failure "cit-bkc-tool: validation error"
-        cit_bkc_report
-        return $result
     fi
+
+    return $result
 }
 
 
