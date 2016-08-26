@@ -161,7 +161,7 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
             asymBlob = TpmUtils.concat(outCred.getCredential(), outCred.getSecret());
         } else {
             // this can't be SHA256 because this is for TPM 1.2
-            asymBlob = TpmUtils.TCGAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
+            asymBlob = TpmUtils.tcgAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
         }
             
         byte[] symBlob = TpmUtils.concat(TpmUtils.concat(credSize, keyParms.toByteArray()), encryptedBlob);
@@ -176,7 +176,7 @@ public class IdentityRequestSubmitResponse implements Callable<IdentityBlob> {
             ret.setSymSize(symBlob.length);
             ret.setIdentityBlob(TpmUtils.concat(asymBlob, symBlob));
         } else {
-            byte[] asymEkBlob = TpmUtils.TCGAsymEncrypt(ekBlob, pubEk);
+            byte[] asymEkBlob = TpmUtils.tcgAsymEncrypt(ekBlob, pubEk);
             log.debug(" asymEkBlob: " + TpmUtils.byteArrayToHexString(asymEkBlob));
             ret.setAsymSize(asymBlob.length);
             ret.setSymSize(symBlob.length);
