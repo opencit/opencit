@@ -536,9 +536,6 @@ run_tests() {
       if [ $result -eq 1 ]; then
         # when a test fails, we record the test name then skip rest of tests (see above)
         failed="$testname"
-      elif [ $result -eq 255 ]; then
-        # reboot required
-        return $result
       fi
     fi
     #if [ $result -ne 0 ]; then return $result; fi
