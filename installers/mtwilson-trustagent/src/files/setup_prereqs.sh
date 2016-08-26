@@ -205,15 +205,19 @@ install_rsync() {
 
 is_reboot_required() {
   local should_reboot=yes
+  
   if is_txtstat_installed; then
     if is_measured_launch; then
       echo "already in measured launch environment"
-      if is_tpm_driver_loaded; then
-        echo "TPM driver is already loaded"
-        should_reboot=no
-      fi
+      should_reboot=no
     fi
   fi
+  
+  if is_tpm_driver_loaded; then
+    echo "TPM driver is already loaded"
+    should_reboot=no
+  fi
+  
   if [ "$should_reboot" == "yes" ]; then
     return 0
   else
