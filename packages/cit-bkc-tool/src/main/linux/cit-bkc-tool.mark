@@ -6,7 +6,10 @@ tpm_ownership:
 aik_present:
 bindingkey_present:
 signingkey_present:
+cit_service_up:
+cit_agent_up:
 create_whitelist:
 write_assettag:
 nvindex_defined:
 host_attestation_status:
+consistent_pcr0:
