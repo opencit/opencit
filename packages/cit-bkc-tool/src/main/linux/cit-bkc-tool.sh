@@ -106,7 +106,7 @@ run_bkc_tool() {
 cit_bkc_setup_reboot() {
     touch /tmp/cit-bkc-tool.crontab && chmod 600 /tmp/cit-bkc-tool.crontab
     echo "# cit-bkc-tool auto-resume after reboot" > /tmp/cit-bkc-tool.crontab
-    echo "@reboot /usr/local/bin/cit-bkc-tool" >> /tmp/cit-bkc-tool.crontab
+    echo "@reboot /usr/local/bin/cit-bkc-tool >>${CIT_BKC_LOG_PATH}/headless.log 2>&1" >> /tmp/cit-bkc-tool.crontab
     # remove any existing lines with cit-bkc-tool and then append new lines with cit-bkc-tool we just prepared
     crontab -u root -l 2>/dev/null | grep -v cit-bkc-tool | cat - /tmp/cit-bkc-tool.crontab | crontab -u root - 2>/dev/null
     rm -f /tmp/cit-bkc-tool.crontab
@@ -275,6 +275,7 @@ cit_bkc_run() {
     local result
 
     cit_bkc_setup_notification
+    mkdir -p ${CIT_BKC_LOG_PATH}
 
     # is mtwilson installed?
     $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
