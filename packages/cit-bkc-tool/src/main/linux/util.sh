@@ -36,3 +36,39 @@ rm_dir() {
   local dir="$1"
   if [ -n "$dir" ] && [ -d "$dir" ]; then rm -rf "$dir"; fi
 }
+
+is_active() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "ACTIVE" ]; then
+    return 0
+  fi
+  return 1
+}
+
+
+is_running() {
+  local target_pid=$($CIT_BKC_PACKAGE_PATH/monitor.sh --pid $1)
+  if [ -n "$target_pid" ]; then
+    return 0
+  fi
+  return 1
+}
+
+is_done() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "DONE" ]; then
+    return 0
+  fi
+  return 1
+}
+
+is_error() {
+  local status=$($CIT_BKC_PACKAGE_PATH/monitor.sh --status $1)
+  result=$?
+  if [ $result -eq 0 ] && [ "$status" == "ERROR" ]; then
+    return 0
+  fi
+  return 1
+}
