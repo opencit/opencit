@@ -267,28 +267,30 @@ cit_bkc_run() {
     local result
 
     # is mtwilson installed?
-    cit_bkc_run_mtwilson_installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
     result=$?
-    if [ $result -eq 0 ]; then
-        echo "CIT Attestation Service is installed" >/dev/null
-    elif [ $result -eq 255 ] || is_reboot_required; then
+    if [ $result -eq 1 ]; then
+        cit_bkc_run_mtwilson_installation
+        result=$?
+    fi
+    if [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
         return $?
-    else
-        echo_failure "cit-bkc-tool: installation error from CIT Attestation Service $result, exiting"
+    elif [ $result -ne 0 ]; then
         return $result
     fi
 
     # is tagent installed?
-    cit_bkc_run_tagent_installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
     result=$?
-    if [ $result -eq 0 ]; then
-        echo "CIT Trust Agent is installed" >/dev/null
-    elif [ $result -eq 255 ] || is_reboot_required; then
+    if [ $result -eq 1 ]; then
+        cit_bkc_run_tagent_installation
+        result=$?
+    fi
+    if [ $result -eq 255 ] || is_reboot_required; then
         cit_bkc_reboot
         return $?
-    else
-        echo_failure "cit-bkc-tool: installation error from CIT Trust Agent $result, exiting"
+    elif [ $result -ne 0 ]; then
         return $result
     fi
 
@@ -329,19 +331,19 @@ cit_bkc_run_tagent_installation() {
 
 
 cit_bkc_status_installation() {
-    # get status of attestation service installation
-    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
-    local result=$?
-    if [ $result -eq 2 ]; then
-        local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_agent.sh print-monitor-path)
-        $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
-    fi
-
     # get status of trust agent installation
     $CIT_BKC_PACKAGE_PATH/install_cit_service.sh status
     local result=$?
     if [ $result -eq 2 ]; then
         local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_service.sh print-monitor-path)
+        $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
+    fi
+
+    # get status of attestation service installation
+    $CIT_BKC_PACKAGE_PATH/install_cit_agent.sh status
+    local result=$?
+    if [ $result -eq 2 ]; then
+        local monitor_path=$($CIT_BKC_PACKAGE_PATH/install_cit_agent.sh print-monitor-path)
         $CIT_BKC_PACKAGE_PATH/monitor.sh --noexec $monitor_path
     fi
 
