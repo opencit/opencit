@@ -187,12 +187,15 @@ public class TAHelper {
             aikverifyhomeData = varPath;
 //            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             if (isHostWindows)
-                aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
+                if (host.TpmVersion.equals("2.0"))
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin2";
+                else
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
             else {
                 if (host.TpmVersion.equals("2.0"))
-                    aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify2" : "aikqverify.exe");
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverify2";
                 else
-                    aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverify";
             }
         } else {
             // mtwilson 1.2 configuration
