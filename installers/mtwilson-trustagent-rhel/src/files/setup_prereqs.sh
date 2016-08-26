@@ -20,9 +20,8 @@
 # 4. Install trousers and trousers-devel packages (current is trousers-0.3.13-1.el7.x86_64)
 # 5. Install the patched tpm-tools
 # 6. Add grub menu item for tboot and select as default
-# 7. Reboot (only if we are not already in trusted boot)
+# 7. Ask for reboot (only if we are not already in trusted boot)
 # 8. Start tcsd (it already has an init script for next boot, but we need it now)
-# 9. Run mtwilson-trustagent-rhel.bin
 
 # source functions file
 if [ -f functions ]; then . functions; fi
@@ -30,11 +29,6 @@ if [ -f functions ]; then . functions; fi
 TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
 LOGFILE=${TRUSTAGENT_INSTALL_LOG_FILE:-$TRUSTAGENT_HOME/logs/install.log}
 mkdir -p $(dirname $LOGFILE)
-
-TRUSTAGENT_RESUME_FLAG=no
-if [ "$1" == "--resume" ]; then
-  TRUSTAGENT_RESUME_FLAG=yes
-fi
 
 ################################################################################
 
@@ -160,7 +154,7 @@ configure_grub() {
 
 configure_grub
 
-# 7. Reboot (only if we are not already in trusted boot)
+# 7. Ask for reboot (only if we are not already in trusted boot)
 
 is_txtstat_installed() {
   is_command_available txt-stat
@@ -209,39 +203,6 @@ install_rsync() {
   auto_install "rsync" "TRUSTAGENT_RSYNC" > /dev/null 2>&1
 }
 
-migrate_to_local() {
-  local script_path
-  if [ "$0" == "-bash" ]; then
-    # sourced from shell, so path is current directory
-    script_path=$(pwd)
-  else
-    # sourced from setup.sh or executed from shell
-    script_path=$(dirname $(realpath $0))
-  fi
-  # so if we are not already running from trustagent home, copy everything to it
-  if [ "$script_path" != "$TRUSTAGENT_HOME/installer" ]; then
-    rm -rf $TRUSTAGENT_HOME/installer
-    mkdir -p $TRUSTAGENT_HOME/installer
-    \cp -r $script_path/* $TRUSTAGENT_HOME/installer/
-  fi
-}
-
-# precondition:
-#   the script and all adjacent files are already copied to trustagent home from where it can run after reboot
-#   the variable TRUSTAGENT_REBOOT is set to 'no' if user wants to disable automatic
-resume_after_reboot() {
-    touch /tmp/trustagent.crontab && chmod 600 /tmp/trustagent.crontab
-    echo "@reboot /bin/sleep 180 ; $TRUSTAGENT_HOME/installer/setup_prereqs.sh --resume >> $LOGFILE 2>&1" > /tmp/trustagent.crontab
-    # remove any existing lines with setup_prereqs and then append new lines with setup_prereqs we just prepared
-    crontab -u root -l 2>/dev/null | grep -v setup_prereqs | cat - /tmp/trustagent.crontab | crontab -u root - 2>/dev/null
-}
-
-no_resume_after_reboot() {
-    # remove any existing lines with setup_prereqs
-    crontab -u root -l 2>/dev/null | grep -v setup_prereqs | crontab -u root - 2>/dev/null
-}
-
-
 is_reboot_required() {
   local should_reboot=yes
   if is_txtstat_installed; then
@@ -253,45 +214,19 @@ is_reboot_required() {
       fi
     fi
   fi
-  if [ "$should_reboot" == "yes" ] && [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then
-    echo "already rebooted once, disabling automatic reboot"
-    should_reboot=no
-  fi
   if [ "$should_reboot" == "yes" ]; then
-    if [ "${TRUSTAGENT_REBOOT:-no}" == "no" ]; then
-      return 255
-    else
-      return 0
-    fi
+    return 0
   else
     return 1
   fi
 }
 
-reboot_maybe() {
-  is_reboot_required
-  local result=$?
-  if [ $result -eq 0 ]; then
-    # reboot is required
-      migrate_to_local
-      resume_after_reboot
-      echo "Rebooting in 60 seconds... kill $$ to cancel";
-      sleep 10
-      shutdown --reboot now
-      exit 0
-  elif [ $result -eq 255 ]; then
-      # reboot is required but will not be automatic
-      echo "reboot is required; please reboot and run installer again"
-  # else reboot is not required
-  fi
-}
-
-reboot_maybe
-
-# if we got here, then we're not rebooting, so make sure that we clear any
-# crontab entry we may have already created
-no_resume_after_reboot
-
+if is_reboot_required; then
+    echo
+    echo "CIT Trust Agent: A reboot is required. Please reboot and run installer again."
+    echo
+    exit 255
+fi
 
 # 8. Start tcsd (it already has an init script for next boot, but we need it now)
 
@@ -318,24 +253,3 @@ else
   start_tcsd
 fi
 
-# 9. Run mtwilson-trustagent-rhel.bin
-
-next_step() {
-  local script_path
-  if [ "$0" == "-bash" ]; then
-    # sourced from shell, so path is current directory
-    script_path=$(pwd)
-  else
-    # sourced from setup.sh or executed from shell
-    script_path=$(dirname $(realpath $0))
-  fi
-  if [ "$TRUSTAGENT_RESUME_FLAG" == "yes" ]; then
-    echo "continuing CIT Agent installation after reboot"
-    (cd $script_path && export TRUSTAGENT_SETUP_PREREQS=no && ./setup.sh)
-  #else
-    # do nothing; either setup.sh called us and will continue when we exit,
-    # or user called us directly from shell and expects us to exit when done.
-  fi
-}
-
-next_step

@@ -111,13 +111,17 @@ is_uefi_boot() {
   fi
 }
 
-configure_grub() {
+define_grub_file() {
   if is_uefi_boot; then
     DEFAULT_GRUB_FILE=/boot/efi/EFI/redhat/grub.cfg
   else
     DEFAULT_GRUB_FILE=/boot/grub2/grub.cfg  
   fi
   GRUB_FILE=${GRUB_FILE:-$DEFAULT_GRUB_FILE}
+}
+
+configure_grub() {
+  define_grub_file
 
   # /etc/default/grub appears in both ubuntu and redhat
   if [ -f /etc/default/grub ]; then
@@ -166,12 +170,7 @@ is_measured_launch() {
 }
 
 is_tpm_driver_loaded() {
-  if is_uefi_boot; then
-    DEFAULT_GRUB_FILE=/boot/efi/EFI/redhat/grub.cfg
-  else
-    DEFAULT_GRUB_FILE=/boot/grub2/grub.cfg  
-  fi
-  GRUB_FILE=${GRUB_FILE:-$DEFAULT_GRUB_FILE}
+  define_grub_file
 
   if [ ! -e /dev/tpm0 ]; then
     local is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
