@@ -32,6 +32,8 @@ tagent_preconfigure() {
   local tls_sha256=$(/usr/bin/sha256sum /opt/mtwilson/configuration/ssl.crt | /usr/bin/awk '{print $1}')
   update_property_in_file MTWILSON_TLS_CERT_SHA1 $HOME/trustagent.env "$tls_sha1"
   update_property_in_file MTWILSON_TLS_CERT_SHA256 $HOME/trustagent.env "$tls_sha256"
+  pca_passwd=$(read_property_from_file MTWILSON_PRIVACYCA_PASSWORD $HOME/mtwilson.env)
+  update_property_in_file MTWILSON_API_PASSWORD $HOME/trustagent.env "$pca_passwd"
 }
 
 tagent_install_status() {
