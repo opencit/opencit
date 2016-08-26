@@ -390,7 +390,7 @@ cit_bkc_status() {
     if cit_bkc_status_installation; then
       if cit_bkc_status_validation; then
         if cit_bkc_report_is_available; then
-          echo "cit-bkc-tool: report is available, type 'cit-bkc-tool report' to display"
+          #echo "cit-bkc-tool: report is available, type 'cit-bkc-tool report' to display"
           return 0
         fi
       fi
