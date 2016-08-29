@@ -12,7 +12,11 @@ import com.intel.mtwilson.common.CommandResult;
 import com.intel.mtwilson.common.CommandUtil;
 import com.intel.mtwilson.common.TAException;
 import gov.niarl.his.privacyca.TpmUtils;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import org.apache.commons.codec.binary.Hex;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
@@ -103,5 +107,38 @@ public class Util {
             log.debug("IO error: {}", e.getMessage());
             return false;
         }
+    }
+    
+    public static byte[] fixMakeCredentialBlobForWindows(byte[] in) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(bos);
+        
+        final int SECRET_SIZE = 134;
+        final int ASYM_SIZE = 256 + 2;
+
+        ByteBuffer buf = ByteBuffer.wrap(in);
+        int secretLength = buf.order(ByteOrder.LITTLE_ENDIAN).getShort();
+        
+        out.writeShort((short)secretLength);
+        
+        byte[] b = new byte[secretLength];
+        
+        buf.get(b);
+        
+        out.write(b);
+        
+        buf.position(SECRET_SIZE);
+        
+        int asymLength = buf.order(ByteOrder.LITTLE_ENDIAN).getShort();
+        
+        out.writeShort((short)asymLength);
+        
+        byte [] c = new byte[asymLength];                
+        
+        buf.get(c);
+        
+        out.write(c);
+        
+        return bos.toByteArray();
     }
 }

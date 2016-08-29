@@ -11,6 +11,8 @@
  */
 
 #include "NIARL_TPM_ModuleV2.h"
+#include <ctype.h>
+#include <climits>
 
 NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 {
@@ -22,6 +24,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	b_outfile = false;
 	i_mode = 0;
 	i_return = 0;
+	return_code = 0;
 
 	//setup local copy of argument array
 	i_argc = argc;
@@ -91,7 +94,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_debug)
 		{
-			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- ";
+			if (timeinfo != NULL) {
+				cerr << asctime(timeinfo) << " ";
+			}
 			cerr << ' ' << i_mode << " mode selection" << endl;
 			cerr << ' ' << b_debug << " debug toggle" << endl;
 			cerr << ' ' << logfile.is_open() << " logging" << endl;
@@ -101,7 +107,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_log)
 		{
-			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- ";
+			if (timeinfo != NULL) {
+				clog << asctime(timeinfo) << " ";
+			}
 			clog << ' ' << i_mode << " mode selection" << endl;
 			clog << ' ' << b_debug << " debug toggle" << endl;
 			clog << ' ' << logfile.is_open() << " logging" << endl;
@@ -157,10 +166,14 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	}
 }
 
+NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(const NIARL_TPM_ModuleV2& src) { /* do not create copies */ }
+
+NIARL_TPM_ModuleV2& NIARL_TPM_ModuleV2::operator=(const NIARL_TPM_ModuleV2&) { return *this; }
+
 NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 {
 	//delete dynamic arrays
-	delete [] s_argv;
+		delete [] s_argv;
 
 	//close logfile
 	if(logfile.is_open())
@@ -182,11 +195,19 @@ NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
 
-		if(b_debug)
-			cerr << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+		if(b_debug) {
+			cerr << "END --- NIARL TPM Module --- ";
+			if (timeinfo != NULL) {
+				cerr << asctime(timeinfo) << " ";
+			}
+		}
 
-		if(b_log)
-			clog << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+		if(b_log) {
+			clog << "END --- NIARL TPM Module --- ";
+			if (timeinfo != NULL) {
+				clog << asctime(timeinfo) << " ";
+			}
+		}
 	}
 }
 
@@ -500,7 +521,7 @@ void NIARL_TPM_ModuleV2::clear_ownership()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1557,7 +1578,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	nonce(s_nonce);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1739,7 +1760,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1950,7 +1971,7 @@ void NIARL_TPM_ModuleV2::create_key()
 //KEY OPERATIONS (NOT SET YET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
-	UINT32			init_flags;
+	UINT32			init_flags = 0;
 
 		if(b_debug)	cerr << "Key Section" << endl;
 		if(b_log)	clog << "Key Section" << endl;
@@ -2221,7 +2242,7 @@ void NIARL_TPM_ModuleV2::set_key()
 //KEY OPERATIONS (NOT SET YET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
-	UINT32			init_flags;
+	UINT32			init_flags = 0;
 
 		if(b_debug)	cerr << "Key Section" << endl;
 		if(b_log)	clog << "Key Section" << endl;
@@ -2765,7 +2786,7 @@ void NIARL_TPM_ModuleV2::clear_key()
 //KEY OPERATIONS (SET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
-	UINT32			init_flags;
+	UINT32			init_flags = 0;
 
 		if(b_debug)	cerr << "Key Section" << endl;
 		if(b_log)	clog << "Key Section" << endl;
@@ -2914,7 +2935,7 @@ void NIARL_TPM_ModuleV2::set_credential()
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	credential(s_blob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3086,7 +3107,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3288,7 +3309,7 @@ void NIARL_TPM_ModuleV2::clear_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -4877,7 +4898,15 @@ void NIARL_TPM_ModuleV2::get_rand_int()
 		if(s_argv[i].compare("-bytes") == 0)
 		{
 			if(++i >= i_argc) return;
-			numbytes = atoi(s_argv[i].c_str());
+			const char* input = s_argv[i].c_str();
+			for (int j = 0; j < strlen(input); j++)
+			{
+				if (!isdigit(input[j])) {
+					return_code = -1 * ERROR_ARG_VALIDATION;
+					return;
+				}
+			}
+			numbytes = atoi(input);
 			i_success++;
 		}
 	}
@@ -4931,9 +4960,11 @@ void NIARL_TPM_ModuleV2::get_rand_int()
 		if(b_log)	cerr << ' ' << result << " GET RANDOM" << endl;
 		return_code = result;
 
-	for(UINT32 i = 0; i < numbytes; i++)
-	{
-		cout << setbase(16) << setw(2) << setfill('0') << (int)randbytes[i];
+	if (numbytes <= UINT_MAX) {
+		for(UINT32 i = 0; i < numbytes; i++)
+		{
+			cout << setbase(16) << setw(2) << setfill('0') << (int)randbytes[i];
+		}
 	}
 
 //CLEANUP SECTION

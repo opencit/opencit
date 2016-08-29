@@ -54,7 +54,7 @@ REM # not including configure-from-environment because we are running it always 
 REM # not including register-tpm-password because we are prompting for it in the setup.sh
 
 set JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-set JAVA_OPTS=-Dlogback.configurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
+set JAVA_OPTS=-Dlogback.confsdfigurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
 
 REM @###################################################################################################
 
@@ -85,7 +85,7 @@ if "%wcommand%"=="start" (
 ) ELSE IF "%wcommand%"=="status" (
   call:trustagent_status
 ) ELSE IF "%wcommand%"=="setup" (
-  call:trustagent_setup %cmdparams%
+  call:trustagent_setup %cmdparams%dsf
 ) ELSE IF "%wcommand%"=="authorize" (
   call:trustagent_authorize
 ) ELSE IF "%wcommand%"=="start-http-server" (
@@ -94,10 +94,11 @@ if "%wcommand%"=="start" (
   echo. CIT trust agent Windows version 1.0
 ) ELSE IF "%wcommand%"=="help" (
   call:print_help
+) ELSE IF "%wcommand%"=="uninstall" (
+  call:tagent_uninstall
 ) ELSE (
   IF "%*"=="" (
     call:print_help
-  ) ELSE (
     echo. Running command: %*
     >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
@@ -111,10 +112,10 @@ REM functions
   echo. Trustagent started
 GOTO:EOF
 
-:trustagent_stop
-  echo. Stopping the trust agent
-  sc stop trustagent > null
-  echo. Trustagent stopped
+:trustagent_status
+  REM set TASTATUS=
+  call :get_status
+  echo. Trustagent status: %TASTATUS%
 GOTO:EOF
 
 :trustagent_restart
@@ -123,18 +124,16 @@ GOTO:EOF
   IF "%TASTATUS%"=="Stopped" (
      echo.   Trustagent was not running
   ) ELSE (
-     sc stop trustagent >null
-     echo.   Trustagent stopped
+    call:trustagent_stop
+    timeout /t 1 /NOBREAK
   )
-  echo. Starting trustagent
-  sc start trustagent > null
-  echo.   Trustagent started
+  call :trustagent_start
 GOTO:EOF
 
-:trustagent_status
-  REM set TASTATUS=
-  call :get_status
-  echo. Trustagent status: %TASTATUS%
+:trustagent_stop
+  echo. Stopping the trust agent
+  sc stop trustagent > null
+  echo. Trustagent stopped
 GOTO:EOF
 
 :trustagent_setup
@@ -189,6 +188,10 @@ GOTO:EOF
     echo. configure-from-environment
     echo. %TRUSTAGENT_SETUP_TASKS%
     echo. register-tpm-password
+GOTO:EOF
+
+:tagent_uninstall
+    start /d "%TRUSTAGENT_HOME%" Uninstall.exe
 GOTO:EOF
 
 :get_status

@@ -187,12 +187,15 @@ public class TAHelper {
             aikverifyhomeData = varPath;
 //            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             if (isHostWindows)
-                aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
+                if (host.TpmVersion.equals("2.0"))
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin2";
+                else
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
             else {
                 if (host.TpmVersion.equals("2.0"))
-                    aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify2" : "aikqverify.exe");
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverify2";
                 else
-                    aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverify";
             }
         } else {
             // mtwilson 1.2 configuration
@@ -637,7 +640,7 @@ public class TAHelper {
          }
          * */
 
-        boolean tpmSupport = true;
+//        boolean tpmSupport = true;
 
 
         // xtw = xof.createXMLStreamWriter(new FileWriter("c:\\temp\\nb_xml.xml"));
@@ -646,9 +649,9 @@ public class TAHelper {
         xtw.writeStartElement("Host_Attestation_Report");
         xtw.writeAttribute("Host_Name", hostName);
         xtw.writeAttribute("Host_VMM", vmmName);
-        xtw.writeAttribute("TXT_Support", String.valueOf(tpmSupport));
+        xtw.writeAttribute("TXT_Support", String.valueOf(true)); //String.valueOf(tpmSupport));
 
-        if (tpmSupport == true) {
+//        if (tpmSupport == true) {
             
             // Note: Map should be insertion sorted by insertion order
             Map<DigestAlgorithm, List<Pcr>> pcrs = pcrManifest.getPcrsMap();
@@ -660,11 +663,11 @@ public class TAHelper {
                     xtw.writeAttribute("DigestAlgorithm", e.getKey().toString());                            
                 }                
             }                       
-        } else {
-            xtw.writeStartElement("PCRInfo");
-            xtw.writeAttribute("Error", "Host does not support TPM.");
-            xtw.writeEndElement();
-        }
+//        } else {
+//            xtw.writeStartElement("PCRInfo");
+//            xtw.writeAttribute("Error", "Host does not support TPM.");
+//            xtw.writeEndElement();
+//        }
 
         // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report.
         Map<DigestAlgorithm, List<PcrEventLog>> logs = pcrManifest.getPcrEventLogMap();

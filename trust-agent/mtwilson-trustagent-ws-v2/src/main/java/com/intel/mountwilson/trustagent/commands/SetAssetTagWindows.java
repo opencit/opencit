@@ -99,19 +99,20 @@ public class SetAssetTagWindows implements ICommand {
         return true;
     }
     
-    private void writeHashToFile() throws TAException, IOException {
-        try {
-            String assetTagHash = context.getAssetTagHash();
-            if (!HexUtil.isHex(assetTagHash)) {
-                log.error("assetTagHash is not in hex format: {}", assetTagHash);
-                throw new IllegalArgumentException(String.format("assetTagHash is not in hex format: %s", assetTagHash));
-            }
-            CommandUtil.runCommand("/usr/local/bin/hex2bin " + assetTagHash + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
-        }catch(TAException ex) {
-                log.error("error writing to nvram, " + ex.getMessage() );
-                throw ex;
-        }        
-    }
+    //#5824: Private method 'writeHashToFile' is unused.
+    //private void writeHashToFile() throws TAException, IOException {
+    //    try {
+    //        String assetTagHash = context.getAssetTagHash();
+    //        if (!HexUtil.isHex(assetTagHash)) {
+    //            log.error("assetTagHash is not in hex format: {}", assetTagHash);
+    //            throw new IllegalArgumentException(String.format("assetTagHash is not in hex format: %s", assetTagHash));
+    //        }
+    //        CommandUtil.runCommand("/usr/local/bin/hex2bin " + assetTagHash + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
+    //    }catch(TAException ex) {
+    //            log.error("error writing to nvram, " + ex.getMessage() );
+    //            throw ex;
+    //    }        
+    //}
     
     private boolean createIndex(String NvramPassword) throws TAException, IOException {
         try {

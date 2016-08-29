@@ -7,3 +7,4 @@ installers/mtwilson-trustagent-ubuntu/target/mtwilson-trustagent-ubuntu-2.2-SNAP
 packages/trustagent-windows-installer/target/mtwilson-trustagent-windows-installer-2.2-SNAPSHOT.exe
 integration/mtwilson-client-java7/target/mtwilson-client-java7-2.2-SNAPSHOT-javadoc.jar
 
+integration/mtwilson-client-java7/target/mtwilson-client-java7-2.2-SNAPSHOT-javadoc.zip
