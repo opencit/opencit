@@ -1151,7 +1151,7 @@ public class HostBO {
                     log.debug("Database already has the configuration details for OEM : " + hostObj.BIOS_Oem);
                 }
 
-                boolean useDaMode = "2.0".equals(hostConfigObj.getTxtHostRecord().TpmVersion);
+                boolean useDaMode = hostConfigObj.getTxtHostRecord().getDaMode();
 
                 // Create the BIOS MLE for the host. 
                 MleData mleObj = new MleData();
