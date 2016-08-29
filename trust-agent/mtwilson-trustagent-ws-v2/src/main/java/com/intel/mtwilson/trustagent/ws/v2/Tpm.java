@@ -158,9 +158,11 @@ public class Tpm {
         logPerformance("context.getTpmQuoteResponse()");
 
         //assetTag 
-        response.isTagProvisioned = isTagProvisioned;
-        if (isTagProvisioned) {
-            response.assetTag = assetTagHash;
+        //#6560: Null pointer dereference of 'response' where null is returned from a method
+        if (response != null){
+            response.isTagProvisioned = isTagProvisioned;
+            if (isTagProvisioned) 
+                response.assetTag = assetTagHash;
         }
 
         // delete temporary session directory

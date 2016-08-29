@@ -22,7 +22,7 @@ public class TCBuffer {
 		brpcPayloadSize  = ByteBuffer.allocate(4);
 		brpcCallStatus   = ByteBuffer.allocate(4);
 		//boriginalRpId = ByteBuffer.allocate(4);
-		rpcPayload    =  new String("EMPTY").getBytes();
+		rpcPayload    =  "EMPTY".getBytes();
 		// set buffer to little endian format
 		//brpId.order(ByteOrder.LITTLE_ENDIAN);
 		brpcCallIndex.order(ByteOrder.LITTLE_ENDIAN);

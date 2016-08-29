@@ -83,48 +83,7 @@
                 </executions>
             </plugin>
             -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <configuration>
-                    <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
-                    <noqualifier>all</noqualifier>
-                    <tags>
-                        <tag>
-                            <name>mtwRequiresPermissions</name>
-                            <placement>aoptcmf</placement>
-                            <head>Requires permissions:</head>
-                        </tag>
-                        <tag>
-                            <name>mtwContentTypeReturned</name>
-                            <placement>aoptcmf</placement>
-                            <head>Content type returned:</head>
-                        </tag>
-                        <tag>
-                            <name>mtwMethodType</name>
-                            <placement>aoptcmf</placement>
-                            <head>Method Type:</head>
-                        </tag>
-                        <tag>
-                            <name>mtwSampleRestCall</name>
-                            <placement>aoptcmf</placement>
-                            <head>Sample REST call:</head>
-                        </tag>
-                        <tag>
-                            <name>mtwSampleApiCall</name>
-                            <placement>aoptcmf</placement>
-                            <head>Sample API call:</head>
-                        </tag>
-                        <tag>
-                            <name>mtwPreRequisite</name>
-                            <placement>aoptcmf</placement>
-                            <head>Pre-requisite:</head>
-                        </tag>                                
-                    </tags>
-                </configuration>
-            </plugin>
-                     
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -440,11 +399,46 @@
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
                                     <goal>javadoc</goal>
                                 </goals>
                                 <configuration>
+                                    <excludePackageNames>com.intel.mtwilson.client.jaxrs.common:generated:com.intel.mountwilson.as.hostmanifestreport.data:com.intel.mountwilson.as.hosttrustreport.data</excludePackageNames>
+                                    <noqualifier>all</noqualifier>
+                                    <tags>
+                                        <tag>
+                                            <name>mtwRequiresPermissions</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Requires permissions:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwContentTypeReturned</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Content type returned:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwMethodType</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Method Type:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwSampleRestCall</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Sample REST call:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwSampleApiCall</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Sample API call:</head>
+                                        </tag>
+                                        <tag>
+                                            <name>mtwPreRequisite</name>
+                                            <placement>aoptcmf</placement>
+                                            <head>Pre-requisite:</head>
+                                        </tag>                                
+                                    </tags>
                                     <attach>true</attach>
                                     <includeDependencySources>true</includeDependencySources>
                                     <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
@@ -459,7 +453,6 @@
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-model</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.trustagent:mtwilson-trustagent-client-jaxrs2</dependencySourceInclude>
                                     </dependencySourceIncludes>
-                                    <excludePackageNames>generated:com.intel.mountwilson.as.hostmanifestreport.data:com.intel.mountwilson.as.hosttrustreport.data</excludePackageNames> 
                                 </configuration>
                             </execution>
                         </executions>
@@ -503,6 +496,26 @@
                                     </target>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>zip-javadoc-site</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+                                        <if>
+                                            <available file="${project.build.directory}/site" type="dir"/>
+                                            <then>
+                                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.zip">
+                                                    <fileset dir="${project.build.directory}/site" />
+                                                </zip>
+                                            </then>
+                                        </if>
+                                    </tasks>
+                                </configuration>
+                            </execution>
                         </executions>
                         <dependencies>
                             <dependency>
@@ -533,6 +546,11 @@
                                         <artifact>
                                             <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
                                             <type>zip</type>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.zip</file>
+                                            <type>zip</type>
+                                            <classifier>javadoc</classifier>
                                         </artifact>
                                     </artifacts>
                                 </configuration>

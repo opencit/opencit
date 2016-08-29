@@ -71,28 +71,30 @@ public class CreateIdentity implements Configurable, Runnable {
             /*
             if (IdentityOS.isWindows()) { 
                 // Call Windows API to get the TPM EK certificate and assign it to "ekCert"
-                Tpm tpm = new Tpm();
-                ekCert = tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
+                //#5815: Call to static method 'com.intel.mtwilson.trustagent.tpmmodules.Tpm.getTpm' via instance reference.
+               //Tpm tpm = new Tpm();
+                ekCert = Tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
             } else
                 ekCert = Tpm.getModule().getCredential(config.getTpmOwnerSecret(), "EC");
              */
             TpmIdentityRequest encryptedEkCert = new TpmIdentityRequest(ekCert, (RSAPublicKey) privacy.getPublicKey(), false);
 
             // create the identity request
-            boolean shortcut = true;
+            //#5831: Test expression is always true.
+            boolean shortcut = false;
             String HisIdentityLabel = "HIS_Identity_Key";
 
             TpmIdentity newId;
             if (IdentityOS.isWindows()) {
                 /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
-                newId = Tpm.getModule().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), X509Util.decodeDerCertificate(ekCert), !shortcut);
+                newId = Tpm.getModule().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), X509Util.decodeDerCertificate(ekCert), shortcut);
 
                 // write the AikOpaque to file
                 String aikopaquefilepath = config.getAikOpaqueFile().getAbsolutePath();
                 writeblob(aikopaquefilepath, newId.getAikOpaque());
 
             } else {
-                newId = Tpm.getModule().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, !shortcut);
+                newId = Tpm.getModule().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, shortcut);
             }
 //             TpmKey aik = new TpmKey(newId.getAikBlob());
 

@@ -93,7 +93,12 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # make sure unzip and authbind are installed
 #java_required_version=1.7.0_51
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl tpm-tools make gcc trousers trousers-devel redhat-lsb-core"
+# make sure unzip and authbind are installed
+#java_required_version=1.7.0_51
+#Adding redhat-lsb libvirt for bug 5289
+#Adding net-tools for bug 5285
+#adding openssl-devel for bug 5284
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl tpm-tools make gcc trousers trousers-devel redhat-lsb-core libvirt net-tools openssl-devel"
 TRUSTAGENT_APT_PACKAGES="zip unzip authbind vim-common openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
 TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
 TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
@@ -109,7 +114,7 @@ else
   #./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 
   # not install trousers and its dev packages for tpm 2.0
-  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl make gcc redhat-lsb-core"
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl make gcc redhat-lsb-core libvirt net-tools openssl-devel"
   TRUSTAGENT_APT_PACKAGES="zip unzip authbind vim-common openssl libssl-dev make gcc binutils"
   TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel make gcc"
   TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
@@ -693,7 +698,7 @@ monit_install() {
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
   auto_install "Monit" "MONIT"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install monit through package installer"; return 1; fi
   monit_clear; monit_detect;
     if [[ -z "$monit" ]]; then
       echo_failure "Unable to auto-install Monit"
@@ -711,7 +716,7 @@ monit_src_install() {
   DEVELOPER_YUM_PACKAGES="make gcc"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
   auto_install "Developer tools" "DEVELOPER"
-  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; exit -1; fi
+  if [ $? -ne 0 ]; then echo_failure "Failed to install developer tools through package installer"; return 1; fi
   monit_clear; monit_detect;
   if [[ -z "$monit" ]]; then
     if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then
