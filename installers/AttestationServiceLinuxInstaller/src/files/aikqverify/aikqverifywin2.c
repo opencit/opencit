@@ -76,23 +76,22 @@ int
 main (int ac, char **av)
 {
 	FILE		*f_in;
-	BYTE		*chal;
-	UINT32		chalLen;
-	BYTE		*quote;
+	BYTE		*chal = NULL;
+	UINT32		chalLen = 0;;
+	BYTE		*quote = NULL;
 	UINT32		quoteLen;
 	RSA			*aikRsa;
-	UINT32		selectLen;
-	BYTE		*select;
-	UINT32		pcrLen;
-	BYTE		*pcrs;
+	//UINT32		selectLen;
+	//BYTE		*select;
+	//UINT32		pcrLen;
 	BYTE		chalmd[20];
 	BYTE		md[32];
 	BYTE		qinfo[8+20+20];
 	char		*chalfile = NULL;
 	int			pcr;
 	int			pcri = 0;
-	int			ind = 0;
-	int			i,j;
+	//int			ind = 0;
+	int			i;
 	PPCP_PLATFORM_ATTESTATION_BLOB pAttestation;
 	UINT32 cursor = 0;
 	BYTE *pbPcrValues = NULL;
@@ -103,29 +102,28 @@ main (int ac, char **av)
     	UINT32 cbSignature = 0;
     	BYTE *pbLog = NULL;
     	UINT32 cbLog = 0;
-    	BYTE *pbNonce = NULL;
+    	//BYTE *pbNonce = NULL;
     	BYTE quoteDigest[20] = {0};
-    	UINT32 cbQuoteDigest = 0;
+    	//UINT32 cbQuoteDigest = 0;
     	UINT32 tpmVersion = 0;
+    	UINT32 returnCode = 0;
 
 	UINT32 index = 0;
         BYTE            *quoted = NULL;
         BYTE            *quotedInfo = NULL;
         UINT16          quotedInfoLen;
-        BYTE            *tpmtSig = NULL;
-        UINT16          sigAlg;
-        UINT32          hashAlg;
-        BYTE            *sig;
-        UINT32          sigLen;
+        //UINT16          sigAlg;
+        //UINT32          hashAlg;
+        //BYTE            *sig;
         BYTE            *recvNonce = NULL;
         UINT32          recvNonceLen;
         TPM2B_NAME      tpm2b_name;
         TPM2B_DATA      tpm2b_data;
-        UINT32          verifiedLen;
-        UINT32          pcrBankCount;
+        //UINT32          verifiedLen;
+        //UINT32          pcrBankCount;
         TPMS_PCR_SELECTION      pcr_selection[MAX_BANKS];
-        TPM2B_DIGEST    tpm2b_digest;
-        TPMT_SIGNATURE  tpmt_signature;
+        //TPM2B_DIGEST    tpm2b_digest;
+        //TPMT_SIGNATURE  tpmt_signature;
         BYTE            pcrConcat[SHA256_SIZE * 24 * 3]; //allocate 3 SHA256 banks memory to accomodate possible combination
         BYTE            pcrsDigest[SHA256_SIZE];
 
@@ -153,6 +151,10 @@ main (int ac, char **av)
 		chalLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
 		chal = malloc (chalLen);
+  		if (chal == NULL) {
+			fprintf (stderr, "Unable to allocate memory to read file %s\n", chalfile);
+			exit (1);
+		}
 		if (fread (chal, 1, chalLen, f_in) != chalLen) {
 			fprintf (stderr, "Unable to read file %s\n", chalfile);
 			exit (1);
@@ -187,9 +189,15 @@ main (int ac, char **av)
 	quoteLen = ftell (f_in);
 	fseek (f_in, 0, SEEK_SET);
 	quote = malloc (quoteLen);
+  	if (quote == NULL) {
+		fprintf (stderr, "Unable to allocate memory to read file %s\n", av[2]);
+		returnCode = 1;
+		goto badquote;
+	}
 	if (fread (quote, 1, quoteLen, f_in) != quoteLen) {
 		fprintf (stderr, "Unable to read file %s\n", av[2]);
-		exit (1);
+		returnCode = 1;
+		goto badquote;
 	}
 	fclose (f_in);
 
@@ -212,11 +220,21 @@ main (int ac, char **av)
         cbQuote = pAttestation->cbQuote;
         cursor += pAttestation->cbQuote;     //to the beginning of Signature
     }
+    else {
+	fprintf (stderr, "Error, cbQuote is 0\n");
+	returnCode = 2;
+	goto badquote;
+    }
     if(pAttestation->cbSignature != 0)
     {
         pbSignature = &quote[cursor];
         cbSignature = pAttestation->cbSignature;
         cursor += pAttestation->cbSignature; //to the beginning of measurement log
+    }
+    else {
+	fprintf (stderr, "Error, cbSignature is 0\n");
+	returnCode = 2;
+	goto badquote;
     }
     pbLog = &quote[cursor];
     cbLog = pAttestation->cbLog;
@@ -228,7 +246,8 @@ main (int ac, char **av)
     // Step 2: Verify the signature with the public AIK
     if (1 != RSA_verify(NID_sha1, quoteDigest, sizeof(quoteDigest), pbSignature, cbSignature, aikRsa)) {
 		fprintf (stderr, "Error, bad RSA signature in quote\n");
-		exit (2);
+		returnCode = 2;
+		goto badquote;
     }
 
     // validate nonce
@@ -264,7 +283,8 @@ main (int ac, char **av)
 
         if (memcmp(recvNonce, chalmd, chalLen) != 0) {
                 fprintf(stderr, "Error in comparing the received nonce with the challenge");
-                exit(3);
+		returnCode = 3;
+                goto badquote;
         } 
     }
 
@@ -286,8 +306,12 @@ main (int ac, char **av)
 	return 0;
 
 badquote:
-	fprintf (stderr, "Input AIK quote file incorrect format\n");
-	return 1;
+	//fprintf (stderr, "Input AIK quote file incorrect format\n");
+        
+	//clean allocated memory
+	if (quote != NULL) free(quote);
+	if (chal != NULL) free(chal);
+	return returnCode;
 }
 
 

@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+//#define __STDC_WANT_LIB_EXT1__ 1
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
@@ -83,15 +84,13 @@ typedef struct {
 int main (int ac, char **av)
 {
 	FILE		*f_in;
-	BYTE		*chal;
-	UINT32		chalLen;
-	BYTE		*quote;
+	BYTE		*chal = NULL;
+	UINT32		chalLen = 0;
+	BYTE		*quote = NULL;
 	UINT32		index =0;
 	UINT32		pos =0;
 	UINT32		quoteLen;
 	RSA		*aikRsa;
-	UINT32		selectLen;
-	BYTE		*select;
 	UINT32		pcrLen;
 	BYTE		*pcrs;
 	UINT32		pcrSize;
@@ -101,13 +100,10 @@ int main (int ac, char **av)
 	BYTE		*quotedInfo = NULL;
 	UINT16		quotedInfoLen;
 	BYTE		*tpmtSig = NULL;
-	UINT16		sigAlg;
 	UINT32		hashAlg;
-	BYTE		*sig;
-	UINT32		sigLen;
+	//UINT32		sigLen;
 	BYTE		*recvNonce = NULL;
 	UINT32		recvNonceLen;
-	UINT32		verifiedLen;
 	BYTE		chalmd[20];
 	BYTE		md[32]; // SHA256 hash
 	BYTE		qinfo[8+20+20];
@@ -124,6 +120,7 @@ int main (int ac, char **av)
 	int			pcri = 0;
 	int			ind = 0;
 	int			i,j;
+	UINT32		returnCode;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
 		chalfile = av[2];
@@ -148,6 +145,10 @@ int main (int ac, char **av)
 		chalLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
 		chal = malloc (chalLen);
+                if (chal == NULL) {
+                        fprintf (stderr, "Unable to allocate memory to read file %s\n", chalfile);
+                        exit (1);
+                }
 		if (fread (chal, 1, chalLen, f_in) != chalLen) {
 			fprintf (stderr, "Unable to read file %s\n", chalfile);
 			exit (1);
@@ -182,9 +183,15 @@ int main (int ac, char **av)
 	quoteLen = ftell (f_in);
 	fseek (f_in, 0, SEEK_SET);
 	quote = malloc (quoteLen);
+	if (quote == NULL) {
+		fprintf (stderr, "Unable to allocate memory to read file %s\n", av[2]);
+		exit (1);
+	}
 	if (fread (quote, 1, quoteLen, f_in) != quoteLen) {
 		fprintf (stderr, "Unable to read file %s\n", av[2]);
-		exit (1);
+		fclose (f_in);
+		returnCode = 1;
+		goto badquote;
 	}
 	fclose (f_in);
 
@@ -233,7 +240,8 @@ int main (int ac, char **av)
 	if (memcmp(recvNonce, chal, chalLen) != 0) {
 		fprintf(stderr, "Error in comparing the received nonce with the challenge");
 		free(chal);
-		exit(1);
+		returnCode =1;
+		goto badquote;
 	} else {
 		free(chal);
 	}
@@ -254,7 +262,8 @@ int main (int ac, char **av)
 	pcrBankCount = ntohl(*(UINT32*)(quote + index));
         if (pcrBankCount > MAX_BANKS) {
 		fprintf(stderr, "number of PCR selection array in the quote is greater than %d", MAX_BANKS);
-		exit(1);
+		returnCode = 1;
+		goto badquote;
 	}
 		
 	//printf("bank count: %02x\n", pcrBankCount);
@@ -308,7 +317,8 @@ int main (int ac, char **av)
         pcrLen = quoteLen - (pcrs-quote);
         if (pcrLen <=0) {
 		fprintf (stderr, "no PCR values included in quote\n");
-		exit(1);
+		returnCode = 1;
+		goto badquote;
 	}
 	
 	// Verify RSA signature
@@ -318,7 +328,8 @@ int main (int ac, char **av)
         // signature
 	if (1 != RSA_verify(NID_sha256, md, sizeof(md), tpmt_signature.signature, tpmt_signature.size, aikRsa)) {
 		fprintf (stderr, "Error, bad RSA signature in quote\n");
-		exit (2);
+		returnCode = 2;
+		goto badquote;
 	}
 
 	// validate the PCR concatenated digest
@@ -336,6 +347,7 @@ int main (int ac, char **av)
 		
 		for (pcr=0; pcr < 8*pcr_selection[j].size; pcr++) {
 			if (pcr_selection[j].pcrSelected[pcr/8] & (1 << (pcr%8))) {
+//				memcpy_s(pcrConcat+pcrPos, pcrSize, pcrs+pcrPos, pcrSize);
 				memcpy(pcrConcat+pcrPos, pcrs+pcrPos, pcrSize);
 				pcri++;
 				ind++;
@@ -346,13 +358,15 @@ int main (int ac, char **av)
 	}
 	if (ind<1) {
 		fprintf(stderr, "Error, no PCRs selected for quote\n");
-		exit(4);
+		returnCode = 4;
+		goto badquote;
 	}
         memset(pcrsDigest, 0, sizeof(pcrsDigest));
 	SHA256(pcrConcat, concatSize, pcrsDigest);
 	if (memcmp(pcrsDigest, tpm2b_digest.digest, tpm2b_digest.size) != 0) {
 		fprintf(stderr, "Error in comparing the concatenated PCR digest with the digest in quote");
-		exit(5);
+		returnCode = 5;
+		goto badquote;
 	}
 	
 	/* Print out PCR values  */
@@ -391,6 +405,7 @@ int main (int ac, char **av)
 	return 0;
 
 badquote:
-	fprintf (stderr, "Input AIK quote file incorrect format\n");
-	return 1;
+        if (quote != NULL) free(quote);
+        if (chal != NULL) free(chal);
+	return returnCode;
 }
