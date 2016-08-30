@@ -156,6 +156,7 @@ public class TpmModule12 implements TpmModuleProvider {
         
         FileOutputStream output = new FileOutputStream(tmpFile);
         IOUtils.write(data, output);
+        output.close();
         
         log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f " + tmpFile.getPath());
         Map<String, String> variables = new HashMap<>();
@@ -212,6 +213,7 @@ public class TpmModule12 implements TpmModuleProvider {
         
         FileInputStream fis = new FileInputStream(f);
         byte[] res = IOUtils.toByteArray(fis);
+        fis.close();
         f.delete();
         return res;       
     }
