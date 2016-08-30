@@ -196,6 +196,7 @@ main (int ac, char **av)
 	}
 	if (fread (quote, 1, quoteLen, f_in) != quoteLen) {
 		fprintf (stderr, "Unable to read file %s\n", av[2]);
+        fclose(f_in);
 		returnCode = 1;
 		goto badquote;
 	}
@@ -310,7 +311,7 @@ badquote:
         
 	//clean allocated memory
 	if (quote != NULL) free(quote);
-	if (chal != NULL) free(chal);
+	//if (chal != NULL) free(chal);
 	return returnCode;
 }
 

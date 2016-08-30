@@ -120,7 +120,7 @@ int main (int ac, char **av)
 	int			pcri = 0;
 	int			ind = 0;
 	int			i,j;
-	UINT32		returnCode;
+	UINT32		returnCode = 0;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
 		chalfile = av[2];
