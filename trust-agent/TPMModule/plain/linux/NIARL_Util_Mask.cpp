@@ -152,6 +152,10 @@ NIARL_Util_Mask::NIARL_Util_Mask(string in_var)
 	}
 }
 
+NIARL_Util_Mask::NIARL_Util_Mask(const NIARL_Util_Mask& src) { /* do not create copies */ }
+
+NIARL_Util_Mask& NIARL_Util_Mask::operator=(const NIARL_Util_Mask&) { return *this; }
+
 NIARL_Util_Mask::~NIARL_Util_Mask()
 {
 	delete [] index;

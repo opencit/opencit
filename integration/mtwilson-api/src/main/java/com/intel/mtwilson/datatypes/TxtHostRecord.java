@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.shiro.util.StringUtils;
 //import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 //import org.codehaus.jackson.annotate.JsonProperty;
@@ -182,5 +184,15 @@ public class TxtHostRecord {
         return best;
     }
 
+    @JsonIgnore
+    public boolean getDaMode() {
+        ConnectionString connString;
+        try {
+            connString = new ConnectionString(this.AddOn_Connection_String);
+            return "2.0".equals(this.TpmVersion) && connString.getVendor() == Vendor.INTEL;
+        } catch (MalformedURLException ex) {
+            return false;
+        }        
+    }
 
 }

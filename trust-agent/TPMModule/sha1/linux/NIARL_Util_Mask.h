@@ -38,6 +38,10 @@ public:
 
 	NIARL_Util_Mask(string in_var);
 	~NIARL_Util_Mask();
+	
+private:
+	NIARL_Util_Mask(const NIARL_Util_Mask& src);
+	NIARL_Util_Mask& operator=(const NIARL_Util_Mask&);
 };
 
 #endif

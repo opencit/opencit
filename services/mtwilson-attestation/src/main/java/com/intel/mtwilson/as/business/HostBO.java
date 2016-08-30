@@ -242,7 +242,7 @@ public class HostBO {
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                         }else if(useDaMode && biosMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
                             log.info("DA MODE: Host specific modules will be retrieved from the host that extends into PCR 17.");
-                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(biosMleId, pcrManifest, hostType);
+                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(vmmMleId, pcrManifest, hostType);
                         } else {
                             log.info("Host specific modules will not be configured since PCR 17 or 19 in the correct TPM mode are not selected for attestation");
                         }
@@ -269,7 +269,7 @@ public class HostBO {
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         Map<String,String> attributes = agent.getHostAttributes();
                         String hostUuidAttr = attributes.get("Host_UUID");
-                        if ((attributes != null) && (!attributes.isEmpty()) && (hostUuidAttr != null))
+                        if ((!attributes.isEmpty()) && (hostUuidAttr != null))
                             tblHosts.setHardwareUuid(hostUuidAttr.toLowerCase().trim());
                         
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId, uuid);
@@ -487,16 +487,46 @@ public class HostBO {
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
                         }
+                        // User specified priority overrides for these fields
                         if (host.getTpmVersion() != null) {
                             tblHosts.setTpmVersion(host.getTpmVersion());
-                        }
-                        if (host.getPcrBanks() != null) {
-                            tblHosts.setPcrBank(host.getPcrBanks());
                         }
 
                         if (agent == null) {
                             HostAgentFactory factory = new HostAgentFactory();
                             agent = factory.getHostAgent(tblHosts);
+                        }
+
+                        TxtHostRecord detailsPulledFromHost = agent.getHostDetails();
+
+                        // pull details from host to fill in null or invalid information
+                        if (tblHosts.getTpmVersion() == null) {
+                            if (detailsPulledFromHost.TpmVersion != null) {
+                                tblHosts.setTpmVersion(detailsPulledFromHost.TpmVersion);
+                            } else {
+                                tblHosts.setTpmVersion("1.2");
+                            }
+                        }
+
+                        if (host.getPcrBanks() != null && detailsPulledFromHost.PcrBanks != null) {
+                            // User has overidden PCR Bank List. Complain if we can't support it
+                            String overrideList = host.getPcrBanks();
+                            String supportedList = detailsPulledFromHost.PcrBanks;
+
+                            Set<String> override = StringUtils.splitToSet(overrideList, " ");
+                            Set<String> supported = StringUtils.splitToSet(supportedList, " ");
+
+                            supported.retainAll(override); // intersection of set
+
+                            if (supported.size() <= 0) {
+                                throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, "This TPM Does not support any of the PCR Banks requested: " + override);
+                            }
+
+                            detailsPulledFromHost.PcrBanks = (StringUtils.join(supported.iterator(), " "));
+                            tblHosts.setPcrBank(detailsPulledFromHost.getBestPcrAlgorithmBank());
+                        } else {
+                            // else we Select AUTO based on Host capabilities, consistent with the V2 api
+                            tblHosts.setPcrBank(detailsPulledFromHost.getBestPcrAlgorithmBank());
                         }
                         
                         if( agent.isAikAvailable() ) {
@@ -525,9 +555,9 @@ public class HostBO {
                             log.debug("LEGACY MODE: Host specific modules will be retrieved from the host that extends into PCR 19.");
                             // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
-                        } else if(useDaMode && biosMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
+                        } else if(useDaMode && vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR17.toString())) {
                             log.debug("DA MODE: Host specific modules will be retrieved from the host that extends into PCR 17.");
-                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(biosMleId, pcrManifest, hostType);
+                            tblHostSpecificManifests = createHostSpecificManifestRecordsDaMode(vmmMleId, pcrManifest, hostType);
                         } else {
                             log.debug("Host specific modules will not be configured since PCR 17 or 19 with the correct TPM Mode are not selected for attestation");
                         }

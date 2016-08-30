@@ -18,7 +18,8 @@
  */
 int hex2bytea( const char *a_pszHex, BYTE **a_pDecoded, int *a_iDecodedLen ) {
         BYTE *pDecoded;
-        int iDecodedLen, iByte, i;
+        unsigned int iByte;
+        int iDecodedLen, i;
         int iHexLen = strlen(a_pszHex);
         if( iHexLen % 2 != 0 ) {
                 *a_pDecoded = NULL;
@@ -34,7 +35,8 @@ int hex2bytea( const char *a_pszHex, BYTE **a_pDecoded, int *a_iDecodedLen ) {
                         *a_iDecodedLen = 0;
                         return 2; // invalid hex digit
                 }
-                pDecoded[i] = iByte & 0xFF;
+                if(pDecoded != NULL)
+                        pDecoded[i] = iByte & 0xFF;
         }
         *a_pDecoded = pDecoded;
         *a_iDecodedLen = iDecodedLen;

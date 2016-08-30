@@ -10,6 +10,7 @@ import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.common.CommandResult;
 import com.intel.mtwilson.common.CommandUtil;
 import com.intel.mtwilson.common.TAException;
+import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.shell.CommandLineResult;
 import com.intel.mtwilson.trustagent.shell.ShellExecutor;
 import com.intel.mtwilson.trustagent.shell.ShellExecutorFactory;
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -246,8 +248,12 @@ public class TpmModuleWindows implements TpmModuleProvider {
             if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.collateIdentityRequest returned nonzero error", result.getReturnCode());
             
             /* executeTpmCommand returns 
-            * >> result.getResult(0) - idbinding (IDENTITY_CONTENTS) -- Note the TpmModule for Linux based on NIAL_TPM_MODULE returns TPM_IDENTITY_REQUEST strcuture, 
-            *     which is encrypted form of TPM_IDENTITY_PROOF. so we need to do some conversion.
+            * >> result.getResult(0) - 
+            *      tpm1.2: 
+            *        idbinding (IDENTITY_CONTENTS) -- Note the TpmModule for Linux based on NIAL_TPM_MODULE returns TPM_IDENTITY_REQUEST strcuture, 
+            *       which is encrypted form of TPM_IDENTITY_PROOF. so we need to do some conversion.
+            *      tpm2.0:
+            *        aikname in the format of [nameAlg -2 bytes][hash of the AIK pub key - 32 byte in case of SHA256
             * >> result.getResult(1) - AIK Pub key Modulus
             * >> result.getResult(2) - AIK key blob
             * Windows PCP does not create identityreqeust raw bytes. It only created an idbinding, but it is just the structure of TPM_IDENTITY_CONTENTS
@@ -256,24 +262,41 @@ public class TpmModuleWindows implements TpmModuleProvider {
             * 2. Create TPM_IDENTITY_REQUEST structure based on TPM_IDENTITY_PROOF
             */
             //TpmIdentityProof(byte [] idLabel, byte [] idBinding, TpmPubKey AIK, byte [] ekCertBytes, byte [] platformCertBytes, byte [] conformanceCertBytes, boolean IV, boolean symKey, boolean oaep)
-            byte[] endCreBytes = null;
-            if (endorsmentCredential != null) endCreBytes = endorsmentCredential.getEncoded();
-            TpmIdentityProof idProof = new TpmIdentityProof(keyLabel.getBytes(),
-                    TpmUtils.hexStringToByteArray(result.getResult(0)),
-                    new TpmPubKey(TpmUtils.hexStringToByteArray(result.getResult(1))),
-                    endCreBytes, endCreBytes, endCreBytes, false, false, false);
-            TpmPubKey caPubKey = new TpmPubKey(new ByteArrayInputStream(pcaPubKeyBlob));
-            //TpmIdentityRequest(TpmIdentityProof newIdProof, RSAPublicKey caKey)
-            TpmIdentityRequest idReq = new TpmIdentityRequest(idProof, caPubKey.getKey()); // this does the encryption of idProof by using caPubKey
-            byte [] identityRequest = idReq.toByteArray();
-            
-            //log.debug("identity request: {}", idReq.toString());
-            log.debug("identity request asym size: {}", idReq.getAsymBlob().length);
-            
-            byte [] aikModulus = TpmUtils.hexStringToByteArray(result.getResult(1));
-            byte [] aikKeyBlob = TpmUtils.hexStringToByteArray(result.getResult(2));
-            TpmIdentity toReturn = new TpmIdentity(identityRequest, aikModulus, aikKeyBlob);
-            return toReturn;
+            if (Tpm.getTpmVersion().equals("1.2")) {
+                byte[] endCreBytes = null;
+                if (endorsmentCredential != null) endCreBytes = endorsmentCredential.getEncoded();
+                TpmIdentityProof idProof = new TpmIdentityProof(keyLabel.getBytes(),
+                        TpmUtils.hexStringToByteArray(result.getResult(0)),
+                        new TpmPubKey(TpmUtils.hexStringToByteArray(result.getResult(1))),
+                        endCreBytes, endCreBytes, endCreBytes, false, false, false);
+                TpmPubKey caPubKey = new TpmPubKey(new ByteArrayInputStream(pcaPubKeyBlob));
+                //TpmIdentityRequest(TpmIdentityProof newIdProof, RSAPublicKey caKey)
+                TpmIdentityRequest idReq = new TpmIdentityRequest(idProof, caPubKey.getKey()); // this does the encryption of idProof by using caPubKey
+                byte [] identityRequest = idReq.toByteArray();
+
+                //log.debug("identity request: {}", idReq.toString());
+                log.debug("identity request asym size: {}", idReq.getAsymBlob().length);
+
+                byte [] aikModulus = TpmUtils.hexStringToByteArray(result.getResult(1));
+                byte [] aikKeyBlob = TpmUtils.hexStringToByteArray(result.getResult(2));
+                TpmIdentity toReturn = new TpmIdentity(identityRequest, aikModulus, aikKeyBlob);
+                return toReturn;
+            } 
+            else {
+                //result(0): AikName, result(1): aikPubModulus, result(2): aikKeyBlob 
+                log.debug("AIK name: {}", result.getResult(0));  
+                log.debug("AIK pub key: {}", result.getResult(1));
+                log.debug("Aik Key Blob: {}", result.getResult(2));
+
+                TrustagentConfiguration TAconfig = TrustagentConfiguration.loadConfiguration();
+                TAconfig.setAikName(result.getResult(0));
+        
+                byte[] aikName = TpmUtils.hexStringToByteArray(result.getResult(0));
+                byte [] aikPubModulus = TpmUtils.hexStringToByteArray(result.getResult(1));
+                byte [] aikKeyBlob = TpmUtils.hexStringToByteArray(result.getResult(2));
+                TpmIdentity newId = new TpmIdentity(aikPubModulus, aikPubModulus, aikKeyBlob, aikName);
+                return newId;
+            }
         } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | TpmUtils.TpmUnsignedConversionException | InvalidKeySpecException ex) {
             Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TpmUtils.TpmBytestreamResouceException ex) {

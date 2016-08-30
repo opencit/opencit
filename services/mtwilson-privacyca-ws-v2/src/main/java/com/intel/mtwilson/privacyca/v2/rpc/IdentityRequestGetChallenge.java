@@ -208,7 +208,7 @@ public class IdentityRequestGetChallenge implements Callable<IdentityChallenge> 
         //String keyfixed = "1234567890123456";
         //byte[] key = keyfixed.getBytes();
         byte[] iv = TpmUtils.createRandomBytes(16);
-        byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
+        byte[] encryptedBlob = TpmUtils.concat(iv, TpmUtils.tcgSymEncrypt(challengeRaw, key, iv));
         byte[] credSize = TpmUtils.intToByteArray(encryptedBlob.length);
 
         TpmSymmetricKey symKey = new TpmSymmetricKey();
@@ -229,7 +229,7 @@ public class IdentityRequestGetChallenge implements Callable<IdentityChallenge> 
             Tpm2Credential outCred = Tpm2Utils.makeCredential(pubEk, Tpm2Algorithm.Symmetric.AES, 128, Tpm2Algorithm.Hash.SHA256, key, aikName);
             asymBlob = TpmUtils.concat(outCred.getCredential(), outCred.getSecret());
         } else {
-            asymBlob = TpmUtils.TCGAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
+            asymBlob = TpmUtils.tcgAsymEncrypt(TpmUtils.concat(symKey.toByteArray(), TpmUtils.sha1hash(aik.toByteArray())), pubEk);
         }
         byte[] symBlob = TpmUtils.concat(TpmUtils.concat(credSize, keyParms.toByteArray()), encryptedBlob);
 
@@ -241,7 +241,7 @@ public class IdentityRequestGetChallenge implements Callable<IdentityChallenge> 
             ret.setSymSize(symBlob.length);
             ret.setIdentityChallenge(TpmUtils.concat(asymBlob, symBlob));
         } else {
-            byte[] asymEkBlob = TpmUtils.TCGAsymEncrypt(ekBlob, pubEk);
+            byte[] asymEkBlob = TpmUtils.tcgAsymEncrypt(ekBlob, pubEk);
             log.debug(" asymEkBlob: " + TpmUtils.byteArrayToHexString(asymEkBlob));
             ret.setAsymSize(asymBlob.length);
             ret.setSymSize(symBlob.length);
@@ -330,9 +330,10 @@ public class IdentityRequestGetChallenge implements Callable<IdentityChallenge> 
             byte[] loczero = new byte[1];
             loczero[0] = (byte) 0x01; //TPM_LOC_ZERO
             System.arraycopy(loczero, 0, activationBlob, index, 1);
-            index = index + 1;
+            //#5834: Variable 'index' was never read after being assigned.
+            //index = index + 1;
             // the digest is 0, so no need to copy
-            index = index + 20;
+            //index = index + 20;
             log.debug("Activation blob size: " + cbActivation);
             log.debug("Activatoin blob: " + TpmUtils.byteArrayToHexString(activationBlob));
             return activationBlob;

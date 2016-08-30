@@ -2,10 +2,10 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.intel.mtwilson.linux</groupId>
-    <artifactId>mtwilson-trustagent-ubuntu</artifactId>
+    <artifactId>mtwilson-trustagent</artifactId>
     
     <packaging>pom</packaging>
-    <name>Trust Agent Linux Installer Ubuntu</name>
+    <name>Trust Agent Linux Installer</name>
     <description>Self-extracting executable that installs Trust Agent and its bundled requirements</description>
     
     <parent>
@@ -54,13 +54,13 @@
                     <version>1.7.0_51</version>
                     <type>bin</type>
                 </dependency>
-                <dependency>
+                <!--dependency>
                     <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
                     <artifactId>tbootxm</artifactId>
                     <version>${project.version}</version>
                     <type>bin</type>
                     <classifier>ubuntu</classifier>
-                </dependency>
+                </dependency-->
                 <dependency>
                     <groupId>com.intel.mtwilson.trustagent</groupId>
                     <artifactId>mtwilson-tpm2-packages</artifactId>
@@ -139,14 +139,14 @@
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>java-1.7.0_51.bin</destFileName>
                                         </artifactItem>
-                                        <artifactItem>
+                                        <!--artifactItem>
                                             <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
                                             <artifactId>tbootxm</artifactId>
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                             <classifier>ubuntu</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
-                                        </artifactItem>
+                                        </artifactItem-->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.trustagent</groupId>
                                             <artifactId>mtwilson-tpm2-packages</artifactId>
