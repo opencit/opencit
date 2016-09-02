@@ -1109,7 +1109,9 @@ public class TpmUtils {
             *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.tcgSymEncrypt(challengeRaw, key, iv));
          */
         ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);        
-        int credsize = TpmUtils.getUINT32(bs);        
+        int credsize = TpmUtils.getUINT32(bs);   
+        TpmKeyParams keyParms = new TpmKeyParams(bs);
+        log.debug("Consumed Key Params " + keyParms);
         byte[] iv = new byte[16];
         if(bs.read(iv, 0, iv.length) == -1) {
             throw new IOException("Failed to read iv");
