@@ -1141,7 +1141,7 @@ public class HostTrustBO {
                     log.debug("Processing PcrEventLogIntegrity rule");
                     PcrEventLogIntegrity eventLogIntegrityRule = (PcrEventLogIntegrity)rule;     
                     
-                    TblTaLog pcr = null;
+                    TblTaLog pcr;
                     String pcrIndex = eventLogIntegrityRule.getPcrIndex().toString();
                     TblTaLog biosPcr = taLogMap.get(pcrIndex + "-BIOS");
                     TblTaLog vmmPcr = taLogMap.get(pcrIndex + "-VMM");

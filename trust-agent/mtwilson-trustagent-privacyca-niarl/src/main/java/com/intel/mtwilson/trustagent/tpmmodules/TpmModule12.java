@@ -199,7 +199,7 @@ public class TpmModule12 implements TpmModuleProvider {
     @Override
     public byte[] nvRead(byte[] authPassword, String index, int size) throws IOException, TpmModule.TpmModuleException {
         File f = File.createTempFile("nvread", ".data");
-        try {
+        try (FileInputStream fis = new FileInputStream(f)) {
             String[] args = {
                 "-i", index,
                 "-s", "0x" + Integer.toHexString(size),
@@ -211,7 +211,6 @@ public class TpmModule12 implements TpmModuleProvider {
                 throw new TpmModule.TpmModuleException("TpmModule12.nvRead returned nonzero error", result.getReturnCode());
             }
 
-            FileInputStream fis = new FileInputStream(f);
             byte[] res = IOUtils.toByteArray(fis);
             return res;   
         }

@@ -139,8 +139,8 @@ public class TpmModule20 implements TpmModuleProvider {
     @Override
     public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
         File file = File.createTempFile("nvwrite", "data");
-        try {
-            FileOutputStream output = new FileOutputStream(file);
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            
             IOUtils.write(data, output);        
 
             String[] args  = {
@@ -150,8 +150,6 @@ public class TpmModule20 implements TpmModuleProvider {
             };
 
             CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvwrite.sh", args, 0);
-
-            file.delete();
 
             if (result.getReturnCode() != 0) {
                 throw new TpmModule.TpmModuleException("TpmModule20.nvWrite returned nonzero error", result.getReturnCode());
