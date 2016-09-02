@@ -1090,6 +1090,7 @@ public class TpmUtils {
      * @param key
      * @param symCaAttestation
      * @return
+     * @throws java.io.IOException
      * @throws TpmUnsignedConversionException
      * @throws TpmBytestreamResouceException
      * @throws NoSuchAlgorithmException
@@ -1099,7 +1100,7 @@ public class TpmUtils {
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
      */
-    public static byte[] decryptSymCaAttestation(byte[]key, byte[] symCaAttestation) throws TpmUnsignedConversionException, TpmBytestreamResouceException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {        
+    public static byte[] decryptSymCaAttestation(byte[]key, byte[] symCaAttestation) throws IOException, TpmUnsignedConversionException, TpmBytestreamResouceException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {        
         // once get the secret, we need to decrypt the sysmCaAttestation to get the aikcert
         /* the symCaAttestation is in the format of TPM_SYM_CA_ATTESTATION
             * UINT32          credSize   -- size of the credential parameter
@@ -1108,13 +1109,18 @@ public class TpmUtils {
             *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.tcgSymEncrypt(challengeRaw, key, iv));
          */
         ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);        
-        int credsize = TpmUtils.getUINT32(bs);
+        int credsize = TpmUtils.getUINT32(bs);   
         TpmKeyParams keyParms = new TpmKeyParams(bs);
+        log.debug("Consumed Key Params " + keyParms);
         byte[] iv = new byte[16];
-        bs.read(iv, 0, 16);
+        if(bs.read(iv, 0, iv.length) == -1) {
+            throw new IOException("Failed to read iv");
+        }
         int ciphertextLen = credsize - 16;
         byte[] ciphertext = new byte[ciphertextLen];
-        bs.read(ciphertext, 0, ciphertextLen);
+        if(bs.read(ciphertext, 0, ciphertextLen) == -1) {
+            throw new IOException("Failed to read Cipher Text");
+        }
 
         return TpmUtils.tcgSymDecrypt(ciphertext, key, iv);
     }

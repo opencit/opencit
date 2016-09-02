@@ -154,29 +154,29 @@ public class TpmModule12 implements TpmModuleProvider {
     public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
         File tmpFile = File.createTempFile("nvwrite", ".data");
         
-        FileOutputStream output = new FileOutputStream(tmpFile);
-        IOUtils.write(data, output);
-        output.close();
-        
-        log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f " + tmpFile.getPath());
-        Map<String, String> variables = new HashMap<>();
-        variables.put("NvramPassword", TpmUtils.byteArrayToHexString(authPassword));
-        CommandLine command = new CommandLine("/opt/trustagent/bin/tpm_nvwrite");
-        command.addArgument("-x");
-        command.addArgument("-t");
-        command.addArgument("-pNvramPassword");
-        command.addArgument(String.format("-i %s", index), false);
-        command.addArgument("-f");
-        command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(tmpFile.getPath()));
-        Result result = ExecUtil.execute(command, variables);
-        if (result.getExitCode() != 0) {
-            log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
-            throw new TpmModule.TpmModuleException(result.getStderr());
-        }
-        log.debug("command stdout: {}", result.getStdout());
+        try(FileOutputStream output = new FileOutputStream(tmpFile)) {
+            IOUtils.write(data, output);
 
-        // now delete the temporary hash file
-        tmpFile.delete();
+            log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f " + tmpFile.getPath());
+            Map<String, String> variables = new HashMap<>();
+            variables.put("NvramPassword", TpmUtils.byteArrayToHexString(authPassword));
+            CommandLine command = new CommandLine("/opt/trustagent/bin/tpm_nvwrite");
+            command.addArgument("-x");
+            command.addArgument("-t");
+            command.addArgument("-pNvramPassword");
+            command.addArgument(String.format("-i %s", index), false);
+            command.addArgument("-f");
+            command.addArgument(EscapeUtil.doubleQuoteEscapeShellArgument(tmpFile.getPath()));
+            Result result = ExecUtil.execute(command, variables);
+            if (result.getExitCode() != 0) {
+                log.error("Error running command [{}]: {}", command.getExecutable(), result.getStderr());
+                throw new TpmModule.TpmModuleException(result.getStderr());
+            }
+            log.debug("command stdout: {}", result.getStdout());
+        }
+        finally {
+            tmpFile.delete();
+        }
     }
     
     @Override
@@ -198,24 +198,25 @@ public class TpmModule12 implements TpmModuleProvider {
 
     @Override
     public byte[] nvRead(byte[] authPassword, String index, int size) throws IOException, TpmModule.TpmModuleException {
-        File f = File.createTempFile("nvread", ".data");   
-        String[] args = {
-            "-i", index,
-            "-s", "0x" + Integer.toHexString(size),
-            "-f", f.getPath()
-        };
-    
-        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm_nvread", args, 1);
-        if(result.getReturnCode() != 0) {
-            f.delete();
-            throw new TpmModule.TpmModuleException("TpmModule12.nvRead returned nonzero error", result.getReturnCode());
+        File f = File.createTempFile("nvread", ".data");
+        try (FileInputStream fis = new FileInputStream(f)) {
+            String[] args = {
+                "-i", index,
+                "-s", "0x" + Integer.toHexString(size),
+                "-f", f.getPath()
+            };
+
+            CommandLineResult result = getShellExecutor().executeTpmCommand("tpm_nvread", args, 1);
+            if(result.getReturnCode() != 0) {
+                throw new TpmModule.TpmModuleException("TpmModule12.nvRead returned nonzero error", result.getReturnCode());
+            }
+
+            byte[] res = IOUtils.toByteArray(fis);
+            return res;   
         }
-        
-        FileInputStream fis = new FileInputStream(f);
-        byte[] res = IOUtils.toByteArray(fis);
-        fis.close();
-        f.delete();
-        return res;       
+        finally {
+            f.delete();
+        }
     }
 
     @Override

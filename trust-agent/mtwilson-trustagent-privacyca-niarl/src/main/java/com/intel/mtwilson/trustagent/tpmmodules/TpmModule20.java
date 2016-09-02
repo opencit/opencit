@@ -139,23 +139,24 @@ public class TpmModule20 implements TpmModuleProvider {
     @Override
     public void nvWrite(byte[] authPassword, String index, byte[] data) throws IOException, TpmModule.TpmModuleException {        
         File file = File.createTempFile("nvwrite", "data");
-        
-        FileOutputStream output = new FileOutputStream(file);
-        IOUtils.write(data, output);        
-        
-        String[] args  = {
-            TpmUtils.byteArrayToHexString(authPassword),
-            index,
-            EscapeUtil.doubleQuoteEscapeShellArgument(file.getPath())
-        };
-        
-        CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvwrite.sh", args, 0);
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            
+            IOUtils.write(data, output);        
 
-        file.delete();
-        
-        if (result.getReturnCode() != 0) {
-            throw new TpmModule.TpmModuleException("TpmModule20.nvWrite returned nonzero error", result.getReturnCode());
-        }        
+            String[] args  = {
+                TpmUtils.byteArrayToHexString(authPassword),
+                index,
+                EscapeUtil.doubleQuoteEscapeShellArgument(file.getPath())
+            };
+
+            CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-nvwrite.sh", args, 0);
+
+            if (result.getReturnCode() != 0) {
+                throw new TpmModule.TpmModuleException("TpmModule20.nvWrite returned nonzero error", result.getReturnCode());
+            }        
+        } finally {
+            file.delete();
+        }
     }
 
     @Override
@@ -202,15 +203,12 @@ public class TpmModule20 implements TpmModuleProvider {
         */
         
         /* EC cert is save to file ekcert.cer now */
-        byte[] ecCertByte = null;
         TrustagentConfiguration config = TrustagentConfiguration.loadConfiguration();
         File ecCertificateFile = config.getEcCertificateFile();
         if( ecCertificateFile.exists() )
-           ecCertByte = FileUtils.readFileToByteArray(ecCertificateFile);
+           return FileUtils.readFileToByteArray(ecCertificateFile);
         else
            throw new TpmModule.TpmModuleException("TpmModule20.getCredential returned nonzero error", 2);
-
-        return ecCertByte;
     }
 
     @Override
@@ -321,7 +319,6 @@ public class TpmModule20 implements TpmModuleProvider {
         TrustagentConfiguration TAconfig = TrustagentConfiguration.loadConfiguration();
         String ekHandle = TAconfig.getEkHandle();
         String akHandle = TAconfig.getAikHandle();
-        String akName = TAconfig.getAikName();
         
         log.debug("activateIdentity2 AIK Handle : {}", akHandle);
        
