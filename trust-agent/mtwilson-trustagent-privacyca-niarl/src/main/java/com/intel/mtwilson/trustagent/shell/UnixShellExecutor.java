@@ -16,7 +16,7 @@ import java.util.List;
 class UnixShellExecutor extends GenericShellExecutor {
 
     @Override
-    void PrepareCommandOverride(List<String> cmd) {     
+    void prepareCommandOverride(List<String> cmd) {     
         if(cmd.size() > 0) {
             String bin = cmd.get(0);
             bin = Folders.application() + File.separator + "bin" + File.separator+ bin;

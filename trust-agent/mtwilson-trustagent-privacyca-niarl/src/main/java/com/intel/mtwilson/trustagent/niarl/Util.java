@@ -114,7 +114,7 @@ public class Util {
         DataOutputStream out = new DataOutputStream(bos);
         
         final int SECRET_SIZE = 134;
-        final int ASYM_SIZE = 256 + 2;
+        //final int ASYM_SIZE = 256 + 2;
 
         ByteBuffer buf = ByteBuffer.wrap(in);
         int secretLength = buf.order(ByteOrder.LITTLE_ENDIAN).getShort();

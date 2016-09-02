@@ -1145,17 +1145,14 @@ public class HostTrustBO {
                     String pcrIndex = eventLogIntegrityRule.getPcrIndex().toString();
                     TblTaLog biosPcr = taLogMap.get(pcrIndex + "-BIOS");
                     TblTaLog vmmPcr = taLogMap.get(pcrIndex + "-VMM");
-                    String type = "";
-                    
+
                     List<String> markerList = Arrays.asList(rule.getMarkers());
-                    if(markerList.contains(TrustMarker.BIOS.name())) {
-                        type = "-BIOS";
+                    if(markerList.contains(TrustMarker.BIOS.name())) {                       
                         pcr = biosPcr;
                     } else if(markerList.contains(TrustMarker.VMM.name())) {
-                        type = "-VMM";
                         pcr = vmmPcr;
-                    } else if(markerList.contains(TrustMarker.ASSET_TAG.name())) {
-                        type = "-ASSET_TAG";
+                    } else {
+                        throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST);
                     }
                     
                     if (pcr != null) {

@@ -820,7 +820,6 @@ public class HostBO {
                 Set<String> vmmManifestSet = new TreeSet<>();
                 
                 Set<String> reqdManifestSet = new TreeSet<>();
-                String reqdManifestList = "";
 
 //                TblHostsJpaController hostsJpaController =  My.jpa().mwHosts();//new TblHostsJpaController(getASEntityManagerFactory());
                 log.debug("TIMETAKEN: for getting API Client object is: {}", (System.currentTimeMillis() - configWLStart));
@@ -855,7 +854,7 @@ public class HostBO {
                     reqdManifestSet.addAll(vmmManifestSet);
                 }                
                 
-                reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
+                String reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
                 
                 
                 log.debug("TIMETAKEN: for calibrating MLE names: {} ", (System.currentTimeMillis() - configWLStart));

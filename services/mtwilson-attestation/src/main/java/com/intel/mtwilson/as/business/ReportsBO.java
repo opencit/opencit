@@ -261,7 +261,7 @@ public class ReportsBO {
                             PcrLogReport r = getPcrLogReportForAssetTag(log, tblHosts.getId());
                             if(!report.containsKey(log.getManifestName())) {
                                 report.put(log.getManifestName(), r);   
-                            } else {
+                            } else if(r != null) {
                                 report.get(log.getManifestName()).getModuleLogs().addAll(r.getModuleLogs());
                             }                            
                         } else {                            

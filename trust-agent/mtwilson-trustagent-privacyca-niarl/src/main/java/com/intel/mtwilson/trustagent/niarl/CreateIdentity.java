@@ -60,7 +60,6 @@ public class CreateIdentity implements Configurable, Runnable {
     @Override
     public void run() {
         try {
-            String tpmVersion = Tpm.getTpmVersion();
             // load the PCA certificate
             TrustagentConfiguration config = new TrustagentConfiguration(configuration);
             SimpleKeystore keystore = new SimpleKeystore(new FileResource(config.getTrustagentKeystoreFile()), config.getTrustagentKeystorePassword());
