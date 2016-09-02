@@ -143,21 +143,32 @@ public class GenerateQuoteCmd implements ICommand {
                         quoteAlgWithPcrs = "0x0B:" + selectedPcrList;
                     } else {
                         String[] pcrBanks = context.getSelectedPcrBanks().split("\\s+");
+                        //construct the list of algorithms and pcrs for quote
                         for (int i=0; i<pcrBanks.length; i++) {
                             if (i != 0)
                                 quoteAlgWithPcrs = quoteAlgWithPcrs + "+";                            
-                            if (pcrBanks[i].equals("SHA1"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x04" + ":" + selectedPcrList;
-                            else if (pcrBanks[i].equals("SHA256"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0B" + ":" + selectedPcrList;  
-                            else if (pcrBanks[i].equals("SHA384"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0C" + ":" + selectedPcrList;  
-                            else if (pcrBanks[i].equals("SHA512"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0D" + ":" + selectedPcrList;  
-                            else if (pcrBanks[i].equals("SM3_256"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x12" + ":" + selectedPcrList;                              
-                            else
-                                log.error("Unsupported pcrbank value: {}", pcrBanks[i]);
+                            switch (pcrBanks[i]) {
+                                case "SHA1":
+                                    quoteAlgWithPcrs = quoteAlgWithPcrs + "0x04" + ":" + selectedPcrList;
+                                    break;
+                                case "SHA256":
+                                    quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0B" + ":" + selectedPcrList;
+                                    break;
+                                case "SHA384":
+                                    quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0C" + ":" + selectedPcrList;
+                                    break;
+                                case "SHA512":
+                                    quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0D" + ":" + selectedPcrList;
+                                    break;
+                                case "SM3_256":
+                                    quoteAlgWithPcrs = quoteAlgWithPcrs + "0x12" + ":" + selectedPcrList;
+                                    break;
+                                default:
+                                    log.error("Unsupported pcrbank value: {}", pcrBanks[i]);
+                                    if (i!=0)
+                                        quoteAlgWithPcrs = quoteAlgWithPcrs.substring(0, quoteAlgWithPcrs.length()-1);
+                                    break;
+                            }
                         }
                     }
 
