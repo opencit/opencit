@@ -2720,6 +2720,8 @@ glassfish_create_ssl_cert() {
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
+    mtwilson_tls_cert_sha256=`openssl sha256 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
+    update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha256"
   else
     echo_warning "No SSL certificate found in Glassfish keystore"
   fi
@@ -3173,6 +3175,8 @@ tomcat_create_ssl_cert() {
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
+    mtwilson_tls_cert_sha256=`openssl sha256 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
+    update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha256"
   else
     echo_warning "No SSL certificate found in Tomcat keystore"
   fi
