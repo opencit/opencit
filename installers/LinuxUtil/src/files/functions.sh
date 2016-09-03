@@ -3705,7 +3705,7 @@ java_keystore_cert_report() {
   local keytool=${JAVA_HOME}/bin/keytool
   local owner_expires=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "^Owner|^Valid"`
   echo "$owner_expires"
-  local fingerprints=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "MD5:|SHA1:"`
+  local fingerprints=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "MD5:|SHA1:|SHA256:"`
   echo "$fingerprints"
 }
 
