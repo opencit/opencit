@@ -16,7 +16,7 @@ import java.util.List;
 class WindowsShellExecutor extends GenericShellExecutor {
 
     @Override
-    void PrepareCommandOverride(List<String> cmd) {        
+    void prepareCommandOverride(List<String> cmd) {        
         // add each to front, which means it will be cmd.exe /c TPMTool.exe
         cmd.add(0, Folders.application() + File.separator + "bin" + File.separator + "TPMTool.exe");
         cmd.add(0, "/c");

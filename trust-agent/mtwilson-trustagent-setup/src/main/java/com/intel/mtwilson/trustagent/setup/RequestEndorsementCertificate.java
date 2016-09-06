@@ -202,7 +202,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         
         // second check if we have an EC and if it's already registered with Mt Wilson
         log.debug("RequestEndorsementCertificate checking if EC is registered with Mt Wilson");
-        if( isEkRegisteredWithMtWilson() ) {
+        if( ekCert != null && isEkRegisteredWithMtWilson() ) {
             log.debug("EK is already registered with Mt Wilson; no need to request an EC");
             return;
         }
