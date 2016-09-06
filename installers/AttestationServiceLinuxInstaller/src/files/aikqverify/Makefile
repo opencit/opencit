@@ -16,7 +16,7 @@ aikqverifywin.o: $(wildcard aikqverifywin.c)
 	gcc -c aikqverifywin.c
 
 clean:
-	rm -f aikqverify aikqverify.o aikqverifywin aikverifywin.o
+	rm -f aikqverify aikqverify.o aikqverifywin aikqverifywin.o
 
 install:
 	mkdir -p /var/opt/intel/aikverifyhome/bin
