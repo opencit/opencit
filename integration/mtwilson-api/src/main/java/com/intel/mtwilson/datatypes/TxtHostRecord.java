@@ -175,11 +175,15 @@ public class TxtHostRecord {
         rankings.put("SHA384", 2);
         rankings.put("SHA512", 3);
         
-        String best = banks[0];
+        String best = "SHA1";  //initialized to SHA1
+        int i=0;
         for(String b : banks) {
-            if(rankings.get(b) > rankings.get(best)) {
-                best = b;
+            if (rankings.containsKey(b) && i<3) { // input validation for supported pcrbanks; and only the first 3 strings are considered.
+                if(rankings.get(b) > rankings.get(best)) {
+                    best = b;
+                }
             }
+            i++;
         }        
         return best;
     }

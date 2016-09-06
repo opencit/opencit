@@ -111,7 +111,7 @@ main (int ac, char **av)
 	UINT32 index = 0;
         BYTE            *quoted = NULL;
         BYTE            *quotedInfo = NULL;
-        UINT16          quotedInfoLen;
+        //UINT16          quotedInfoLen;
         //UINT16          sigAlg;
         //UINT32          hashAlg;
         //BYTE            *sig;
@@ -153,15 +153,18 @@ main (int ac, char **av)
 		chal = malloc (chalLen);
   		if (chal == NULL) {
 			fprintf (stderr, "Unable to allocate memory to read file %s\n", chalfile);
+            fclose(f_in);
 			exit (1);
 		}
 		if (fread (chal, 1, chalLen, f_in) != chalLen) {
 			fprintf (stderr, "Unable to read file %s\n", chalfile);
+            fclose(f_in);
 			exit (1);
 		}
 		fclose (f_in);
 		SHA1 (chal, chalLen, chalmd);
 		free (chal);
+        chal = NULL;
 	} else {
 		memset (chalmd, 0, sizeof(chalmd));
 	}
@@ -175,6 +178,7 @@ main (int ac, char **av)
 	}
 	if ((aikRsa = PEM_read_RSA_PUBKEY(f_in, NULL, NULL, NULL)) == NULL) {
 		fprintf (stderr, "Unable to read RSA file %s\n", av[1]);
+        fclose (f_in);
 		exit (1);
 	}
 	fclose (f_in);
@@ -191,11 +195,13 @@ main (int ac, char **av)
 	quote = malloc (quoteLen);
   	if (quote == NULL) {
 		fprintf (stderr, "Unable to allocate memory to read file %s\n", av[2]);
+        fclose(f_in);
 		returnCode = 1;
 		goto badquote;
 	}
 	if (fread (quote, 1, quoteLen, f_in) != quoteLen) {
 		fprintf (stderr, "Unable to read file %s\n", av[2]);
+        fclose(f_in);
 		returnCode = 1;
 		goto badquote;
 	}
@@ -303,14 +309,14 @@ main (int ac, char **av)
 	fflush (stdout);
 	fprintf (stderr, "Success!\n");
 
-	return 0;
+	returnCode = 0;
 
 badquote:
 	//fprintf (stderr, "Input AIK quote file incorrect format\n");
         
 	//clean allocated memory
 	if (quote != NULL) free(quote);
-	if (chal != NULL) free(chal);
+	//if (chal != NULL) free(chal);
 	return returnCode;
 }
 

@@ -120,7 +120,7 @@ int main (int ac, char **av)
 	int			pcri = 0;
 	int			ind = 0;
 	int			i,j;
-	UINT32		returnCode;
+	UINT32		returnCode = 0;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
 		chalfile = av[2];
@@ -240,10 +240,12 @@ int main (int ac, char **av)
 	if (memcmp(recvNonce, chal, chalLen) != 0) {
 		fprintf(stderr, "Error in comparing the received nonce with the challenge");
 		free(chal);
+		chal = NULL;
 		returnCode =1;
 		goto badquote;
 	} else {
 		free(chal);
+		chal = NULL;
 	}
 	
 	index += 17; // skip over the TPMS_CLOCKINFO structure - Not interested
@@ -342,13 +344,20 @@ int main (int ac, char **av)
 			pcrSize = SHA256_SIZE;
 		else {
 			fprintf (stderr, "Not supported PCR banks (%02x) in quote\n", hashAlg);
-			exit(3);
+			returnCode = 3;
+			goto badquote;
 		}
 		
 		for (pcr=0; pcr < 8*pcr_selection[j].size; pcr++) {
 			if (pcr_selection[j].pcrSelected[pcr/8] & (1 << (pcr%8))) {
-//				memcpy_s(pcrConcat+pcrPos, pcrSize, pcrs+pcrPos, pcrSize);
-				memcpy(pcrConcat+pcrPos, pcrs+pcrPos, pcrSize);
+				if ((pcrPos +pcrSize) < sizeof(pcrConcat)) {
+					memcpy(pcrConcat+pcrPos, pcrs+pcrPos, pcrSize);
+				}
+				else {
+					fprintf (stderr, "Error, not enough memory for PCRs digest checking\n");
+					returnCode = 3;
+					goto badquote;	
+				}
 				pcri++;
 				ind++;
 				concatSize += pcrSize;
@@ -402,7 +411,7 @@ int main (int ac, char **av)
 	fflush (stdout);
 	fprintf (stderr, "Success!\n");
 
-	return 0;
+	returnCode = 0;
 
 badquote:
         if (quote != NULL) free(quote);
