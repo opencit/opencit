@@ -161,7 +161,7 @@ public class TxtHostRecord {
     
     @JsonIgnore
     public String getBestPcrAlgorithmBank() {
-        if(PcrBanks != null && PcrBanks.length() > 0 && PcrBanks.length() <4) //input validation. supported pcrbanks usuually up to 3 banks.
+        if(PcrBanks != null && PcrBanks.length() > 0)
             return selectBestSinglePcrBank(this.PcrBanks);
         else 
             return "SHA1";
@@ -176,12 +176,14 @@ public class TxtHostRecord {
         rankings.put("SHA512", 3);
         
         String best = "SHA1";  //initialized to SHA1
+        int i=0;
         for(String b : banks) {
-            if (rankings.containsKey(b)) { // input validation. only the 4 pcrbanks listed above are supported.
+            if (rankings.containsKey(b) && i<3) { // input validation for supported pcrbanks; and only the first 3 strings are considered.
                 if(rankings.get(b) > rankings.get(best)) {
                     best = b;
                 }
             }
+            i++;
         }        
         return best;
     }
