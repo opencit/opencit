@@ -395,7 +395,7 @@ public class MleBO {
         if (addManifest) {
             manifestList = new ArrayList<>();
             for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
-                manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue()));
+                manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue(), pcrManifest.getPcrBank()));
             }
         }
 
