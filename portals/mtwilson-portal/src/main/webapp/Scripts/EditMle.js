@@ -215,7 +215,10 @@ function getModuleTypeMleListSuccess(responseJSON){
           
           str+='<div class="manifestModuleTypeTableContent" style="overflow: auto;">'+
               '<table width="100%" cellpadding="0" cellspacing="0"><tbody>';
-          
+        
+        listOfmanifest.sort(function(l, r) {
+           return (l.PcrBank + l.Name).localeCompare(r.PcrBank + r.Name);
+        });
         for(var mani in listOfmanifest){
             str+='<tr>'+
                 '<td class="manifestModuleTypeRow1" name="mleName">'+listOfmanifest[mani].Name+'</td>'+
@@ -228,6 +231,10 @@ function getModuleTypeMleListSuccess(responseJSON){
                 '</tr>';
             
         }
+        
+        whiteList.sort(function(l, r) { 
+            return (l.pcrBank + l.componentName).localeCompare(r.pcrBank + r.componentName);
+        });
         for(var item in whiteList){
             str+='<tr>'+
                 '<td class="manifestModuleTypeRow1" name="mleName">'+whiteList[item].componentName+'</td>'+
