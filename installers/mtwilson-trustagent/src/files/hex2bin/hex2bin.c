@@ -55,8 +55,10 @@ int main(int argc, char **argv) {
     
     //printf("argv %s\n", argv[1]);
 	
-	int iHexLen = strlen(argv[1]);
+	unsigned int iHexLen=0;
+    while(*(argv[1]+iHexLen) ) iHexLen++;
     //printf("iHexlen %d\n", iHexLen);
+	
     if( iHexLen % 2 != 0 ) {
         fprintf(stderr, "invalid hex length\n"); exit(1);  // invalid length for hex
     }

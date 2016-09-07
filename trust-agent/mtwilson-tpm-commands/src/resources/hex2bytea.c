@@ -42,7 +42,10 @@ int hex2int(const char c)
 int hex2bytea( const char *a_pszHex, BYTE **a_pDecoded, int *a_iDecodedLen ) {
         BYTE *pDecoded;
         int iDecodedLen, iByte, i;
-        int iHexLen = strlen(a_pszHex);
+        
+		unsigned int iHexLen=0;
+        while(*(a_pszHex+iHexLen) ) iHexLen++;
+		
         if( iHexLen % 2 != 0 ) {
                 *a_pDecoded = NULL;
                 *a_iDecodedLen = 0;
