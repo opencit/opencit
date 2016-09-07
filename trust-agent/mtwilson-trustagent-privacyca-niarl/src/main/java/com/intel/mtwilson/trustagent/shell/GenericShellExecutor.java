@@ -36,7 +36,7 @@ abstract class GenericShellExecutor implements ShellExecutor {
         }                
         
         // call into subclasses
-        PrepareCommandOverride(cmd);
+        prepareCommandOverride(cmd);
         
         for(String tmp : cmd) {
             log.debug(tmp);
@@ -92,5 +92,5 @@ abstract class GenericShellExecutor implements ShellExecutor {
     }    
     
     
-    abstract void PrepareCommandOverride(List<String> cmd);
+    abstract void prepareCommandOverride(List<String> cmd);
 }

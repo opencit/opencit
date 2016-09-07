@@ -179,7 +179,6 @@ public class HostTrustBO {
             hostObjToRegister.AddOn_Connection_String = hostObj.AddOn_Connection_String;
             if (hostObj.Port != null) { hostObjToRegister.Port = hostObj.Port; }
             hostObjToRegister.tlsPolicyChoice = hostObj.tlsPolicyChoice;
-            hostObjToRegister.TpmVersion = hostObj.TpmVersion;
             
             // it says "banks" but this is actually singular. TxtHostRecord here is just a generic object used to pass around fields in this case
             // the flow is awkward and goes from TxtHostRecord -> TxtHost -> TblHost, rather than just creating a TblHost directly. 
@@ -190,8 +189,7 @@ public class HostTrustBO {
             TblHosts tblHosts = new TblHosts();
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
-            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor
-            tblHosts.setTpmVersion(hostObj.TpmVersion);
+            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor            
             tblHosts.setPcrBank(hostObj.getBestPcrAlgorithmBank());
             
             tblHosts.setIPAddress(hostObj.HostName);
@@ -200,7 +198,17 @@ public class HostTrustBO {
             }
             
             HostAgentFactory factory = new HostAgentFactory();
-            HostAgent agent = factory.getHostAgent(tblHosts);
+            HostAgent agent = factory.getHostAgent(tblHosts);       
+            
+            TxtHostRecord detailsFromHost = agent.getHostDetails();
+            if(detailsFromHost != null && detailsFromHost.TpmVersion != null) {
+                hostObjToRegister.TpmVersion = detailsFromHost.TpmVersion;
+                tblHosts.setTpmVersion(detailsFromHost.TpmVersion);
+            } else {
+                hostObjToRegister.TpmVersion = "1.2";
+                tblHosts.setTpmVersion("1.2");
+            }
+            
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
@@ -1141,21 +1149,18 @@ public class HostTrustBO {
                     log.debug("Processing PcrEventLogIntegrity rule");
                     PcrEventLogIntegrity eventLogIntegrityRule = (PcrEventLogIntegrity)rule;     
                     
-                    TblTaLog pcr = null;
+                    TblTaLog pcr;
                     String pcrIndex = eventLogIntegrityRule.getPcrIndex().toString();
                     TblTaLog biosPcr = taLogMap.get(pcrIndex + "-BIOS");
                     TblTaLog vmmPcr = taLogMap.get(pcrIndex + "-VMM");
-                    String type = "";
-                    
+
                     List<String> markerList = Arrays.asList(rule.getMarkers());
-                    if(markerList.contains(TrustMarker.BIOS.name())) {
-                        type = "-BIOS";
+                    if(markerList.contains(TrustMarker.BIOS.name())) {                       
                         pcr = biosPcr;
                     } else if(markerList.contains(TrustMarker.VMM.name())) {
-                        type = "-VMM";
                         pcr = vmmPcr;
-                    } else if(markerList.contains(TrustMarker.ASSET_TAG.name())) {
-                        type = "-ASSET_TAG";
+                    } else {
+                        throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST);
                     }
                     
                     if (pcr != null) {

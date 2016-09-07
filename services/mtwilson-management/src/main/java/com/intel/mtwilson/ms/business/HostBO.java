@@ -518,8 +518,8 @@ public class HostBO {
             // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
             // One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
             // need to be updated.
-            for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {
-                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+            for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {                
+                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();                
                 if (isHostConfigured(hostObj)) {
                     log.debug(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
                     // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
@@ -820,7 +820,6 @@ public class HostBO {
                 Set<String> vmmManifestSet = new TreeSet<>();
                 
                 Set<String> reqdManifestSet = new TreeSet<>();
-                String reqdManifestList = "";
 
 //                TblHostsJpaController hostsJpaController =  My.jpa().mwHosts();//new TblHostsJpaController(getASEntityManagerFactory());
                 log.debug("TIMETAKEN: for getting API Client object is: {}", (System.currentTimeMillis() - configWLStart));
@@ -855,7 +854,7 @@ public class HostBO {
                     reqdManifestSet.addAll(vmmManifestSet);
                 }                
                 
-                reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
+                String reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
                 
                 
                 log.debug("TIMETAKEN: for calibrating MLE names: {} ", (System.currentTimeMillis() - configWLStart));
