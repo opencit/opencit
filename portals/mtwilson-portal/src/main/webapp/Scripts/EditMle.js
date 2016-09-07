@@ -205,11 +205,12 @@ function getModuleTypeMleListSuccess(responseJSON){
         str+='<div style="background-color: #3A4F63; color:#FFFFFF;"><table class="manifestModuleTypeTableHeader" width="100%" cellpadding="0" cellspacing="0">'+
               '<thead><tr>'+
               '<th class="manifestModuleTypeRow1">Component Name</th>'+
-              '<th class="manifestModuleTypeRow2">Digest Value</th>'+
-              '<th class="manifestModuleTypeRow3">Event Name</th>'+
-              '<th class="manifestModuleTypeRow4">Package Name</th>'+
-              '<th class="manifestModuleTypeRow5">Package Vendor</th>'+
-              '<th class="manifestModuleTypeRow6">Package Version</th>'+
+              '<th class="manifestModuleTypeRow2">Bank</th>' +
+              '<th class="manifestModuleTypeRow3">Digest Value</th>'+
+              '<th class="manifestModuleTypeRow4">Event Name</th>'+
+              '<th class="manifestModuleTypeRow5">Package Name</th>'+
+              '<th class="manifestModuleTypeRow6">Package Vendor</th>'+
+              '<th class="manifestModuleTypeRow7">Package Version</th>'+
               '</tr></thead></table></div>';
           
           str+='<div class="manifestModuleTypeTableContent" style="overflow: auto;">'+
@@ -218,22 +219,24 @@ function getModuleTypeMleListSuccess(responseJSON){
         for(var mani in listOfmanifest){
             str+='<tr>'+
                 '<td class="manifestModuleTypeRow1" name="mleName">'+listOfmanifest[mani].Name+'</td>'+
-                '<td class="manifestModuleTypeRow2" name="mleName">'+listOfmanifest[mani].Value+'</td>'+
-                '<td class="manifestModuleTypeRow3" name="mleName">&nbsp;</td>'+
+                '<td class="manifestModuleTypeRow2" name="maleName">'+listOfmanifest[mani].PcrBank+'</td>'+
+                '<td class="manifestModuleTypeRow3" name="mleName">'+listOfmanifest[mani].Value+'</td>'+
                 '<td class="manifestModuleTypeRow4" name="mleName">&nbsp;</td>'+
                 '<td class="manifestModuleTypeRow5" name="mleName">&nbsp;</td>'+
                 '<td class="manifestModuleTypeRow6" name="mleName">&nbsp;</td>'+
+                '<td class="manifestModuleTypeRow7" name="mleName">&nbsp;</td>'+
                 '</tr>';
             
         }
         for(var item in whiteList){
             str+='<tr>'+
                 '<td class="manifestModuleTypeRow1" name="mleName">'+whiteList[item].componentName+'</td>'+
-                '<td class="manifestModuleTypeRow2" name="mleName">'+whiteList[item].digestValue+'</td>'+
-                '<td class="manifestModuleTypeRow3" name="mleName">'+whiteList[item].eventName+'</td>'+
-                '<td class="manifestModuleTypeRow4" name="mleName">'+whiteList[item].packageName+'</td>'+
-                '<td class="manifestModuleTypeRow5" name="mleName">'+whiteList[item].packageVendor+'</td>'+
-                '<td class="manifestModuleTypeRow6" name="mleName">'+whiteList[item].packageVersion+'</td>'+
+                '<td class="manifestModuleTypeRow2" name="mleName">'+whiteList[item].pcrBank+'</td>'+
+                '<td class="manifestModuleTypeRow3" name="mleName">'+whiteList[item].digestValue+'</td>'+
+                '<td class="manifestModuleTypeRow4" name="mleName">'+whiteList[item].eventName+'</td>'+
+                '<td class="manifestModuleTypeRow5" name="mleName">'+whiteList[item].packageName+'</td>'+
+                '<td class="manifestModuleTypeRow6" name="mleName">'+whiteList[item].packageVendor+'</td>'+
+                '<td class="manifestModuleTypeRow7" name="mleName">'+whiteList[item].packageVersion+'</td>'+
                 '</tr>';
         }
         str+='</tbody> </table></div>';
