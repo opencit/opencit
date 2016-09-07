@@ -206,7 +206,7 @@ public class HostTrustPolicyManager {
             String prefix = vendorProtocol.toLowerCase()+":"; // "INTEL" or "intel" becomes "intel:"
             if( host.getAddOnConnectionInfo().startsWith(prefix) ) {
                 String vendorKey = vendorProtocol;
-                boolean useDaMode =  "2.0".equals(host.getTpmVersion()) && host.getAddOnConnectionInfo().startsWith("intel:");
+                boolean useDaMode = "2.0".equals(host.getTpmVersion()) && host.getAddOnConnectionInfo().startsWith("intel:");
                 if(useDaMode) {
                     vendorKey += "-da";
                 }
