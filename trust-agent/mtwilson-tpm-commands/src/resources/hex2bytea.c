@@ -11,6 +11,7 @@
 
 //#include "tpm_tspi.h"
 //#include "tpm_utils.h"
+#include "hex2bytea.h"
 
 
 int hex2int(const char c);
@@ -70,7 +71,7 @@ int hex2bytea( const char *a_pszHex, BYTE **a_pDecoded, int *a_iDecodedLen ) {
 
                 iByte = (hex1*16) + hex2;
 
-                pDecoded[pDecoded_index++] = iByte & 0xFF;
+                if(pDecoded) pDecoded[pDecoded_index++] = iByte & 0xFF;
         }
         *a_pDecoded = pDecoded;
         *a_iDecodedLen = iDecodedLen;

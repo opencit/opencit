@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
      printf("usuage is: hex2bin hexString binaryFile");
      exit(-1);
     }
-    int b, i=0, j=0, hex1, hex2;
+    int b, j=0, hex1, hex2;
 
     FILE* outFile = fopen(argv[2],"w");
     
