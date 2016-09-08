@@ -475,7 +475,8 @@ function getFailureReportSuccess(responseJSON) {
                         '<th class="failureReportSubRow2">Value</th>' +
                         '<th class="failureReportSubRow3">WhiteList Value</th>' +
                         '</tr></thead>';
-
+                
+                moduleLog.sort(byProperty("componentName"));                
                 for (var logs in moduleLog) {
                     var logclass = null;
                     if (logs % 2 === 0) {
