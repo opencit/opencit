@@ -73,7 +73,8 @@ static BOOL useEnvironment = FALSE;
 
 static int parse(const int aOpt, const char *aArg)
 {
-
+	unsigned int strLength=0;
+    while(*(aArg+strLength) ) strLength++;
 	switch (aOpt) {
 	case 'b':
 		keyType = TSS_KEY_TYPE_BIND;
@@ -82,13 +83,22 @@ static int parse(const int aOpt, const char *aArg)
 		keyType = TSS_KEY_TYPE_SIGNING;
 		break;
 	case 'k':
-		strncpy(filenamePrivatekeyblobOutput, aArg, PATH_MAX);
+		if(strLength < PATH_MAX && strLength > 0)
+			strncpy(filenamePrivatekeyblobOutput, aArg, PATH_MAX);
+		else
+		   return 1;
 		break;
 	case 'p':
-		strncpy(filenamePublickeyOutput, aArg, PATH_MAX);
+		if(strLength < PATH_MAX && strLength > 0)
+			strncpy(filenamePublickeyOutput, aArg, PATH_MAX);
+		else
+		   return 1;
 		break;
 	case 'q':
-		strncpy(keypassword, aArg, PATH_MAX);
+		if(strLength < PATH_MAX && strLength > 0)
+			strncpy(keypassword, aArg, PATH_MAX);
+		else
+		   return 1;
 		keyAuth = TSS_KEY_AUTHORIZATION;
 		break;
 	case 'Q':
