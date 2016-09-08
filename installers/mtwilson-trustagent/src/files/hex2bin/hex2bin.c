@@ -49,14 +49,16 @@ int main(int argc, char **argv) {
      printf("usuage is: hex2bin hexString binaryFile");
      exit(-1);
     }
-    int b, i=0, j=0, hex1, hex2;
+    int b, j=0, hex1, hex2;
 
     FILE* outFile = fopen(argv[2],"w");
     
     //printf("argv %s\n", argv[1]);
 	
-	int iHexLen = strlen(argv[1]);
+	unsigned int iHexLen=0;
+    while(*(argv[1]+iHexLen) ) iHexLen++;
     //printf("iHexlen %d\n", iHexLen);
+	
     if( iHexLen % 2 != 0 ) {
         fprintf(stderr, "invalid hex length\n"); exit(1);  // invalid length for hex
     }
