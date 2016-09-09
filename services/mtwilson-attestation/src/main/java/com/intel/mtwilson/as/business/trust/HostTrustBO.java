@@ -35,6 +35,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.model.*;
@@ -179,7 +180,6 @@ public class HostTrustBO {
             hostObjToRegister.AddOn_Connection_String = hostObj.AddOn_Connection_String;
             if (hostObj.Port != null) { hostObjToRegister.Port = hostObj.Port; }
             hostObjToRegister.tlsPolicyChoice = hostObj.tlsPolicyChoice;
-            hostObjToRegister.TpmVersion = hostObj.TpmVersion;
             
             // it says "banks" but this is actually singular. TxtHostRecord here is just a generic object used to pass around fields in this case
             // the flow is awkward and goes from TxtHostRecord -> TxtHost -> TblHost, rather than just creating a TblHost directly. 
@@ -190,8 +190,7 @@ public class HostTrustBO {
             TblHosts tblHosts = new TblHosts();
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
-            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor
-            tblHosts.setTpmVersion(hostObj.TpmVersion);
+            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor            
             tblHosts.setPcrBank(hostObj.getBestPcrAlgorithmBank());
             
             tblHosts.setIPAddress(hostObj.HostName);
@@ -200,7 +199,17 @@ public class HostTrustBO {
             }
             
             HostAgentFactory factory = new HostAgentFactory();
-            HostAgent agent = factory.getHostAgent(tblHosts);
+            HostAgent agent = factory.getHostAgent(tblHosts);       
+            
+            TxtHostRecord detailsFromHost = agent.getHostDetails();
+            if(detailsFromHost != null && detailsFromHost.TpmVersion != null) {
+                hostObjToRegister.TpmVersion = detailsFromHost.TpmVersion;
+                tblHosts.setTpmVersion(detailsFromHost.TpmVersion);
+            } else {
+                hostObjToRegister.TpmVersion = "1.2";
+                tblHosts.setTpmVersion("1.2");
+            }
+            
             if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
@@ -277,6 +286,11 @@ public class HostTrustBO {
                     log.debug("getTrustStatusOfHostNotInDB: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
                     tblHosts.setBiosMleId(biosMLE);
 
+                    if(!mleSupportsPcrBank(DigestAlgorithm.valueOf(tblHosts.getPcrBank()), biosMLE)) {
+                        log.debug("MLE {} doesn't have the PCR bank for this host, skipping", biosMLE.getName());
+                        continue;
+                    }
+                    
                     Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                     PolicyEngine policyEngine = new PolicyEngine();
                     TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
@@ -353,6 +367,11 @@ public class HostTrustBO {
                     log.debug("getTrustStatusOfHostNotInDB: Processing VMM MLE {} with version {}.", vmmMLE.getName(), vmmMLE.getVersion());                    
                     
                     tblHosts.setVmmMleId(vmmMLE);
+                    
+                    if(!mleSupportsPcrBank(DigestAlgorithm.valueOf(tblHosts.getPcrBank()), vmmMLE)) {
+                        log.debug("MLE {} doesn't have the PCR bank for this host, skipping", vmmMLE.getName());
+                        continue;
+                    }
 
                     Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                     PolicyEngine policyEngine = new PolicyEngine();
@@ -2316,6 +2335,11 @@ public class HostTrustBO {
                             log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as the PCR list does not match.", biosMLE.getName(), biosMLE.getVersion());                        
                             continue;
                         }
+                        
+                        if(!mleSupportsPcrBank(DigestAlgorithm.valueOf(tblHosts.getPcrBank()), biosMLE)) {
+                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as the PCR bank is not supported for this host", biosMLE.getName(), biosMLE.getVersion());
+                            continue;
+                        }
 
                         // Now that all the basic validation is done, we can retrieve the attestation report from the host for verfiication against the DB. We were
                         // earlier retrieving the attestation report to start with. But for better performance, doing it after all the validations.
@@ -2401,6 +2425,11 @@ public class HostTrustBO {
                         if (!doPcrsListMatch(vmmPCRs, vmmMLE.getRequiredManifestList())) {
                             log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as the PCR list does not match.", vmmMLE.getName(), vmmMLE.getVersion());                        
                             continue;
+                        }              
+                        
+                        if (!mleSupportsPcrBank(DigestAlgorithm.valueOf(tblHosts.getPcrBank()), vmmMLE)) {
+                            log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as the PCR bank is not supported for this host", vmmMLE.getName(), vmmMLE.getVersion());
+                            continue;
                         }
 
                         // Now that all the basic validation is done, we can retrieve the attestation report from the host for verfiication against the DB. We were
@@ -2457,7 +2486,7 @@ public class HostTrustBO {
         }        
     }
     
-    private boolean doPcrsListMatch(String requestedPCRs, String dbMLEPCRs) {
+    private boolean doPcrsListMatch(String requestedPCRs , String dbMLEPCRs) {
         
         Set<String> pcrsFromDB = new HashSet<>();
         pcrsFromDB.addAll(Arrays.asList(dbMLEPCRs.split(",")));
@@ -2468,6 +2497,16 @@ public class HostTrustBO {
             return false;
                     
         return true;
+    }
+    
+    private boolean mleSupportsPcrBank(DigestAlgorithm pcrBank, TblMle mle) {
+        for(TblPcrManifest pcr : mle.getTblPcrManifestCollection()) {
+            // if there are any Pcr manifests that support the requested bank, return true
+            if(pcrBank == DigestAlgorithm.valueOf(pcr.getPcrBank())) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
