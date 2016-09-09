@@ -338,7 +338,7 @@ function showDialogConfigureWhiteHelp() {
 //		str+='<div class="helpDiv">'+configureWhiteHelp[iteam]+'</div>';
 //	}
         var str = '<div class="helpDiv" data-i18n="[html]help.configure_white_help"></div>';
-	fnOpenDialog(str, "Help", 500, 200,false);
+	fnOpenDialog(str, "Help", 500, 500,false);
 }
 
 function showDialogWhiteListApplicableHelp() {
