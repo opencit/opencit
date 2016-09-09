@@ -284,6 +284,11 @@ function fnUploadWhiteListConfigurationData() {
 //	
 //}
 
+function fnToggleOptionalPcrs() {
+    $("#optional_pcrs_list").toggle()
+}
+
+
 function fnShowLoginCredentials() {
     str = "<a href=\"#\" onclick=\"fnShowLoginCredentials()\">";
     if ((document.getElementById('opensource_credentials').innerHTML).indexOf("Show login credentials") > 0) {
@@ -333,7 +338,7 @@ function showDialogConfigureWhiteHelp() {
 //		str+='<div class="helpDiv">'+configureWhiteHelp[iteam]+'</div>';
 //	}
         var str = '<div class="helpDiv" data-i18n="[html]help.configure_white_help"></div>';
-	fnOpenDialog(str, "Help", 500, 200,false);
+	fnOpenDialog(str, "Help", 500, 500,false);
 }
 
 function showDialogWhiteListApplicableHelp() {

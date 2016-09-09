@@ -55,38 +55,40 @@
                                         </c:forEach>
                                     </select>
                                 </div>
-                            </div>     
+                            </div>                                
                             <div class="singleDiv">
-                                <div class="labelDiv"><span data-i18n="input.optional_pcrs">Optional PCRs:</span> <input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
-                                <div class="valueDivConfig" id="biosPCRsValues">
-                                    <input type="checkbox" id="required_pcrs_0" name="0">
-                                    <span>0</span>
-                                    <input type="checkbox" id="required_pcrs_1" name="1">
-                                    <span>1</span>
-                                    <input type="checkbox" id="required_pcrs_2" name="2">
-                                    <span>2</span>
-                                    <input type="checkbox" id="required_pcrs_3" name="3">
-                                    <span>3</span>
-                                    <input type="checkbox" id="required_pcrs_4" name="4">
-                                    <span>4</span>
-                                    <input type="checkbox" id="required_pcrs_5" name="5">
-                                    <span>5</span>
-                                    <input type="checkbox" id="required_pcrs_17" name="17">
-                                    <span>17</span>
-                                </div>
-                                <div class="valueDivConfig" id="vmmPCRsValues">
-                                    <input type="checkbox" id="required_pcrs_12" name="12"> 
-                                    <span>12</span>
-                                    <input type="checkbox" id="required_pcrs_13" name="13">
-                                    <span>13</span>
-                                    <input type="checkbox" id="required_pcrs_14" name="14">
-                                    <span>14</span>
-                                    <input type="checkbox" id="required_pcrs_18" name="18"> 
-                                    <span>18</span>
-                                    <input type="checkbox" id="required_pcrs_19" name="19">
-                                    <span>19</span>
-                                    <input type="checkbox" id="required_pcrs_20" name="20">
-                                    <span>20</span>
+                                <div class="labelDiv"><a data-i18n="input.optional_pcrs" href="#" onclick="fnToggleOptionalPcrs()">Optional PCRs:</a> <input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
+                                <div  id="optional_pcrs_list" style="display: none;">
+                                    <div class="valueDivConfig" id="biosPCRsValues">
+                                        <input type="checkbox" id="required_pcrs_0" name="0">
+                                        <span>0</span>
+                                        <input type="checkbox" id="required_pcrs_1" name="1">
+                                        <span>1</span>
+                                        <input type="checkbox" id="required_pcrs_2" name="2">
+                                        <span>2</span>
+                                        <input type="checkbox" id="required_pcrs_3" name="3">
+                                        <span>3</span>
+                                        <input type="checkbox" id="required_pcrs_4" name="4">
+                                        <span>4</span>
+                                        <input type="checkbox" id="required_pcrs_5" name="5">
+                                        <span>5</span>
+                                        <input type="checkbox" id="required_pcrs_17" name="17">
+                                        <span>17</span>
+                                    </div>
+                                    <div class="valueDivConfig" id="vmmPCRsValues">
+                                        <input type="checkbox" id="required_pcrs_12" name="12"> 
+                                        <span>12</span>
+                                        <input type="checkbox" id="required_pcrs_13" name="13">
+                                        <span>13</span>
+                                        <input type="checkbox" id="required_pcrs_14" name="14">
+                                        <span>14</span>
+                                        <input type="checkbox" id="required_pcrs_18" name="18"> 
+                                        <span>18</span>
+                                        <input type="checkbox" id="required_pcrs_19" name="19">
+                                        <span>19</span>
+                                        <input type="checkbox" id="required_pcrs_20" name="20">
+                                        <span>20</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="singleDiv errorMessage" id="defineErrorMessage"></div>
