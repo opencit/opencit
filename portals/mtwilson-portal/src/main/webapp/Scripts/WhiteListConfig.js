@@ -284,6 +284,11 @@ function fnUploadWhiteListConfigurationData() {
 //	
 //}
 
+function fnToggleOptionalPcrs() {
+    $("#optional_pcrs_list").toggle()
+}
+
+
 function fnShowLoginCredentials() {
     str = "<a href=\"#\" onclick=\"fnShowLoginCredentials()\">";
     if ((document.getElementById('opensource_credentials').innerHTML).indexOf("Show login credentials") > 0) {
