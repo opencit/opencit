@@ -56,7 +56,8 @@
                                     </select>
                                 </div>
                             </div>     
-                            <div class="singleDiv">
+                            <div id ="optional_pcrs"><a href="#" onclick="fnToggleOptionalPcrs()">Toggle Additional PCRs</a></div>
+                            <div class="singleDiv" id="optional_pcrs_list" style="display: none;">
                                 <div class="labelDiv"><span data-i18n="input.optional_pcrs">Optional PCRs:</span> <input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
                                 <div class="valueDivConfig" id="biosPCRsValues">
                                     <input type="checkbox" id="required_pcrs_0" name="0">
