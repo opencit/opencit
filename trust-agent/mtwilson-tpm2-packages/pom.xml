@@ -64,8 +64,6 @@
                                         <chmod perm="755">
                                             <fileset dir="${makeself.directory}">
                                                 <include name="**/*.sh"/>
-                                                <include name="**/tboot/*.sh"/>
-                                                <include name="**/tboot/utils/*"/>
                                                 <include name="**/tss2/*.sh"/>
                                                 <include name="**/tss2/sbin/*"/>
                                                 <include name="**/tpm2-tools/*.sh"/>

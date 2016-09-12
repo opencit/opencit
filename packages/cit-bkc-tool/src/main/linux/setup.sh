@@ -1,29 +1,30 @@
 #!/bin/sh
 
-# This script uses monitor.sh to show a progress bar while running install.sh
-mkdir -p /tmp/cit/monitor/install-bkc-tool
+# the cit-bkc-tool installer outline:
+# 1. create a destination folder, copy all installer contents to this destination folder
+# 2. run the "install.sh" script from the destination folder
+#    that script will run subordinate installers and automatically resume after reboot
 
-# Combine the marker files for Attestation Service and Trust Agent
-cat cit-service.mark cit-agent.mark > /tmp/cit/monitor/.markers
+source ./cit-bkc-tool.env
 
-# Run the installer with console progress bar
-echo "Installing BKC Tool for Cloud Integrity Technology (R)..."
-chmod +x monitor.sh install.sh
-./monitor.sh install.sh /tmp/cit/monitor/.markers /tmp/cit/monitor/install-bkc-tool
+chmod +x *.sh *.bin
 
-# after installation is complete, run the bkc tool (unless user/developer has asked for interactive mode)
-if [ $? -eq 0 ]; then
-  if [ -n "$CIT_BKC_INTERACTIVE" ]; then
-    echo "Interactive mode"
-    echo "Run 'cit-bkc-tool --help' to see available commands"
-  else
-    # the 'cit-bkc' tool should be in /usr/local/bin after successful install
-    cit-bkc-tool clear
-    cit-bkc-tool --reboot
-  fi
-  exit 0
-else
-  echo "Installation failed"
-  echo "Log file: /tmp/cit/monitor/install-bkc-tool/stdout"
-  exit 1
+pwd=$(pwd)
+if [ "$pwd" != "$CIT_BKC_PACKAGE_PATH" ]; then
+    rm -rf $CIT_BKC_PACKAGE_PATH
+    mkdir -p $CIT_BKC_PACKAGE_PATH
+    cp * $CIT_BKC_PACKAGE_PATH
 fi
+
+mkdir -p $CIT_BKC_BIN_PATH
+rm -f $CIT_BKC_BIN_PATH/cit-bkc-tool
+cp cit-bkc-tool.sh $CIT_BKC_BIN_PATH/cit-bkc-tool
+
+mkdir -p $CIT_BKC_CONF_PATH
+if [ -f $CIT_BKC_CONF_PATH/cit-bkc-tool.env ]; then
+  cp cit-bkc-tool.env $CIT_BKC_CONF_PATH/cit-bkc-tool.env.new
+else
+  cp cit-bkc-tool.env $CIT_BKC_CONF_PATH
+fi
+
+$CIT_BKC_BIN_PATH/cit-bkc-tool

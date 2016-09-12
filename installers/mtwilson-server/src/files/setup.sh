@@ -94,8 +94,6 @@ else
   echo "No environment file"
 fi
 
-
-
 #If user is non root make sure all prereq directories are created and owned by nonroot user
 if [ "$(whoami)" != "root" ]; then
   if [ ! -d $MTWILSON_HOME ]; then
@@ -209,7 +207,6 @@ else
   fi
 fi
 
-
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
 export MTWILSON_OPT_INTEL=/opt/intel
 export MTWILSON_ETC_INTEL=/etc/intel
@@ -244,6 +241,25 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
   chmod 700 $directory
 done
 set_owner_for_mtwilson_directories
+
+#cp version script to configuration directory
+cp version $MTWILSON_HOME/configuration/version
+
+#cp mtwilson control script and setup symlinks
+cp mtwilson.sh $MTWILSON_HOME/bin/mtwilson.sh
+rm -f $MTWILSON_HOME/bin/mtwilson
+ln -s $MTWILSON_HOME/bin/mtwilson.sh $MTWILSON_HOME/bin/mtwilson
+chmod +x $MTWILSON_HOME/bin/*
+
+#If user is root then create mtwilson symlink to /usr/local/bin otherwise export path '$MTWILSON_HOME/bin'
+if [ "$(whoami)" == "root" ]; then
+ if [ ! -d /usr/local/bin ]; then
+   mkdir -p /usr/local/bin
+ fi
+ #Remove symbolic link if already exist
+ rm -f /usr/local/bin/mtwilson
+ ln -s $MTWILSON_HOME/bin/mtwilson /usr/local/bin/mtwilson
+fi
 
 # make aikverify directories, set ownership and permissions
 if [ "$(whoami)" == "root" ]; then
@@ -389,15 +405,14 @@ case $flavor in
     addRepoRequired=$(yum list xmlstarlet 2>/dev/null | grep -E 'Available Packages|Installed Packages')
     repo_url="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
     #if xmlstarlet package already available, break; no need to add repo
-    if [ -n "$addRepoRequired" ]; then
-      break
+    if [ -z "$addRepoRequired" ]; then
+      prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
+      if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
+        echo_failure "User declined to add EPEL Release repository to local package manager."
+        exit -1
+      fi
+      add_package_repository "${repo_url}"
     fi
-    prompt_with_default ADD_EPEL_RELEASE_REPO "Add EPEL Release repository to local package manager? " "no"
-    if [ "$ADD_EPEL_RELEASE_REPO" == "no" ]; then
-      echo_failure "User declined to add EPEL Release repository to local package manager."
-      exit -1
-    fi
-    add_package_repository "${repo_url}"
     ;;
 esac
   
@@ -511,7 +526,9 @@ unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
 mkdir -p $MTWILSON_HOME/share/scripts
 
 #this is now done in LinuxUtil setup.sh
-#cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+rm -f "$MTWILSON_HOME/share/scripts/functions"
+ln -s "$MTWILSON_HOME/share/scripts/functions.sh" "$MTWILSON_HOME/share/scripts/functions"
 
 # deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
 cp functions "$MTWILSON_BIN/functions.sh"
@@ -520,13 +537,6 @@ cp functions "$MTWILSON_BIN/functions.sh"
 echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL_LOG_FILE
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
 chmod 755 $MTWILSON_BIN/*
-
-# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
-# with a symlink to /opt/mtwilson/bin/mtwilson
-if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
-  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
-  rm -f /usr/local/bin/mtwilson
-fi
 
 # configure mtwilson TLS policies
 echo "Configuring TLS policies..." >>$INSTALL_LOG_FILE
@@ -615,6 +625,23 @@ chmod 600 logback.xml logback-stderr.xml
 chown $MTWILSON_USERNAME:$MTWILSON_USERNAME logback.xml logback-stderr.xml
 cp logback.xml logback-stderr.xml "$MTWILSON_CONFIGURATION"
 
+
+# Gather default configuration
+MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
+
+# Prompt for installation settings
+echo "Configuring Mt Wilson Server Name..."
+echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
+This address will be used in the server SSL certificate and in all Mt Wilson URLs.
+For example, if you enter '$MTWILSON_SERVER_IP_ADDRESS' then the Mt Wilson URL is 
+https://$MTWILSON_SERVER_IP_ADDRESS:8181 (for Glassfish deployments) or 
+https://$MTWILSON_SERVER_IP_ADDRESS:8443 (for Tomcat deployments)
+Detected the following options on this server:"
+for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
+prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
+export MTWILSON_SERVER
+echo
+
 # copy shiro.ini api security file
 if [ ! -f "$MTWILSON_CONFIGURATION/shiro.ini" ]; then
   echo "Copying shiro.ini to $MTWILSON_CONFIGURATION" >> $INSTALL_LOG_FILE
@@ -634,8 +661,8 @@ if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
   update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_SERVER";
 fi
 hostAllow=`read_property_from_file $hostAllowPropertyName "$MTWILSON_CONFIGURATION/shiro.ini"`
-if [[ $hostAllow != *$MTWILSON_IP* ]]; then
-  update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_IP";
+if [[ $hostAllow != *$MTWILSON_SERVER_IP_ADDRESS* ]]; then
+  update_property_in_file "$hostAllowPropertyName" "$MTWILSON_CONFIGURATION/shiro.ini" "$hostAllow,$MTWILSON_SERVER_IP_ADDRESS";
 fi
 sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION/shiro.ini"
 
@@ -650,7 +677,6 @@ find_installer() {
 
 monit_installer=`find_installer monit`
 logrotate_installer=`find_installer logrotate`
-mtwilson_util=`find_installer mtwilson-linux-util` #MtWilsonLinuxUtil`
 management_service=`find_installer mtwilson-management-service` #ManagementService`
 whitelist_service=`find_installer mtwilson-whitelist-service` #WLMService`
 attestation_service=`find_installer mtwilson-attestation-service` #AttestationService`
@@ -659,10 +685,6 @@ glassfish_installer=`find_installer glassfish`
 tomcat_installer=`find_installer tomcat`
 
 # Verify the installers we need are present before we start installing
-if [ ! -e "$mtwilson_util" ]; then
-  echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
-  exit -1;
-fi
 if [ -n "$opt_glassfish" ] && [ ! -e "$glassfish_installer" ]; then
   echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
   exit -1;
@@ -694,22 +716,6 @@ fi
 
 # Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
 export MTWILSON_SETUP_NODEPLOY=
-
-# Gather default configuration
-MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
-
-# Prompt for installation settings
-echo "Configuring Mt Wilson Server Name..."
-echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
-This address will be used in the server SSL certificate and in all Mt Wilson URLs.
-For example, if you enter '$MTWILSON_SERVER_IP_ADDRESS' then the Mt Wilson URL is 
-https://$MTWILSON_SERVER_IP_ADDRESS:8181 (for Glassfish deployments) or 
-https://$MTWILSON_SERVER_IP_ADDRESS:8443 (for Tomcat deployments)
-Detected the following options on this server:"
-for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
-prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
-export MTWILSON_SERVER
-echo
 
 if [[ -z "$opt_postgres" && -z "$opt_mysql" ]]; then
  echo_warning "Relying on an existing database installation"
@@ -947,11 +953,6 @@ fi
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 chmod +x *.bin
-
-echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
-./$mtwilson_util  >> $INSTALL_LOG_FILE
-if [ $? -ne 0 ]; then echo_failure "Failed to install linux utility"; exit -1; fi
-echo "Mt Wilson linux utility installation done" | tee -a  $INSTALL_LOG_FILE
 
 mkdir -p /opt/mtwilson/logs
 touch /opt/mtwilson/logs/mtwilson.log
@@ -1296,6 +1297,10 @@ if [ -z "$MTWILSON_NOSETUP" ]; then
 
   #mtwilson setup
 fi
+
+# store server hostname or ip address (whatever user configured) for server
+# to use when constructing self-references
+mtwilson config mtwilson.host "$MTWILSON_SERVER"
 
 # delete the temporary setup environment variables file
 rm -f $MTWILSON_ENV/mtwilson-setup

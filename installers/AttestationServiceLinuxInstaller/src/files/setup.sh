@@ -110,7 +110,7 @@ echo "Attestation service installer calling asctl setup..." >>$INSTALL_LOG_FILE
 
 aikqverify_install_prereq() {
   echo "Installing aikqverify prereqs..."
-  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev"
+  DEVELOPER_YUM_PACKAGES="make gcc openssl openssl-devel"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
   auto_install "Developer tools" "DEVELOPER" >> "$INSTALL_LOG_FILE"
   if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi

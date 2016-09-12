@@ -2526,13 +2526,15 @@ private TlsPolicy createTlsPolicyForVcenter(String vCenterConnection, String tls
             Type mleDataType = new TypeToken<MLEDataVO>() {
             }.getType();
             dataVO = new Gson().fromJson(mleOb, mleDataType);
-
-            for (Map<String, String> manifestMap : dataVO.getManifestList()) {
-                for (Map.Entry<String, String> manifest : manifestMap.entrySet()) {
-                    manifest.setValue(manifest.getValue().toUpperCase());
+            
+            if( dataVO.getManifestList() != null) {
+                for (Map<String, String> manifestMap : dataVO.getManifestList()) {
+                    for (Map.Entry<String, String> manifest : manifestMap.entrySet()) {
+                        manifest.setValue(manifest.getValue().toUpperCase());
+                    }
                 }
-            }
-
+   
+            }           
             System.out.println("dataVo >>" + dataVO);
             if (newMle) {
                 responseView.addObject("result", mleClientService.addMLEInfo(dataVO, getWhitelistService(req)));

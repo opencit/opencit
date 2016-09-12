@@ -5,7 +5,6 @@
     <artifactId>cit-bkc-tool</artifactId>
     
     <packaging>pom</packaging>
-    <name>CIT BKC Tool</name>
     <description>Installs a tool to validate Intel Cloud Integrity Technology (CIT) with the Best Known Configuration (BKC)</description>
     
     <parent>
@@ -47,9 +46,10 @@
                     <classifier>jdk_glassfish_monit</classifier>
                 </dependency>
                 <!-- Trust Agent -->
+                <!-- NOTE: in v2.1 we use the "mtwilson-trustagent" project for both ubuntu and redhat even though there is a "mtwilson-trustagent-rhel" project; ask Ryan for explanation -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
-                    <artifactId>mtwilson-trustagent-rhel</artifactId>
+                    <artifactId>mtwilson-trustagent</artifactId>
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
@@ -58,7 +58,14 @@
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
-                    <version>2.1-SNAPSHOT</version>
+                    <version>${project.version}</version>
+                    <type>sh</type>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.version}</version>
                     <type>sh</type>
                 </dependency>
 
@@ -91,16 +98,23 @@
                                         <!-- Trust Agent -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>mtwilson-trustagent-rhel</artifactId>
+                                            <artifactId>mtwilson-trustagent</artifactId>
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
-                                            <version>2.1-SNAPSHOT</version>
+                                            <version>${project.version}</version>
                                             <type>sh</type>
                                             <destFileName>monitor.sh</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <destFileName>functions.sh</destFileName>
                                         </artifactItem>
                                     </artifactItems>
                                     <outputDirectory>${makeself.basic}</outputDirectory>

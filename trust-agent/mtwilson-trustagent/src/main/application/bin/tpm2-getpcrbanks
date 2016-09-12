@@ -3,8 +3,11 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-bankHex=(0x04 0x0B 0x0C 0x0D 0x12)
-banks=(SHA1 SHA256 SHA384 SHA512 SM3_256)
+#bankHex=(0x04 0x0B 0x0C 0x0D 0x12)
+bankHex=(0x04 0x0B)
+#banks=(SHA1 SHA256 SHA384 SHA512 SM3_256)
+banks=(SHA1 SHA256)
+
 index=0;
 
 for alghex in ${bankHex[@]}; do
