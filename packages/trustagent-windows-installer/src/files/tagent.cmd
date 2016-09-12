@@ -15,6 +15,7 @@ set TRUSTAGENT_HOME=%parentfolder%
 
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
 set logfile=%TRUSTAGENT_HOME%\logs\trustagent2.log
+set tasklogfile=%TRUSTAGENT_HOME%\logs\trustagent3.log
 
 set JAVA_HOME=%TRUSTAGENT_HOME%\jre
 set JAVABIN=%JAVA_HOME%\bin\java
@@ -26,6 +27,7 @@ set TRUSTAGENT_BIN=%TRUSTAGENT_HOME%\bin
 set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
 set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
+set TRUSTAGENT_PROPERTY_FILE=%TRUSTAGENT_CONF%\trustagent.properties
 set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_LOGS%\http.log
 set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
 set TRUSTAGENT_TPM_TASKS=create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership
@@ -42,11 +44,9 @@ REM  for env_file in $TRUSTAGENT_ENV_FILES; do
 REM    . $env_file
 REM  done
   for /f  "delims=" %%a in ('dir "%TRUSTAGENT_ENV%" /b') do (
-    echo. hello0
     echo. %%a
-    cd "%TRUSTAGENT_ENV%"
-    call %%a
-    echo. %TEST_TA%
+    REM cd "%TRUSTAGENT_ENV%"
+    REM call %%a
   )
 )
 
@@ -54,7 +54,7 @@ REM # not including configure-from-environment because we are running it always 
 REM # not including register-tpm-password because we are prompting for it in the setup.sh
 
 set JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-set JAVA_OPTS=-Dlogback.configurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
+set JAVA_OPTS=-Dlogback.confsdfigurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
 
 REM @###################################################################################################
 
@@ -72,6 +72,7 @@ REM echo. %JAVA_HOME%
 set TASTATUS=
 REM parsing the command arguments
 set wcommand=%1
+set options=%2
 set cmdparams=
 for /f "usebackq tokens=1*" %%i in (`echo %*`) DO @ set cmdparams=%%j
 REM echo. Running command: %wcommand% with %cmdparams%
@@ -85,7 +86,7 @@ if "%wcommand%"=="start" (
 ) ELSE IF "%wcommand%"=="status" (
   call:trustagent_status
 ) ELSE IF "%wcommand%"=="setup" (
-  call:trustagent_setup %cmdparams%
+  call:trustagent_setup %cmdparams%dsf
 ) ELSE IF "%wcommand%"=="authorize" (
   call:trustagent_authorize
 ) ELSE IF "%wcommand%"=="start-http-server" (
@@ -94,11 +95,17 @@ if "%wcommand%"=="start" (
   echo. CIT trust agent Windows version 1.0
 ) ELSE IF "%wcommand%"=="help" (
   call:print_help
+) ELSE IF "%wcommand%"=="uninstall" (
+  call:tagent_uninstall
+) ELSE IF "%wcommand%"=="export-config" (
+  if "%options%"=="--stdout" (
+    type "%TRUSTAGENT_PROPERTY_FILE%"
+  )
 ) ELSE (
   IF "%*"=="" (
     call:print_help
   ) ELSE (
-    echo. Running command: %*
+    REM echo. Running command: %*
     >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
@@ -111,10 +118,10 @@ REM functions
   echo. Trustagent started
 GOTO:EOF
 
-:trustagent_stop
-  echo. Stopping the trust agent
-  sc stop trustagent > null
-  echo. Trustagent stopped
+:trustagent_status
+  REM set TASTATUS=
+  call :get_status
+  echo. Trustagent status: %TASTATUS%
 GOTO:EOF
 
 :trustagent_restart
@@ -123,18 +130,16 @@ GOTO:EOF
   IF "%TASTATUS%"=="Stopped" (
      echo.   Trustagent was not running
   ) ELSE (
-     sc stop trustagent >null
-     echo.   Trustagent stopped
+    call:trustagent_stop
+    timeout /t 1 /NOBREAK
   )
-  echo. Starting trustagent
-  sc start trustagent > null
-  echo.   Trustagent started
+  call :trustagent_start
 GOTO:EOF
 
-:trustagent_status
-  REM set TASTATUS=
-  call :get_status
-  echo. Trustagent status: %TASTATUS%
+:trustagent_stop
+  echo. Stopping the trust agent
+  sc stop trustagent > null
+  echo. Trustagent stopped
 GOTO:EOF
 
 :trustagent_setup
@@ -189,6 +194,10 @@ GOTO:EOF
     echo. configure-from-environment
     echo. %TRUSTAGENT_SETUP_TASKS%
     echo. register-tpm-password
+GOTO:EOF
+
+:tagent_uninstall
+    start /d "%TRUSTAGENT_HOME%" Uninstall.exe
 GOTO:EOF
 
 :get_status

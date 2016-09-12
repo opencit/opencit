@@ -64,12 +64,9 @@ main (int ac, char **av)
 	BYTE		*quote;
 	UINT32		quoteLen;
 	RSA			*aikRsa;
-	UINT32		selectLen;
-	BYTE		*select;
-	UINT32		pcrLen;
-	BYTE		*pcrs;
-	UINT32		sigLen;
-	BYTE		*sig;
+	//UINT32		selectLen;
+	//UINT32		sigLen;
+	//BYTE		*sig;
 	BYTE		chalmd[20];
 	BYTE		md[20];
 	BYTE		qinfo[8+20+20];
@@ -89,7 +86,6 @@ main (int ac, char **av)
     UINT32 cbLog = 0;
     BYTE *pbNonce = NULL;
     BYTE quoteDigest[20] = {0};
-    UINT32 cbQuoteDigest = 0;
 
 	if (ac == 5 && 0 == strcmp(av[1], "-c")) {
 		chalfile = av[2];
@@ -114,6 +110,11 @@ main (int ac, char **av)
 		chalLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
 		chal = malloc (chalLen);
+                if (chal == NULL) 
+                {
+                    fprintf (stderr, "Unable to allocate memory\n");
+                    exit (1);            
+                }
 		if (fread (chal, 1, chalLen, f_in) != chalLen) {
 			fprintf (stderr, "Unable to read file %s\n", chalfile);
 			exit (1);
@@ -148,6 +149,11 @@ main (int ac, char **av)
 	quoteLen = ftell (f_in);
 	fseek (f_in, 0, SEEK_SET);
 	quote = malloc (quoteLen);
+        if (quote == NULL) 
+        {
+            fprintf (stderr, "Unable to allocate memory for quote\n");
+            exit (1);            
+        }
 	if (fread (quote, 1, quoteLen, f_in) != quoteLen) {
 		fprintf (stderr, "Unable to read file %s\n", av[2]);
 		exit (1);
@@ -183,7 +189,7 @@ main (int ac, char **av)
     SHA1(pbQuote, cbQuote, quoteDigest);
 
     // Step 2: Validate the nonce
-    if (memcmp(chalmd, pbNonce, 20) != 0) {
+    if (pbNonce != NULL && (memcmp(chalmd, pbNonce, 20) != 0)) {
     	fprintf (stderr, "Error, bad Nonce in quote\n");
 		exit (2);
     }
@@ -209,11 +215,13 @@ main (int ac, char **av)
 	fflush (stdout);
 	fprintf (stderr, "Success!\n");
 
+        if (quote != NULL)
+            free(quote);
 	return 0;
 
-badquote:
-	fprintf (stderr, "Input AIK quote file incorrect format\n");
-	return 1;
+//badquote:
+	//fprintf (stderr, "Input AIK quote file incorrect format\n");
+	//return 1;
 }
 
 

@@ -60,14 +60,15 @@ public class TAConfig {
         config = gatherConfiguration(defaults);
     }
     
-    // for troubleshooting
+    /* for troubleshooting
     private void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[] { /*"app.path",*/ "debug", "trustagent.http.tls.port", "mtwilson.api.url" };
+        String keys[] = new String[] { "debug", "trustagent.http.tls.port", "mtwilson.api.url" };
         for(String key : keys) {
             String value = c.getString(key);
             System.out.println(String.format("TAConfig [%s]: %s=%s", label, key, value));
         }
     }
+    */
 
     private Configuration gatherConfiguration(Properties defaults)  {
         try {

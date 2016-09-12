@@ -269,7 +269,7 @@ public class HostBO {
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         Map<String,String> attributes = agent.getHostAttributes();
                         String hostUuidAttr = attributes.get("Host_UUID");
-                        if ((attributes != null) && (!attributes.isEmpty()) && (hostUuidAttr != null))
+                        if ((!attributes.isEmpty()) && (hostUuidAttr != null))
                             tblHosts.setHardwareUuid(hostUuidAttr.toLowerCase().trim());
                         
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId, uuid);

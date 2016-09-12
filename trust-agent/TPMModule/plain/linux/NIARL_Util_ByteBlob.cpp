@@ -97,6 +97,10 @@ NIARL_Util_ByteBlob::NIARL_Util_ByteBlob(string in_var)
 	}
 }
 
+NIARL_Util_ByteBlob::NIARL_Util_ByteBlob(const NIARL_Util_ByteBlob& src) { /* do not create copies */ }
+
+NIARL_Util_ByteBlob& NIARL_Util_ByteBlob::operator=(const NIARL_Util_ByteBlob&) { return *this; }
+
 NIARL_Util_ByteBlob::~NIARL_Util_ByteBlob()
 {
 	delete [] blob;

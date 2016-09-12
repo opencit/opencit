@@ -217,10 +217,11 @@ public class HostInfoCmdWin implements ICommand {
         }
     }
         
-    private String trim(String text) {
-        if( text == null ) { return null; }
-        return text.trim();
-    }
+    //#5841: Private method 'trim' is unused.
+    //private String trim(String text) {
+    //    if( text == null ) { return null; }
+    //    return text.trim();
+    //}
 
     /*
      * Sample response of dmidecode -s bios-vendor -> Intel Corp. Sample
@@ -291,13 +292,13 @@ public class HostInfoCmdWin implements ICommand {
             log.error("Error executing the [wmic bios get manufacturer]");
         }   
     }
-
-    private void getVmmAndVersion() throws TAException, IOException {
-        context.setVmmName("Windows Hyper-V");
-        context.setVmmVersion("1.0");
-        log.debug("VMM Name: " + context.getVmmName());
-        log.debug("VMM Version: " + context.getVmmVersion());
-    }
+    //#5817: Private method 'getVmmAndVersion' is unused.
+    //private void getVmmAndVersion() throws TAException, IOException {
+    //    context.setVmmName("Windows Hyper-V");
+    //    context.setVmmVersion("1.0");
+    //    log.debug("VMM Name: " + context.getVmmName());
+    //    log.debug("VMM Version: " + context.getVmmVersion());
+    //}
 
     /**
      * Retrieves the CPU ID of the processor. This is used to identify the processor generation.

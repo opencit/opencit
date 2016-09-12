@@ -395,7 +395,7 @@ public class MleBO {
         if (addManifest) {
             manifestList = new ArrayList<>();
             for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
-                manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue()));
+                manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue(), pcrManifest.getPcrBank()));
             }
         }
 
@@ -779,23 +779,7 @@ public class MleBO {
             throw new ASException(ErrorCode.WS_PCR_WHITELIST_CREATE_ERROR, e.getClass().getSimpleName());
         }
         return "true";
-    }
-
-    /**
-     * Added By: Sudhir on June 20, 2012
-     *
-     * Retrieves the details of the PCR manifest entry if exists.
-     *
-     * @param mle_id : Identity of the MLE
-     * @param pcrName : Name of the PCR
-     * @return : Data row containing the PCR manifest details.
-     */
-    private List<TblPcrManifest> getPCRWhiteListDetails(Integer mle_id, String pcrName) {
-        List<TblPcrManifest> tblPcr;
-        validateNull("pcrName", pcrName);
-        tblPcr = pcrManifestJpaController.findByMleIdName(mle_id, pcrName);
-        return tblPcr;
-    }
+    }   
     
     private TblPcrManifest getPCRWhiteListDetails(Integer mle_id, String pcrName, String pcrBank) {
         if(pcrBank == null) {

@@ -48,15 +48,7 @@ public class Tpm2Utils {
     private final static int INTEGER_BYTES = 4;
 
     private static boolean isSupportedAsymAlgorithm(String algorithm) {
-        switch (algorithm) {
-            case "RSA":
-                return true;
-            case "ECDSA":
-            case "ECDH":
-                return false;
-            default:
-                return false;
-        }
+        return isSupportedAsymAlgorithm(Tpm2Algorithm.Asymmetric.valueOf(algorithm));       
     }
 
     private static boolean isSupportedAsymAlgorithm(Tpm2Algorithm.Asymmetric asymAlg) {
@@ -82,20 +74,6 @@ public class Tpm2Utils {
 
     private static final int SHA1_SIZE = 20;
     private static final int SHA256_SIZE = 32;
-
-    private static int getAlgorithmHashDigestLength(String algorithm) {
-        if (algorithm == null) {
-            return 0;
-        }
-        switch (algorithm.replaceAll("-", "")) {
-            case "SHA1":
-                return SHA1_SIZE;
-            case "SHA256":
-                return SHA256_SIZE;
-            default:
-                return 0;
-        }
-    }
 
     private static int getAlgorithmHashDigestLength(Tpm2Algorithm.Hash hashAlg) {
         switch (hashAlg) {
@@ -172,7 +150,7 @@ public class Tpm2Utils {
         }
 
         // encrypt credential with Symmetric Algorithm
-        byte[] symKey = KDFa(nameAlgorithm, seed, STORAGE, objectName, null, symKeySizeInBits);
+        byte[] symKey = kDFa(nameAlgorithm, seed, STORAGE, objectName, null, symKeySizeInBits);
         ByteBuffer credentialBlob = ByteBuffer.allocate(Tpm2Credential.TPM2B_ID_OBJECT_SIZE);
         Cipher symCipher;
         byte[] encryptedCredential;
@@ -189,7 +167,7 @@ public class Tpm2Utils {
         }
 
         // Compute Hmac Integrity of encrypted credential
-        byte[] hmacKey = KDFa(nameAlgorithm, seed, INTEGRITY, null, null, nameAlgDigestLength * 8);
+        byte[] hmacKey = kDFa(nameAlgorithm, seed, INTEGRITY, null, null, nameAlgDigestLength * 8);
         SecretKeySpec hmacKeySpec;
         Mac hmac;
         if (nameAlgorithm == Tpm2Algorithm.Hash.SHA1) {
@@ -213,7 +191,7 @@ public class Tpm2Utils {
         return new Tpm2Credential(credentialBlob.array(), encryptedSeed.array());
     }
 
-    private static byte[] KDFa(Tpm2Algorithm.Hash hashAlgorithm, byte[] key, String label, byte[] contextU, byte[] contextV, int sizeInBits) throws NoSuchAlgorithmException, InvalidKeyException {
+    private static byte[] kDFa(Tpm2Algorithm.Hash hashAlgorithm, byte[] key, String label, byte[] contextU, byte[] contextV, int sizeInBits) throws NoSuchAlgorithmException, InvalidKeyException {
 
         String macAlgorithm;
 

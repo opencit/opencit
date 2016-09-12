@@ -571,7 +571,7 @@ public class TblModuleManifestJpaController implements Serializable {
         }            	
     }
     
-        public TblModuleManifest findByMleNameEventNamePcrBank(Integer mleId,String componentName, String eventName, String pcrBank){
+    public TblModuleManifest findByMleNameEventNamePcrBank(Integer mleId,String componentName, String eventName, String pcrBank){
     
         EntityManager em = getEntityManager();
         try {
