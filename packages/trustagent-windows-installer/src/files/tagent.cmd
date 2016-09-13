@@ -15,6 +15,7 @@ set TRUSTAGENT_HOME=%parentfolder%
 
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
 set logfile=%TRUSTAGENT_HOME%\logs\trustagent2.log
+set tasklogfile=%TRUSTAGENT_HOME%\logs\trustagent3.log
 
 set JAVA_HOME=%TRUSTAGENT_HOME%\jre
 set JAVABIN=%JAVA_HOME%\bin\java
@@ -26,6 +27,7 @@ set TRUSTAGENT_BIN=%TRUSTAGENT_HOME%\bin
 set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
 set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
+set TRUSTAGENT_PROPERTY_FILE=%TRUSTAGENT_CONF%\trustagent.properties
 set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_LOGS%\http.log
 set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
 set TRUSTAGENT_TPM_TASKS=create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership
@@ -42,11 +44,9 @@ REM  for env_file in $TRUSTAGENT_ENV_FILES; do
 REM    . $env_file
 REM  done
   for /f  "delims=" %%a in ('dir "%TRUSTAGENT_ENV%" /b') do (
-    echo. hello0
     echo. %%a
-    cd "%TRUSTAGENT_ENV%"
-    call %%a
-    echo. %TEST_TA%
+    REM cd "%TRUSTAGENT_ENV%"
+    REM call %%a
   )
 )
 
@@ -72,6 +72,7 @@ REM echo. %JAVA_HOME%
 set TASTATUS=
 REM parsing the command arguments
 set wcommand=%1
+set options=%2
 set cmdparams=
 for /f "usebackq tokens=1*" %%i in (`echo %*`) DO @ set cmdparams=%%j
 REM echo. Running command: %wcommand% with %cmdparams%
@@ -96,10 +97,15 @@ if "%wcommand%"=="start" (
   call:print_help
 ) ELSE IF "%wcommand%"=="uninstall" (
   call:tagent_uninstall
+) ELSE IF "%wcommand%"=="export-config" (
+  if "%options%"=="--stdout" (
+    type "%TRUSTAGENT_PROPERTY_FILE%"
+  )
 ) ELSE (
   IF "%*"=="" (
     call:print_help
-    echo. Running command: %*
+  ) ELSE (
+    REM echo. Running command: %*
     >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )

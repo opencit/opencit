@@ -89,7 +89,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
 
     @Override
     public String getAssetTagIndex() throws IOException, TpmModuleException {
-        return "0x40000010";
+        return "2.0".equals(Tpm.getTpmVersion()) ? "0x01c10110" : "0x40000010";
     }
 
     @Override
