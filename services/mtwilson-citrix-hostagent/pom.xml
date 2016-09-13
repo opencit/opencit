@@ -127,9 +127,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.xensource</groupId>
-            <artifactId>citrix-sdk</artifactId>
-            <version>6.1</version>
+            <groupId>net.java.dev.vcc.thirdparty</groupId>
+            <artifactId>xen-api</artifactId>
+            <version>6.2.0-3.1</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
