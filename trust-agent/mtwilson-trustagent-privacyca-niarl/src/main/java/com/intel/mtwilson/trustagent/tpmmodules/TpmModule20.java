@@ -365,4 +365,9 @@ public class TpmModule20 implements TpmModuleProvider {
         log.debug("returned pcr banks trimmed: {}", result.getReturnOutput().trim());
         return result.getReturnOutput().trim();
     }      
+
+    @Override
+    public HashMap<String, byte[]> createAndCertifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
