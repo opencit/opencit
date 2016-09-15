@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $# != 4 ]]; then
-    echo "Usage: tpm2-createkey.sh <bind|sign> <handle> <out.pub> <out.priv>"
+    echo "Usage: tpm2-createkey.sh <bind|sign> <parenthandle> <keyauth>s <out.pub> <out.priv>"
     exit -1
 fi
 

@@ -23,9 +23,13 @@ import gov.niarl.his.privacyca.TpmUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -368,6 +372,52 @@ public class TpmModule20 implements TpmModuleProvider {
 
     @Override
     public HashMap<String, byte[]> createAndCertifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        String srkHandle = "0x81000000";
+        String publicFile = "/tmp/out.pub";
+        String privateFile = "/tmp/out.priv";
+
+        String attestFile = "/tmp/out.attest";
+        String sigFile = "/tmp/out.sig";
+        
+        try {
+
+            String args[] = {
+                keyType,
+                srkHandle,
+                publicFile,
+                privateFile
+            };
+            CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-createkey.sh", args, 0);
+
+            if(result.getReturnCode() == 0) {
+                String args2[] = {
+                    srkHandle,
+                    String.valueOf(aikIndex),
+                    TpmUtils.byteArrayToHexString(aikAuth),
+                    publicFile,
+                    privateFile,
+                    attestFile,
+                    sigFile
+                };
+                result = getShellExecutor().executeTpmCommand("tpm2-certifykey.sh", args2, 0);
+
+                if(result.getReturnCode() != 0) {
+                    throw new TpmModule.TpmModuleException("Failed to certify key after creation");
+                } else {
+                    HashMap<String, byte[]> res = new HashMap<String, byte[]>();               
+                    res.put("keymod", IOUtils.toByteArray(new FileInputStream(publicFile)));
+                    res.put("keyblob", IOUtils.toByteArray(new FileInputStream(privateFile)));
+                    res.put("keydata", IOUtils.toByteArray(new FileInputStream(attestFile)));
+                    res.put("keysig", IOUtils.toByteArray(new FileInputStream(sigFile)));
+                }
+            }
+
+            throw new TpmModule.TpmModuleException("Failed to create and certify key");
+        } finally {
+            Files.deleteIfExists(Paths.get(publicFile));
+            Files.deleteIfExists(Paths.get(privateFile));
+            Files.deleteIfExists(Paths.get(attestFile));
+            Files.deleteIfExists(Paths.get(sigFile));
+        }
     }
 }
