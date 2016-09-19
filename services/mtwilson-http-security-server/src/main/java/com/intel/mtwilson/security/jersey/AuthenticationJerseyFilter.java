@@ -86,10 +86,11 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         log.debug("AuthenticationJerseyFilter: Request URI="+request.getUriInfo().getRequestUri());
         log.debug("AuthenticationJerseyFilter: Secure/https="+request.getSecurityContext().isSecure());
         
-        if( servletRequest != null ) {
-            log.debug("AuthenticationJerseyFilter: Remote Address="+servletRequest.getRemoteAddr());            
+        if( servletRequest == null ) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Servlet request cannot be null").build());
         }
-        
+        log.debug("AuthenticationJerseyFilter: Remote Address=" + servletRequest.getRemoteAddr());
+
         if( sslRequired &&  !request.getSecurityContext().isSecure() ) {
             log.error("AuthenticationJerseyFilter: rejecting insecure (http) request");
             throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).entity("Secure connection required").build());            
@@ -104,7 +105,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         
         // the administrator may specify a list of IP addresses to trust without requiring an Authorization header. this requirement was added in 0.5.1-sp1 (0.5.2).        
         log.debug("Trusted remote addresses: {}", StringUtils.join(trustWhitelist, " and "));
-        log.debug("Client remote address: {}", servletRequest != null ? servletRequest.getRemoteAddr() : "(NO SERVLET REQUEST)");
+        log.debug("Client remote address: {}", servletRequest.getRemoteAddr());
         if( trustWhitelist != null && trustWhitelist.length > 0 && servletRequest != null && servletRequest.getRemoteAddr() != null ) {
             String trustedAddress = IPAddressUtil.matchAddressInList(servletRequest.getRemoteAddr(), trustWhitelist);
             if( trustedAddress != null ) {

@@ -88,7 +88,7 @@ public class GenerateQuoteCmd implements ICommand {
         }
                 
         String osName = context.getOsName();
-        String commandLine = "";
+        String commandLine;
         String keyName = "HIS_Identity_Key";
         byte[] nonce = Base64.decodeBase64(context.getNonce());
 
@@ -143,21 +143,32 @@ public class GenerateQuoteCmd implements ICommand {
                         quoteAlgWithPcrs = "0x0B:" + selectedPcrList;
                     } else {
                         String[] pcrBanks = context.getSelectedPcrBanks().split("\\s+");
+                        //construct the list of algorithms and pcrs for quote
                         for (int i=0; i<pcrBanks.length; i++) {
                             if (i != 0)
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "+";                            
-                            if (pcrBanks[i].equals("SHA1"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x04" + ":" + selectedPcrList;
-                            else if (pcrBanks[i].equals("SHA256"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0B" + ":" + selectedPcrList;  
-                            else if (pcrBanks[i].equals("SHA384"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0C" + ":" + selectedPcrList;  
-                            else if (pcrBanks[i].equals("SHA512"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x0D" + ":" + selectedPcrList;  
-                            else if (pcrBanks[i].equals("SM3_256"))
-                                quoteAlgWithPcrs = quoteAlgWithPcrs + "0x12" + ":" + selectedPcrList;                              
-                            else
-                                log.error("Unsupported pcrbank value: {}", pcrBanks[i]);
+                                quoteAlgWithPcrs += "+";                            
+                            switch (pcrBanks[i]) {
+                                case "SHA1":
+                                    quoteAlgWithPcrs += "0x04" + ":" + selectedPcrList;
+                                    break;
+                                case "SHA256":
+                                    quoteAlgWithPcrs += "0x0B" + ":" + selectedPcrList;
+                                    break;
+                                case "SHA384":
+                                    quoteAlgWithPcrs += "0x0C" + ":" + selectedPcrList;
+                                    break;
+                                case "SHA512":
+                                    quoteAlgWithPcrs += "0x0D" + ":" + selectedPcrList;
+                                    break;
+                                case "SM3_256":
+                                    quoteAlgWithPcrs += "0x12" + ":" + selectedPcrList;
+                                    break;
+                                default:
+                                    log.error("Unsupported pcrbank value: {}", pcrBanks[i]);
+                                    if (i!=0)  //remove the "+" added at the beginning of the loop
+                                        quoteAlgWithPcrs = quoteAlgWithPcrs.substring(0, quoteAlgWithPcrs.length()-1);
+                                    break;
+                            }
                         }
                     }
 
@@ -207,16 +218,16 @@ public class GenerateQuoteCmd implements ICommand {
 	            log.debug("Create the quote {} ", context.getQuoteFileName());
                     
                     // 3rd: concatate the two output together and set the tpm quote return
-	            byte [] pcrs = null;
-                    byte [] quoteResult = null;
+	            byte [] pcrs;
+                    byte [] quoteResult;
                     try (InputStream in = new FileResource(new File(context.getPcrsFileName())).getInputStream()) {
 	                pcrs = IOUtils.toByteArray(in);
 	            }
                     try (InputStream in = new FileResource(new File(context.getQuoteFileName())).getInputStream()) {
 	                quoteResult = IOUtils.toByteArray(in);
 	            }
-                    log.debug("pcrs: {}", pcrs.toString());
-                    log.debug("quote result: {}", quoteResult.toString());
+                    //log.debug("pcrs: {}", pcrs.toString());
+                    //log.debug("quote result: {}", quoteResult.toString());
                     
                     byte[] combined = new byte[pcrs.length + quoteResult.length];
                     System.arraycopy(quoteResult, 0, combined, 0, quoteResult.length);

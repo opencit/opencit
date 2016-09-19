@@ -125,6 +125,10 @@ public:
 	void		decrypt();
 	void		create_ek();
 	void		quote2();
+	
+private:
+	NIARL_TPM_ModuleV2(const NIARL_TPM_ModuleV2& src);
+	NIARL_TPM_ModuleV2& operator=(const NIARL_TPM_ModuleV2&);
 };
 
 #endif

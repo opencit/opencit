@@ -518,8 +518,8 @@ public class HostBO {
             // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
             // One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
             // need to be updated.
-            for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {
-                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+            for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {                
+                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();                
                 if (isHostConfigured(hostObj)) {
                     log.debug(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
                     // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
@@ -650,14 +650,13 @@ public class HostBO {
      * @return : true if the white list is configured successfully.
      */
     public boolean configureWhiteListFromHost(TxtHostRecord gkvHost) throws ApiException {
-        WhitelistConfigurationData hostConfigObj = null;
         boolean configStatus;
 
         try {
 
             if (gkvHost != null) {
 
-                hostConfigObj = new WhitelistConfigurationData();
+                WhitelistConfigurationData hostConfigObj = new WhitelistConfigurationData();                
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
 
@@ -668,10 +667,14 @@ public class HostBO {
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
                 hostConfigObj.setOverWriteWhiteList(false);
                 hostConfigObj.setRegisterHost(false);
+                if (hostConfigObj == null)
+                    throw new MSException(ErrorCode.AS_HOST_NOT_FOUND);
+                configStatus = configureWhiteListFromCustomData(hostConfigObj);
+                return configStatus;
+            } else {
+                log.error("Good know host has not been specified.");
+                throw new MSException(ErrorCode.AS_HOST_NOT_FOUND);
             }
-
-            configStatus = configureWhiteListFromCustomData(hostConfigObj);
-            return configStatus;
 
         } catch (MSException | ASException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -817,7 +820,6 @@ public class HostBO {
                 Set<String> vmmManifestSet = new TreeSet<>();
                 
                 Set<String> reqdManifestSet = new TreeSet<>();
-                String reqdManifestList = "";
 
 //                TblHostsJpaController hostsJpaController =  My.jpa().mwHosts();//new TblHostsJpaController(getASEntityManagerFactory());
                 log.debug("TIMETAKEN: for getting API Client object is: {}", (System.currentTimeMillis() - configWLStart));
@@ -852,7 +854,7 @@ public class HostBO {
                     reqdManifestSet.addAll(vmmManifestSet);
                 }                
                 
-                reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
+                String reqdManifestList = StringUtils.join(reqdManifestSet.iterator(), ",");
                 
                 
                 log.debug("TIMETAKEN: for calibrating MLE names: {} ", (System.currentTimeMillis() - configWLStart));
@@ -1148,7 +1150,7 @@ public class HostBO {
                     log.debug("Database already has the configuration details for OEM : " + hostObj.BIOS_Oem);
                 }
 
-                boolean useDaMode = "2.0".equals(hostConfigObj.getTxtHostRecord().TpmVersion);
+                boolean useDaMode = hostConfigObj.getTxtHostRecord().getDaMode();
 
                 // Create the BIOS MLE for the host. 
                 MleData mleObj = new MleData();
@@ -1848,7 +1850,8 @@ public class HostBO {
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         List<X509Certificate> privacyCaCerts;
-        File pcaListPemFile = null;
+        //#5837: Variable 'pcaListPemFile' was never read after being assigned.
+        File pcaListPemFile;
         try {
             pcaListPemFile = ResourceFinder.getFile("PrivacyCA.list.pem");
             try (InputStream privacyCaIn = new FileInputStream(pcaListPemFile)) {
@@ -1864,7 +1867,8 @@ public class HostBO {
         } catch (FileNotFoundException e) {
             log.debug("Cannot load external certificates from PrivacyCA.list.pem: {}", e.getMessage());
         }
-        File pcaPemFile = null;
+        //#5838: Variable 'pcaPemFile' was never read after being assigned.
+        File pcaPemFile;
         try {
             pcaPemFile = ResourceFinder.getFile("PrivacyCA.pem");
             try (InputStream privacyCaIn = new FileInputStream(pcaPemFile)) {

@@ -18,25 +18,65 @@
  * 
  * change log:
  * 1/24: now pass hex string as argv[1] and the binary file to write to as argv[2]
+ * 9/8/16: replacing sscanf banned function by hex2int()
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+
+/*
+ * Input: hexadecimal character in the range 0..9 or A..F case-insensitive
+ * Output: decimal value of input in the range 0..15
+ *         or -1 if the input was not a valid hexadecimal character
+ */
+int hex2int(const char c)
+{
+    if(c >= '0' && c<= '9') {
+        return c - '0';
+    }
+    else if( c >= 'A' && c <= 'F' ) {
+        return c - 'A' + 10;
+    }
+    else if( c >= 'a' && c <= 'f' ) {
+        return c - 'a' + 10;
+    }
+    else {
+        return -1;
+    }
+}
 
 int main(int argc, char **argv) {
     if(argc != 3) {
      printf("usuage is: hex2bin hexString binaryFile");
      exit(-1);
     }
-    int b, i=0;
-    int scanerr = 0;
-        FILE* outFile = fopen(argv[2],"w");
-    for(i=0;argv[1]+i != NULL;i+=2) {
-        scanerr = sscanf(argv[1]+i, "%2x", &b);
-        if( scanerr == EOF ) { break; }
-        if( scanerr != 1 ) { fprintf(stderr, "non-hex input\n"); exit(1); }
-        fputc(b, outFile);
+    int b, i=0, j=0, hex1, hex2;
+    FILE* outFile = fopen(argv[2],"w");
+
+    //printf("argv %s\n", argv[1]);
+	
+	unsigned int iHexLen=0;
+    while(*(argv[1]+iHexLen) ) iHexLen++;
+    //printf("iHexlen %d\n", iHexLen);
+	
+    if( iHexLen % 2 != 0 ) {
+        fprintf(stderr, "invalid hex length\n"); exit(1);  // invalid length for hex
     }
-    fclose(outFile);
-    exit(0);
+
+    for(j=0; j<iHexLen-1; j=j+2) {
+
+        hex1 = hex2int(argv[1][j]);
+        hex2 = hex2int(argv[1][j+1]);
+        if(hex1 == -1 || hex2 == -1) {
+                fprintf(stderr, "non-hex input\n"); exit(1);
+        }
+
+        b = (hex1*16) + hex2;
+
+        fputc(b, outFile);
+        //printf("b: %d\n", b);
+     }
+     fclose(outFile);
+     exit(0);
 }
+

@@ -1,6 +1,8 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
 ################################################################################
+CFLAGS=-fstack-protector -fPIE -fPIC -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS=-z noexecstack -z relro -z now -pie
 
 -include ../makefile.init
 
@@ -43,7 +45,7 @@ all: NIARL_TPM_Module
 NIARL_TPM_Module: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o"NIARL_TPM_Module" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ $(CFLAGS) -o"NIARL_TPM_Module" $(OBJS) $(USER_OBJS) $(LIBS) $(LDFLAGS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

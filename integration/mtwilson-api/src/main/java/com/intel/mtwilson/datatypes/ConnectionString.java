@@ -333,7 +333,11 @@ public class ConnectionString {
      * @return 
      */
     public Hostname getHostname() {
-        return new Hostname(hostname.toString());
+		//#5822: Null pointer dereference of 'new ConnectionString(...).hostname' where null comes from constant
+        if (hostname == null)
+            return null;
+        else
+            return new Hostname(hostname.toString());
     }
     
     /**

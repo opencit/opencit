@@ -410,6 +410,7 @@ public class ConverterUtil {
 				manifest = new HashMap<String, String>();
 				manifest.put("Name", manifestData.getName());
 				manifest.put("Value", manifestData.getValue());
+                                manifest.put("PcrBank", manifestData.getPcrBank());
 				list.add(manifest);
 			}
 		}

@@ -47,6 +47,10 @@
             <version>1.46</version>                     <!-- was 1.41 -->
             <!--  <scope>provided</scope>--> <!-- need to include it for the -setup.jar  -->
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
     </dependencies>
     
 </project>

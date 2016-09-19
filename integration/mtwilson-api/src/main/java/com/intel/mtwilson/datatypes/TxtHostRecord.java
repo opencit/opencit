@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.shiro.util.StringUtils;
 //import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 //import org.codehaus.jackson.annotate.JsonProperty;
@@ -173,18 +175,28 @@ public class TxtHostRecord {
         rankings.put("SHA384", 2);
         rankings.put("SHA512", 3);
         
-        String best = banks[0];
+        String best = "SHA1";  //initialized to SHA1
+        int i=0;
         for(String b : banks) {
-            if(rankings.get(b) > rankings.get(best)) {
-                best = b;
+            if (rankings.containsKey(b) && i<3) { // input validation for supported pcrbanks; and only the first 3 strings are considered.
+                if(rankings.get(b) > rankings.get(best)) {
+                    best = b;
+                }
             }
+            i++;
         }        
         return best;
     }
 
     @JsonIgnore
     public boolean getDaMode() {
-        return "2.0".equals(this.TpmVersion);
+        ConnectionString connString;
+        try {
+            connString = new ConnectionString(this.AddOn_Connection_String);
+            return "2.0".equals(this.TpmVersion) && connString.getVendor() == Vendor.INTEL;
+        } catch (MalformedURLException ex) {
+            return false;
+        }        
     }
 
 }

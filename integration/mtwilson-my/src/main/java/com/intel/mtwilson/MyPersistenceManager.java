@@ -81,11 +81,15 @@ public class MyPersistenceManager extends PersistenceManager {
     public static Properties getASDataJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();
         Configuration myConfig = config.getConfiguration();
+        String jdbcDriver = null;
         prop.put("javax.persistence.jdbc.driver", myConfig.getString("mountwilson.as.db.driver",config.getDatabaseDriver()));
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+        if (prop.containsKey("javax.persistence.jdbc.driver"))
+            jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();
+        
+        if( (jdbcDriver != null) && (jdbcDriver.equals("com.mysql.jdbc.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+        else if( (jdbcDriver != null) && (jdbcDriver.equals("org.postgresql.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {
@@ -138,10 +142,15 @@ public class MyPersistenceManager extends PersistenceManager {
         prop.put("javax.persistence.jdbc.driver", 
                 myConfig.getString("mountwilson.as.db.driver", 
                config.getDatabaseDriver()));
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+
+        String jdbcDriver = null;
+        if (prop.containsKey("javax.persistence.jdbc.driver"))
+            jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();
+
+        if( (jdbcDriver != null) && (jdbcDriver.equals("com.mysql.jdbc.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+        else if( (jdbcDriver != null) && (jdbcDriver.equals("org.postgresql.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {
@@ -177,10 +186,15 @@ public class MyPersistenceManager extends PersistenceManager {
         prop.put("javax.persistence.jdbc.driver", 
                 myConfig.getString("mountwilson.audit.db.driver", 
                 config.getDatabaseDriver()));
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+
+        String jdbcDriver = null;
+        if (prop.containsKey("javax.persistence.jdbc.driver"))
+            jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();        
+        
+        if( (jdbcDriver != null) && (jdbcDriver.equals("com.mysql.jdbc.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+        else if( (jdbcDriver != null) && (jdbcDriver.equals("org.postgresql.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {
@@ -215,10 +229,15 @@ public class MyPersistenceManager extends PersistenceManager {
         prop.put("javax.persistence.jdbc.driver", 
                 myConfig.getString("mountwilson.mc.db.driver", 
                 config.getDatabaseDriver()));
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+
+        String jdbcDriver = null;
+        if (prop.containsKey("javax.persistence.jdbc.driver"))
+            jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();        
+
+        if( (jdbcDriver != null) && (jdbcDriver.equals("com.mysql.jdbc.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+        else if( (jdbcDriver != null) && (jdbcDriver.equals("org.postgresql.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {
@@ -253,11 +272,15 @@ public class MyPersistenceManager extends PersistenceManager {
         if ( mtwilsonDbDriverEnvVar != null && !mtwilsonDbDriverEnvVar.isEmpty()) {
             prop.put("javax.persistence.jdbc.driver", mtwilsonDbDriverEnvVar);
         }
-        String jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();
-        if( (jdbcDriver != null) && jdbcDriver.equals("com.mysql.jdbc.Driver") ) {
+
+        String jdbcDriver = null;
+        if (prop.containsKey("javax.persistence.jdbc.driver"))
+            jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();        
+
+        if( (jdbcDriver != null) && (jdbcDriver.equals("com.mysql.jdbc.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if((jdbcDriver != null) && jdbcDriver.equals("org.postgresql.Driver") ) {
+        else if((jdbcDriver != null) && (jdbcDriver.equals("org.postgresql.Driver")) ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {

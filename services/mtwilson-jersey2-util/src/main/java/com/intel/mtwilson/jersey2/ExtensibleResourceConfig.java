@@ -71,9 +71,4 @@ public class ExtensibleResourceConfig extends ResourceConfig {
         
     }
 
-    // workaround for netbeans 7.3.1 bug (fixed in netbeans 7.4) https://netbeans.org/bugzilla/show_bug.cgi?id=234581
-    // with this workaround netbeans will continue to auto-generate addRestResourceClasses but it's harmless
-    // because it will never be called
-    public void getClasses(int unused) {
-    }
 }

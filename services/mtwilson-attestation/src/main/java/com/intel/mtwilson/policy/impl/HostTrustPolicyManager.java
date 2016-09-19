@@ -205,11 +205,12 @@ public class HostTrustPolicyManager {
         for(String vendorProtocol : vendorFactoryMap.keySet()) {
             String prefix = vendorProtocol.toLowerCase()+":"; // "INTEL" or "intel" becomes "intel:"
             if( host.getAddOnConnectionInfo().startsWith(prefix) ) {
-                boolean useDaMode = "2.0".equals(host.getTpmVersion());
+                String vendorKey = vendorProtocol;
+                boolean useDaMode = "2.0".equals(host.getTpmVersion()) && host.getAddOnConnectionInfo().startsWith("intel:");
                 if(useDaMode) {
-                    vendorProtocol += "-da";
+                    vendorKey += "-da";
                 }
-                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendorProtocol);
+                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendorKey);
                 if( factory != null ) {
                     return factory;
                 }

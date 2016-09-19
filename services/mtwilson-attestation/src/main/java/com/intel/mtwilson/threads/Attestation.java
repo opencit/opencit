@@ -48,7 +48,9 @@ public class Attestation implements ServletContextListener {
             log.error("Failed to initialize SAML issuer");
         }
         log.debug("Creating SamlGenerator with issuer configuration: {}", IssuerConfigurationHolder.samlIssuerConfiguration); // 
-        log.debug("Creating SamlGenerator with issuer: {} and validity seconds: {}", IssuerConfigurationHolder.samlIssuerConfiguration.getIssuerName(), IssuerConfigurationHolder.samlIssuerConfiguration.getValiditySeconds());
+        if( IssuerConfigurationHolder.samlIssuerConfiguration != null ) {
+            log.debug("Creating SamlGenerator with issuer: {} and validity seconds: {}", IssuerConfigurationHolder.samlIssuerConfiguration.getIssuerName(), IssuerConfigurationHolder.samlIssuerConfiguration.getValiditySeconds());
+        }        
         }
         catch(Throwable e) {
             log.error("Failed to initialize attestation service", e);

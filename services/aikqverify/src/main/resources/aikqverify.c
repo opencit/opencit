@@ -91,6 +91,10 @@ main (int ac, char **av)
 		chalLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
 		chal = malloc (chalLen);
+                if(chal == NULL){
+                    fprintf (stderr, "Unable to allocate memory for chal\n");
+                    exit (1);
+		}
 		if (fread (chal, 1, chalLen, f_in) != chalLen) {
 			fprintf (stderr, "Unable to read file %s\n", chalfile);
 			exit (1);
@@ -124,8 +128,12 @@ main (int ac, char **av)
 	fseek (f_in, 0, SEEK_END);
 	quoteLen = ftell (f_in);
 	fseek (f_in, 0, SEEK_SET);
-	quote = malloc (quoteLen);
-	if (fread (quote, 1, quoteLen, f_in) != quoteLen) {
+	quote = malloc(quoteLen);
+        if (quote == NULL) {
+            fprintf(stderr, "Unable to allocate memory for quote\n");
+            exit(1);
+        }
+        if (fread(quote, 1, quoteLen, f_in) != quoteLen) {
 		fprintf (stderr, "Unable to read file %s\n", av[2]);
 		exit (1);
 	}
@@ -171,12 +179,13 @@ main (int ac, char **av)
 			pcri++;
 		}
 	}
-	fflush (stdout);
+        fflush (stdout);
+        free(quote);	
 	fprintf (stderr, "Success!\n");
-
 	return 0;
 
 badquote:
+        free(quote);
 	fprintf (stderr, "Input AIK quote file incorrect format\n");
 	return 1;
 }

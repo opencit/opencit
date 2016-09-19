@@ -13,6 +13,7 @@ REM ECHO.Setup trust agent with CIT server...
 REM echo. ==Trust Agent located at: %package_dir%
 
 set TRUSTAGENT_HOME=%package_dir%
+set TRUSTAGENT_BIN=%package_dir%\bin
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
 set TRUSTAGENT_LOGS=%TRUSTAGENT_HOME%\logs
 
@@ -23,6 +24,7 @@ REM setx PATH "%PATH%;%package_bin" /M
 
 set intel_conf_dir=%package_dir%\configuration
 set package_config_filename=%intel_conf_dir%\%package_name%.properties
+set tpm_version_filename=%intel_conf_dir%\tpm-version
 set package_env_filename=%package_dir%\%package_name%.env
 set package_version_filename=%package_dir%\env.d\trustagent.version
 set ASSET_TAG_SETUP="y"
@@ -144,6 +146,9 @@ echo.Trust agent setup: Create trustagent.version
 > "%package_version_filename%"  echo. "# Installed Trust Agent on %date% %time%"
 >> "%package_version_filename%"  echo. "TRUSTAGENT_VERSION=%VERSION%"
 >> "%package_version_filename%"  echo "TRUSTAGENT_RELEASE=\"%BUILD%\""
+
+REM # create tpm-version file
+tpmtool.exe getTpmVersion > "%TRUSTAGENT_CONF%\tpm-version"
 
 echo.Trust agent setup: Registering tagent in start up
 REM register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1
