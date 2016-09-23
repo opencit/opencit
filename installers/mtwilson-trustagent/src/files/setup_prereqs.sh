@@ -190,7 +190,7 @@ define_grub_file() {
 
 configure_grub() {
   define_grub_file
-
+  
   # /etc/default/grub appears in both ubuntu and redhat
   if [ -f /etc/default/grub ]; then
     update_property_in_file GRUB_DEFAULT /etc/default/grub 0
@@ -250,7 +250,7 @@ is_measured_launch() {
 
 is_tpm_driver_loaded() {
   define_grub_file
-
+  
   if [ ! -e /dev/tpm0 ]; then
     local is_tpm_tis_force=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force=1')
     local is_tpm_tis_force_any=$(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep 'tpm_tis.force')
@@ -283,18 +283,22 @@ install_rsync() {
 }
 
 is_reboot_required() {
-  local should_reboot=yes
+  local should_reboot=no
   
   if is_txtstat_installed; then
-    if is_measured_launch; then
-      echo "already in measured launch environment"
-      should_reboot=no
+    if !is_measured_launch; then
+      echo "Not in measured launch environment, reboot required"
+      should_reboot=yes
+    else
+      echo "Already in measured launch environment"
     fi
   fi
   
-  if is_tpm_driver_loaded; then
+  if !is_tpm_driver_loaded; then
+    echo "TPM driver is not loaded, reboot required"
+    should_reboot=yes
+  else
     echo "TPM driver is already loaded"
-    should_reboot=no
   fi
   
   if [ "$should_reboot" == "yes" ]; then
