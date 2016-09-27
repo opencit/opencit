@@ -60,7 +60,7 @@ void convert_niarl_password(char *in_var, BYTE *blob) {
 		exit(1);
 	}
 
-	int size = temp_size / 2;	//base 16 takes 2 digits so reduce length to show real size
+	//int size = temp_size / 2;	//base 16 takes 2 digits so reduce length to show real size
 	//blob = new BYTE[size];	//create the byte array  
 
 	UINT32	hex_value = 0;	//accumulates 2 hex characters to load into blob
@@ -155,7 +155,7 @@ main (int ac, char **av)
 	TSS_VALIDATION	valid;
 	TPM_QUOTE_INFO	*quoteInfo;
 	BYTE		srkSecret[] = TSS_WELL_KNOWN_SECRET;
-	FILE		*f_in;
+	FILE		*f_in = NULL;
 	FILE		*f_out;
 	char		*chalfile = NULL;
 	char		*pass = NULL;
@@ -163,7 +163,7 @@ main (int ac, char **av)
 	UINT32		npcrMax;
 	UINT32		npcrBytes;
 	UINT32		npcrs = 0;
-	BYTE		*buf;
+	BYTE		*buf = NULL;
 	UINT32		bufLen;
 	BYTE		*bp;
 	BYTE		*tmpbuf;
@@ -211,44 +211,68 @@ main (int ac, char **av)
 		fseek (f_in, 0, SEEK_END);
 		bufLen = ftell (f_in);
 		fseek (f_in, 0, SEEK_SET);
-		buf = malloc (bufLen);
-		if (fread(buf, 1, bufLen, f_in) != bufLen) {
-			fprintf (stderr, "Unable to readn file %s\n", chalfile);
-			exit (1);
+		
+		if (bufLen > 0) {
+			buf = malloc (bufLen);
+			if(buf == NULL){
+				fprintf (stderr, "Unable to allocate memory for buf\n");
+				exit (1);
+			}
+			
+			if (fread(buf, 1, bufLen, f_in) != bufLen) {
+                                free (buf);
+				fprintf (stderr, "Unable to readn file %s\n", chalfile);
+				exit (1);
+			}
+			fclose (f_in);
+			sha1 (hContext, buf, bufLen, chalmd);
+			free (buf);
 		}
-		fclose (f_in);
-		sha1 (hContext, buf, bufLen, chalmd);
-		free (buf);
 	} else {
 		memset (chalmd, 0, sizeof(chalmd));
 	}
-
+        
 	/* Read AIK blob */
 	if ((f_in = fopen(av[1], "rb")) == NULL) {
-		fprintf (stderr, "Unable to open file %s\n", av[1]);
-		exit (1);
+            if(f_in != NULL)
+                fclose(f_in);
+            fprintf (stderr, "Unable to open file %s\n", av[1]);
+            exit (1);
 	}
 	fseek (f_in, 0, SEEK_END);
 	bufLen = ftell (f_in);
 	fseek (f_in, 0, SEEK_SET);
 	buf = malloc (bufLen);
+        if(buf == NULL){
+            fprintf (stderr, "Unable to allocate memory for buf\n");
+            exit (1);
+        }
 	if (fread(buf, 1, bufLen, f_in) != bufLen) {
 		fprintf (stderr, "Unable to readn file %s\n", av[1]);
 		exit (1);
 	}
 	fclose (f_in);
 
-	result = Tspi_Context_LoadKeyByBlob (hContext, hSRK, bufLen, buf, &hAIK); CKERR;
-	free (buf);
+	result = Tspi_Context_LoadKeyByBlob (hContext, hSRK, bufLen, buf, &hAIK); 
+        CKERR;	
 	fprintf (stderr, "after Tspi_Context_LoadKeyByBlob \n");
 	if (pass) {
 		BYTE *binary_password = malloc(sizeof(BYTE)* strlen(pass)/ 2);
-		convert_niarl_password(pass, binary_password);
+                if(binary_password == NULL){
+                    fprintf (stderr, "Unable to allocate memory for binary_password\n");
+                    exit (1);
+                }                    
+		convert_niarl_password(pass, binary_password);                
 		result = Tspi_Context_CreateObject(hContext, TSS_OBJECT_TYPE_POLICY,
-				TSS_POLICY_USAGE, &hAIKPolicy); CKERR;
+				TSS_POLICY_USAGE, &hAIKPolicy); 
+                if (result != TSS_SUCCESS)
+                    free(binary_password);
+                CKERR;
 		result = Tspi_Policy_AssignToObject(hAIKPolicy, hAIK);
 		result = Tspi_Policy_SetSecret (hAIKPolicy, TSS_SECRET_MODE_PLAIN,
-				strlen(pass)/2, binary_password); CKERR;
+				strlen(pass)/2, binary_password); 
+                free(binary_password);
+                CKERR;
 	}
 
 	/* Create PCR list to be quoted */
@@ -338,9 +362,12 @@ main (int ac, char **av)
 	fclose (f_out);
 
 	printf ("Success!\n");
+        free(buf);
 	return 0;
 
 error:
+        if(buf != NULL)
+            free(buf);
 	fprintf (stderr, "Failure, error code: 0x%x\n", result);
 	return 1;
 }

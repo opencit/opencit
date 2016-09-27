@@ -83,8 +83,9 @@ public class RequestAikCertificate extends AbstractSetupTask {
             */
                         /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
             try {
-                Tpm tpm = new Tpm();
-                byte[] ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                //#5819: Call to static method 'com.intel.mtwilson.trustagent.tpmmodules.Tpm.getTpm' via instance reference.
+                //Tpm tpm = new Tpm();
+                byte[] ekCert = Tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
                 if( ekCert == null || ekCert.length == 0 ) {
                     configuration("Endorsement Certificate is null or zero-length");
                 }

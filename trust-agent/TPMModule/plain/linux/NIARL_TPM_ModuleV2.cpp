@@ -11,7 +11,8 @@
  */
 
 #include "NIARL_TPM_ModuleV2.h"
-
+#include <ctype.h>
+#include <climits>
 
 NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 {
@@ -24,6 +25,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	i_mode = 0;
 	i_return = 0;
 	b_getenvSecrets = false;
+	return_code = 0;
 
 	//setup local copy of argument array
 	i_argc = argc;
@@ -98,7 +100,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_debug)
 		{
-			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			cerr << "START --- NIARL TPM Module (v2.5 11-24-2010) --- ";
+			if (timeinfo != NULL) {
+				cerr << asctime(timeinfo) << " ";
+			}
 			cerr << ' ' << i_mode << " mode selection" << endl;
 			cerr << ' ' << b_debug << " debug toggle" << endl;
 			cerr << ' ' << logfile.is_open() << " logging" << endl;
@@ -108,7 +113,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 		if(b_log)
 		{
-			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- " << asctime(timeinfo);
+			clog << "START --- NIARL TPM Module (v2.5 11-24-2010) --- ";
+			if (timeinfo != NULL) {
+				clog << asctime(timeinfo) << " ";
+			}
 			clog << ' ' << i_mode << " mode selection" << endl;
 			clog << ' ' << b_debug << " debug toggle" << endl;
 			clog << ' ' << logfile.is_open() << " logging" << endl;
@@ -187,6 +195,10 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	}
 }
 
+NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(const NIARL_TPM_ModuleV2& src) { /* do not create copies */ }
+
+NIARL_TPM_ModuleV2& NIARL_TPM_ModuleV2::operator=(const NIARL_TPM_ModuleV2&) { return *this; }
+
 NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 {
 	//delete dynamic arrays
@@ -212,11 +224,19 @@ NIARL_TPM_ModuleV2::~NIARL_TPM_ModuleV2()
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
 
-		if(b_debug)
-			cerr << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+		if(b_debug) {
+			cerr << "END --- NIARL TPM Module --- ";
+			if (timeinfo != NULL) {
+				cerr << asctime(timeinfo) << " ";
+			}
+		}
 
-		if(b_log)
-			clog << "END --- NIARL TPM Module --- " << asctime(timeinfo);
+		if(b_log) {
+			clog << "END --- NIARL TPM Module --- ";
+			if (timeinfo != NULL) {
+				clog << asctime(timeinfo) << " ";
+			}
+		}
 	}
 }
 
@@ -533,7 +553,7 @@ void NIARL_TPM_ModuleV2::clear_ownership()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1629,7 +1649,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	nonce(s_nonce);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1812,7 +1832,7 @@ throw ERROR_MODE_DISABLED;
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	reset(s_reset);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -1950,6 +1970,15 @@ void NIARL_TPM_ModuleV2::create_key()
 		return_code = -1 * ERROR_ARG_MISSING;
 		return;
 	}
+	
+	// Validate the key type
+	if((keytype.compare("bind") != 0) && (keytype.compare("sign") != 0))
+	{
+		if(b_debug)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		if(b_log)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		return_code = -1 * ERROR_ARG_VALIDATION;
+		return;	
+	}
 
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
@@ -2041,7 +2070,7 @@ void NIARL_TPM_ModuleV2::create_key()
 			if(b_debug)	cerr << " binding key selected" << endl;
 			if(b_log)	cerr << " binding key selected" << endl;
 	}
-	else if(keytype.compare("sign") == 0)
+	else // if(keytype.compare("sign") == 0) - Since we have already validated that the keytype is either bind or sign, we need not check again here.
 	{
 		//uuid_key.rgbNode[5] = 0x06;
 		uuid_key.rgbNode[0] = 0x06;
@@ -2221,6 +2250,15 @@ void NIARL_TPM_ModuleV2::set_key()
 		return;
 	}
 
+	// Validate the key type
+	if((keytype.compare("identity") != 0) && (keytype.compare("bind") != 0) && (keytype.compare("sign") != 0))
+	{
+		if(b_debug)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		if(b_log)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		return_code = -1 * ERROR_ARG_VALIDATION;
+		return;	
+	}
+	
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
 	NIARL_Util_ByteBlob	keyblob(s_keyblob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
@@ -2320,7 +2358,7 @@ void NIARL_TPM_ModuleV2::set_key()
 			if(b_debug)	cerr << " binding key selected" << endl;
 			if(b_log)	cerr << " binding key selected" << endl;
 	}
-	else if(keytype.compare("sign") == 0)
+	else // if(keytype.compare("sign") == 0) - No need to check for signing key here again since the keytype has been validated to be either identity or bind or sign.
 	{
 		//uuid_key.rgbNode[5] = 0x06;
 		uuid_key.rgbNode[0] = 0x06;
@@ -2766,6 +2804,15 @@ void NIARL_TPM_ModuleV2::clear_key()
 		return;
 	}
 
+	// Validate the key type
+	if((keytype.compare("identity") != 0) && (keytype.compare("bind") != 0) && (keytype.compare("sign") != 0))
+	{
+		if(b_debug)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		if(b_log)	cerr << ' ' << keytype << " Invalid keytype specified." << endl;
+		return_code = -1 * ERROR_ARG_VALIDATION;
+		return;	
+	}
+	
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
 
@@ -2865,7 +2912,7 @@ void NIARL_TPM_ModuleV2::clear_key()
 			if(b_debug)	cerr << "binding key selected" << endl;
 			if(b_log)	clog << "binding key selected" << endl;
 	}
-	else if(keytype.compare("sign") == 0)
+	else // if(keytype.compare("sign") == 0) - No need to check for sign key here since we have already validated that the keytype should be either of identity, bind or sign.
 	{
 		//uuid_key.rgbNode[5] = 0x06;
 		uuid_key.rgbNode[0] = 0x06;
@@ -2988,7 +3035,7 @@ void NIARL_TPM_ModuleV2::set_credential()
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	NIARL_Util_ByteBlob	credential(s_blob);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -3161,7 +3208,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 //CONTEXT SECTION
 	TSS_RESULT		result;
@@ -3211,8 +3258,8 @@ void NIARL_TPM_ModuleV2::get_credential()
 	UINT32			cred_size;
 	BYTE*			cred_blob;
 	UINT32 nvIndex = TSS_NV_DEFINED|TPM_NV_INDEX_EKCert;
-	UINT32 ekbufLen;
-	BYTE *ekbuf;
+	UINT32 ekbufLen = 0;
+	BYTE *ekbuf = NULL;
 	UINT32 offset;
 	UINT32 ekOffset;
 	unsigned i;
@@ -3261,7 +3308,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 		if(b_debug)	cerr << " Trousers mode activated" << endl;
 		if(b_log)	clog << " Trousers mode activated" << endl;
 
-		UINT32			counter = 0;
+		//UINT32			counter = 0;
 
 		//cred_size = 10;		//allow enough space to get DER x509 size header
 		cred_size = 128;
@@ -3284,6 +3331,13 @@ void NIARL_TPM_ModuleV2::get_credential()
 		ekbufLen = (cred_blob[i+2] << 8) + cred_blob[i+3] + 4;
 		//cout << ekbufLen << endl;
 		ekbuf = (BYTE*)malloc(ekbufLen);
+		if (ekbuf == NULL)
+		{
+			if(b_debug)	cerr << " Memory allocation failed in get_credential method" << endl;
+			if(b_log)	clog << " Memory allocation failed in get_credential method" << endl;
+			return_code = -1 * ERROR_UNKNOWN;
+			return;		
+		}
 		for (int inc=i; inc<cred_size; inc++) {
 		  ekbuf[inc-i]=cred_blob[inc];
 		}
@@ -3363,7 +3417,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 //CLEANUP SECTION
 	result = Tspi_Context_CloseObject(context, policy_tpm);
 	result = Tspi_Context_CloseObject(context, nvstore);
-
+	free(ekbuf);
 	//result = Tspi_Context_FreeMemory(context, NULL);
 	result = Tspi_Context_Close(context);
 	return;
@@ -3415,7 +3469,7 @@ void NIARL_TPM_ModuleV2::clear_credential()
 
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
-	UINT32				wks_size = sizeof(wks_blob);
+	//UINT32				wks_size = sizeof(wks_blob);
 
 
 //CONTEXT SECTION
@@ -5003,7 +5057,15 @@ void NIARL_TPM_ModuleV2::get_rand_int()
 		if(s_argv[i].compare("-bytes") == 0)
 		{
 			if(++i >= i_argc) return;
-			numbytes = atoi(s_argv[i].c_str());
+			const char* input = s_argv[i].c_str();
+			for (int j = 0; j < strlen(input); j++)
+			{
+				if (!isdigit(input[j])) {
+					return_code = -1 * ERROR_ARG_VALIDATION;
+					return;
+				}
+			}
+			numbytes = atoi(input);
 			i_success++;
 		}
 	}
@@ -5057,9 +5119,11 @@ void NIARL_TPM_ModuleV2::get_rand_int()
 		if(b_log)	cerr << ' ' << result << " GET RANDOM" << endl;
 		return_code = result;
 
-	for(UINT32 i = 0; i < numbytes; i++)
-	{
-		cout << setbase(16) << setw(2) << setfill('0') << (int)randbytes[i];
+	if (numbytes <= UINT_MAX) {
+		for(UINT32 i = 0; i < numbytes; i++)
+		{
+			cout << setbase(16) << setw(2) << setfill('0') << (int)randbytes[i];
+		}
 	}
 
 //CLEANUP SECTION

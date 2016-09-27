@@ -36,7 +36,7 @@ fi
 # unzip the trustagent-3.0-SNAPSHOT.zip since we are going to zip it again
 trustagentZip="trustagent-${projectVersion}.zip"
 cd $targetDir/${projectNameVersion}
-unzip ${trustagentZip}
+unzip -o ${trustagentZip}
 rm -rf ${trustagentZip}
 mv *.cmd bin/
 mv logback.xml.base configuration/

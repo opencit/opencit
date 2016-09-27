@@ -19,6 +19,9 @@ import java.security.spec.*;
 import java.security.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.io.*;
 
@@ -39,6 +42,8 @@ import java.io.*;
  *
  */
 public class TpmIdentityRequest {
+        private Logger log = LoggerFactory.getLogger(getClass());
+        
 	private byte[] asymBlob;
 	private byte[] symBlob;
 	private TpmKeyParams asymAlgorithm;
@@ -116,15 +121,19 @@ public class TpmIdentityRequest {
 			throws TpmUtils.TpmUnsignedConversionException, 
 			TpmUtils.TpmBytestreamResouceException,
 			PrivacyCaException {
-		ByteArrayInputStream bs = new ByteArrayInputStream(blob);
-		int asymSize = TpmUtils.getUINT32(bs);
-		int symSize = TpmUtils.getUINT32(bs);
-		asymAlgorithm = new TpmKeyParams(bs);
-		symAlgorithm = new TpmKeyParams(bs);
-		TrousersModeIV = symAlgorithm.getTrouSerSmode();
-		asymBlob = TpmUtils.getBytes(bs, asymSize);
-		symBlob = TpmUtils.getBytes(bs, symSize);
-		findIv();
+            try (ByteArrayInputStream bs = new ByteArrayInputStream(blob)) {
+                int asymSize = TpmUtils.getUINT32(bs);
+                int symSize = TpmUtils.getUINT32(bs);
+                asymAlgorithm = new TpmKeyParams(bs);
+                symAlgorithm = new TpmKeyParams(bs);
+                TrousersModeIV = symAlgorithm.getTrouSerSmode();
+                asymBlob = TpmUtils.getBytes(bs, asymSize);
+                symBlob = TpmUtils.getBytes(bs, symSize);
+                findIv();
+            } catch (Exception e) {
+                log.error("Error generating TPM identity request", e);
+                throw new PrivacyCaException("Error generating TPM identity request");
+            }
 	}
 	/**
 	 * Create a new TpmIdentityRequest by supplying a TpmIdentityProof and the Privacy CA's public key. A symmetric key and IV will be randomly created.
@@ -449,14 +458,14 @@ public class TpmIdentityRequest {
 			InvalidAlgorithmParameterException, 
 			TpmUtils.TpmBytestreamResouceException,
 			PrivacyCaException {
-		TpmSymmetricKey symKey = new TpmSymmetricKey();
+		TpmSymmetricKey symKey;
 		switch (asymAlgorithm.getEncScheme()) {
 		case 0x3: // <-- most likely with NTRU, TrouSerS
 			Cipher asymCipher = Cipher.getInstance("RSA/ECB/OAEPWithSha1AndMGF1Padding");
 			OAEPParameterSpec oaepSpec = new OAEPParameterSpec("Sha1", "MGF1", MGF1ParameterSpec.SHA1, new PSource.PSpecified("TCPA".getBytes()));
 			asymCipher.init(Cipher.PRIVATE_KEY, privCaKey, oaepSpec);
 			asymCipher.update(asymBlob);
-			byte[] temparray = null;
+			byte[] temparray;
 			try {
 				temparray = asymCipher.doFinal();
 			} catch (BadPaddingException e) { //<- TrouSerS does not use an OAEP parameter string of "TCPA", per 1.1b spec. This results in a BadPaddingException -- try again without!
