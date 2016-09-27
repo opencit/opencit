@@ -1,14 +1,18 @@
 # Important! Ensure that the tabs are maintained.
 # Converting tabs to spaces is an error in Makefiles
+CC=gcc
+CFLAGS=-fstack-protector -fPIE -fPIC -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS=-z noexecstack -z relro -z now -pie
+
 all: aikquote
 
 .PHONY: all
 
 aikquote: aikquote.o
-	gcc aikquote.o -o aikquote -lcrypto -ltspi
+	$(CC) $(CFLAGS) aikquote.o -o aikquote -lcrypto -ltspi $(LDFLAGS)
 
 aikquote.o: $(wildcard aikquote.c)
-	gcc -c aikquote.c
+	$(CC) $(CFLAGS) -c aikquote.c $(LDFLAGS)
 
 clean:
 	rm -f aikquote
