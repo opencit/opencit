@@ -119,6 +119,27 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                             }
                         }
                     }
+                } else {
+                    // Since the host details are not specified, lets check if the user has specified filter criteria for 
+                    // retrieving bulk attestations.
+                    if (criteria.fromDate != null && !criteria.fromDate.isEmpty()) {
+                        log.debug("HostAttestation:Search - Filter criteria for retrieving bulk attestations are specified {}.", criteria.fromDate);
+                        Calendar cal = Calendar.getInstance();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        
+                        Iso8601Date createdIso8601Date = Iso8601Date.valueOf(criteria.fromDate);
+                        cal.setTime(createdIso8601Date); // This would set the time to ex:2015-05-30 00:00:00
+                        Date createdDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+
+                        List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().getListForHostsByExpirationDate(Integer.MIN_VALUE, createdDate);
+                        if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
+                            log.debug("HostAttestation:Search - Retrieved {} of results.", tblSamlAssertionList.size());
+                            for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
+                                hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(null, tblSamlAssertion));
+                            }
+                        }
+                        
+                    }
                 }
             }
         } catch (Exception ex) {
