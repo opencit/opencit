@@ -286,7 +286,7 @@ is_reboot_required() {
   local should_reboot=no
   
   if is_txtstat_installed; then
-    if !is_measured_launch; then
+    if ! is_measured_launch; then
       echo "Not in measured launch environment, reboot required"
       should_reboot=yes
     else
@@ -294,7 +294,7 @@ is_reboot_required() {
     fi
   fi
   
-  if !is_tpm_driver_loaded; then
+  if ! is_tpm_driver_loaded; then
     echo "TPM driver is not loaded, reboot required"
     should_reboot=yes
   else
