@@ -91,13 +91,13 @@ if $tomcatExistingInstallation; then
     echo "Copying existing tomcat keystore and saving keystore location in server.xml..."
     mkdir -p "$TOMCAT_HOME/ssl"
     cp "$tomcatExistingKeystoreFile" "$tomcatKeystoreFile"
-    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
+    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
     #sed -i 's/keystoreFile=.*\b/keystoreFile=\"'"$tomcatKeystoreFile"'/g' "$tomcatServerXml"
     perl -p -i -e 's/keystoreFile=.*?\s/keystoreFile=\"'"$(sed_escape $tomcatKeystoreFile)"'\" /g' "$tomcatServerXml"
   fi
   if [ -n "$tomcatExistingKeystorePassword" ]; then
     echo "Saving existing tomcat keystore password in server.xml..."
-    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
+    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
     sed -i 's/keystorePass=.*\b/keystorePass=\"'"$tomcatKeystorePassword"'/g' "$tomcatServerXml"
   fi
 fi
@@ -158,7 +158,7 @@ mv server_temp.xml server.xml
 
 # alternative is to use xsltproc:  xsltproc -o server.xml tomcat-https.xsl server.xml.bak
 
-xmlstarlet ed --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@ciphers)]' --type attr -n ciphers -v 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA' server.xml > server_temp.xml
+xmlstarlet ed --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@ciphers)]' --type attr -n ciphers -v 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA' server.xml > server_temp.xml
 mv server_temp.xml server.xml
 
 tomcat_permissions ${TOMCAT_HOME}
