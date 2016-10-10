@@ -162,4 +162,4 @@ xmlstarlet ed --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol=
 mv server_temp.xml server.xml
 
 tomcat_permissions ${TOMCAT_HOME}
-rm -rf "${TOMCAT_HOME}/webapps/docs" "${TOMCAT_HOME}/webapps/examples"
+rm -rf "${TOMCAT_HOME}/webapps/docs" "${TOMCAT_HOME}/webapps/examples" "${TOMCAT_HOME}/webapps/ROOT"
