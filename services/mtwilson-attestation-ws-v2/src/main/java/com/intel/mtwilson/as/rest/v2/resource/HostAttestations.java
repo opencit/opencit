@@ -6,8 +6,10 @@ package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
@@ -25,6 +27,10 @@ import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -93,22 +99,54 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                     log.error("Host specified with name {} is not valid.", criteria.nameEqualTo);
                     throw new RepositoryInvalidInputException();
                 }
-            } else return null;
+            } else 
+                obj = null;
             
-            // since we have found the host with the specified criteria lets check if there is a valid cached saml assertion
-            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getName()); //.getId().toString());
-            if(tblSamlAssertion != null){
-                if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
-                    log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
-                    return tblSamlAssertion.getSaml();
-                }else{
-                    log.debug("Found assertion in cache with error set.");
-                   throw new RepositoryRetrieveException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
+            if (obj != null) {
+                // since we have found the host with the specified criteria lets check if there is a valid cached saml assertion
+                TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getName()); //.getId().toString());
+                if(tblSamlAssertion != null){
+                    if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
+                        log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
+                        return tblSamlAssertion.getSaml();
+                    }else{
+                        log.debug("Found assertion in cache with error set.");
+                       throw new RepositoryRetrieveException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
+                    }
+                } else {
+                    return null;
                 }
             } else {
-                return null;
+                // User might have specified criteria for bulk retrieval of SAML attestations
+                    if (criteria.fromDate != null && !criteria.fromDate.isEmpty()) {
+                        log.debug("HostAttestation: SAML Search - Filter criteria for retrieving bulk SAML attestations are specified {}.", criteria.fromDate);
+                        Calendar cal = Calendar.getInstance();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        
+                        Iso8601Date createdIso8601Date = Iso8601Date.valueOf(criteria.fromDate);
+                        cal.setTime(createdIso8601Date); // This would set the time to ex:2015-05-30 00:00:00
+                        Date createdDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+
+                        List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().getListForHostsByExpirationDate(Integer.MIN_VALUE, createdDate);
+                        if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
+                            String samlList = "";
+                            log.info("HostAttestation: SAML Search - Retrieved {} of results.", tblSamlAssertionList.size());
+                            for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
+                                if(tblSamlAssertion != null){
+                                    if(tblSamlAssertion.getErrorMessage() == null || tblSamlAssertion.getErrorMessage().isEmpty()) {
+                                        log.debug("HostAttestation: SAML Search found assertion for {} created on {} ", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getCreatedTs());
+                                        samlList = samlList + tblSamlAssertion.getSaml();
+                                    }else{
+                                        log.debug("HostAttestation: SAML Search found assertion for {} with error {}.", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getErrorMessage());                                    
+                                    }
+                                }                                
+                            }                            
+                            return samlList;
+                        } 
+                        
+                    }                                
             }
-            
+            return null;
         } catch (RepositoryException re) {
             throw re;            
         } catch (Exception ex) {

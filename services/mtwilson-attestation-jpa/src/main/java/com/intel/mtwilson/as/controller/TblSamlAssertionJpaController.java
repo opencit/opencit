@@ -281,4 +281,23 @@ public class TblSamlAssertionJpaController implements Serializable {
             em.close();
         }
     }
+	
+    public List<TblSamlAssertion> getListForHostsByExpirationDate(Integer limitPerHost, Date createdDate) {
+        List<TblSamlAssertion> tblSamlAssertionList;
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblSamlAssertion.findSamlForHostsByExpirationDate");
+            // Unable to support this parameter right now since JPA does not support LIMIT or PARTITION options.
+            // Probably we need to run multiple queries to accomplish it.
+            //query.setParameter("limitPerHost", limitPerHost);
+            query.setParameter("createdDate", createdDate);
+
+            tblSamlAssertionList = query.getResultList();
+        } finally {
+                em.close();
+        }
+
+        return tblSamlAssertionList;
+        
+    }	
 }
