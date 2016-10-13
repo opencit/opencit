@@ -39,4 +39,7 @@ public class HostAttestationFilterCriteria extends DefaultFilterCriteria impleme
 	@QueryParam("createdDate")
 	@Regex("((?s).*)")
 	public String createdDate;    
+	@QueryParam("limitPerHost")
+	@Regex("(?:[0-9]+)")
+	public Integer limitPerHost;
 }
