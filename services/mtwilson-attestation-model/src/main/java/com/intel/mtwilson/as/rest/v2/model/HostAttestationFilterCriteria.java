@@ -36,5 +36,7 @@ public class HostAttestationFilterCriteria extends DefaultFilterCriteria impleme
     @QueryParam("toDate")
     @Regex(RegexPatterns.ANY_VALUE)
     public String toDate;
-    
+	@QueryParam("createdDate")
+	@Regex("((?s).*)")
+	public String createdDate;    
 }
