@@ -458,7 +458,7 @@ case "$1" in
     vrtm_uninstall
 	tbootxm_uninstall    
     openstack_extensions_uninstall
-	#docker_proxy_uninstall
+	docker_proxy_uninstall
     trustagent_uninstall
     groupdel trustagent > /dev/null 2>&1
     userdel trustagent > /dev/null 2>&1
