@@ -22,6 +22,7 @@ set JAVABIN=%JAVA_HOME%\bin\java
 
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
 set TRUSTAGENT_LOGS=%TRUSTAGENT_HOME%\logs
+set TRUSTAGENT_LOGFILE=%TRUSTAGENT_LOGS%\trustagent.log
 set TRUSTAGENT_JAVA=%TRUSTAGENT_HOME%\java
 set TRUSTAGENT_BIN=%TRUSTAGENT_HOME%\bin
 set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
@@ -150,7 +151,7 @@ GOTO:EOF
     set _tmpvar1=!_tmpvar:~5!
     set HARDWARE_UUID=!_tmpvar1:~0,-1!
   )
-  echo. HARDWARE_UUID: %HARDWARE_UUID%
+  REM echo. HARDWARE_UUID: %HARDWARE_UUID%
   set tasklist=%*
   REM echo. %tasklist%
   IF "%tasklist%"=="" (
@@ -159,7 +160,7 @@ GOTO:EOF
       set tasklist=%TRUSTAGENT_SETUP_TASKS% --force
   )
   REM echo. %tasklist%
-  "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
+  >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
 GOTO:EOF
 
 :trustagent_authorize
