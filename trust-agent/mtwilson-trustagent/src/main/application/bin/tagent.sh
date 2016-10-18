@@ -184,6 +184,10 @@ trustagent_start() {
         return 0
     fi
 
+    # regenerate Measurement log when trustagent is started
+    rm -rf $TRUSTAGENT_HOME/var/measureLog.xml
+    $TRUSTAGENT_HOME/bin/module_analysis.sh
+
     # check if we need to use authbind or if we can start java directly
     prog="$JAVA_CMD"
     if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n "$(which authbind 2>/dev/null)" ]; then
