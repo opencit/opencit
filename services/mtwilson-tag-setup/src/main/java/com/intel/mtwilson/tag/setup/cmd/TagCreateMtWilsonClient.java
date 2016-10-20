@@ -94,7 +94,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         //create keystore and users
         Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
         SimpleKeystore keystore = MwClientUtil.createUserInResourceV2(keystoreResource, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword,
-                url, properties, "tagservice user for asset tag functionality", Locale.ENGLISH, "TLS");
+                url, properties, "tagservice user for asset tag functionality", Locale.ENGLISH, "TLSv1.2");
         keystore.save();
 
         //approve users

@@ -1002,6 +1002,9 @@ elif using_tomcat; then
   fi
   tomcat_detect
 
+  #set jersey logging filter level to WARNING, instead of default value of INFO
+  echo "org.glassfish.jersey.filter.LoggingFilter.level = WARNING" >> $TOMCAT_CONF/logging.properties
+
   echo "TOMCAT_HOME=$TOMCAT_HOME" > $MTWILSON_ENV/tomcat
   echo "TOMCAT_CONF=$TOMCAT_CONF" >> $MTWILSON_ENV/tomcat
   echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV/tomcat
