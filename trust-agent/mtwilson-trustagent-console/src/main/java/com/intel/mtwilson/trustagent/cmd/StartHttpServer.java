@@ -19,6 +19,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
@@ -28,9 +29,19 @@ import org.eclipse.jetty.webapp.WebAppContext;
  */
 public class StartHttpServer implements Command {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StartHttpServer.class);
-    private Server server;
+
+    public final static int JETTY_THREAD_MAX_MULTIPLIER = 16;
+    public static Server server;
     private TrustagentConfiguration configuration;
     private Configuration options;
+    
+    private int computeMinThreads() {
+        return Runtime.getRuntime().availableProcessors() + 1;
+    }
+    
+    private int computeMaxThreads() {
+        return Runtime.getRuntime().availableProcessors() * JETTY_THREAD_MAX_MULTIPLIER;
+    }
     
     @Override
     public void setOptions(Configuration options) {
@@ -50,7 +61,22 @@ public class StartHttpServer implements Command {
     }
     
     protected Server createServer() {
-        Server server = new Server();
+        int minThreads = Integer.parseInt(configuration.getJettyThreadMin());
+        int maxThreads = Integer.parseInt(configuration.getJettyThreadMax());
+ 
+        if (minThreads < 1) {
+            minThreads = computeMinThreads();
+        }
+        if (maxThreads < 1) {
+            maxThreads = Math.max(computeMaxThreads(), 300);
+        }
+ 
+        if (minThreads > maxThreads) {
+            minThreads = Math.max(1, maxThreads - 1);
+        }
+ 
+        QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads);
+        Server server = new Server(threadPool);
         ServerConnector https = createTlsConnector(server);
         server.setConnectors(new Connector[] { https });
         server.setStopAtShutdown(true);

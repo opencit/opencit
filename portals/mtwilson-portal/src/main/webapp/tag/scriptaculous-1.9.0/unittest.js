@@ -174,11 +174,11 @@ Test.Unit.Runner.prototype = {
     setTimeout(this.runTests.bind(this), 1000);
   },
   parseResultsURLQueryParameter: function() {
-    return window.location.search.parseQuery()["resultsURL"];
+    return Encoder.encodeForJS(Encoder.encodeForHTML(window.location.search.parseQuery()["resultsURL"]));
   },
   parseTestsQueryParameter: function(){
     if (window.location.search.parseQuery()["tests"]){
-        return window.location.search.parseQuery()["tests"].split(',');
+        return Encoder.encodeForJS(Encoder.encodeForHTML(window.location.search.parseQuery()["tests"])).split(',');
     };
   },
   // Returns:
