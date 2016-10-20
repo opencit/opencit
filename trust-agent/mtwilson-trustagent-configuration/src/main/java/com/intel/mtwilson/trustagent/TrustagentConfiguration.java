@@ -63,6 +63,8 @@ public class TrustagentConfiguration {
     public static final String SIGNING_KEY_SECRET = "signing.key.secret";
     public static final String SIGNING_KEY_INDEX = "signing.key.index";
     public static final String TRUSTAGENT_ADMIN_USERNAME = "trustagent.admin.username";
+    public final static String JETTY_THREAD_MIN = "jetty.thread.min";
+    public final static String JETTY_THREAD_MAX = "jetty.thread.max";
                
     private Configuration conf;
     
@@ -121,6 +123,12 @@ public class TrustagentConfiguration {
     public String getTpmOwnerSecretHex() {
         return conf.get(TPM_OWNER_SECRET, null); // intentionally no default - this must be generated during setup
     }
+    public String getJettyThreadMin() {
+        return conf.get(JETTY_THREAD_MIN, null); // intentionally no default - this must be generated during setup
+    }
+    public String getJettyThreadMax() {
+        return conf.get(JETTY_THREAD_MAX, null); // intentionally no default - this must be generated during setup
+    }     
     public byte[] getTpmOwnerSecret() {
         try {
             return Hex.decodeHex(getTpmOwnerSecretHex().toCharArray());
