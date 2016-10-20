@@ -124,10 +124,10 @@ public class TrustagentConfiguration {
         return conf.get(TPM_OWNER_SECRET, null); // intentionally no default - this must be generated during setup
     }
     public String getJettyThreadMin() {
-        return conf.get(JETTY_THREAD_MIN, null); // intentionally no default - this must be generated during setup
+        return conf.get(JETTY_THREAD_MIN, "0");
     }
     public String getJettyThreadMax() {
-        return conf.get(JETTY_THREAD_MAX, null); // intentionally no default - this must be generated during setup
+        return conf.get(JETTY_THREAD_MAX, "0");
     }     
     public byte[] getTpmOwnerSecret() {
         try {
