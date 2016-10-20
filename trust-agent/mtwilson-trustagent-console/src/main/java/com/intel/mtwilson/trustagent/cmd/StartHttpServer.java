@@ -29,8 +29,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
  */
 public class StartHttpServer implements Command {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StartHttpServer.class);
-    public final static String JETTY_THREAD_MIN = "jetty.thread.min";
-    public final static String JETTY_THREAD_MAX = "jetty.thread.max";
+
     public final static int JETTY_THREAD_MAX_MULTIPLIER = 16;
     public static Server server;
     private TrustagentConfiguration configuration;
@@ -62,20 +61,20 @@ public class StartHttpServer implements Command {
     }
     
     protected Server createServer() {
-        int minThreads = Integer.parseInt(configuration.get(JETTY_THREAD_MIN, "0"));
-        int maxThreads = Integer.parseInt(configuration.get(JETTY_THREAD_MAX, "0"));
-
+        int minThreads = Integer.parseInt(configuration.getJettyThreadMin());
+        int maxThreads = Integer.parseInt(configuration.getJettyThreadMax());
+ 
         if (minThreads < 1) {
             minThreads = computeMinThreads();
         }
         if (maxThreads < 1) {
             maxThreads = Math.max(computeMaxThreads(), 300);
         }
-
+ 
         if (minThreads > maxThreads) {
             minThreads = Math.max(1, maxThreads - 1);
         }
-
+ 
         QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads);
         Server server = new Server(threadPool);
         ServerConnector https = createTlsConnector(server);
