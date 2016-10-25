@@ -74,7 +74,7 @@ if [ -n "$xml" ]; then
     wget --no-proxy $xml -O $XML_FILE_LOCATION
 fi
 
-WGET="wget --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --auth-no-challenge --secure-protocol=TLSv1"
+WGET="wget --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --auth-no-challenge"
 UUID=`dmidecode |grep UUID | awk '{print $2}'`
 tagChoice=""
 tagFile=""
@@ -209,14 +209,20 @@ function provisionCert() {
  echo "$WGET -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
  $WGET -q -O "$tpaDir/tempStatus" "$server/version"
  if [ ! -s "$tpaDir/tempStatus" ]; then
-   echo "$WGET -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
-   $WGET -q -O "$tpaDir/tempStatus" "$server/version"
+   echo "$WGET --secure-protocol=TLSv1_2 -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
+   $WGET --secure-protocol=TLSv1_2 -q -O "$tpaDir/tempStatus" "$server/version"
    if [ -s "$tpaDir/tempStatus" ]; then
-     echo "Connected to server"
+     export WGET="WGET --secure-protocol=TLSv1_2"
    else
-    dialog --stdout --backtitle "$TITLE" --msgbox 'A SSL/TLS connection could not be established with the server. Please verify settings and try again.' 10 60
-    echo "A SSL/TLS connection could not be established with the server. Please verify settings and try again." > "$tpaDir/completion"
-    exit -1;
+     echo "$WGET --secure-protocol=TLSv1_1 -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
+     $WGET --secure-protocol=TLSv1_1 -q -O "$tpaDir/tempStatus" "$server/version"
+     if [ -s "$tpaDir/tempStatus" ]; then
+       export WGET="WGET --secure-protocol=TLSv1_1"
+     else
+       dialog --stdout --backtitle "$TITLE" --msgbox 'A SSL/TLS connection could not be established with the server. Please verify settings and try again.' 10 60
+       echo "A SSL/TLS connection could not be established with the server. Please verify settings and try again." > "$tpaDir/completion"
+       exit -1;
+     fi
    fi
  fi
  
