@@ -371,7 +371,7 @@ public class TpmModule20 implements TpmModuleProvider {
     }      
 
     @Override
-    public HashMap<String, byte[]> createAndCertifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
+    public HashMap<String, byte[]> createAndCertifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, String aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
         String srkHandle = "0x81000000";
         String publicFile = "/tmp/out.pub";
         String privateFile = "/tmp/out.priv";
@@ -392,7 +392,7 @@ public class TpmModule20 implements TpmModuleProvider {
             if(result.getReturnCode() == 0) {
                 String args2[] = {
                     srkHandle,
-                    String.valueOf(aikIndex),
+                    aikIndex,
                     TpmUtils.byteArrayToHexString(aikAuth),
                     publicFile,
                     privateFile,
@@ -409,10 +409,12 @@ public class TpmModule20 implements TpmModuleProvider {
                     res.put("keyblob", IOUtils.toByteArray(new FileInputStream(privateFile)));
                     res.put("keydata", IOUtils.toByteArray(new FileInputStream(attestFile)));
                     res.put("keysig", IOUtils.toByteArray(new FileInputStream(sigFile)));
+                    return res;
                 }
             }
-
-            throw new TpmModule.TpmModuleException("Failed to create and certify key");
+            else { 
+                throw new TpmModule.TpmModuleException("Failed to create and certify key");
+            }
         } finally {
             Files.deleteIfExists(Paths.get(publicFile));
             Files.deleteIfExists(Paths.get(privateFile));

@@ -178,7 +178,12 @@ public class TrustagentConfiguration {
         }
         */
         try {
-            return readFromFile(Folders.configuration() + File.separator + "aikhandle");
+            if ( getTpmVersion().equals("1.2") ) {
+                return conf.get(AIK_INDEX, "1");                
+            }
+            else {
+                return readFromFile(Folders.configuration() + File.separator + "aikhandle");
+            }
         } catch (IOException ex) {
             Logger.getLogger(TrustagentConfiguration.class.getName()).log(Level.SEVERE, null, ex);
             throw new IllegalArgumentException("AiK Handle", ex);
