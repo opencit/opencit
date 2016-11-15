@@ -249,6 +249,10 @@ public class HostInfoCmd implements ICommand {
                         log.debug("VMM Name: " + context.getVmmName());
                         log.debug("VMM Version: " + context.getVmmVersion());
                     }
+                    if (context.getVmmName() == null) {
+                        context.setVmmName("Host_No_VMM");
+                        context.setVmmVersion("0.0");
+                    }
                 }
             } else {
                 log.error("Unable to execute virsh command to retrieve the hypervisor details");
