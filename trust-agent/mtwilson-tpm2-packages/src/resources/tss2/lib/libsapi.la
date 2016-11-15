@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/hdxia/tpm2_packages/tss2/lib'
+libdir='/usr/local/lib'
