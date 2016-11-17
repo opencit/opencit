@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.My;
 import javax.ws.rs.Consumes;
 import com.intel.dcsg.cpg.xml.JAXB;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy1.xml.TrustPolicy;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -61,6 +61,14 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.apache.commons.lang.StringUtils;
+import java.io.ByteArrayInputStream;
+import javax.xml.parsers.ParserConfigurationException;
+
 
 /**
  * @author jbuhacoff
@@ -69,6 +77,28 @@ import org.xml.sax.SAXException;
 @Path("/trustpolicy-signature")
 public class TrustPolicySignature {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustPolicySignature.class);
+	
+	public static final String TRUST_POLICY_VERSION_1="1.1";
+	public static final String TRUST_POLICY_VERSION_2="1.2";
+	
+	public  String getPolicyVersion(String draftContent) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		ByteArrayInputStream bis = new ByteArrayInputStream(draftContent.getBytes());
+		Document doc = db.parse(bis);
+		Node n = doc.getFirstChild();
+		String namspaceUri = n.getNamespaceURI();
+		// //mtwilson:trustdirector:policy:1.2
+		String policyVersion = null;
+		if (StringUtils.isNotBlank(namspaceUri)) {
+			String[] namspaceArr = namspaceUri.split(":");
+			if (namspaceArr.length > 0) {
+				policyVersion = namspaceArr[namspaceArr.length - 1];
+			}
+		}
+		return policyVersion;
+    }
     
     @POST
     @Consumes({MediaType.APPLICATION_XML})
@@ -76,8 +106,18 @@ public class TrustPolicySignature {
     @RequiresPermissions("trust_policies:certify")
     public String signImageTrustPolicy(String xml) {
         try {
-        JAXB jaxb = new JAXB();
-        String validatedXml = jaxb.write(jaxb.read(xml, TrustPolicy.class));
+		String policyVersion = getPolicyVersion(xml);
+		String validatedXml=null;
+		JAXB jaxb = new JAXB();
+		if (StringUtils.isNotBlank(policyVersion)) {
+			if (TRUST_POLICY_VERSION_2.equals(policyVersion)) {
+	            validatedXml = jaxb.write(jaxb.read(xml, com.intel.mtwilson.trustpolicy2.xml.TrustPolicy.class));
+			}else if(TRUST_POLICY_VERSION_1.equals(policyVersion)){
+				validatedXml = jaxb.write(jaxb.read(xml, TrustPolicy.class));
+			}
+		}
+        
+        validatedXml = jaxb.write(jaxb.read(xml, TrustPolicy.class));
         String signedXml = generateDsig(validatedXml);
         return signedXml;
         }

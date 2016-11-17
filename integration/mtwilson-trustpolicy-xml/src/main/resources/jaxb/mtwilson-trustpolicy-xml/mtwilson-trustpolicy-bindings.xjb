@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<jxb:bindings version="1.0" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <jxb:bindings>
-      <jxb:bindings schemaLocation="mtwilson-trustpolicy.xsd" node="/xs:schema/xs:complexType[@name='whitelist']/xs:sequence/xs:choice">
-            <jxb:property name="measurements"/>
-        </jxb:bindings>
-        </jxb:bindings>
-    </jxb:bindings>

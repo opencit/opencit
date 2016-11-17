@@ -36,15 +36,31 @@
                         </goals>
                         <configuration>
                             <schemaIncludes>
-                                <include>jaxb/mtwilson-trustpolicy-xml/*.xsd</include>
+                                <include>jaxb/mtwilson-trustpolicy-xml/mtwilson-trustpolicy1.xsd</include>
                             </schemaIncludes>
                             <bindingIncludes>
-                                <include>jaxb/mtwilson-trustpolicy-xml/*.xjb</include>
+                                <include>jaxb/mtwilson-trustpolicy-xml/mtwilson-trustpolicy-bindings1.xjb</include>
                             </bindingIncludes>
-                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-trustpolicy-xml.episode</episodeFile>
-                            <generatePackage>com.intel.mtwilson.trustpolicy.xml</generatePackage>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-trustpolicy1-xml.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.trustpolicy1.xml</generatePackage>
                         </configuration>
-                        <id>mtwilson-trustpolicy-xml</id>
+                        <id>mtwilson-trustpolicy1-xml</id>
+                    </execution>
+					<execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaIncludes>
+                                <include>jaxb/mtwilson-trustpolicy-xml/mtwilson-trustpolicy2.xsd</include>
+                            </schemaIncludes>
+                            <bindingIncludes>
+                                <include>jaxb/mtwilson-trustpolicy-xml/mtwilson-trustpolicy-bindings2.xjb</include>
+                            </bindingIncludes>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-trustpolicy2-xml.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.trustpolicy2.xml</generatePackage>
+                        </configuration>
+                        <id>mtwilson-trustpolicy2-xml</id>
                     </execution>
                 </executions>
                 <configuration>

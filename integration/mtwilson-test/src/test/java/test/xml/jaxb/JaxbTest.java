@@ -5,9 +5,9 @@
 package test.xml.jaxb;
 
 import com.intel.dcsg.cpg.xml.JAXB;
-import com.intel.mtwilson.measurement.xml.FileMeasurementType;
-import com.intel.mtwilson.measurement.xml.MeasurementType;
-import com.intel.mtwilson.measurement.xml.Measurements;
+import com.intel.mtwilson.measurement1.xml.FileMeasurementType;
+import com.intel.mtwilson.measurement1.xml.MeasurementType;
+import com.intel.mtwilson.measurement1.xml.Measurements;
 import java.io.IOException;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;

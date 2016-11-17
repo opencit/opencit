@@ -36,15 +36,32 @@
                         </goals>
                         <configuration>
                             <schemaIncludes>
-                                <include>jaxb/mtwilson-measurement-xml/*.xsd</include>
+                                <include>jaxb/mtwilson-measurement-xml/mtwilson-measurement2.xsd</include>
                             </schemaIncludes>
                             <bindingIncludes>
-                                <include>jaxb/mtwilson-measurement-xml/*.xjb</include>
+                                <include>jaxb/mtwilson-measurement-xml/mtwilson-measurement-bindings2.xjb</include>
                             </bindingIncludes>
-                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-measurement-xml.episode</episodeFile>
-                            <generatePackage>com.intel.mtwilson.measurement.xml</generatePackage>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-measurement2-xml.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.measurement2.xml</generatePackage>
                         </configuration>
-                        <id>mtwilson-measurement-xml</id>
+                        <id>mtwilson-measurement2-xml</id>
+                    </execution>
+              
+				                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaIncludes>
+                                <include>jaxb/mtwilson-measurement-xml/mtwilson-measurement1.xsd</include>
+                            </schemaIncludes>
+                            <bindingIncludes>
+                                <include>jaxb/mtwilson-measurement-xml/mtwilson-measurement-bindings1.xjb</include>
+                            </bindingIncludes>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-measurement1-xml.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.measurement1.xml</generatePackage>
+                        </configuration>
+                        <id>mtwilson-measurement1-xml</id>
                     </execution>
                 </executions>
                 <configuration>

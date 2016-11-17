@@ -35,15 +35,31 @@
                         </goals>
                         <configuration>
                             <schemaIncludes>
-                                <include>jaxb/mtwilson-manifest-xml/*.xsd</include>
+                                <include>jaxb/mtwilson-manifest-xml/mtwilson-manifest1.xsd</include>
                             </schemaIncludes>
                             <bindingIncludes>
-                                <include>jaxb/mtwilson-manifest-xml/*.xjb</include>
+                                <include>jaxb/mtwilson-manifest-xml/mtwilson-manifest-bindings1.xjb</include>
                             </bindingIncludes>
-                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-manifest-xml.episode</episodeFile>
-                            <generatePackage>com.intel.mtwilson.manifest.xml</generatePackage>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-manifest-xml1.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.manifest1.xml</generatePackage>
                         </configuration>
-                        <id>mtwilson-manifest-xml</id>
+                        <id>mtwilson-manifest1-xml</id>
+                    </execution>
+					<execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaIncludes>
+                                <include>jaxb/mtwilson-manifest-xml/mtwilson-manifest2.xsd</include>
+                            </schemaIncludes>
+                            <bindingIncludes>
+                                <include>jaxb/mtwilson-manifest-xml/mtwilson-manifest-bindings2.xjb</include>
+                            </bindingIncludes>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-manifest-xml2.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.manifest2.xml</generatePackage>
+                        </configuration>
+                        <id>mtwilson-manifest2-xml</id>
                     </execution>
                 </executions>
                 <configuration>

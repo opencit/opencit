@@ -7,7 +7,7 @@ package com.intel.mtwilson.vm.attestation.client.jaxrs2;
 
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy1.xml.TrustPolicy;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;

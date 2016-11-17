@@ -7,7 +7,7 @@ package com.intel.mtwilson.v2.vm.attestation.rpc;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.xml.JAXB;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy1.xml.TrustPolicy;
 import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
 import java.io.IOException;
 import java.nio.charset.Charset;

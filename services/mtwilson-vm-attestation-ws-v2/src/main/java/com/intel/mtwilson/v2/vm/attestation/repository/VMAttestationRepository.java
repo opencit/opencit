@@ -24,9 +24,9 @@ import com.intel.mtwilson.as.rest.v2.model.VMAttestationFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationLocator;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
-import com.intel.mtwilson.measurement.xml.FileMeasurementType;
-import com.intel.mtwilson.measurement.xml.DirectoryMeasurementType;
-import com.intel.mtwilson.measurement.xml.MeasurementType;
+import com.intel.mtwilson.measurement1.xml.FileMeasurementType;
+import com.intel.mtwilson.measurement1.xml.DirectoryMeasurementType;
+import com.intel.mtwilson.measurement1.xml.MeasurementType;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.XmlMeasurementLog;
@@ -43,10 +43,10 @@ import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import static com.intel.mtwilson.trustagent.model.VMQuoteResponse.QuoteType.XML_DSIG;
-import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
+import com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement;
 import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
-import com.intel.mtwilson.measurement.xml.Measurements;
+import com.intel.mtwilson.trustpolicy1.xml.TrustPolicy;
+import com.intel.mtwilson.measurement1.xml.Measurements;
 import com.intel.mtwilson.model.VmMeasurement;
 import com.intel.mtwilson.model.VmMeasurementLog;
 import com.intel.mtwilson.vmquote.xml.VMQuote;
@@ -336,11 +336,11 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     // creating Measurements Object which will be converted into measurement xml string
                                     Measurements whitelistObj = new Measurements();
                                     List<MeasurementType> measurements = whitelistObj.getMeasurements();
-                                    for (com.intel.mtwilson.trustpolicy.xml.Measurement measurement: vmTrustPolicy.getWhitelist().getMeasurements()){
+                                    for (com.intel.mtwilson.trustpolicy1.xml.Measurement measurement: vmTrustPolicy.getWhitelist().getMeasurements()){
                                         MeasurementType measurementType;
                                         if(measurement instanceof DirectoryMeasurement){
                                             DirectoryMeasurementType dirMeasurementType = new DirectoryMeasurementType();
-                                            com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement dirMeasurement = (com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement) measurement;
+                                            com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement dirMeasurement = (com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement) measurement;
                                             dirMeasurementType.setExclude(dirMeasurement.getExclude());
                                             dirMeasurementType.setInclude(dirMeasurement.getInclude());
                                             measurementType = dirMeasurementType;
