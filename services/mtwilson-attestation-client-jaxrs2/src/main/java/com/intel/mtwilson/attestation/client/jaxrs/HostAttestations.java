@@ -399,26 +399,20 @@ public class HostAttestations extends MtWilsonClient {
      * </xmp></pre></div>
      */        
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
-        if (properties == null || properties.getProperty("mtwilson.api.keystore") == null || properties.getProperty("mtwilson.api.keystore.password") == null) {
-            return null;
+        String keystorePath = getConfiguration().get("mtwilson.api.keystore");
+        Password keystorePassword = getPassword("mtwilson.api.keystore.password");
+        if( keystorePath != null && !keystorePath.isEmpty() && keystorePassword != null ) {
+            SimpleKeystore keystore = new SimpleKeystore(new File(keystorePath), keystorePassword);
+            X509Certificate[] trustedSamlCertificates;
+            try {
+                trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
+            }
+            catch(KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
+                throw e;
+            }
+            TrustAssertion trustAssertion = new TrustAssertion(trustedSamlCertificates, saml);
+            return trustAssertion;            
         }
-        String mtwilsonApiKeystore = properties.getProperty("mtwilson.api.keystore");
-        String mtwilsonApiKeystorePassword = properties.getProperty("mtwilson.api.keystore.password");
-        
-        if (mtwilsonApiKeystore == null || mtwilsonApiKeystore.isEmpty() || mtwilsonApiKeystorePassword == null || mtwilsonApiKeystorePassword.isEmpty()) {
-            return null;
-        }
-        
-        SimpleKeystore keystore = new SimpleKeystore(new File(mtwilsonApiKeystore), mtwilsonApiKeystorePassword);
-        X509Certificate[] trustedSamlCertificates;
-        try {
-            trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
-        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
-            throw e;
-        } catch (Exception e) {
-            throw e;
-        }
-        TrustAssertion trustAssertion = new TrustAssertion(trustedSamlCertificates, saml);
-        return trustAssertion;
+        return null;
     }
 }
