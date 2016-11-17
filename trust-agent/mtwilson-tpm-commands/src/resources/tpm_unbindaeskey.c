@@ -54,10 +54,10 @@
 		goto out_close; \
 	}
 
-static char filenameEncryptedInput[PATH_MAX] = "";
-static char filenamePlaintextOutput[PATH_MAX] = "";
-static char filenamePrivatekey[PATH_MAX] = "";
-static char keypassword[PATH_MAX] = "";
+static char filenameEncryptedInput[PATH_MAX + 1] = "";
+static char filenamePlaintextOutput[PATH_MAX + 1] = "";
+static char filenamePrivatekey[PATH_MAX + 1] = "";
+static char keypassword[PATH_MAX + 1] = "";
 static const char *keypasswordEnv;
 static TSS_FLAG keypasswordMode = TSS_SECRET_MODE_PLAIN;
 static BOOL decodeHexPassword = FALSE;
@@ -116,24 +116,24 @@ static void help(const char* aCmd)
 int main(int argc, char **argv) {
 	TSS_HCONTEXT    hContext;
 	TSS_HTPM        hTPM; 
-	TSS_HPOLICY     hTPMPolicy;
-	TSS_HKEY        hSRK; 
+	//TSS_HPOLICY     hTPMPolicy;
+	TSS_HKEY        hSRK = NULL; 
 	TSS_HPOLICY     hSRKPolicy;
-	TSS_HKEY        hKey; 
+	TSS_HKEY        hKey = NULL; 
 	TSS_HPOLICY     hKeyPolicy;
 	TSS_HENCDATA    hEncdata;
-	TSS_HPOLICY     hEncdataPolicy;
+	//TSS_HPOLICY     hEncdataPolicy;
 	TSS_RESULT      result;
 	BYTE            WELL_KNOWN_SECRET[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPrivatekeyFile;
-	BYTE            *contentPrivatekeyFile;
-	FILE            *filePrivatekey;
+	BYTE            *contentPrivatekeyFile = NULL;
+	FILE            *filePrivatekey = NULL;
 	UINT32          lengthEncryptedInputFile;
-	BYTE            *contentEncryptedInputFile;
-	FILE            *fileEncryptedInput;
+	BYTE            *contentEncryptedInputFile = NULL;
+	FILE            *fileEncryptedInput = NULL;
 	UINT32          lengthPlaintextOutput;
-	BYTE            *plaintextOutput;
-	FILE            *filePlaintextOutput;
+	BYTE            *plaintextOutput = NULL;
+	FILE            *filePlaintextOutput = NULL;
 	BYTE			*keypasswordBytes = NULL;
 	UINT32			lengthKeypasswordBytes;
 
@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 	fseek (filePrivatekey, 0, SEEK_END);
 	lengthPrivatekeyFile = ftell (filePrivatekey);
 	fseek (filePrivatekey, 0, SEEK_SET);
-	contentPrivatekeyFile = malloc (lengthPrivatekeyFile);
+	CATCH_NULL(contentPrivatekeyFile = malloc (lengthPrivatekeyFile));
 	CATCH_ERROR( fread(contentPrivatekeyFile, 1, lengthPrivatekeyFile, filePrivatekey) != lengthPrivatekeyFile );
 	fclose(filePrivatekey);
 	filePrivatekey = NULL;
@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
 	fseek (fileEncryptedInput, 0, SEEK_END);
 	lengthEncryptedInputFile = ftell (fileEncryptedInput);
 	fseek (fileEncryptedInput, 0, SEEK_SET);
-	contentEncryptedInputFile = malloc (lengthEncryptedInputFile);
+	CATCH_NULL(contentEncryptedInputFile = malloc (lengthEncryptedInputFile));
 	CATCH_ERROR( fread(contentEncryptedInputFile, 1, lengthEncryptedInputFile, fileEncryptedInput) != lengthEncryptedInputFile );
 	fclose(fileEncryptedInput);
 	fileEncryptedInput = NULL;
@@ -238,10 +238,15 @@ int main(int argc, char **argv) {
 	exitCode = 0;
 	
 	out_close:
-	if( hKey ) { Tspi_Context_CloseObject(hContext, hKey); }
-	if( hSRK ) { Tspi_Context_CloseObject(hContext, hSRK); }
+	if (filePrivatekey != NULL) { fclose(filePrivatekey); }
+	if (fileEncryptedInput != NULL) { fclose(fileEncryptedInput); }
+	if (filePlaintextOutput != NULL) { fclose(filePlaintextOutput); }
+	if( hKey != NULL ) { Tspi_Context_CloseObject(hContext, hKey); }
+	if( hSRK != NULL ) { Tspi_Context_CloseObject(hContext, hSRK); }
 	Tspi_Context_Close(hContext);
 
 	out:
+	if( contentEncryptedInputFile != NULL ) { free(contentEncryptedInputFile ); }
+	if( contentPrivatekeyFile != NULL ) { free(contentPrivatekeyFile ); }
 	return exitCode;
 }

@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -259,13 +260,14 @@ public class TpmModuleWindows implements TpmModuleProvider {
             byte [] key = TpmUtils.hexStringToByteArray(result.getResult(0));
             int credsize  = TpmUtils.getUINT32(bs);
             TpmKeyParams keyParms = new TpmKeyParams(bs);
-            byte[] iv = new byte[16];
-            bs.read(iv, 0, 16);
-            int ciphertextLen = credsize - 16;
-            byte [] ciphertext = new byte[ciphertextLen];
-            bs.read(ciphertext, 0, ciphertextLen);
             
-            byte [] aikcert = TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
+            byte[] iv = IOUtils.toByteArray(bs,16);
+            //bs.read(iv, 0, 16);
+            int ciphertextLen = credsize - 16;
+            //byte [] ciphertext = new byte[ciphertextLen];
+            byte[] ciphertext = IOUtils.toByteArray(bs,ciphertextLen);
+            
+            byte [] aikcert = TpmUtils.tcgSymDecrypt(ciphertext, key, iv);
             
             // return the results
             HashMap<String,byte[]> results = new HashMap<String, byte[]>();
@@ -302,7 +304,8 @@ public class TpmModuleWindows implements TpmModuleProvider {
                     throws IOException {
 
         int returnCode;
-        final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
+        //#5814: Variable 'newTpmModuleExePath' was never read after being assigned.
+        //final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
         final String newExeName = "TPMTool.exe";
 
         // Parse the args parameter to populate the environment variables array

@@ -51,7 +51,7 @@ public class MwHostPreRegistrationDetailsJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            mwHostPreRegistrationDetails = em.merge(mwHostPreRegistrationDetails);
+            em.merge(mwHostPreRegistrationDetails);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();

@@ -92,11 +92,7 @@
                 <arg value="install"/>
             </exec>
             <fail message="Failed to build javadoc" status="${mavenExitJavadoc}">
-                <condition>
-                    <not>
-                        <equals arg1="${mavenExitJavadoc}" arg2="0"/>
-                    </not>
-                </condition>
+                <condition><not><equals arg1="${mavenExitJavadoc}" arg2="0"/></not></condition>
             </fail>
         </target>
         
@@ -108,11 +104,7 @@
                 <arg value="install"/>
             </exec>
             <fail message="Failed to build packages" status="${mavenExitPackages}">
-                <condition>
-                    <not>
-                        <equals arg1="${mavenExitPackages}" arg2="0"/>
-                    </not>
-                </condition>
+                <condition><not><equals arg1="${mavenExitPackages}" arg2="0"/></not></condition>
             </fail>
         </target>
         

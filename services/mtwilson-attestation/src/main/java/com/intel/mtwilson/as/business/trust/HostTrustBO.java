@@ -1993,10 +1993,10 @@ public class HostTrustBO {
     
     public HostAttestation buildHostAttestation(TblHosts tblHosts, TblSamlAssertion tblSamlAssertion) throws IOException {
         HostAttestation hostAttestation = new HostAttestation();
-        hostAttestation.setAikSha1(tblHosts.getAikSha1());
+        hostAttestation.setAikSha1(tblSamlAssertion.getHostId().getAikSha1());
         //hostAttestation.setChallenge(tblHosts.getChallenge());
-        hostAttestation.setHostName(tblHosts.getName());
-        hostAttestation.setHostUuid(tblHosts.getUuid_hex()); //.getHardwareUuid());
+        hostAttestation.setHostName(tblSamlAssertion.getHostId().getName());
+        hostAttestation.setHostUuid(tblSamlAssertion.getHostId().getUuid_hex()); //.getHardwareUuid());
         hostAttestation.setId(UUID.valueOf(tblSamlAssertion.getAssertionUuid()));
         hostAttestation.setSaml(tblSamlAssertion.getSaml());
         hostAttestation.setTrustReport(mapper.readValue(tblSamlAssertion.getTrustReport(), TrustReport.class));
@@ -2005,7 +2005,7 @@ public class HostTrustBO {
         hostTrustStatus.bios = tblSamlAssertion.getBiosTrust();
         hostTrustStatus.vmm = tblSamlAssertion.getVmmTrust();
         //hostTrustStatus.asset_tag = tblSamlAssertion.getAssetTagTrust();
-        hostAttestation.setHostTrustResponse(new HostTrustResponse(new Hostname(tblHosts.getName()), hostTrustStatus));
+        hostAttestation.setHostTrustResponse(new HostTrustResponse(new Hostname(tblSamlAssertion.getHostId().getName()), hostTrustStatus));
         return hostAttestation;
     }
 

@@ -171,7 +171,8 @@ public class HostInfoCmd implements ICommand {
      */
 
     private void getVmmAndVersion() throws TAException, IOException {
-        Result result = null;
+        Result result;
+        result = null;
         CommandLine dockerCommand = new CommandLine("/opt/trustagent/bin/tagent");
         dockerCommand.addArgument("system-info");
         dockerCommand.addArgument("docker version", false);

@@ -6,7 +6,7 @@ import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
 import java.io.ByteArrayInputStream;
 
 public class TpmCertifyKey {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmCertifyKey.class);
     private static int TPM_SHA1_160_HASH_LEN = 20;
     private static int TPM_SHA1BASED_NONCE_LEN = TPM_SHA1_160_HASH_LEN;
     private byte[] structVer = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00};
@@ -23,16 +23,21 @@ public class TpmCertifyKey {
     }
 
     public TpmCertifyKey(byte[] blob) throws TpmBytestreamResouceException, TpmUnsignedConversionException {
-        ByteArrayInputStream bs = new ByteArrayInputStream(blob);
-        structVer = TpmUtils.getBytes(bs, 4);
-        tpmKeyUsage = TpmUtils.getUINT16(bs);
-        tpmKeyFlags = TpmUtils.getUINT32(bs);
-        tpmAuthDataUsage = TpmUtils.getBytes(bs, 1)[0]; //byte
-        keyParms = new TpmKeyParams(bs); //TpmKeyParams
-        publicKeyDigest = TpmUtils.getBytes(bs, TPM_SHA1_160_HASH_LEN);
-        nonce = TpmUtils.getBytes(bs, TPM_SHA1BASED_NONCE_LEN);
-        parentPCRStatus = TpmUtils.getBytes(bs, 1)[0];
-        pcrInfoSize = TpmUtils.getUINT32(bs);
+        //ByteArrayInputStream bs = new ByteArrayInputStream(blob);
+        try (ByteArrayInputStream bs = new ByteArrayInputStream(blob)) {
+            structVer = TpmUtils.getBytes(bs, 4);
+            tpmKeyUsage = TpmUtils.getUINT16(bs);
+            tpmKeyFlags = TpmUtils.getUINT32(bs);
+            tpmAuthDataUsage = TpmUtils.getBytes(bs, 1)[0]; //byte
+            keyParms = new TpmKeyParams(bs); //TpmKeyParams
+            publicKeyDigest = TpmUtils.getBytes(bs, TPM_SHA1_160_HASH_LEN);
+            nonce = TpmUtils.getBytes(bs, TPM_SHA1BASED_NONCE_LEN);
+            parentPCRStatus = TpmUtils.getBytes(bs, 1)[0];
+            pcrInfoSize = TpmUtils.getUINT32(bs);
+        } catch (Exception e) {
+            log.error("Error in TpmCertifyKey", e);
+            throw new TpmUtils.TpmBytestreamResouceException("Error in TpmCertifyKey");
+        }
     }
 
     public byte[] getPublicKeyDigest() {

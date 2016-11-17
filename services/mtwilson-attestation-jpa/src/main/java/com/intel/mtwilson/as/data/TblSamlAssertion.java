@@ -31,7 +31,10 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblSamlAssertion.findByRangeOfCreatedTs", query = "SELECT t FROM TblSamlAssertion t WHERE t.hostId.name = :hostName and t.createdTs >= :fromCreatedTs and t.createdTs < :toCreatedTs ORDER BY t.createdTs ASC"),
     @NamedQuery(name = "TblSamlAssertion.findByHostAndExpiry", query = "SELECT t FROM TblSamlAssertion t WHERE t.expiryTs > :now and t.hostId.name = :hostName ORDER BY t.expiryTs DESC"),
     @NamedQuery(name = "TblSamlAssertion.findByHostID", query = "SELECT t FROM TblSamlAssertion t WHERE t.hostId = :hostId"),
-    @NamedQuery(name = "TblSamlAssertion.findByAssertionUuid", query = "SELECT t FROM TblSamlAssertion t WHERE t.assertionUuid = :assertionUuid ORDER BY t.expiryTs DESC")})
+    @NamedQuery(name = "TblSamlAssertion.findByAssertionUuid", query = "SELECT t FROM TblSamlAssertion t WHERE t.assertionUuid = :assertionUuid ORDER BY t.expiryTs DESC"), 
+    @NamedQuery(name = "TblSamlAssertion.findSamlForHostsByExpirationDate", query = "SELECT t FROM TblSamlAssertion t WHERE t.createdTs = "
+            + "(SELECT MAX(s.createdTs) FROM TblSamlAssertion s WHERE s.hostId = t.hostId) AND t.createdTs >= :createdDate ORDER BY  t.hostId")})
+
 public class TblSamlAssertion implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

@@ -62,14 +62,16 @@ public class TblSamlAssertionJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            TblSamlAssertion persistentTblSamlAssertion = em.find(TblSamlAssertion.class, tblSamlAssertion.getId());
-            TblHosts hostIdOld = persistentTblSamlAssertion.getHostId();
+            //#6358: Variable 'persistentTblSamlAssertion' was never read after being assigned.
+            //TblSamlAssertion persistentTblSamlAssertion = em.find(TblSamlAssertion.class, tblSamlAssertion.getId());
+            //#5821: Variable 'hostIdOld' was never read after being assigned
+            //TblHosts hostIdOld = persistentTblSamlAssertion.getHostId();
             TblHosts hostIdNew = tblSamlAssertion.getHostId();
             if (hostIdNew != null) {
                 hostIdNew = em.getReference(hostIdNew.getClass(), hostIdNew.getId());
                 tblSamlAssertion.setHostId(hostIdNew);
             }
-            tblSamlAssertion = em.merge(tblSamlAssertion);
+            //tblSamlAssertion = em.merge(tblSamlAssertion);
 //            if (hostIdOld != null && !hostIdOld.equals(hostIdNew)) {
 //                hostIdOld.getTblSamlAssertionCollection().remove(tblSamlAssertion);
 //                hostIdOld = em.merge(hostIdOld);
@@ -279,4 +281,23 @@ public class TblSamlAssertionJpaController implements Serializable {
             em.close();
         }
     }
+	
+    public List<TblSamlAssertion> getListForHostsByExpirationDate(Integer limitPerHost, Date createdDate) {
+        List<TblSamlAssertion> tblSamlAssertionList;
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblSamlAssertion.findSamlForHostsByExpirationDate");
+            // Unable to support this parameter right now since JPA does not support LIMIT or PARTITION options.
+            // Probably we need to run multiple queries to accomplish it.
+            //query.setParameter("limitPerHost", limitPerHost);
+            query.setParameter("createdDate", createdDate);
+
+            tblSamlAssertionList = query.getResultList();
+        } finally {
+                em.close();
+        }
+
+        return tblSamlAssertionList;
+        
+    }	
 }

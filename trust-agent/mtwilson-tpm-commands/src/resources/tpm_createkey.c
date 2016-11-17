@@ -61,11 +61,11 @@
 
 extern const char *__progname;
 
-static char filenamePrivatekeyblobOutput[PATH_MAX] = "";
-static char filenamePublickeyOutput[PATH_MAX] = "";
+static char filenamePrivatekeyblobOutput[PATH_MAX + 1] = "";
+static char filenamePublickeyOutput[PATH_MAX + 1] = "";
 static TSS_FLAG keyType = 0;
 static TSS_FLAG keyAuth = TSS_KEY_NO_AUTHORIZATION;
-static char keypassword[PATH_MAX] = "";
+static char keypassword[PATH_MAX + 1] = "";
 static const char *keypasswordEnv;
 static TSS_FLAG keypasswordMode = TSS_SECRET_MODE_PLAIN;
 static BOOL decodeHexPassword = FALSE;
@@ -73,7 +73,8 @@ static BOOL useEnvironment = FALSE;
 
 static int parse(const int aOpt, const char *aArg)
 {
-
+	unsigned int strLength=0;
+    while(*(aArg+strLength) ) strLength++;
 	switch (aOpt) {
 	case 'b':
 		keyType = TSS_KEY_TYPE_BIND;
@@ -82,13 +83,22 @@ static int parse(const int aOpt, const char *aArg)
 		keyType = TSS_KEY_TYPE_SIGNING;
 		break;
 	case 'k':
-		strncpy(filenamePrivatekeyblobOutput, aArg, PATH_MAX);
+		if(strLength < PATH_MAX && strLength > 0)
+			strncpy(filenamePrivatekeyblobOutput, aArg, PATH_MAX);
+		else
+		   return 1;
 		break;
 	case 'p':
-		strncpy(filenamePublickeyOutput, aArg, PATH_MAX);
+		if(strLength < PATH_MAX && strLength > 0)
+			strncpy(filenamePublickeyOutput, aArg, PATH_MAX);
+		else
+		   return 1;
 		break;
 	case 'q':
-		strncpy(keypassword, aArg, PATH_MAX);
+		if(strLength < PATH_MAX && strLength > 0)
+			strncpy(keypassword, aArg, PATH_MAX);
+		else
+		   return 1;
 		keyAuth = TSS_KEY_AUTHORIZATION;
 		break;
 	case 'Q':
@@ -132,20 +142,19 @@ int main(int argc, char **argv) {
 	TSS_HTPM        hTPM;
 	TSS_HKEY        hSRK; 
 	TSS_HPOLICY     hSRKPolicy; 
-	TSS_HKEY        hKey; 
+	TSS_HKEY        hKey = NULL; 
 	TSS_HPOLICY     hKeyPolicy; 
 	TSS_FLAG        keyflags;
 	TSS_RESULT      result;
 	BYTE            WELL_KNOWN_SECRET[TCPA_SHA1_160_HASH_LEN] = TSS_WELL_KNOWN_SECRET;
 	UINT32          lengthPublickey;
 	BYTE            *contentPublickey;
-	FILE            *filePublickey;
+	FILE            *filePublickey = NULL;
 	UINT32          lengthPrivatekeyblob;
 	BYTE            *contentPrivatekeyblob;
-	FILE            *filePrivatekeyblob;
+	FILE            *filePrivatekeyblob = NULL;
 	BYTE			*keypasswordBytes = NULL;
 	UINT32			lengthKeypasswordBytes;
-	int             i;
 	int             exitCode = -1;
 	
 	struct option hOpts[] = {
@@ -238,5 +247,9 @@ int main(int argc, char **argv) {
 	Tspi_Context_Close(hContext);
 
 	out:
+	if(filePublickey != NULL)
+		fclose(filePublickey);
+	if(filePrivatekeyblob != NULL)
+		fclose(filePrivatekeyblob);
 	return exitCode;
 }
