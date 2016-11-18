@@ -117,7 +117,7 @@ public class TrustPolicySignature {
 			}
 		}
         
-        validatedXml = jaxb.write(jaxb.read(xml, TrustPolicy.class));
+        //////validatedXml = jaxb.write(jaxb.read(xml, TrustPolicy.class));
         String signedXml = generateDsig(validatedXml);
         return signedXml;
         }
