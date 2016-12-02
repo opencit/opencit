@@ -50,14 +50,13 @@ fi
 
 ################################################################################
 
-# 1. Add epel-release-latest-7.noarch repository
-
-add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
-
-# 2. Install redhat-lsb-core and other redhat-specific packages
-
 if yum_detect; then
+  # 1. Add epel-release-latest-7.noarch repository
+  add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  # 2. Install redhat-lsb-core and other redhat-specific packages
   yum -y install redhat-lsb redhat-lsb-core libvirt net-tools grub2-efi-modules > /dev/null 2>&1
+#elif aptget_detect; then
+#  
 fi
 
 # 3. Install tboot
@@ -67,6 +66,14 @@ fi
 # tpm 1.2
 is_tboot_installed() {
   is_package_installed tboot
+  result=$?
+  if [ $result -ne 0 ]; then
+    if [ -f /boot/tboot.gz ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
 }
 
 # tpm 1.2
@@ -151,7 +158,13 @@ if [ "$TPM_VERSION" == "1.2" ]; then
   install_tpm_tools
   install_patched_tpm_tools
 elif [ "$TPM_VERSION" == "2.0" ]; then
-  install_tboot_tpm2
+  if is_tboot_installed; then
+    echo "tboot already installed"
+  else
+    #install_tboot_tpm2
+    echo_failure "tboot 1.9.5 or later must be installed for TPM 2.0 functionality"
+    exit 5
+  fi
   install_tss2_tpmtools2
 elif [ -z "$TPM_VERSION" ]; then
   echo "Cannot detect TPM version"
