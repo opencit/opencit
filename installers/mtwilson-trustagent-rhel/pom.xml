@@ -168,6 +168,7 @@
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
                                         
+                                        <!--
                                         <artifactItem>
                                             <groupId>net.sourceforge.tboot</groupId>
                                             <artifactId>tboot</artifactId>
@@ -184,6 +185,7 @@
                                             <type>deb</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
+                                        -->
                                         
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->

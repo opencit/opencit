@@ -80,6 +80,7 @@
                 also... therefore both ubuntu and redhat dependencies are
                 included here for now.
                 -->
+                <!--
                 <dependency>
                     <groupId>net.sourceforge.tboot</groupId>
                     <artifactId>tboot</artifactId>
@@ -94,6 +95,7 @@
                     <classifier>amd64</classifier>
                     <type>deb</type>
                 </dependency>
+                -->
 
                 <dependency>
                     <groupId>org.slf4j</groupId>
@@ -189,6 +191,7 @@
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
                                         
+                                        <!--
                                         <artifactItem>
                                             <groupId>net.sourceforge.tboot</groupId>
                                             <artifactId>tboot</artifactId>
@@ -205,7 +208,7 @@
                                             <type>deb</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
-                                        
+                                        -->
                                         
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
