@@ -14,6 +14,7 @@ public class ModuleWhiteList {
    
     private String componentName;
     private String digestValue;
+    private String pcrBank;
     private String eventName;
     private String extendedToPCR;
     private String packageName;
@@ -53,9 +54,10 @@ public class ModuleWhiteList {
      * @param osVersion
      * @param oemName 
      */
-    public ModuleWhiteList(String componentName, String digestValue, String eventName, String extendedToPCR, String packageName, String packageVendor, String packageVersion, Boolean useHostSpecificDigest, String description, String mleName, String mleVersion, String osName, String osVersion, String oemName) {
+    public ModuleWhiteList(String componentName, String digestValue, String pcrBank, String eventName, String extendedToPCR, String packageName, String packageVendor, String packageVersion, Boolean useHostSpecificDigest, String description, String mleName, String mleVersion, String osName, String osVersion, String oemName) {
         this.componentName = componentName;
         this.digestValue = digestValue;
+        this.pcrBank = pcrBank;
         this.eventName = eventName;
         this.extendedToPCR = extendedToPCR;
         this.packageName = packageName;
@@ -68,6 +70,15 @@ public class ModuleWhiteList {
         this.osName = osName;
         this.osVersion = osVersion;
         this.oemName = oemName;
+    }
+
+    @JsonProperty("PcrBank")
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
     }
     
     @JsonProperty("ComponentName")

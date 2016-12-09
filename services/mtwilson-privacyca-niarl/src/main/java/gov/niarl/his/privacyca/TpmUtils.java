@@ -220,47 +220,53 @@ public class TpmUtils {
                 throw new TpmBytestreamResouceException("Error getting bytes");
             }
 	}
-	/**
-	 * Creates a new X509 V3 certificate for use as an Attestation Identity Key (AIK) using the BouncyCastle provider. The certificate is designed in the 
-	 * direction of the Trusted Computing Group's specification of certificates for the Trusted Platform Module, although in its current form this 
-	 * function does not meet the standard. To that extent, the Subject Name field is left blank, and the V3 Subject Alternative Name field is marked 
-	 * critical and populated with the ID Label specified in the supplied TPM_Identity_Proof structure.  
-	 * 
-	 * @param idProof The TPM_Identity_Proof structure, used for the identity label field.
-	 * @param privKey The Privacy CA's private key for signing the certificate.
-	 * @param caCert The Privacy CA's public key certificate.
-	 * @param validityDays The number of days until the created certificate expires, from the time this function is run.
-	 * @param level Currently not used.
-	 * @return An AIK certificate.
-	 * @throws InvalidKeySpecException Passed on from the BouncyCastle certificate generator.
-	 * @throws NoSuchAlgorithmException Passed on from the BouncyCastle certificate generator.
-	 * @throws CertificateEncodingException Passed on from the BouncyCastle certificate generator.
-	 * @throws NoSuchProviderException Thrown if the BouncyCastle provider cannot be found.
-	 * @throws SignatureException Passed on from the BouncyCastle certificate generator.
-	 * @throws InvalidKeyException Passed on from the BouncyCastle certificate generator.
-	 */
-	public static X509Certificate makeCert(TpmIdentityProof idProof, RSAPrivateKey privKey, X509Certificate caCert, int validityDays, int level) 
-			throws InvalidKeySpecException, 
-			NoSuchAlgorithmException, 
-			CertificateEncodingException, 
-			NoSuchProviderException, 
-			SignatureException, 
-			InvalidKeyException {
-		Security.addProvider(new BouncyCastleProvider());
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-		certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-		certGen.setIssuerDN(caCert.getSubjectX500Principal());
-		certGen.setNotBefore(new java.sql.Time(System.currentTimeMillis()));
-		Calendar expiry = Calendar.getInstance();
-		expiry.add(Calendar.DAY_OF_YEAR, validityDays);
-		certGen.setNotAfter(expiry.getTime());
-		certGen.setSubjectDN(new X500Principal(""));
-		certGen.setPublicKey(idProof.getAik().getKey());
-		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, new String(idProof.getIdLableBytes()))));
-		X509Certificate cert = certGen.generate(privKey, "BC");
-		return cert;
-	}
+    public static X509Certificate makeCert(TpmPubKey aik, String sanLabel, RSAPrivateKey privKey, X509Certificate caCert, int validityDays, int level) throws InvalidKeySpecException,
+            NoSuchAlgorithmException,
+            CertificateEncodingException,
+            NoSuchProviderException,
+            SignatureException,
+            InvalidKeyException {
+        Security.addProvider(new BouncyCastleProvider());
+        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+        certGen.setIssuerDN(caCert.getSubjectX500Principal());
+        certGen.setNotBefore(new java.sql.Time(System.currentTimeMillis()));
+        Calendar expiry = Calendar.getInstance();
+        expiry.add(Calendar.DAY_OF_YEAR, validityDays);
+        certGen.setNotAfter(expiry.getTime());
+        certGen.setSubjectDN(new X500Principal(""));
+        certGen.setPublicKey(aik.getKey());
+        certGen.setSignatureAlgorithm("SHA256withRSA");
+        certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, sanLabel)));
+        X509Certificate cert = certGen.generate(privKey, "BC");
+        return cert;
+    }
+
+    /**
+     * Creates a new X509 V3 certificate for use as an Attestation Identity Key (AIK) using the BouncyCastle provider. The certificate is designed in the direction of the Trusted Computing Group's specification of certificates for the Trusted Platform Module, although in its current form this function does not meet the standard. To that extent, the Subject Name field is left blank, and the V3 Subject Alternative Name field is marked critical and populated with the ID Label specified in the supplied TPM_Identity_Proof structure.
+     *
+     * @param idProof The TPM_Identity_Proof structure, used for the identity label field.
+     * @param privKey The Privacy CA's private key for signing the certificate.
+     * @param caCert The Privacy CA's public key certificate.
+     * @param validityDays The number of days until the created certificate expires, from the time this function is run.
+     * @param level Currently not used.
+     * @return An AIK certificate.
+     * @throws InvalidKeySpecException Passed on from the BouncyCastle certificate generator.
+     * @throws NoSuchAlgorithmException Passed on from the BouncyCastle certificate generator.
+     * @throws CertificateEncodingException Passed on from the BouncyCastle certificate generator.
+     * @throws NoSuchProviderException Thrown if the BouncyCastle provider cannot be found.
+     * @throws SignatureException Passed on from the BouncyCastle certificate generator.
+     * @throws InvalidKeyException Passed on from the BouncyCastle certificate generator.
+     */
+    public static X509Certificate makeCert(TpmIdentityProof idProof, RSAPrivateKey privKey, X509Certificate caCert, int validityDays, int level)
+            throws InvalidKeySpecException,
+            NoSuchAlgorithmException,
+            CertificateEncodingException,
+            NoSuchProviderException,
+            SignatureException,
+            InvalidKeyException {
+        return makeCert(idProof.getAik(), new String(idProof.getIdLableBytes()), privKey, caCert, validityDays, level);
+    }
 	/**
 	 * Pulls the system time in "MMM d, yyyy h:mm:ss a" format as a string, suitable for use in a log file.
 	 * @return String as described above.
@@ -313,7 +319,7 @@ public class TpmUtils {
 		certGen.setNotAfter(expiry.getTime());
 		certGen.setSubjectDN(new X500Principal("CN=" + caName));
 		certGen.setPublicKey(pubKey);
-		certGen.setSignatureAlgorithm("SHA1withRSA");
+		certGen.setSignatureAlgorithm("SHA256withRSA");
 		certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
 		certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
 		X509Certificate caCert = certGen.generate(privKey);
@@ -376,7 +382,7 @@ public class TpmUtils {
 		certGen.setNotAfter(expiry.getTime());
 		certGen.setSubjectDN(new X500Principal("CN=" + subjectName));
 		certGen.setPublicKey(pubKey);
-		certGen.setSignatureAlgorithm("SHA1withRSA");
+		certGen.setSignatureAlgorithm("SHA256withRSA");
 		certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
 		certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
 		certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
@@ -440,7 +446,7 @@ public class TpmUtils {
 		pubExp[2] = (byte)(0x01 & 0xff);
 		RSAPublicKey pubEk = TpmUtils.makePubKey(pubEkMod, pubExp);
 		certGen.setPublicKey(pubEk);
-		certGen.setSignatureAlgorithm("SHA1withRSA");
+		certGen.setSignatureAlgorithm("SHA256withRSA");
 		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "TPM EK Credential")));
 		X509Certificate cert = certGen.generate(privKey, "BC");
 		return cert;
@@ -1078,6 +1084,47 @@ public class TpmUtils {
 		symCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), ivSpec);
 		return symCipher.doFinal(ciphertext);
 	}
+
+    /**
+     *
+     * @param key
+     * @param symCaAttestation
+     * @return
+     * @throws java.io.IOException
+     * @throws TpmUnsignedConversionException
+     * @throws TpmBytestreamResouceException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws InvalidAlgorithmParameterException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
+    public static byte[] decryptSymCaAttestation(byte[]key, byte[] symCaAttestation) throws IOException, TpmUnsignedConversionException, TpmBytestreamResouceException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {        
+        // once get the secret, we need to decrypt the sysmCaAttestation to get the aikcert
+        /* the symCaAttestation is in the format of TPM_SYM_CA_ATTESTATION
+            * UINT32          credSize   -- size of the credential parameter
+            * TPM_KEY_PARMS   algorithm  -- indicator and parameters forthe symmetic algorithm
+            * BYTE *          credential -- result of encryption TPM_IDENTITY_CREDENTIAL using the session_key and the algorithm indicated "algorithm"
+            *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.tcgSymEncrypt(challengeRaw, key, iv));
+         */
+        ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);        
+        int credsize = TpmUtils.getUINT32(bs);   
+        TpmKeyParams keyParms = new TpmKeyParams(bs);
+        log.debug("Consumed Key Params " + keyParms);
+        byte[] iv = new byte[16];
+        if(bs.read(iv, 0, iv.length) == -1) {
+            throw new IOException("Failed to read iv");
+        }
+        int ciphertextLen = credsize - 16;
+        byte[] ciphertext = new byte[ciphertextLen];
+        if(bs.read(ciphertext, 0, ciphertextLen) == -1) {
+            throw new IOException("Failed to read Cipher Text");
+        }
+
+        return TpmUtils.tcgSymDecrypt(ciphertext, key, iv);
+    }
+
 	/**
 	 * Generate a Hashed Message Authentication Code for TCS function authentication using the given auth blob and concatenation of all *H1 (1H1, 2H1, etc) values for the function.
 	 * @param authBlob 20 byte auth code for the object in question

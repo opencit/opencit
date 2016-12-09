@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -85,7 +86,7 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
         ruleEventLog.setMarkers(TrustMarker.VMM.name()); // pcr 19 measures vmm for esxi
         rules.add(ruleEventLog);
         // now add an integrity check for pcr 19, which is important in order to validate the event log used in previous rule
-        PcrEventLogIntegrity ruleEventLogIntegrity = new PcrEventLogIntegrity(PcrIndex.PCR19);
+        PcrEventLogIntegrity ruleEventLogIntegrity = new PcrEventLogIntegrity(DigestAlgorithm.SHA1, PcrIndex.PCR19);
         ruleEventLogIntegrity.setMarkers(TrustMarker.VMM.name()); // this event log integrity rule applies to pcr 19 which is for the vmm
         rules.add(ruleEventLogIntegrity);
         return rules;

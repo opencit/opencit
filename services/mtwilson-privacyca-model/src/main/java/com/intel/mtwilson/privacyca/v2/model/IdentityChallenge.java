@@ -15,6 +15,24 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName="identity_challenge")
 public class IdentityChallenge {
     private byte[] identityChallenge;
+    private int asymSize;
+    private int symSize;
+
+    public int getAsymSize() {
+        return asymSize;
+    }
+
+    public void setAsymSize(int asymSize) {
+        this.asymSize = asymSize;
+    }
+
+    public int getSymSize() {
+        return symSize;
+    }
+
+    public void setSymSize(int symSize) {
+        this.symSize = symSize;
+    }
 
     public void setIdentityChallenge(byte[] identityChallenge) {
         this.identityChallenge = identityChallenge;

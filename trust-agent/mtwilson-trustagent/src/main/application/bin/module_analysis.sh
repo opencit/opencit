@@ -2,6 +2,20 @@
 #Analysis tboot log
 # Usage: ./module_analysis.sh   (reads from txt-stat output)
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
+
+#First check if /opt/trustagent/var/measureLog.xml exist; if not, run the following scripts to generate it.
+# if yes, this means module analysis has been done since trustagent is started. just copy the module analysis result to the OUTFILE file
+# specified in the environment.
+SAVED_MEASUREMENT=/opt/trustagent/var/measureLog.xml
+OUTFILE=${OUTFILE:-/opt/trustagent/var/measureLog.xml}
+IS_SAVED=0
+if [ -e "$SAVED_MEASUREMENT" ] && [ -s "$SAVED_MEASUREMENT" ]; then
+  if [ "$OUTFILE" != "$SAVED_MEASUREMENT" ]; then
+     cp -f $SAVED_MEASUREMENT $OUTFILE
+  fi
+  exit 0
+fi
+
 TXTSTAT=$(which txt-stat 2>/dev/null)
 TXTSTAT=${TXTSTAT:-"/usr/sbin/txt-stat"}
 
@@ -211,8 +225,11 @@ xml_pcr2() {
  for parm in $num;do
  if [ $parm -gt 0 ];then
    x401Data="`$INFILE | sed -n "$((parm+3)), $((parm+3)) p" | sed "s/ //g" | sed "s/\t//g"`"
-   if [ $x401Data = "00000000" ];then
-   txt_status=2
+   if [ $x401Data = "00000000" ]; then
+     txt_status=2
+   elif [ $x401Data = "01000000" ];then
+     `echo $0 | sed "s/\.sh/_da\.sh/g"` $1
+     exit 0
    fi
  fi
  done
@@ -347,7 +364,7 @@ else
 fi
 
 
-if [ $txt_status -eq 2 -a $x404Data!="EOF" ];then
+if [ $txt_status -eq 2 -a $x403Data!="EOF" ];then
   sinit_mle_data_bios_acm_id="${x403Data:0:40}"
   #echo "@@ sinit_mle_data_bios_acm_id = $sinit_mle_data_bios_acm_id"
 else
@@ -575,4 +592,3 @@ fi
 echo "$BLANK2$BLANK2</modules>" >>$OUTFILE
 echo "$BLANK2</txt>" >>$OUTFILE
 echo "</measureLog>" >>$OUTFILE
-

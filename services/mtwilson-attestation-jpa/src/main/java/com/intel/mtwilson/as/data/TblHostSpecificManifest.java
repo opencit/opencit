@@ -34,6 +34,7 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblHostSpecificManifest.findByHostID", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.hostID = :hostID"),
     @NamedQuery(name = "TblHostSpecificManifest.findByModuleAndHostID", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.hostID = :hostID AND t.moduleManifestID.id = :Module_Manifest_ID"),
     @NamedQuery(name = "TblHostSpecificManifest.findByDigestValue", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.digestValue = :digestValue")})
+    @NamedQuery(name = "TblHostSpecificManifest.findByModuleIdHostIdPcrBank", query = "SELECT t FROM TblHostSpecificManifest t where t.hostID = :hostID AND t.moduleManifestID.id = :Module_Manifest_ID AND t.pcrBank = :pcrBank")
 public class TblHostSpecificManifest implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -47,6 +48,16 @@ public class TblHostSpecificManifest implements Serializable {
     @Basic(optional = false)
     @Column(name = "DigestValue")
     private String digestValue;
+    @Column(name = "pcr_bank")
+    private String pcrBank = "SHA1";
+
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
     @JoinColumn(name = "Module_Manifest_ID", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblModuleManifest moduleManifestID;

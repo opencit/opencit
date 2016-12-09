@@ -121,9 +121,15 @@ compile_aikqverify() {
   AIKQVERIFY_OK=''
   cd ${aikqverify_dir}/bin
   make  2>&1 > /dev/null
-  rm -f aikqverify.o
   rm -f Makefile
+  rm -f aikqverify.o
   rm -f aikqverify.c
+  rm -f aikqverify2.o
+  rm -f aikqverify2.c
+  rm -f aikqverifywin.o
+  rm -f aikqverifywin.c
+  rm -f aikqverifywin2.o
+  rm -f aikqverifywin2.c
   if [ -e aikqverify ]; then
     AIKQVERIFY_OK=yes
   fi

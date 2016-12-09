@@ -100,7 +100,7 @@ TRUSTAGENT_HTTP_LOG_FILE=$TRUSTAGENT_LOGS/http.log
 TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate"
 TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
 TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair take-ownership"
-TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS="create-binding-key certify-binding-key create-signing-key certify-signing-key"
+#TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS="create-binding-key certify-binding-key create-signing-key certify-signing-key"
 TRUSTAGENT_SETUP_TASKS="update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user $TRUSTAGENT_TPM_TASKS $TRUSTAGENT_AUTHORIZE_TASKS $TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS login-register"
 # not including configure-from-environment because we are running it always before the user-chosen tasks
 # not including register-tpm-password because we are prompting for it in the setup.sh
@@ -164,7 +164,7 @@ trustagent_setup() {
 
 trustagent_authorize() {
   export HARDWARE_UUID=$(trustagent_system_info "dmidecode -s system-uuid")
-  local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
+  local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA256"
   local default_value
   for v in $authorize_vars
   do
@@ -183,6 +183,10 @@ trustagent_start() {
         echo "Trust Agent is running"
         return 0
     fi
+
+    # regenerate Measurement log when trustagent is started
+    rm -rf $TRUSTAGENT_HOME/var/measureLog.xml
+    $TRUSTAGENT_HOME/bin/module_analysis.sh
 
     # check if we need to use authbind or if we can start java directly
     prog="$JAVA_CMD"
@@ -382,13 +386,17 @@ trousers_detect_and_run() {
   # here;  does not affect root user who would have /usr/sbin earlier in the PATH,
   # and also this change only affects our process
   PATH=$PATH:/usr/sbin
-  trousers=`which tcsd 2>/dev/null`
-  if [ -z "$trousers" ]; then
-    #echo_failure "trousers installation is required for trust agent to run successfully."
-    echo "trousers is required for trust agent to run"
-    exit -1
-  else
-    $trousers
+
+  TPM_VERSION=`cat $TRUSTAGENT_CONFIGURATION/tpm-version`
+  if [ "TPM_VERSION" == "1.2" ]; then 
+    trousers=`which tcsd 2>/dev/null`
+    if [ -z "$trousers" ]; then
+      #echo_failure "trousers installation is required for trust agent to run successfully."
+      echo "trousers is required for trust agent to run"
+      exit -1
+    else
+      $trousers
+    fi
   fi
 }
 

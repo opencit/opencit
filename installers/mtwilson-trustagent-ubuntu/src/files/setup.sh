@@ -91,7 +91,34 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 #VERSION=3.0
 #BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-3.0)"
 
+# make sure unzip and authbind are installed
+#java_required_version=1.7.0_51
+# make sure unzip and authbind are installed
+#java_required_version=1.7.0_51
+#Adding redhat-lsb libvirt for bug 5289
+#Adding net-tools for bug 5285
+#adding openssl-devel for bug 5284
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl tpm-tools make gcc trousers trousers-devel redhat-lsb-core libvirt net-tools openssl-devel"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind vim-common openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
 
+# identify tpm version and set the dependent packages based on version of TPM
+TPM_VERSION=1.2
+if [[ -f "/sys/class/misc/tpm0/device/caps" || -f "/sys/class/tpm/tpm0/device/caps" ]]; then
+  TPM_VERSION=1.2
+else
+#  if [[ -f "/sys/class/tpm/tpm0/device/description" && `cat /sys/class/tpm/tpm0/device/description` == "TPM 2.0 Device" ]]; then
+  TPM_VERSION=2.0
+  # Move to later phase of this script. install tpm2-tss, tpm2-tools, and tboot for tpm2
+  #./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
+
+  # not install trousers and its dev packages for tpm 2.0
+  TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common openssl make gcc redhat-lsb-core libvirt net-tools openssl-devel"
+  TRUSTAGENT_APT_PACKAGES="zip unzip authbind vim-common openssl libssl-dev make gcc binutils"
+  TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel make gcc"
+  TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+fi
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -133,6 +160,7 @@ export TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
 export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
 export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
 export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
+
 
 # before we start, clear the install log (directory must already exist; created above)
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
@@ -259,15 +287,8 @@ TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
 package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
 
-# make sure unzip and authbind are installed
-#java_required_version=1.7.0_51
-#Adding redhat-lsb libvirt for bug 5289
-#Adding net-tools for bug 5285
-#adding openssl-devel for bug 5284
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel redhat-lsb libvirt net-tools openssl-devel"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
+# save tpm version in trust agent configuration directory
+echo -n "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
@@ -276,6 +297,11 @@ if [ "$(whoami)" == "root" ]; then
 else
   echo_warning "Required packages:"
   auto_install_preview "TrustAgent requirements" "TRUSTAGENT"
+fi
+
+if [ "$TPM_VERSION" == "2.0" ]; then
+  # install tss2 and tpm2-tools for tpm2.0
+  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
 fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
@@ -327,7 +353,7 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
   ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
 fi
 
-### INSTALL MEASUREMENT AGENT
+### INSTALL MEASUREMENT AGENT --comment out for now for cit 2.2
 echo "Installing measurement agent..."
 TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
 if [ -z "$TBOOTXM_PACKAGE" ]; then
@@ -397,84 +423,87 @@ if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d
 fi
 
 ### symlinks
-#tpm_nvinfo
-tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
-if [ -z "$tpmnvinfo" ]; then
-  echo_failure "Cannot find tpm_nvinfo"
-  echo_failure "tpm-tools must be installed"
-  exit -1
-fi
-if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvinfo" ]]; then
-  ln -s "$tpmnvinfo" "$TRUSTAGENT_BIN"
-fi
+if [ "$TPM_VERSION" == "1.2" ]; then
+    #tpm_nvinfo
+    tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
+    if [ -z "$tpmnvinfo" ]; then
+      echo_failure "Cannot find tpm_nvinfo"
+      echo_failure "tpm-tools must be installed"
+      exit -1
+    fi
+    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvinfo" ]]; then
+      ln -s "$tpmnvinfo" "$TRUSTAGENT_BIN"
+    fi
 
-#tpm_nvrelease
-tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
-if [ -z "$tpmnvrelease" ]; then
-  echo_failure "Cannot find tpm_nvrelease"
-  echo_failure "tpm-tools must be installed"
-  exit -1
-fi
-if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvrelease" ]]; then
-  ln -s "$tpmnvrelease" "$TRUSTAGENT_BIN"
-fi
+    #tpm_nvrelease
+    tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
+    if [ -z "$tpmnvrelease" ]; then
+      echo_failure "Cannot find tpm_nvrelease"
+      echo_failure "tpm-tools must be installed"
+      exit -1
+    fi
+    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvrelease" ]]; then
+      ln -s "$tpmnvrelease" "$TRUSTAGENT_BIN"
+    fi
 
-#tpm_nvwrite
-tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
-if [ -z "$tpmnvwrite" ]; then
-  echo_failure "Cannot find tpm_nvwrite"
-  echo_failure "tpm-tools must be installed"
-  exit -1
-fi
-if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvwrite" ]]; then
-  ln -s "$tpmnvwrite" "$TRUSTAGENT_BIN"
-fi
+    #tpm_nvwrite
+    tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
+    if [ -z "$tpmnvwrite" ]; then
+      echo_failure "Cannot find tpm_nvwrite"
+      echo_failure "tpm-tools must be installed"
+      exit -1
+    fi
+    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvwrite" ]]; then
+      ln -s "$tpmnvwrite" "$TRUSTAGENT_BIN"
+    fi
 
-#tpm_nvread
-tpmnvread=`which tpm_nvread 2>/dev/null`
-if [ -z "$tpmnvread" ]; then
-  echo_failure "Cannot find tpm_nvread"
-  echo_failure "tpm-tools must be installed"
-  exit -1
-fi
-if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvread" ]]; then
-  ln -s "$tpmnvread" "$TRUSTAGENT_BIN"
-fi
+    #tpm_nvread
+    tpmnvread=`which tpm_nvread 2>/dev/null`
+    if [ -z "$tpmnvread" ]; then
+      echo_failure "Cannot find tpm_nvread"
+      echo_failure "tpm-tools must be installed"
+      exit -1
+    fi
+    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvread" ]]; then
+      ln -s "$tpmnvread" "$TRUSTAGENT_BIN"
+    fi
 
-#tpm_nvdefine
-tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
-if [ -z "$tpmnvdefine" ]; then
-  echo_failure "Cannot find tpm_nvdefine"
-  echo_failure "tpm-tools must be installed"
-  exit -1
-fi
-if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvdefine" ]]; then
-  ln -s "$tpmnvdefine" "$TRUSTAGENT_BIN"
-fi
+    #tpm_nvdefine
+    tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
+    if [ -z "$tpmnvdefine" ]; then
+      echo_failure "Cannot find tpm_nvdefine"
+      echo_failure "tpm-tools must be installed"
+      exit -1
+    fi
+    if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvdefine" ]]; then
+      ln -s "$tpmnvdefine" "$TRUSTAGENT_BIN"
+    fi
 
-#tpm_bindaeskey
-if [ -h "/usr/local/bin/tpm_bindaeskey" ]; then
-  rm -f "/usr/local/bin/tpm_bindaeskey"
-fi
-ln -s "$TRUSTAGENT_BIN/tpm_bindaeskey" /usr/local/bin/tpm_bindaeskey
+    #tpm_bindaeskey
+    if [ -h "/usr/local/bin/tpm_bindaeskey" ]; then
+      rm -f "/usr/local/bin/tpm_bindaeskey"
+    fi
+    ln -s "$TRUSTAGENT_BIN/tpm_bindaeskey" /usr/local/bin/tpm_bindaeskey
 
-#tpm_unbindaeskey
-if [ -h "/usr/local/bin/tpm_unbindaeskey" ]; then
-  rm -f "/usr/local/bin/tpm_unbindaeskey"
-fi
-ln -s "$TRUSTAGENT_BIN/tpm_unbindaeskey" /usr/local/bin/tpm_unbindaeskey
+    #tpm_unbindaeskey
+    if [ -h "/usr/local/bin/tpm_unbindaeskey" ]; then
+      rm -f "/usr/local/bin/tpm_unbindaeskey"
+    fi
+    ln -s "$TRUSTAGENT_BIN/tpm_unbindaeskey" /usr/local/bin/tpm_unbindaeskey
 
-#tpm_createkey
-if [ -h "/usr/local/bin/tpm_createkey" ]; then
-  rm -f "/usr/local/bin/tpm_createkey"
-fi
-ln -s "$TRUSTAGENT_BIN/tpm_createkey" /usr/local/bin/tpm_createkey
+    #tpm_createkey
+    if [ -h "/usr/local/bin/tpm_createkey" ]; then
+      rm -f "/usr/local/bin/tpm_createkey"
+    fi
+    ln -s "$TRUSTAGENT_BIN/tpm_createkey" /usr/local/bin/tpm_createkey
 
-#tpm_signdata
-if [ -h "/usr/local/bin/tpm_signdata" ]; then
-  rm -f "/usr/local/bin/tpm_signdata"
+    #tpm_signdata
+    if [ -h "/usr/local/bin/tpm_signdata" ]; then
+      rm -f "/usr/local/bin/tpm_signdata"
+    fi
+    ln -s "$TRUSTAGENT_BIN/tpm_signdata" /usr/local/bin/tpm_signdata
+
 fi
-ln -s "$TRUSTAGENT_BIN/tpm_signdata" /usr/local/bin/tpm_signdata
 
 hex2bin_install() {
   return_dir=`pwd`
@@ -533,7 +562,7 @@ fi
 # 5. run ldconfig -p to ensure it is found
 fix_libcrypto() {
   #yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
-  local has_libcrypto=`find / -name libcrypto.so.1.0.0 | head -1`
+  local has_libcrypto=`find / -name libcrypto.so.1.0.0 2>/dev/null | head -1`
   local libdir=`dirname $has_libcrypto`
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
@@ -571,23 +600,30 @@ return_dir=`pwd`
     cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
     cd ..
   else
-    # compile and install tpm commands
-    echo "Compiling TPM commands... "
-    cd commands
-    COMPILE_OK=''
-    make 2>&1 > /dev/null
-    # identity and takeownership commands not needed with NIARL PRIVACY CA
-    if [ -e aikquote ]; then
-      chmod 755 aikquote
-      cp aikquote $TRUSTAGENT_HOME/bin
-      COMPILE_OK=yes
-      echo_success "OK"
+    if [ "$TPM_VERSION" == "1.2" ]; then
+      # compile and install tpm commands
+      echo "Compiling TPM commands... "
+      cd commands
+      COMPILE_OK=''
+      make 2>&1 > /dev/null
+      # identity and takeownership commands not needed with NIARL PRIVACY CA
+      if [ -e aikquote ]; then
+        chmod 755 aikquote
+        cp aikquote $TRUSTAGENT_HOME/bin
+        COMPILE_OK=yes
+        echo_success "OK"
+      else
+        echo_failure "FAILED"
+      fi
+      chmod 755 aikquote NIARL_TPM_Module openssl.sh
+      cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
+      cd ..
     else
-      echo_failure "FAILED"
-    fi
-    chmod 755 aikquote NIARL_TPM_Module openssl.sh
-    cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
-    cd ..
+      cd commands
+      chmod 755 NIARL_TPM_Module openssl.sh
+      cp NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
+      cd ..      
+    fi 
   fi
   cd ..
   # create trustagent-version file
@@ -602,18 +638,21 @@ return_dir=`pwd`
 
 cd $return_dir
 
+
 if [ "$(whoami)" == "root" ]; then
-  tcsdBinary=$(which tcsd)
-  if [ -z "$tcsdBinary" ]; then
-    echo_failure "Not able to resolve trousers binary location. trousers installed?"
-    exit 1
-  fi
-  # systemd enable trousers for RHEL 7.2 startup
-  systemctlCommand=`which systemctl 2>/dev/null`
-  if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
-    echo "systemctl enabling trousers service..."
-    "$systemctlCommand" enable tcsd.service 2>/dev/null
-    "$systemctlCommand" start tcsd.service 2>/dev/null
+  if [ "$TPM_VERSION" == "1.2" ]; then
+    tcsdBinary=$(which tcsd)
+    if [ -z "$tcsdBinary" ]; then
+      echo_failure "Not able to resolve trousers binary location. trousers installed?"
+      exit 1
+    fi
+    # systemd enable trousers for RHEL 7.2 startup
+    systemctlCommand=`which systemctl 2>/dev/null`
+    if [ -d "/etc/systemd/system" ] && [ -n "$systemctlCommand" ]; then
+      echo "systemctl enabling trousers service..."
+      "$systemctlCommand" enable tcsd.service 2>/dev/null
+      "$systemctlCommand" start tcsd.service 2>/dev/null
+    fi
   fi
   echo "Registering tagent in start up"
   register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
@@ -784,7 +823,7 @@ tagent setup update-extensions-cache-file --force 2>/dev/null
 # NOTE: only the output from start-http-server is redirected to the logfile;
 #       the stdout from the setup command will be displayed
 tagent setup
-tagent start >>$logfile  2>&1
+#tagent start >>$logfile  2>&1
 
 # optional: register tpm password with mtwilson so pull provisioning can
 #           be accomplished with less reboots (no ownership transfer)

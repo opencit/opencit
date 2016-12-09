@@ -137,6 +137,18 @@ public class TblHosts implements Serializable {
     @Lob
     @Column(name = "binding_key_certificate")
     private String bindingKeyCertificate;
+    @Column(name = "tpm_version")
+    private String tpmVersion;
+    @Column(name = "pcr_bank")
+    private String pcrBank;
+
+    public String getTpmVersion() {
+        return tpmVersion;
+    }
+
+    public void setTpmVersion(String tpmVersion) {
+        this.tpmVersion = tpmVersion;
+    }
 
     public TblHosts() {
     }
@@ -197,6 +209,14 @@ public class TblHosts implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
     }
 
     public String getAddOnConnectionInfo() {

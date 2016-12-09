@@ -16,6 +16,17 @@ public class ManifestData {
 
     private String name;
     private String value;
+    private String pcrBank = "SHA1";
+
+    @JsonProperty("PcrBank")      
+    public String getPcrBank() {
+        return pcrBank;
+    }
+    
+    @JsonProperty("PcrBank")
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
 
     private ManifestData() {
     }
@@ -23,6 +34,11 @@ public class ManifestData {
     public ManifestData(String name, String value) {
         setName(name);
         setValue(value);
+    }
+    
+    public ManifestData(String name, String value, String pcrBank) {
+        this(name, value);
+        setPcrBank(pcrBank);
     }
 
     @JsonProperty("Name")

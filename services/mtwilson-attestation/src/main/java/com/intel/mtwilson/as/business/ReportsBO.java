@@ -250,16 +250,39 @@ public class ReportsBO {
                 assetTagPCR = ASSET_TAG_PCR;
             
             if (logs != null) {
+                Map<String, PcrLogReport> report = new TreeMap<>();
                 for (TblTaLog log : logs) {
                     logger.debug("getAttestationReport - Processing the PCR {} with trust status {}.", log.getManifestName(), log.getTrustStatus());
                     boolean value = (failureOnly && log.getTrustStatus() == false);
+                    
                     if (!failureOnly || value) {
                         if (log.getManifestName().equalsIgnoreCase(assetTagPCR)) {
-                            attestationReport.getPcrLogs().add(getPcrLogReportForAssetTag(log, tblHosts.getId()));
-                        } else {
-                            attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
+                            //attestationReport.getPcrLogs().add(getPcrLogReportForAssetTag(log, tblHosts.getId()));
+                            PcrLogReport r = getPcrLogReportForAssetTag(log, tblHosts.getId());
+                            if(!report.containsKey(log.getManifestName())) {
+                                report.put(log.getManifestName(), r);   
+                            } else if(r != null) {
+                                report.get(log.getManifestName()).getModuleLogs().addAll(r.getModuleLogs());
+                            }                            
+                        } else {                            
+                            //attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
+                            
+                            PcrLogReport r = getPcrManifestLog(tblHosts, log, failureOnly);
+                            if(!report.containsKey(log.getManifestName())) {
+                                report.put(log.getManifestName(), r);   
+                            } else {
+                                PcrLogReport existing = report.get(log.getManifestName());
+                                if(existing.getTrustStatus().intValue() != r.getTrustStatus().intValue()) {
+                                    existing.setTrustStatus(0);
+                                }
+                                existing.getModuleLogs().addAll(r.getModuleLogs());
+                                
+                            }      
                         }
                     }
+                }
+                for(PcrLogReport r: report.values()) {
+                    attestationReport.getPcrLogs().add(r);
                 }
             }
         }
@@ -316,7 +339,7 @@ public class ReportsBO {
         manifest.setTrustStatus(getTrustStatus(log.getTrustStatus()));
         manifest.setWhiteListValue(tblPcrManifest.getValue());
 //        if (log.getTblModuleManifestLogCollection() != null && log.getTblModuleManifestLogCollection().size() > 0) {
-            addManifestLogs(tblHosts.getId(), manifest, log, failureOnly,tblPcrManifest);// 20130417 added host id to parameter list so addManifestLogs can find host-specific module values
+            addManifestLogs(tblHosts, manifest, log, failureOnly,tblPcrManifest);// 20130417 added host id to parameter list so addManifestLogs can find host-specific module values
 //        }
         return manifest;
     }
@@ -342,7 +365,9 @@ public class ReportsBO {
 //    }
     
     
-    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
+    private void addManifestLogs(TblHosts host, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
+        Integer hostId = host.getId();
+        String registeredPcrBank = host.getPcrBank();
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<>();
         ModuleLogReport tbootxmModuleLogReport = new ModuleLogReport();
         HashMap<String, ModuleLogReport> temptbootxmSubModuleReport = new HashMap<>();
@@ -376,12 +401,12 @@ public class ReportsBO {
                 logger.debug("addManifestLogs - {} - {}", moduleManifest.getComponentName(), moduleManifest.getDigestValue());
 
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
-                        !moduleReports.containsKey(moduleManifest.getComponentName())){
+                        !moduleReports.containsKey(moduleManifest.getComponentName()) && registeredPcrBank.equals(moduleManifest.getPcrBank())){
                     
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
                         // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
                         //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
-                        String hostSpecificDigestValue = My.jpa().mwHostSpecificManifest().findByModuleAndHostID(hostId, moduleManifest.getId()).getDigestValue();
+                        String hostSpecificDigestValue = My.jpa().mwHostSpecificManifest().findByModuleIdHostIdPcrBank(hostId, moduleManifest.getId(), moduleManifest.getPcrBank()).getDigestValue();
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }
@@ -442,7 +467,7 @@ public class ReportsBO {
 
         if (pcrManifestCollection != null) {
             for (TblPcrManifest pcrManifest : pcrManifestCollection) {
-                if (pcrManifest.getName().equals(manifestName)) {
+                if (pcrManifest.getName().equals(manifestName) && pcrManifest.getPcrBank().equals(tblHosts.getPcrBank())) {
                     return pcrManifest;
                 }
             }

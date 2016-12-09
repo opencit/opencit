@@ -37,6 +37,7 @@ public class BuildQuoteXMLCmd implements ICommand {
             tpmQuoteResponse.quote = context.getTpmQuote();
             tpmQuoteResponse.eventLog = context.getModules(); //base64-encoded  xml which the caller will interpret
             tpmQuoteResponse.tcbMeasurement = context.getTcbMeasurement();
+            tpmQuoteResponse.selectedPcrBanks = context.getSelectedPcrBanks();
             context.setTpmQuoteResponse(tpmQuoteResponse);
         }
         catch(Exception e) {

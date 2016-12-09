@@ -190,7 +190,7 @@ function SetRequired(element) {
     }
 }
 
-function hostDataVoObbject(hostId,hostName,hostIPAddress,hostPort,hostDescription,biosName,biosBuildNo,vmmName,vmmBuildNo,updatedOn,emailAddress,location,oemName,vCenterDetails) {
+function hostDataVoObbject(hostId,hostName,hostIPAddress,hostPort,hostDescription,biosName,biosBuildNo,vmmName,vmmBuildNo,updatedOn,emailAddress,location,oemName,vCenterDetails,pcrBank) {
 	this.hostId = hostId;
 	this.hostName = hostName;
 	this.hostIPAddress = hostIPAddress;
@@ -205,6 +205,7 @@ function hostDataVoObbject(hostId,hostName,hostIPAddress,hostPort,hostDescriptio
 	this.location =location;
 	this.oemName =oemName;
 	this.vCenterDetails =vCenterDetails;
+	this.pcrBank =pcrBank;
 }
 
 function fnShowLoginCredentials() {
@@ -316,6 +317,7 @@ function fnGetNewHostData() {
 */	hostVo.emailAddress = $('#MainContent_tbEmailAddress').val();
 	hostVo.oemName = $('#MainContent_ddlOEM').val();
 	
+	hostVo.pcrBank = $('#MainContent_pcrBankSelected input:radio:checked').attr('value');
 	/*var isVmware = false;
 	var selected = $('#MainContent_LstVmm').val();
 	$('#MainContent_LstVmm').find('option').each(function() {
@@ -378,6 +380,7 @@ function addNewHost() {
             if (chechAddHostValidation()) {
                 if (confirm($("#alert_confirm_add_host").text())) {
                     var dataToSend = fnGetNewHostData();
+		    console.log(dataToSend.pcrBank);
                     dataToSend.hostId = null;
                     dataToSend = $.toJSON(dataToSend);
                     $('#mainAddHostContainer').prepend(disabledDiv);
@@ -398,6 +401,16 @@ function fnSaveNewHostInfoSuccess(response,messageToDisplay) {
 	}else {
 		$('#mleMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(response.message)+'</div>');
 	}
+}
+
+
+function showDialogRequiredPCRBank() {
+//      var str="";
+//      for ( var iteam in requiredPCRValuesHelp) {
+//              str+='<div class="helpDiv">'+requiredPCRValuesHelp[iteam]+'</div>';
+//      }
+        var str = '<div class="helpDiv" data-i18n="[html]help.required_pcr_bank_help"></div>';
+        fnOpenDialog(str, "Help", 500, 350,false);
 }
 
 // see also WhiteListConfig.js

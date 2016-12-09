@@ -61,7 +61,13 @@
                     <type>bin</type>
                     <classifier>rhel</classifier>
                 </dependency>
-                
+                <dependency>
+                    <groupId>com.intel.mtwilson.trustagent</groupId>
+                    <artifactId>mtwilson-tpm2-packages</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+                                
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
@@ -139,6 +145,13 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                             <classifier>rhel</classifier>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.trustagent</groupId>
+                                            <artifactId>mtwilson-tpm2-packages</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
