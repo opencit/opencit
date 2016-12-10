@@ -132,7 +132,14 @@ directory_layout
 if [ "${TRUSTAGENT_SETUP_PREREQS:-yes}" == "yes" ]; then
   # set TRUSTAGENT_REBOOT=no (in trustagent.env) if you want to ensure it doesn't reboot
   # set TRUSTAGENT_SETUP_PREREQS=no (in trustagent.env) if you want to skip this step 
-  source setup_prereqs.sh
+  chmod +x setup_prereqs.sh
+  ./setup_prereqs.sh
+  result=$?
+  if [ $result -eq 255 ]; then
+    mkdir -p "$TRUSTAGENT_HOME/var"
+    touch "$TRUSTAGENT_HOME/var/reboot_required"
+    exit 255
+  fi
 fi
 
 # determine if we are installing as root or non-root
@@ -795,7 +802,6 @@ if [ "$(whoami)" == "root" ]; then
   if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
    echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
   fi
-
 else
   echo_warning "Skipping monit installation"
 fi

@@ -50,14 +50,13 @@ fi
 
 ################################################################################
 
-# 1. Add epel-release-latest-7.noarch repository
-
-add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
-
-# 2. Install redhat-lsb-core and other redhat-specific packages
-
 if yum_detect; then
+  # 1. Add epel-release-latest-7.noarch repository
+  add_package_repository https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  # 2. Install redhat-lsb-core and other redhat-specific packages
   yum -y install redhat-lsb redhat-lsb-core libvirt net-tools grub2-efi-modules > /dev/null 2>&1
+#elif aptget_detect; then
+#  
 fi
 
 # 3. Install tboot
@@ -181,9 +180,17 @@ is_uefi_boot() {
 
 define_grub_file() {
   if is_uefi_boot; then
-    DEFAULT_GRUB_FILE=/boot/efi/EFI/redhat/grub.cfg
+    if [ -f "/boot/efi/EFI/redhat/grub.cfg" ]; then
+      DEFAULT_GRUB_FILE="/boot/efi/EFI/redhat/grub.cfg"
+    else
+      DEFAULT_GRUB_FILE="/boot/efi/EFI/ubuntu/grub.cfg"
+    fi
   else
-    DEFAULT_GRUB_FILE=/boot/grub2/grub.cfg  
+    if [ -f "/boot/grub2/grub.cfg" ]; then
+      DEFAULT_GRUB_FILE="/boot/grub2/grub.cfg"
+    else
+      DEFAULT_GRUB_FILE="/boot/grub/grub.cfg"
+    fi
   fi
   GRUB_FILE=${GRUB_FILE:-$DEFAULT_GRUB_FILE}
 }

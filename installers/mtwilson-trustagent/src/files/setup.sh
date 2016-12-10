@@ -802,7 +802,6 @@ if [ "$(whoami)" == "root" ]; then
   if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
    echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
   fi
-
 else
   echo_warning "Skipping monit installation"
 fi
