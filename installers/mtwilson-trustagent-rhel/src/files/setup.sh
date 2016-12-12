@@ -202,7 +202,6 @@ if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_
 fi
 profile_name=$profile_dir/$(basename $(getUserProfileFile))
 
-appendToUserProfileFile "export PATH=$TRUSTAGENT_BIN:\$PATH" $profile_name
 appendToUserProfileFile "export TRUSTAGENT_HOME=$TRUSTAGENT_HOME" $profile_name
 
 # if there's a monit configuration for trustagent, remove it to prevent
@@ -334,6 +333,17 @@ fi
 echo "Extracting application..."
 TRUSTAGENT_ZIPFILE=`ls -1 trustagent-*.zip 2>/dev/null | head -n 1`
 unzip -oq $TRUSTAGENT_ZIPFILE -d $TRUSTAGENT_HOME
+
+OIFS=$IFS
+IFS=" "
+bin_directories=($(find ${TRUSTAGENT_HOME} \( -name bin -type d \) -o \( -name sbin -type d \)))
+bin_directories_path=
+for directory in ${bin_directories[@]}; do
+  bin_directories_path+="${directory}:"
+done
+IFS=$OIFS
+
+appendToUserProfileFile "export PATH=$bin_directories_path\$PATH" $profile_name
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then

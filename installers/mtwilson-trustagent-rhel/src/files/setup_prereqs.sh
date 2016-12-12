@@ -148,7 +148,7 @@ if [ "$TPM_VERSION" == "1.2" ]; then
   fi
   install_trousers
   install_tpm_tools
-  install_patched_tpm_tools
+  #install_patched_tpm_tools
 elif [ "$TPM_VERSION" == "2.0" ]; then
   install_tboot_tpm2
   install_tss2_tpmtools2

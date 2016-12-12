@@ -43,12 +43,6 @@
                     <type>zip</type>
                 </dependency>
                 <dependency>
-                    <groupId>com.intel.mtwilson.contrib.linux</groupId>
-                    <artifactId>patched-tpm-tools</artifactId>
-                    <version>${project.version}</version>
-                    <type>bin</type>
-                </dependency>
-                <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-linux-util</artifactId>
                     <version>${project.version}</version>
@@ -118,13 +112,6 @@
                                             <type>zip</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>trustagent-${project.version}.zip</destFileName>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.contrib.linux</groupId>
-                                            <artifactId>patched-tpm-tools</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>bin</type>
-                                            <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
