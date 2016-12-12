@@ -223,8 +223,12 @@ configure_grub() {
   if [ -f /usr/lib/grub/x86_64-efi/multiboot2.mod ] && [ -d /boot/efi/EFI/redhat/x86_64-efi ]; then
     \cp /usr/lib/grub/x86_64-efi/multiboot2.mod /boot/efi/EFI/redhat/x86_64-efi/
   fi
-
-  grub2-mkconfig -o $GRUB_FILE
+  
+  if is_command_available grub2-mkconfig; then
+    grub2-mkconfig -o $GRUB_FILE
+  else
+    update-grub
+  fi
 }
 
 # TODO TPM2.0 :

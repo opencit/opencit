@@ -239,7 +239,7 @@ public class GenerateQuoteCmd implements ICommand {
                 }
             } else {
                 try {   
-                        CommandLine command = new CommandLine("/opt/trustagent/bin/aikquote");
+                        CommandLine command = new CommandLine("/opt/trustagent/share/tpmquote/bin/aikquote");
                         command.addArgument("-p");
                         command.addArgument(identityAuthKey);
                         command.addArgument("-c");

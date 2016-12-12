@@ -292,10 +292,10 @@ ASSET_TAG_SETUP="y"
 #Adding redhat-lsb libvirt for bug 5289
 #Adding net-tools for bug 5285
 #adding openssl-devel for bug 5284
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind make gcc vim-common"
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind make gcc dpkg-dev vim-common"
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind make gcc vim-common"
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind make gcc vim-common"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind vim-common"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind dpkg-dev vim-common"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind vim-common"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind vim-common"
 # save tpm version in trust agent configuration directory
 echo -n "$TPM_VERSION" > $TRUSTAGENT_CONFIGURATION/tpm-version
 
@@ -335,14 +335,16 @@ TRUSTAGENT_ZIPFILE=`ls -1 trustagent-*.zip 2>/dev/null | head -n 1`
 unzip -oq $TRUSTAGENT_ZIPFILE -d $TRUSTAGENT_HOME
 
 OIFS=$IFS
-IFS=" "
+IFS=$'\n'
 bin_directories=($(find ${TRUSTAGENT_HOME} \( -name bin -type d \) -o \( -name sbin -type d \)))
 bin_directories_path=
 for directory in ${bin_directories[@]}; do
+  chmod -R 700 ${directory}
   bin_directories_path+="${directory}:"
 done
 IFS=$OIFS
 
+export PATH=${bin_directories_path}$PATH
 appendToUserProfileFile "export PATH=$bin_directories_path\$PATH" $profile_name
 
 # update logback.xml with configured trustagent log directory
@@ -539,26 +541,10 @@ fi
 fi
 # end if [ "$TPM_VERSION" == "1.2" ]
 
-
-hex2bin_install() {
-  # build hex2bin in sub-shell so we change of directory is temporary
-  (
-    cd hex2bin
-    make && cp hex2bin $TRUSTAGENT_BIN
-    chmod +x $TRUSTAGENT_BIN/hex2bin
-  )
-}
-
-hex2bin_install
-
 hex2bin=`which hex2bin 2>/dev/null`
 if [ -z "$hex2bin" ]; then
   echo_failure "cannot find command: hex2bin"
   exit 1
-else
-  if [[ ! -h "$TRUSTAGENT_BIN/hex2bin" ]] && [[ ! -f "$TRUSTAGENT_BIN/hex2bin" ]]; then
-    ln -s "$hex2bin" "$TRUSTAGENT_BIN"
-  fi
 fi
 
 mkdir -p "$TRUSTAGENT_HOME"/share/scripts
@@ -625,54 +611,18 @@ if [ "$(whoami)" == "root" ]; then
   fix_libcrypto
 fi
 
-return_dir=`pwd`
+chmod 755 openssl.sh
+cp openssl.sh $TRUSTAGENT_HOME/bin
 
-  is_citrix_xen=`lsb_release -a | grep "^Distributor ID" | grep XenServer`
-  if [ -n "$is_citrix_xen" ]; then
-    # we have precompiled binaries for citrix-xen
-    echo "Installing TPM commands... "
-    cd commands-citrix-xen
-    chmod 755 aikquote NIARL_TPM_Module openssl.sh
-    cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
-    cd ..
-  else
-    if [ "$TPM_VERSION" == "1.2" ]; then
-      # compile and install tpm commands
-      echo "Compiling TPM commands... "
-      cd commands
-      COMPILE_OK=''
-      make 2>&1 > /dev/null
-      # identity and takeownership commands not needed with NIARL PRIVACY CA
-      if [ -e aikquote ]; then
-        chmod 755 aikquote
-        cp aikquote $TRUSTAGENT_HOME/bin
-        COMPILE_OK=yes
-        echo_success "OK"
-      else
-        echo_failure "FAILED"
-      fi
-      chmod 755 aikquote NIARL_TPM_Module openssl.sh
-      cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
-      cd ..
-    else
-      cd commands
-      chmod 755 NIARL_TPM_Module openssl.sh
-      cp NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
-      cd ..      
-    fi 
-  fi
-  cd ..
-  # create trustagent-version file
-  package_version_filename=$TRUSTAGENT_ENV/trustagent-version
-  datestr=`date +%Y-%m-%d.%H%M`
-  touch $package_version_filename
-  chmod 600 $package_version_filename
-  chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $package_version_filename
-  echo "# Installed Trust Agent on ${datestr}" > $package_version_filename
-  echo "TRUSTAGENT_VERSION=${VERSION}" >> $package_version_filename
-  echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
-
-cd $return_dir
+# create trustagent-version file
+package_version_filename=$TRUSTAGENT_ENV/trustagent-version
+datestr=`date +%Y-%m-%d.%H%M`
+touch $package_version_filename
+chmod 600 $package_version_filename
+chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $package_version_filename
+echo "# Installed Trust Agent on ${datestr}" > $package_version_filename
+echo "TRUSTAGENT_VERSION=${VERSION}" >> $package_version_filename
+echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
 
 if [ "$(whoami)" == "root" ]; then
   if [ "$TPM_VERSION" == "1.2" ]; then
