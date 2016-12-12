@@ -248,8 +248,14 @@ public class SamlGenerator {
                 // Required to add to cache
                 samlAssertion.expiry_ts = confirmationMethod.getNotOnOrAfter().toDate();
             }
-            InetAddress localhost = InetAddress.getLocalHost();
-            confirmationMethod.setAddress(localhost.getHostAddress()); // NOTE: This is the ATTESTATION SERVICE IP ADDRESS,  **NOT** THE HOST ADDRESS
+            // SubjectConfirmationData not required to have Address, and the
+            // Java API here is doing a DNS lookup to get the address. If the
+            // local host name is not in /etc/hosts or configured in DNS, this
+            // will fail. 
+            // If we need to restore host address, use "mtwilson.host" configuration
+            // setting instead of performing a lookup here.
+            //InetAddress localhost = InetAddress.getLocalHost();
+            //confirmationMethod.setAddress(localhost.getHostAddress()); // NOTE: This is the ATTESTATION SERVICE IP ADDRESS,  **NOT** THE HOST ADDRESS
             return confirmationMethod;
         }
         

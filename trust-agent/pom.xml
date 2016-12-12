@@ -17,7 +17,7 @@
     
     <modules>
         <module>mtwilson-privacyca-client-jaxrs2</module>
-        <module>mtwilson-tpm-commands</module>
+        <!--<module>mtwilson-tpm-commands</module>-->
         <module>mtwilson-trustagent</module>
         <module>mtwilson-trustagent-client-jaxrs2</module>
         <module>mtwilson-trustagent-configuration</module>

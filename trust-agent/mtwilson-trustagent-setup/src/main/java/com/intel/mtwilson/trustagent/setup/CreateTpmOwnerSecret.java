@@ -67,27 +67,13 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
         }
         else { /* for Linux. Still need to distinguish between TPM 1.2 and TPM 2.0 */
             log.debug("It is Linux");
-            
-            String tpmVersion = TrustagentConfiguration.getTpmVersion();
-            log.debug("Tpm version: {}", tpmVersion);
-            if (tpmVersion.equals("1.2")) {
-                File tpmOwned = new File("/sys/class/tpm/tpm0/device/owned");
-                if (!tpmOwned.exists()) {
-                    tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
-                }
+            File tpmOwned = new File("/sys/class/tpm/tpm0/device/owned");
+            if (tpmOwned.exists()) {
                 String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
                 Integer number = Integer.valueOf(text.trim());
                 return number == 1;
             }
-            else {
-                //Fix, how to check if tpm 2.0 owned
-                CommandResult result = CommandUtil.runCommand("tpm2-isowned");
-                if (result != null && result.getStdout() != null) {
-                    if(result.getStdout().contains("1")) 
-                        return true;
-                }
-                return false;
-            }
+            return false;
         }
     }
 }
