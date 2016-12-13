@@ -117,70 +117,35 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                     return null;
                 }
             } 
-		// User might have specified criteria for bulk retrieval of SAML attestations
-			if (criteria.fromDate != null && !criteria.fromDate.isEmpty()) {
-				log.debug("HostAttestation: SAML Search - Filter criteria for retrieving bulk SAML attestations are specified {}.", criteria.fromDate);
-				Calendar cal = Calendar.getInstance();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				
-				Iso8601Date createdIso8601Date = Iso8601Date.valueOf(criteria.fromDate);
-				cal.setTime(createdIso8601Date); // This would set the time to ex:2015-05-30 00:00:00
-				Date createdDate = dateFormat.parse(dateFormat.format(cal.getTime()));
 
-				List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().getListForHostsByExpirationDate(Integer.MIN_VALUE, createdDate);
-				if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
-					String samlList = "";
-					log.info("HostAttestation: SAML Search - Retrieved {} of results.", tblSamlAssertionList.size());
-					for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
-						if(tblSamlAssertion != null){
-							if(tblSamlAssertion.getErrorMessage() == null || tblSamlAssertion.getErrorMessage().isEmpty()) {
-								log.debug("HostAttestation: SAML Search found assertion for {} created on {} ", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getCreatedTs());
-								samlList = samlList + tblSamlAssertion.getSaml();
-							}else{
-								log.debug("HostAttestation: SAML Search found assertion for {} with error {}.", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getErrorMessage());                                    
-							}
-						}                                
-					}                            
-					return samlList;
-				} 
-				
-			}                                
+            // User might have specified criteria for bulk retrieval of SAML attestations
+            if (criteria.fromDate != null && !criteria.fromDate.isEmpty()) {
+                    log.debug("HostAttestation: SAML Search - Filter criteria for retrieving bulk SAML attestations are specified {}.", criteria.fromDate);
+                    Calendar cal = Calendar.getInstance();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-			if ((criteria.createdDate != null) && (!criteria.createdDate.isEmpty()))
-			{
-				if ((criteria.limitPerHost == null) || (criteria.limitPerHost.intValue() == 0)) {
-					criteria.limitPerHost = Integer.valueOf(1);
-				}
-				log.debug("HostAttestation: SAML Search - Filter criteria for retrieving bulk SAML attestations are specified {} - {}.", criteria.createdDate, criteria.limitPerHost);
-				Calendar cal = Calendar.getInstance();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Iso8601Date createdIso8601Date = Iso8601Date.valueOf(criteria.fromDate);
+                    cal.setTime(createdIso8601Date); // This would set the time to ex:2015-05-30 00:00:00
+                    Date createdDate = dateFormat.parse(dateFormat.format(cal.getTime()));
 
-				Iso8601Date createdIso8601Date = Iso8601Date.valueOf(criteria.createdDate);
-				cal.setTime(createdIso8601Date);
-				Date createdDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                    List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().getListForHostsByExpirationDate(Integer.MIN_VALUE, createdDate);
+                    if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
+                            String samlList = "";
+                            log.info("HostAttestation: SAML Search - Retrieved {} of results.", tblSamlAssertionList.size());
+                            for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
+                                    if(tblSamlAssertion != null){
+                                            if(tblSamlAssertion.getErrorMessage() == null || tblSamlAssertion.getErrorMessage().isEmpty()) {
+                                                    log.debug("HostAttestation: SAML Search found assertion for {} created on {} ", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getCreatedTs());
+                                                    samlList = samlList + tblSamlAssertion.getSaml();
+                                            }else{
+                                                    log.debug("HostAttestation: SAML Search found assertion for {} with error {}.", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getErrorMessage());                                    
+                                            }
+                                    }                                
+                            }                            
+                            return samlList;
+                    } 
+            }                                
 
-				List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().getListForHostsByExpirationDate(criteria.limitPerHost, createdDate);
-				if ((tblSamlAssertionList != null) && (!tblSamlAssertionList.isEmpty()))
-				{
-					String samlList = "";
-					log.info("HostAttestation: SAML Search - Retrieved {} of results.", Integer.valueOf(tblSamlAssertionList.size()));
-					for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
-						if (tblSamlAssertion != null) {
-							if ((tblSamlAssertion.getErrorMessage() == null) || (tblSamlAssertion.getErrorMessage().isEmpty()))
-							{
-								log.debug("HostAttestation: SAML Search found assertion for {} created on {} ", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getCreatedTs());
-								samlList = samlList + tblSamlAssertion.getSaml();
-							}
-							else
-							{
-								log.debug("HostAttestation: SAML Search found assertion for {} with error {}.", tblSamlAssertion.getHostId().getName(), tblSamlAssertion.getErrorMessage());
-							}
-						}
-					}
-					return samlList;
-				}
-			}	 
-			
             return null;
         } catch (RepositoryException re) {
             throw re;            
