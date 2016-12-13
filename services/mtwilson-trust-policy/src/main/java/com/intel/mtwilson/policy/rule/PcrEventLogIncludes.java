@@ -6,6 +6,7 @@ package com.intel.mtwilson.policy.rule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
@@ -31,17 +32,20 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogIncludes extends BaseRule {
+    private DigestAlgorithm pcrBank;
     private PcrIndex pcrIndex;
     private Set<Measurement> expected;
     
     protected PcrEventLogIncludes() { } // for desearializing jackson
     
-    public PcrEventLogIncludes(PcrIndex pcrIndex, Measurement expected) {
+    public PcrEventLogIncludes(DigestAlgorithm pcrBank, PcrIndex pcrIndex, Measurement expected) {
+        this.pcrBank = pcrBank;
         this.pcrIndex = pcrIndex;
         this.expected = new HashSet<Measurement>(1);
         this.expected.add(expected);
     }
-    public PcrEventLogIncludes(PcrIndex pcrIndex, Set<Measurement> expected) {
+    public PcrEventLogIncludes(DigestAlgorithm pcrBank, PcrIndex pcrIndex, Set<Measurement> expected) {
+        this.pcrBank = pcrBank;
         this.pcrIndex = pcrIndex;
         this.expected = expected;
     }
@@ -59,7 +63,7 @@ public class PcrEventLogIncludes extends BaseRule {
             report.fault(new PcrEventLogMissing());
         }
         else {
-            PcrEventLog pcrEventLog = hostReport.pcrManifest.getPcrEventLog(pcrIndex);
+            PcrEventLog pcrEventLog = hostReport.pcrManifest.getPcrEventLog(pcrBank, pcrIndex);
             if( pcrEventLog == null  ) {
                 report.fault(new PcrEventLogMissing(pcrIndex));
             }

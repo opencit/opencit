@@ -46,8 +46,9 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblModuleManifest.findByMleUuidHex", query = "SELECT t FROM TblModuleManifest t WHERE t.mle_uuid_hex = :mle_uuid_hex"),    
     @NamedQuery(name = "TblModuleManifest.findByComponentNameLike", query = "SELECT t FROM TblModuleManifest t WHERE t.componentName LIKE :name"),    
     @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName"),
+    @NamedQuery(name = "TblModuleManifest.findByMleNameEventNamePcrBank", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName = :name and t.eventID.name = :eventName and t.pcrBank = :pcrBank"),
     @NamedQuery(name = "TblModuleManifest.findByModuleValue", query = "SELECT t FROM TblModuleManifest t WHERE t.digestValue = :digestValue"),
-    @NamedQuery(name = "TblModuleManifest.findByMleIDEventID", query = "SELECT t.id FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.eventID.id = :eventId and t.componentName= :name")
+    @NamedQuery(name = "TblModuleManifest.findByMleIDEventIDPcrBank", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.eventID.id = :eventId and t.componentName= :name and t.pcrBank = :pcrBank")
     })
 //    @NamedQuery(name = "TblModuleManifest.findByUpdatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.updatedOn = :updatedOn")
 
@@ -62,6 +63,16 @@ public class TblModuleManifest implements Serializable {
     @Basic(optional = false)
     @Column(name = "DigestValue")
     private String digestValue;
+    @Column(name = "pcr_bank")
+    private String pcrBank;
+
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
     @Column(name = "ExtendedToPCR")
     private String extendedToPCR;
     @Column(name = "PackageName")

@@ -2,7 +2,11 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,34 +26,43 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * PcrModuleManifest and an actual (from the HostReport)  PcrModuleManifest, and
  * compare the expected to the actual. 
  * 
+ * @param <T>
  * @since 1.2
  * @author jbuhacoff
  */
-public class PcrEventLog extends ObjectModel {
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "digest_type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PcrEventLogSha1.class),
+    @JsonSubTypes.Type(value = PcrEventLogSha256.class)
+})
+public abstract class PcrEventLog<T extends Measurement> extends ObjectModel {
     private final PcrIndex pcrIndex;
-    private final List<Measurement> eventLog = new ArrayList<>();
+    private final List<T> eventLog = new ArrayList<>();
 
     public PcrEventLog(PcrIndex pcrIndex) {
         this.pcrIndex = pcrIndex;
     }
     
     @JsonCreator
-    public PcrEventLog(@JsonProperty("pcr_index") PcrIndex pcrIndex, @JsonProperty("event_log") List<Measurement> moduleManifest) {
+    public PcrEventLog(@JsonProperty("pcr_index") PcrIndex pcrIndex, @JsonProperty("event_log") List<T> moduleManifest) {
         this.pcrIndex = pcrIndex;
         if( moduleManifest != null ) {
-            this.eventLog.addAll(moduleManifest);
+            this.eventLog.addAll(moduleManifest);            
         }
     }
     
     public PcrIndex getPcrIndex() { return pcrIndex; }
-    public List<Measurement> getEventLog() { return eventLog; }
+    public List<T> getEventLog() { return eventLog; }
     
     /**
      * Checks to see if the PcrModuleManifest contains the given Measurement (value & description)
      * @param measurement
      * @return true if the PcrModuleManifest contains the given Measurement value
      */
-    public boolean contains(Measurement m) {
+    public boolean contains(T m) {
         if( m == null ) { return false; }
         return eventLog.contains(m); 
     }
@@ -59,7 +72,7 @@ public class PcrEventLog extends ObjectModel {
      * @param value
      * @return true if the PcrModuleManifest contains an entry with the specified value, false otherwise
      */
-    public boolean contains(Sha1Digest value) {
+    public boolean contains(AbstractDigest value) {
         if( value == null ) { return false; }
         for(Measurement m : eventLog) {
             if( m.getValue().equals(value) ) {
@@ -130,6 +143,7 @@ public class PcrEventLog extends ObjectModel {
                 }
             }
         }
-    }
-
+    }        
+    
+    public abstract DigestAlgorithm getPcrBank();
 }

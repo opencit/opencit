@@ -988,7 +988,7 @@ function isNumber(n) {
                                             -->
                                             <a data-bind-uuid="item.id" href="#" data-i18n="link.deploy" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show();  $('certificate-provision-host').focus(); return false;">Deploy</a> &nbsp;
                                             <a href="" onmouseover="$(this).download = $(this).getAttribute('filename') + '.crt';$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);"  data-bind-filename="item.subject" data-toggle="tooltip" title="Download Certificate"><span class="glyphicon glyphicon-downlaod-alt"></span></a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
-                                            <a data-bind-uuid="item.id" href="#" data-i18n="link.import" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
+                                            <!-- <a data-bind-uuid="item.id" href="#" data-i18n="link.import" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp; -->
                                             <a data-bind-uuid="item.id" href="#" data-i18n="link.revoke" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>
                                         </td>
                                     </tr>

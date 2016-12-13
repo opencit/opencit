@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
 import com.intel.dcsg.cpg.configuration.Configurable;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.net.URL;
@@ -65,7 +66,8 @@ public class ProvisionTPM implements Configurable, Runnable {
             // secret we know so we can continue
             byte [] nonce1 = TpmUtils.createRandomBytes(20);
             try {
-                TpmModule.takeOwnership(config.getTpmOwnerSecret(), nonce1);
+                //TpmModule.takeOwnership(config.getTpmOwnerSecret(), nonce1);
+                Tpm.getModule().takeOwnership(config.getTpmOwnerSecret(), nonce1);
             } catch (TpmModule.TpmModuleException e){
                 if( e.getErrorCode() != null && e.getErrorCode() == 4 ) {
                     log.debug("Ownership is already taken"); 
@@ -83,7 +85,8 @@ public class ProvisionTPM implements Configurable, Runnable {
             byte[] nonce2 = TpmUtils.createRandomBytes(20);
             log.debug("Nonce: {}", TpmUtils.byteArrayToHexString(nonce2));
             try {
-                byte [] pubEkMod = TpmModule.getEndorsementKeyModulus(config.getTpmOwnerSecret(), nonce2);
+                //byte [] pubEkMod = TpmModule.getEndorsementKeyModulus(config.getTpmOwnerSecret(), nonce2);
+                byte [] pubEkMod = Tpm.getModule().getEndorsementKeyModulus(config.getTpmOwnerSecret(), nonce2);
                 log.debug("Public EK Modulus: {}", TpmUtils.byteArrayToHexString(pubEkMod));
                 log.debug("Requesting TPM endorsement from Privacy CA");
                 // send the public endorsement key modulus to the privacy ca and receive the endorsement certificate
@@ -100,7 +103,8 @@ public class ProvisionTPM implements Configurable, Runnable {
                 X509Certificate ekCert = pcaClient.endorseTpm(pubEkMod);
                 log.debug("Received EC {}", Sha1Digest.digestOf(ekCert.getEncoded()).toHexString());
                 // write the EC to the TPM NVRAM
-                TpmModule.setCredential(config.getTpmOwnerSecret(), "EC", ekCert.getEncoded());
+                //TpmModule.setCredential(config.getTpmOwnerSecret(), "EC", ekCert.getEncoded());
+                Tpm.getModule().setCredential(config.getTpmOwnerSecret(), "EC", ekCert.getEncoded());
             } catch (TpmModule.TpmModuleException e){
                 log.error("Error getting EC: {}", e.getMessage());
                 throw e;

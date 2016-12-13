@@ -100,8 +100,8 @@ public class MwHostPreRegistrationDetails implements Serializable {
         if (passwordInPlain == null && password != null) {
             try {
                 passwordInPlain = ASDataCipher.cipher.decryptString(password);
-                log.info("MwHostPreRegistrationDetails ASDataCipher plainText = {}", passwordInPlain);
-                log.info("MwHostPreRegistrationDetails ASDataCipher cipherText = {}", password);
+                //log.debug("MwHostPreRegistrationDetails ASDataCipher plainText = {}", passwordInPlain);
+                log.debug("MwHostPreRegistrationDetails ASDataCipher cipherText = {}", password);
             } catch (Exception e) {
                 log.error("Cannot decrypt host pre-registration credentials", e);
                 throw new IllegalArgumentException("Cannot decrypt host pre-registration credentials.");

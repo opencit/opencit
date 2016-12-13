@@ -1,5 +1,7 @@
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
@@ -38,11 +40,16 @@ import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.MeasurementSha1;
+import com.intel.mtwilson.model.MeasurementSha256;
 import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.model.PcrEventLogFactory;
+import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.HostInfo;
@@ -57,6 +64,7 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Map;
 import javax.xml.bind.PropertyException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -66,6 +74,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.shiro.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +106,7 @@ public class TAHelper {
     private String aikverifyhomeBin;
     private String aikverifyCmd;
     private Pattern pcrNumberPattern = Pattern.compile("[0-9]|[0-1][0-9]|2[0-3]"); // integer 0-23 with optional zero-padding (00, 01, ...)
-    private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
+    private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]+"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
     private boolean quoteWithIPAddress = true; // to fix issue #1038 we use this secure default
@@ -178,9 +187,16 @@ public class TAHelper {
             aikverifyhomeData = varPath;
 //            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             if (isHostWindows)
-                aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
-            else
-                aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+                if (host.TpmVersion.equals("2.0"))
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin2";
+                else
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
+            else {
+                if (host.TpmVersion.equals("2.0"))
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverify2";
+                else
+                    aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverify";
+            }
         } else {
             // mtwilson 1.2 configuration
             Configuration config = ASConfig.getConfiguration();
@@ -497,7 +513,7 @@ public class TAHelper {
         File n;
         File c;
         File r;
-        byte[] nonce;
+        byte[] nonce;        
         if( challenge == null ) {
             nonce = generateNonce(); // 20 random bytes
         }
@@ -525,7 +541,8 @@ public class TAHelper {
         trustedAik = X509Util.encodePemCertificate(client.getAik());
 
         // to fix issue #1038 trust agent relay we send 20 random bytes nonce to the host (base64-encoded) but if mtwilson.tpm.quote.ipaddress is enabled then in our copy we replace the last 4 bytes with the host's ip address, and when the host generates the quote it does the same thing, and we can verify it later
-        TpmQuoteResponse tpmQuoteResponse = client.getTpmQuote(nonce, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
+        // we select best PCR bank but we will change to all PCR banks once it's supported
+        TpmQuoteResponse tpmQuoteResponse = client.getTpmQuote(nonce, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}, host.PcrBanks); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
         log.debug("got response from server [" + hostname + "] ");
 
         log.debug("extracted quote from response: {}", Base64.encodeBase64String(tpmQuoteResponse.quote));
@@ -546,6 +563,7 @@ public class TAHelper {
         }
 
         // for Windows host, we generate a new nonce by sha1(nonce | tag)
+        // Now is done for ALL hosts, not only Windows
         if (tpmQuoteResponse.isTagProvisioned) {
             log.debug("tpmQuoteResponse.isTagProvisioned is true");
             verifyNonce = Sha1Digest.digestOf(verifyNonce).extend(tpmQuoteResponse.assetTag).toByteArray();
@@ -634,18 +652,17 @@ public class TAHelper {
         xtw.writeAttribute("TXT_Support", String.valueOf(true)); //String.valueOf(tpmSupport));
 
 //        if (tpmSupport == true) {
-            for (int i = 0; i < 24; i++) {
-//                ArrayList<IManifest> pcrMFList = new ArrayList<IManifest>();
-//                pcrMFList.addAll(pcrManifestMap.values());
-
-//                for (IManifest pcrInfo : pcrMFList) {
-                Pcr pcr = pcrManifest.getPcr(i);
-//                    PcrManifest pInfo = (PcrManifest) pcrInfo;
-                xtw.writeStartElement("PCRInfo");
-                xtw.writeAttribute("ComponentName", pcr.getIndex().toString()); // String.valueOf(pInfo.getPcrNumber()));
-                xtw.writeAttribute("DigestValue", pcr.getValue().toString().toUpperCase()); // pInfo.getPcrValue().toUpperCase());
-                xtw.writeEndElement();
-            }
+            
+            // Note: Map should be insertion sorted by insertion order
+            Map<DigestAlgorithm, List<Pcr>> pcrs = pcrManifest.getPcrsMap();
+            for(Map.Entry<DigestAlgorithm, List<Pcr>> e : pcrs.entrySet()) {
+                for(Pcr p : e.getValue()) {
+                    xtw.writeStartElement("PCRInfo");
+                    xtw.writeAttribute("ComponentName", p.getIndex().toString());
+                    xtw.writeAttribute("DigestValue", p.getValue().toString().toUpperCase());
+                    xtw.writeAttribute("DigestAlgorithm", e.getKey().toString());                            
+                }                
+            }                       
 //        } else {
 //            xtw.writeStartElement("PCRInfo");
 //            xtw.writeAttribute("Error", "Host does not support TPM.");
@@ -653,19 +670,21 @@ public class TAHelper {
 //        }
 
         // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report.
-        for (int pcrIndex = 0; pcrIndex < 24; pcrIndex++) {
-            if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex))) {
-                List<Measurement> eventLogs = pcrManifest.getPcrEventLog(pcrIndex).getEventLog();
-                for (Measurement eventLog : eventLogs) {
+        Map<DigestAlgorithm, List<PcrEventLog>> logs = pcrManifest.getPcrEventLogMap();
+        for(Map.Entry<DigestAlgorithm, List<PcrEventLog>> e : logs.entrySet()) {
+            for(PcrEventLog pel : e.getValue()) {
+                List<Measurement> eventLogs = pel.getEventLog();
+                for(Measurement m : eventLogs) {
                     xtw.writeStartElement("EventDetails");
                     xtw.writeAttribute("EventName", "OpenSource.EventName");
-                    xtw.writeAttribute("ComponentName", eventLog.getLabel());
-                    xtw.writeAttribute("DigestValue", eventLog.getValue().toString().toUpperCase());
-                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pcrIndex));
+                    xtw.writeAttribute("ComponentName", m.getLabel());                    
+                    xtw.writeAttribute("DigestValue", m.getValue().toString().toUpperCase());
+                    xtw.writeAttribute("DigestAlgorithm", pel.getPcrBank().toString().toUpperCase());
+                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pel.getPcrIndex()));
                     xtw.writeAttribute("PackageName", "");
                     xtw.writeAttribute("PackageVendor", "");
                     xtw.writeAttribute("PackageVersion", "");
-                    if (ArrayUtils.contains(openSourceHostSpecificModules, eventLog.getLabel())) {
+                    if (ArrayUtils.contains(openSourceHostSpecificModules, m.getLabel())) {
                         // For Xen, these modules would be vmlinuz and initrd and for KVM it would just be initrd.
                         xtw.writeAttribute("UseHostSpecificDigest", "true");
                     } else {
@@ -836,7 +855,7 @@ public class TAHelper {
     }
 
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
-//        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
+//        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();        
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s",
@@ -858,14 +877,32 @@ public class TAHelper {
         for (String pcrString : result) {
             String[] parts = pcrString.trim().split(" ");
             if (parts.length == 2) {
-                String pcrNumber = parts[0].trim().replaceAll(pcrNumberUntaint, "").replaceAll("\n", "");
+                /* parts[0] contains pcr index and the bank algorithm
+                 * in case of SHA1, the bank algorithm is not attached. so the format is just the pcr number same as before
+                 * in case of SHA256 or other algorithms, the format is "pcrNumber_SHA256"
+                 */
+                String[] pcrIndexParts = parts[0].trim().split("_");
+                String pcrNumber = pcrIndexParts[0].trim().replaceAll(pcrNumberUntaint, "").replaceAll("\n", "");
+                String pcrBank;
+                if (pcrIndexParts.length ==2)
+                    pcrBank = pcrIndexParts[1].trim();
+                else
+                    pcrBank = "SHA1";
                 String pcrValue = parts[1].trim().replaceAll(pcrValueUntaint, "").replaceAll("\n", "");
+
                 boolean validPcrNumber = pcrNumberPattern.matcher(pcrNumber).matches();
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
                 if (validPcrNumber && validPcrValue) {
                     log.debug("Result PCR " + pcrNumber + ": " + pcrValue);
 //                	pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));
-                    pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
+                    // TODO: structure returned by this will be different, so we can actually select the algorithm by type and not length
+                    // if(pcrValue.length() == 32 * 2) {
+                    if(pcrBank.equals("SHA256")) {
+                        pcrManifest.setPcr(PcrFactory.newInstance(DigestAlgorithm.SHA256, PcrIndex.valueOf(pcrNumber), pcrValue));
+                    //} else if(pcrValue.length() == 20 * 2) {
+                    } else if(pcrBank.equals("SHA1")) {
+                        pcrManifest.setPcr(PcrFactory.newInstance(DigestAlgorithm.SHA1, PcrIndex.valueOf(pcrNumber), pcrValue));
+                    } 
                 }
             } else {
                 log.warn("Result PCR invalid");
@@ -894,11 +931,18 @@ public class TAHelper {
                 int extendedToPCR = -1;
                 String digestValue = "";
                 String componentName = "";
+                String pcrBank = "SHA1";
 
                 while (reader.hasNext()) {
                     if (reader.getEventType() == XMLStreamConstants.START_ELEMENT
                             && reader.getLocalName().equalsIgnoreCase("module")) {
                         reader.next();
+                        
+                        if(reader.getLocalName().equalsIgnoreCase("pcrBank")) {
+                            pcrBank = reader.getElementText().toUpperCase();
+                            reader.next();
+                        }                       
+                        
                         // Get the PCR Number to which the module is extended to
                         if (reader.getLocalName().equalsIgnoreCase("pcrNumber")) {
                             extendedToPCR = Integer.parseInt(reader.getElementText());
@@ -906,7 +950,7 @@ public class TAHelper {
 
                         reader.next();
                         // Get the Module name
-                        if (reader.getLocalName().equalsIgnoreCase("name")) {
+                        if (reader.getLocalName().equalsIgnoreCase("name")) {                            
                             componentName = reader.getElementText();
                         }
 
@@ -914,19 +958,19 @@ public class TAHelper {
                         // Get the Module hash value
                         if (reader.getLocalName().equalsIgnoreCase("value")) {
                             digestValue = reader.getElementText();
-                        }
+                        }                                                
 
                         log.debug("Process module " + componentName + " getting extended to " + extendedToPCR);
 
                         // Attach the PcrEvent logs to the corresponding pcr indexes.
-                        // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.
-                        Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue);
-                        if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(extendedToPCR))) {
-                            pcrManifest.getPcrEventLog(extendedToPCR).getEventLog().add(m);
+                        // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.                        
+                        Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue, pcrBank);
+                        if (pcrManifest.containsPcrEventLog(pcrBank, PcrIndex.valueOf(extendedToPCR))) {
+                            pcrManifest.getPcrEventLog(pcrBank, extendedToPCR).getEventLog().add(m);
                         } else {
                             ArrayList<Measurement> list = new ArrayList<Measurement>();
                             list.add(m);
-                            pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(extendedToPCR), list));
+                            pcrManifest.setPcrEventLog(PcrEventLogFactory.newInstance(pcrBank, PcrIndex.valueOf(extendedToPCR), list));
                         }
                     }
                     reader.next();
@@ -950,7 +994,7 @@ public class TAHelper {
      * @param moduleHash
      * @return
      */
-    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash) {
+    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash, String pcrBank) {
         HashMap<String, String> info = new HashMap<String, String>();
         info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
         // Removing the prefix of "OpenSource" as it is being captured in the event type
@@ -959,7 +1003,15 @@ public class TAHelper {
         info.put("PackageVendor", "");
         info.put("PackageVersion", "");
 
-        return new Measurement(new Sha1Digest(moduleHash), moduleName, info);
+        DigestAlgorithm da = DigestAlgorithm.valueOf(pcrBank);        
+        switch(da) {
+            case SHA1:
+                return new MeasurementSha1(new Sha1Digest(moduleHash), moduleName, info);                
+            case SHA256:                
+                return new MeasurementSha256(new Sha256Digest(moduleHash), moduleName, info);                
+            default:
+                throw new UnsupportedOperationException("PCRBank: " + pcrBank + " not supported");
+        }        
     }
     /*
      public EntityManagerFactory getEntityManagerFactory() {
@@ -980,4 +1032,5 @@ public class TAHelper {
      return pcrs;
      }
      */
+        
 }

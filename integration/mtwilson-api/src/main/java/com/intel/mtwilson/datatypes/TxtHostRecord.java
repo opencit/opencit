@@ -15,6 +15,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.shiro.util.StringUtils;
 //import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 //import org.codehaus.jackson.annotate.JsonProperty;
 //import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -83,7 +88,10 @@ public class TxtHostRecord {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
     public String Hardware_Uuid;
-    
+    @JsonProperty
+    public String TpmVersion;
+    @JsonProperty
+    public String PcrBanks;
     /**
      * @since 2.0
      */
@@ -119,6 +127,8 @@ public class TxtHostRecord {
         AIK_SHA1 = input.getAikSha1();
         Hardware_Uuid = null;
         tlsPolicyChoice = input.getTlsPolicyChoice();
+        TpmVersion = input.getTpmVersion();
+        PcrBanks = input.getPcrBanks();
     }    
 
 
@@ -144,7 +154,49 @@ public class TxtHostRecord {
         this.VMM_OSVersion = host.VMM_OSVersion;
         this.VMM_Version = host.VMM_Version;
         this.tlsPolicyChoice = host.tlsPolicyChoice;
-    }    
+        this.TpmVersion = host.TpmVersion;
+        this.PcrBanks = host.PcrBanks;
 
+    }    
+    
+    @JsonIgnore
+    public String getBestPcrAlgorithmBank() {
+        if(PcrBanks != null && PcrBanks.length() > 0)
+            return selectBestSinglePcrBank(this.PcrBanks);
+        else 
+            return "SHA1";
+    }
+    
+    public static String selectBestSinglePcrBank(String availableBanks) {        
+        String[] banks = StringUtils.split(availableBanks, ' ');
+        Map<String, Integer> rankings = new HashMap<>();
+        rankings.put("SHA1", 0);
+        rankings.put("SHA256", 1);
+        rankings.put("SHA384", 2);
+        rankings.put("SHA512", 3);
+        
+        String best = "SHA1";  //initialized to SHA1
+        int i=0;
+        for(String b : banks) {
+            if (rankings.containsKey(b) && i<3) { // input validation for supported pcrbanks; and only the first 3 strings are considered.
+                if(rankings.get(b) > rankings.get(best)) {
+                    best = b;
+                }
+            }
+            i++;
+        }        
+        return best;
+    }
+
+    @JsonIgnore
+    public boolean getDaMode() {
+        ConnectionString connString;
+        try {
+            connString = new ConnectionString(this.AddOn_Connection_String);
+            return "2.0".equals(this.TpmVersion) && connString.getVendor() == Vendor.INTEL;
+        } catch (MalformedURLException ex) {
+            return false;
+        }        
+    }
 
 }

@@ -426,12 +426,13 @@ h5, h6
 
 /*.row12{width: 50px;}*/
 
-.manifestModuleTypeRow1{width: 144px;}
-.manifestModuleTypeRow2{width: 160px;}
-.manifestModuleTypeRow3{width: 115px;}
-.manifestModuleTypeRow4{width: 65px;}
+.manifestModuleTypeRow1{width: 124px;}
+.manifestModuleTypeRow2{width: 40px;}
+.manifestModuleTypeRow3{width: 160px;}
+.manifestModuleTypeRow4{width: 115px;}
 .manifestModuleTypeRow5{width: 65px;}
-.manifestModuleTypeRow6{width: 75px;}
+.manifestModuleTypeRow6{width: 65px;}
+.manifestModuleTypeRow7{width: 55px;}
 
 .manifestModuleTypeTableHeader{
     table-layout: fixed;

@@ -13,6 +13,7 @@ REM ECHO.Setup trust agent with CIT server...
 REM echo. ==Trust Agent located at: %package_dir%
 
 set TRUSTAGENT_HOME=%package_dir%
+set TRUSTAGENT_BIN=%package_dir%\bin
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
 set TRUSTAGENT_LOGS=%TRUSTAGENT_HOME%\logs
 
@@ -23,6 +24,7 @@ REM setx PATH "%PATH%;%package_bin" /M
 
 set intel_conf_dir=%package_dir%\configuration
 set package_config_filename=%intel_conf_dir%\%package_name%.properties
+set tpm_version_filename=%intel_conf_dir%\tpm-version
 set package_env_filename=%package_dir%\%package_name%.env
 set package_version_filename=%package_dir%\env.d\trustagent.version
 set ASSET_TAG_SETUP="y"
@@ -55,7 +57,7 @@ IF EXIST "%package_dir%\trustagent.env" (
 )
 
 REM # this is a list of all the variables we expect to find in trustagent.env
-set TRUSTAGENT_ENV_VARS=MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USERNAME MTWILSON_API_PASSWORD TPM_OWNER_SECRET TPM_SRK_SECRET AIK_SECRET AIK_INDEX TPM_QUOTE_IPV4 TRUSTAGENT_HTTP_TLS_PORT TRUSTAGENT_TLS_CERT_DN TRUSTAGENT_TLS_CERT_IP TRUSTAGENT_TLS_CERT_DNS TRUSTAGENT_KEYSTORE_PASSWORD DAA_ENABLED TRUSTAGENT_PASSWORD JAVA_REQUIRED_VERSION HARDWARE_UUID
+set TRUSTAGENT_ENV_VARS=MTWILSON_API_URL MTWILSON_TLS_CERT_SHA256 MTWILSON_API_USERNAME MTWILSON_API_PASSWORD TPM_OWNER_SECRET TPM_SRK_SECRET AIK_SECRET AIK_INDEX TPM_QUOTE_IPV4 TRUSTAGENT_HTTP_TLS_PORT TRUSTAGENT_TLS_CERT_DN TRUSTAGENT_TLS_CERT_IP TRUSTAGENT_TLS_CERT_DNS TRUSTAGENT_KEYSTORE_PASSWORD DAA_ENABLED TRUSTAGENT_PASSWORD JAVA_REQUIRED_VERSION HARDWARE_UUID
 
 REM export_vars $TRUSTAGENT_ENV_VARS
 FOR %%a in (%TRUSTAGENT_ENV_VARS%) do (
@@ -144,6 +146,9 @@ echo.Trust agent setup: Create trustagent.version
 > "%package_version_filename%"  echo. "# Installed Trust Agent on %date% %time%"
 >> "%package_version_filename%"  echo. "TRUSTAGENT_VERSION=%VERSION%"
 >> "%package_version_filename%"  echo "TRUSTAGENT_RELEASE=\"%BUILD%\""
+
+REM # create tpm-version file
+tpmtool.exe getTpmVersion > "%TRUSTAGENT_CONF%\tpm-version"
 
 echo.Trust agent setup: Registering tagent in start up
 REM register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1

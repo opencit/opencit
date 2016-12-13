@@ -49,13 +49,13 @@ public class PcrMatchesConstant extends BaseRule {
             report.fault(new PcrManifestMissing());            
         }
         else {
-            Pcr actual = hostReport.pcrManifest.getPcr(expected.getIndex().toInteger());
+            Pcr actual = hostReport.pcrManifest.getPcr(expected.getPcrBank(), expected.getIndex().toInteger());
             if( actual == null ) {
                 report.fault(new PcrValueMissing(expected.getIndex()));
             }
             else {
                 if( !expected.equals(actual) ) {
-                    report.fault(new PcrValueMismatch(expected.getIndex(), expected.getValue(), actual.getValue()) );
+                    report.fault(PcrValueMismatch.newInstance(expected.getPcrBank(), expected.getIndex(), expected.getValue(), actual.getValue()) );
                 }
             }
         }

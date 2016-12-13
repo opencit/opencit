@@ -46,6 +46,15 @@ public class TADataContext {
     private TpmQuoteResponse tpmQuoteResponse;
     private String sessionId;
     private String tcbMeasurement;
+    private String selectedPcrBanks;
+
+    public String getSelectedPcrBanks() {
+        return selectedPcrBanks;
+    }
+
+    public void setSelectedPcrBanks(String selectedPcrBanks) {
+        this.selectedPcrBanks = selectedPcrBanks;
+    }
     
     public String getSessionId() {
         if( sessionId == null ) {
@@ -140,6 +149,10 @@ public class TADataContext {
     
     public String getQuoteFileName() {
         return getDataFolder() + File.separator + "aikquote";
+    }
+    
+    public String getPcrsFileName() {
+        return getDataFolder() + File.separator + "pcrs";
     }
 
     public String getAikBlobFileName() {

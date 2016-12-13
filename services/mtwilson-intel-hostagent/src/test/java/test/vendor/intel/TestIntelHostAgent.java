@@ -34,6 +34,7 @@ import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
@@ -170,7 +171,8 @@ Pcr 23 = 0000000000000000000000000000000000000000
         
         if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
                    PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
-                   for (Measurement m : pcrEventLog.getEventLog()) {
+                   List<Measurement> mList = pcrEventLog.getEventLog();
+                   for (Measurement m : mList) {
                        log.debug("Host specific manifest for event '"   + m.getInfo().get("EventName") + 
                                "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
                    }

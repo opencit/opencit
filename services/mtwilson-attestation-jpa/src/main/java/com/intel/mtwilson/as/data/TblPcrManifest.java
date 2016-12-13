@@ -43,6 +43,7 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblPcrManifest.findByMleUuidHex", query = "SELECT t FROM TblPcrManifest t WHERE t.mle_uuid_hex = :mle_uuid_hex"),    
     @NamedQuery(name = "TblPcrManifest.findByPCRDescription", query = "SELECT t FROM TblPcrManifest t WHERE t.pCRDescription = :pCRDescription"),
     @NamedQuery(name = "TblPcrManifest.findByMleIdName", query = "SELECT t FROM TblPcrManifest t WHERE t.mleId.id = :mleId and t.name = :name")})
+    @NamedQuery(name = "TblPcrManifest.findByMleIdNamePcrBank", query = "SELECT t FROM TblPcrManifest t WHERE t.mleId.id = :mleId and t.name = :name and t.pcrBank = :pcrBank")
 
 public class TblPcrManifest implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -56,7 +57,17 @@ public class TblPcrManifest implements Serializable {
     private String name;
     @Basic(optional = false)
     @Column(name = "Value")
-    private String value;
+    private String value;    
+    @Column(name = "pcr_bank")
+    private String pcrBank;
+
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
     @Basic(optional = false)

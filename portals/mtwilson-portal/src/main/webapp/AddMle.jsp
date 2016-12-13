@@ -78,54 +78,24 @@
 					<input type="checkbox" id="" onclick="fnToggelManifestList(checked)"><span>Uplaod GKVs directly from a trusted host</span>
 				</div>
 			</div> -->
-			
-			<div class="manifestListClass" id="manifestListDiv" >
-				<div class="labelDivEditMle"><span data-i18n="input.manifest_list">Manifest List:</span>
-					<input type="image" onclick="showDialogManifestList()" src="images/helpicon.png">
-				</div>
-				<table>
-                                    <!-- <tr>
-						<td><span>17</span></td>
-						<td><input type="checkbox" onclick="fnToggelRegisterValue(checked,'MainContent_tb17')" id="MainContent_check17"/></td>
-						<td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb17"></td>
-						<td>
-							<form class="uploadForm textBox_Border" method="post" enctype="multipart/form-data">
-							<input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" />
-							<input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()">
-							<input style="float: right;" type="image" onclick="showDialogUploadFile();return false;" src="images/helpicon.png">
-							</form></td>
-					</tr> -->
-					<tr>
-						<td><span>18</span></td>
-						<td><input type="checkbox" onclick="fnToggelRegisterValue(checked,'MainContent_tb18')" id="MainContent_check18"/></td>
-						<td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb18" data-i18n="[title]hover_title.manifest"></td>
-						<td><div id="successMessage"></div></td>
-					</tr>
-					<tr>
-						<td><span>19</span></td>
-						<td><input type="checkbox" onclick="fnToggelRegisterValue(checked,'MainContent_tb19')" id="MainContent_check19"/></td>
-						<td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb19" data-i18n="[title]hover_title.manifest"></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><span>20</span></td>
-						<td><input type="checkbox" onclick="fnToggelRegisterValue(checked,'MainContent_tb20')" id="MainContent_check20"/></td>
-						<td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb20" data-i18n="[title]hover_title.manifest"></td>
-						<td></td>
-					</tr>
-				</table>
-				
-			</div>
-			<div id="uploadGkvs" class="singleDiv" style="display: none;">
+						
+			<div id="uploadGkvs" class="singleDiv">
 					<div class="labelDivEditMleManifest" data-i18n="required_manifests">Required Manifests:</div>
 					<div class="valueDiv" id="gkvs_register_checkbox">
 						<!-- <input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span> -->
-						<input type="checkbox" id="MainContent_check_gkvs12" name="12"><span>12</span>
-						<input type="checkbox" id="MainContent_check_gkvs13" name="13"><span>13</span>
-						<input type="checkbox" id="MainContent_check_gkvs14" name="14"><span>14</span>
-						<input type="checkbox" id="MainContent_check_gkvs18" name="18"><span>18</span>
-						<input type="checkbox" id="MainContent_check_gkvs19" name="19"><span>19</span>
-						<input type="checkbox" id="MainContent_check_gkvs20" name="20"><span>20</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs0" name="0"><span>0</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs1" name="1"><span>1</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs2" name="2"><span>2</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs3" name="3"><span>3</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs4" name="4"><span>4</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs5" name="5"><span>5</span>   
+						<input type="checkbox" disabled="disabled" id="MainContent_check_gkvs12" name="12"><span>12</span>
+						<input type="checkbox" disabled="disabled" id="MainContent_check_gkvs13" name="13"><span>13</span>
+						<input type="checkbox" disabled="disabled" id="MainContent_check_gkvs14" name="14"><span>14</span>
+                                                <input type="checkbox" disabled="disabled" id="MainContent_check_gkvs17" name="17"><span>17</span>
+						<input type="checkbox" disabled="disabled" id="MainContent_check_gkvs18" name="18"><span>18</span>
+						<input type="checkbox" disabled="disabled" id="MainContent_check_gkvs19" name="19"><span>19</span>
+						<input type="checkbox" disabled="disabled" id="MainContent_check_gkvs20" name="20"><span>20</span>
 					</div>
 				
 				<!-- <div class="singleDiv">

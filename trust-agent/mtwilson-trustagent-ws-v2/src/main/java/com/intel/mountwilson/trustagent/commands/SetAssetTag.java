@@ -32,6 +32,7 @@ import org.apache.commons.exec.CommandLine;
  *
  * @author stdalex
  */
+@Deprecated
 public class SetAssetTag implements ICommand{
    Logger log = LoggerFactory.getLogger(getClass().getName());
     private TADataContext context;

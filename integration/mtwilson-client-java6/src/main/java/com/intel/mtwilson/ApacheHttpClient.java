@@ -320,7 +320,8 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         if ("https".equals(protocol)) {
             log.debug("Initializing {} connection", policy.getProtocolSelector().preferred());
-            SSLContext sslcontext = SSLContext.getInstance(TlsUtil.getSafeContextName(policy.getProtocolSelector().preferred()) /*tlsProtocol*/); // issue #870 allow client to configure TLS protocol version with mtwilson.api.ssl.protocol
+            //SSLContext sslcontext = SSLContext.getInstance(TlsUtil.getSafeContextName(policy.getProtocolSelector().preferred()) /*tlsProtocol*/); // issue #870 allow client to configure TLS protocol version with mtwilson.api.ssl.protocol
+            SSLContext sslcontext = SSLContext.getInstance("TLSv1.2");
             sslcontext.init(null, new X509TrustManager[]{policy.getTrustManager()}, null); // key manager, trust manager, securerandom
             SSLSocketFactory sf = new SSLSocketFactory(
                     sslcontext,

@@ -138,12 +138,6 @@
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-linux-util</artifactId>
                     <version>${project.version}</version>
-                    <type>bin</type>
-                </dependency>    
-                <dependency>
-                    <groupId>com.intel.mtwilson.linux</groupId>
-                    <artifactId>mtwilson-linux-util</artifactId>
-                    <version>${project.version}</version>
                     <type>sh</type>
                 </dependency>
             </dependencies>
@@ -196,12 +190,6 @@
                                             <version>${project.version}</version>
                                             <type>sh</type>
                                             <destFileName>functions</destFileName>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>mtwilson-linux-util</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>bin</type>
                                         </artifactItem>
                                         <!-- UI portals -->
                                         <artifactItem>
@@ -304,12 +292,6 @@
                                             <version>${project.version}</version>
                                             <type>sh</type>
                                             <destFileName>functions</destFileName>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>mtwilson-linux-util</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>bin</type>
                                         </artifactItem>
                                         <!-- UI portals -->
                                         <!-- 

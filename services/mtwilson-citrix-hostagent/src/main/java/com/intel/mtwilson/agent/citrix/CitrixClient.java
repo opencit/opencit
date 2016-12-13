@@ -19,6 +19,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.model.PcrSha1;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
@@ -482,7 +483,7 @@ public class CitrixClient {
                 if (validPcrNumber && validPcrValue) {
                     log.debug("Result PCR " + pcrNumber + ": " + pcrValue);
                     if (pcrs.contains(pcrNumber)) {
-                        pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
+                        pcrMp.put(pcrNumber, new PcrSha1(new PcrIndex(Integer.parseInt(pcrNumber)), pcrValue));
                     }
                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }

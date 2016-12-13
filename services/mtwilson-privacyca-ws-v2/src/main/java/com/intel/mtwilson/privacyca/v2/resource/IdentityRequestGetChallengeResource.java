@@ -36,9 +36,11 @@ public class IdentityRequestGetChallengeResource {
     public byte[] identityChallengeRequest(byte[] derEncodedIdentityChallengeRequest) throws Exception {
         IdentityChallengeRequest identityChallengeRequest = IdentityChallengeRequest.valueOf(derEncodedIdentityChallengeRequest);
         IdentityRequestGetChallenge rpc = new IdentityRequestGetChallenge();
+        rpc.setTpmVersion(identityChallengeRequest.getTpmVersion());
         rpc.setIdentityRequest(identityChallengeRequest.getIdentityRequest());
+        rpc.setAikName(identityChallengeRequest.getAikName());
         rpc.setEndorsementCertificate(identityChallengeRequest.getEndorsementCertificate());
-        return rpc.call();
+        return rpc.call().getIdentityChallenge();
     }
 
     @POST
@@ -46,12 +48,11 @@ public class IdentityRequestGetChallengeResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public IdentityChallenge identityChallengeRequest(IdentityChallengeRequest identityChallengeRequest) throws Exception {
         IdentityRequestGetChallenge rpc = new IdentityRequestGetChallenge();
+        rpc.setTpmVersion(identityChallengeRequest.getTpmVersion());
         rpc.setIdentityRequest(identityChallengeRequest.getIdentityRequest());
+        rpc.setAikName(identityChallengeRequest.getAikName());
         rpc.setEndorsementCertificate(identityChallengeRequest.getEndorsementCertificate());
-        byte[] encryptedChallenge = rpc.call();
-        IdentityChallenge identityChallenge = new IdentityChallenge();
-        identityChallenge.setIdentityChallenge(encryptedChallenge);
-        return identityChallenge;
+        return rpc.call();
     }
 
 }

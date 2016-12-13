@@ -17,3 +17,4 @@ derby.log
 /nb-configuration.xml
 ~*
 *.tmp
+/services/mtwilson-privacyca-niarl/nbproject/

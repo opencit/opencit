@@ -316,7 +316,7 @@ public class TblPcrManifestJpaController implements Serializable {
      * @param pcrName: Name of the PCR
      * @return : Single row result if there is a match or else null.
      */
-    public TblPcrManifest findByMleIdName(Integer id, String pcrName) {
+    public List<TblPcrManifest> findByMleIdName(Integer id, String pcrName) {
         EntityManager em = getEntityManager();
         try {
 
@@ -327,8 +327,8 @@ public class TblPcrManifestJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 
-            TblPcrManifest pcrManifest = (TblPcrManifest) query.getSingleResult();
-            return pcrManifest;
+                        
+            return (List<TblPcrManifest>) query.getResultList();            
 
         } catch(NoResultException e){
         	log.error(String.format("PCR Manifest for MLE %d PCR#  not found in Database ", id, pcrName));
@@ -336,6 +336,26 @@ public class TblPcrManifestJpaController implements Serializable {
         } finally {
             em.close();
         }               
+    }        
+    
+    public TblPcrManifest findByMleIdNamePcrBank(Integer mle_id, String pcrName, String pcrBank) {
+        EntityManager em = getEntityManager();
+        try {
+           Query query = em.createNamedQuery("TblPcrManifest.findByMleIdNamePcrBank");
+           query.setParameter("mleId", mle_id);
+           query.setParameter("name", pcrName);
+           query.setParameter("pcrBank", pcrBank);
+           
+            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            
+            return (TblPcrManifest)query.getSingleResult();
+        } catch(NoResultException e) {
+            log.error(String.format("PCR Manifest for MLE %d %s:PCR# %s not found in Database ", mle_id, pcrBank, pcrName));
+            return null;
+        } finally {
+            em.close();
+        }
     }
 
     public List<TblPcrManifest> findTblPcrManifestByMleUuid(String mleUuid) {
@@ -356,6 +376,7 @@ public class TblPcrManifestJpaController implements Serializable {
             em.close();
         }               
     }    
+
 
     public TblPcrManifest findTblPcrManifestByUuid(String uuid) {
         
@@ -413,5 +434,4 @@ public class TblPcrManifestJpaController implements Serializable {
             em.close();
         }               
     }    
-    
 }

@@ -118,7 +118,7 @@ public class RegisterHosts extends MtWilsonClient {
      *          "txt_host_record":{"host_name":"192.168.0.2","add_on_connection_string":"vmware:https://192.168.0.1:443/sdk;admin;pwd",
      *          "tls_policy_choice":{"tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}}}]}}
      * 
-     * Output: {"hosts":{"host_records":[{"add_bios_white_list":false,"add_vmm_white_list":false,"bios_white_list_target":"BIOS_OEM",
+     * Output: {"hosts":{"HostRecords":[{"add_bios_white_list":false,"add_vmm_white_list":false,"bios_white_list_target":"BIOS_OEM",
      *          "vmm_white_list_target":"VMM_OEM","bios_pcrs":"","vmm_pcrs":"","host_location":"","register_host":false,
      *          "txt_host_record":{"host_name":"192.168.0.2","bios_name":"Intel_Corporation","bios_version":"01.00.0060",
      *          "bios_oem":"Intel Corporation","vmm_name":"Intel_Thurley_VMware_ESXi","vmm_version":"5.1.0-799733","vmm_osname":"VMware_ESXi",

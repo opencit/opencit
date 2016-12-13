@@ -15,17 +15,20 @@ set TRUSTAGENT_HOME=%parentfolder%
 
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
 set logfile=%TRUSTAGENT_HOME%\logs\trustagent2.log
+set tasklogfile=%TRUSTAGENT_HOME%\logs\trustagent3.log
 
 set JAVA_HOME=%TRUSTAGENT_HOME%\jre
 set JAVABIN=%JAVA_HOME%\bin\java
 
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
 set TRUSTAGENT_LOGS=%TRUSTAGENT_HOME%\logs
+set TRUSTAGENT_LOGFILE=%TRUSTAGENT_LOGS%\trustagent.log
 set TRUSTAGENT_JAVA=%TRUSTAGENT_HOME%\java
 set TRUSTAGENT_BIN=%TRUSTAGENT_HOME%\bin
 set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
 set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
+set TRUSTAGENT_PROPERTY_FILE=%TRUSTAGENT_CONF%\trustagent.properties
 set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_LOGS%\http.log
 set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
 set TRUSTAGENT_TPM_TASKS=create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership
@@ -42,11 +45,9 @@ REM  for env_file in $TRUSTAGENT_ENV_FILES; do
 REM    . $env_file
 REM  done
   for /f  "delims=" %%a in ('dir "%TRUSTAGENT_ENV%" /b') do (
-    echo. hello0
     echo. %%a
-    cd "%TRUSTAGENT_ENV%"
-    call %%a
-    echo. %TEST_TA%
+    REM cd "%TRUSTAGENT_ENV%"
+    REM call %%a
   )
 )
 
@@ -54,7 +55,7 @@ REM # not including configure-from-environment because we are running it always 
 REM # not including register-tpm-password because we are prompting for it in the setup.sh
 
 set JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-set JAVA_OPTS=-Dlogback.configurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
+set JAVA_OPTS=-Dlogback.confsdfigurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
 
 REM @###################################################################################################
 
@@ -72,6 +73,7 @@ REM echo. %JAVA_HOME%
 set TASTATUS=
 REM parsing the command arguments
 set wcommand=%1
+set options=%2
 set cmdparams=
 for /f "usebackq tokens=1*" %%i in (`echo %*`) DO @ set cmdparams=%%j
 REM echo. Running command: %wcommand% with %cmdparams%
@@ -85,7 +87,7 @@ if "%wcommand%"=="start" (
 ) ELSE IF "%wcommand%"=="status" (
   call:trustagent_status
 ) ELSE IF "%wcommand%"=="setup" (
-  call:trustagent_setup %cmdparams%
+  call:trustagent_setup %cmdparams%dsf
 ) ELSE IF "%wcommand%"=="authorize" (
   call:trustagent_authorize
 ) ELSE IF "%wcommand%"=="start-http-server" (
@@ -94,11 +96,17 @@ if "%wcommand%"=="start" (
   echo. CIT trust agent Windows version 1.0
 ) ELSE IF "%wcommand%"=="help" (
   call:print_help
+) ELSE IF "%wcommand%"=="uninstall" (
+  call:tagent_uninstall
+) ELSE IF "%wcommand%"=="export-config" (
+  if "%options%"=="--stdout" (
+    type "%TRUSTAGENT_PROPERTY_FILE%"
+  )
 ) ELSE (
   IF "%*"=="" (
     call:print_help
   ) ELSE (
-    echo. Running command: %*
+    REM echo. Running command: %*
     >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
@@ -143,7 +151,7 @@ GOTO:EOF
     set _tmpvar1=!_tmpvar:~5!
     set HARDWARE_UUID=!_tmpvar1:~0,-1!
   )
-  echo. HARDWARE_UUID: %HARDWARE_UUID%
+  REM echo. HARDWARE_UUID: %HARDWARE_UUID%
   set tasklist=%*
   REM echo. %tasklist%
   IF "%tasklist%"=="" (
@@ -152,7 +160,7 @@ GOTO:EOF
       set tasklist=%TRUSTAGENT_SETUP_TASKS% --force
   )
   REM echo. %tasklist%
-  "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
+  >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
 GOTO:EOF
 
 :trustagent_authorize
@@ -166,8 +174,8 @@ GOTO:EOF
   )
   echo. HARDWARE_UUID: %HARDWARE_UUID%
 
-  REM set authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
-  set authorize_vars="MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
+  REM set authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA256"
+  set authorize_vars="MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA256"
 
   REM local default_value
   REM for v in $authorize_vars
@@ -187,6 +195,10 @@ GOTO:EOF
     echo. configure-from-environment
     echo. %TRUSTAGENT_SETUP_TASKS%
     echo. register-tpm-password
+GOTO:EOF
+
+:tagent_uninstall
+    start /d "%TRUSTAGENT_HOME%" Uninstall.exe
 GOTO:EOF
 
 :get_status

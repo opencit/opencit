@@ -37,6 +37,15 @@ public class HostDetailsEntityVO implements Serializable {
      */
     private String tlsPolicyType;
     private String tlsPolicyData;
+    private String pcrBank;
+
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
     
 	/**
 	 * @return the vCenterDetails

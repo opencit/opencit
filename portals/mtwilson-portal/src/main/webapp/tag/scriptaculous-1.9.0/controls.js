@@ -249,15 +249,15 @@ Autocompleter.Base = Class.create({
 
     var bounds = this.getTokenBounds();
     if (bounds[0] != -1) {
-      var newValue = this.element.value.substr(0, bounds[0]);
-      var whitespace = this.element.value.substr(bounds[0]).match(/^\s+/);
+      var newValue = this.element.value.escape.HTML().substr(0, bounds[0]);
+      var whitespace = this.element.value.escape.HTML().substr(bounds[0]).match(/^\s+/);
       if (whitespace)
         newValue += whitespace[0];
-      this.element.value = newValue + value + this.element.value.substr(bounds[1]);
+      this.element.value = newValue + value + this.element.value.escape.HTML().substr(bounds[1]);
     } else {
       this.element.value = value;
     }
-    this.oldElementValue = this.element.value;
+    this.oldElementValue = this.element.value.escape.HTML();
     this.element.focus();
 
     if (this.options.afterUpdateElement)

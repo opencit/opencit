@@ -41,7 +41,7 @@
                     <classifier>application</classifier>
                     <version>${project.version}</version>
                     <type>zip</type>
-                </dependency>	
+                </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-linux-util</artifactId>
@@ -61,7 +61,13 @@
                     <type>bin</type>
                     <classifier>rhel</classifier>
                 </dependency>
-                
+                <dependency>
+                    <groupId>com.intel.mtwilson.trustagent</groupId>
+                    <artifactId>mtwilson-tpm2-packages</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+                                
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
@@ -141,6 +147,31 @@
                                             <classifier>rhel</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.trustagent</groupId>
+                                            <artifactId>mtwilson-tpm2-packages</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                        </artifactItem>
+                                        
+                                        <artifactItem>
+                                            <groupId>net.sourceforge.tboot</groupId>
+                                            <artifactId>tboot</artifactId>
+                                            <version>1.9.4</version>
+                                            <classifier>x86_64</classifier>
+                                            <type>rpm</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>net.sourceforge.tboot</groupId>
+                                            <artifactId>tboot</artifactId>
+                                            <version>1.9.4</version>
+                                            <classifier>amd64</classifier>
+                                            <type>deb</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                        </artifactItem>
+                                        
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
                                     <overWriteReleases>false</overWriteReleases>
