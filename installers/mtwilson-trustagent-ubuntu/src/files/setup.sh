@@ -310,7 +310,7 @@ fi
 
 if [ "$TPM_VERSION" == "2.0" ]; then
   # install tss2 and tpm2-tools for tpm2.0
-  ./mtwilson-tpm2-packages-2.2-SNAPSHOT.bin
+  ./mtwilson-tpm2-packages-*.bin
 fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
