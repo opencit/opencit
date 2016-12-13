@@ -52,6 +52,13 @@ fi
 
 cd $targetDir
 $MAKENSIS "${projectNameVersion}/nsis/trustagentinstallscript.nsi"
+if [ $? -ne 0 ]; then echo "Failed to make the NSI trustagent install script"; exit 2; fi
+
+if [ ! -f "${projectNameVersion}/nsis/Setup_TrustAgent.exe" ]; then
+  echo "${projectNameVersion}/nsis/Setup_TrustAgent.exe file does not exist"
+  exit 3
+fi
+
 mv "${projectNameVersion}/nsis/Setup_TrustAgent.exe" "${projectNameVersion}.exe"
 
 # This is not necessary, but to zip it
