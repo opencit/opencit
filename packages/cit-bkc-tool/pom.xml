@@ -202,10 +202,10 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
                                         <loadfile property="distro" srcFile="${project.build.directory}/distro"/>
                                         <echo>DISTRO=${distro}</echo>
-                                        <attachartifact file="${makeself.basic}.bin" classifier="${distro}" type="bin"/>
+                                        <move file="${makeself.basic}.bin" tofile="${makeself.basic}-${distro}.bin"/>
+                                        <attachartifact file="${makeself.basic}-${distro}.bin" classifier="${distro}" type="bin"/>
                                     </target>
                                 </configuration>
                             </execution>
