@@ -12,6 +12,7 @@ import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.x509.X509Util;
+import java.util.List;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Measurement;
@@ -164,7 +165,8 @@ Pcr 23 = 0000000000000000000000000000000000000000
         
         if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
                    PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
-                   for (Measurement m : pcrEventLog.getEventLog()) {
+                   List<Measurement> mList = pcrEventLog.getEventLog();
+                   for (Measurement m : mList) {
                        log.debug("Host specific manifest for event '"   + m.getInfo().get("EventName") + 
                                "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
                    }

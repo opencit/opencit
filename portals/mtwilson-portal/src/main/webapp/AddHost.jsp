@@ -59,6 +59,18 @@
                                     <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="1443"-->
 				</div>
 			</div>
+			<div class="singleDiv" id="hostPcrBankDiv">
+				<div class="labelDiv"><span data-i18n="input.host_pcrbank">PCR Bank:</span> <input type="image" onclick="showDialogRequiredPCRBank()" src="images/helpicon.png" class="helperImageClass"></div>
+
+				<div class="valueDiv" id="MainContent_pcrBankSelected">
+                                    <input type="radio" name="pcrbank" value="SHA256 SHA1" checked>
+				    <span>Auto</span>
+                                    <input type="radio" name="pcrbank" value="SHA256">
+				    <span>SHA256</span>
+                                    <input type="radio" name="pcrbank" value="SHA1">
+				    <span>SHA1</span>
+				</div>
+			</div>
 			<div  name="opensource_credentials" id ="opensource_credentials"><a href="#" onclick="fnShowLoginCredentials()">Show login credentials</a></div>			            
                         <div id="openSourceStringElement">
 				<div class="singleDiv">

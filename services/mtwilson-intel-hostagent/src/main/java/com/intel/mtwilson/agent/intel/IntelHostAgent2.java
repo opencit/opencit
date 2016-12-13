@@ -163,6 +163,9 @@ public class IntelHostAgent2 implements HostAgent {
         host.Processor_Info = hostInfo.getProcessorInfo().trim().substring(0, 8).toUpperCase();
         // now set some state we need for getHostAttestationReport
         vmmName = host.VMM_Name;
+        host.TpmVersion = hostInfo.getTpmVersion();
+        host.PcrBanks = hostInfo.getPcrBanks();
+        log.debug("Received host pcrbanks: {}", host.PcrBanks);
         return host;
     }
 
@@ -179,7 +182,7 @@ public class IntelHostAgent2 implements HostAgent {
 //        OpenSourceVMMHelper helper = new OpenSourceVMMHelper();
 //        return help.getHostAttestationReport(hostAddress);
         try {
-            TAHelper helper = new TAHelper(getHostDetails());
+            TAHelper helper = new TAHelper(getHostDetails());           
             // currently the getHostAttestationReport function is ONLY called from Management Service HostBO.configureWhiteListFromCustomData(...)  so there wouldn't be any saved trusted AIK in the database anyway
             pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), client, challenge);
             vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrManifest, vmmName);

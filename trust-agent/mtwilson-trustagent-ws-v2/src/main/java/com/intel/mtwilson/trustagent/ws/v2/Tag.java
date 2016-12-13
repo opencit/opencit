@@ -4,12 +4,17 @@
  */
 package com.intel.mtwilson.trustagent.ws.v2;
 
+import com.intel.mountwilson.common.TAConfig;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.SetAssetTag;
 import com.intel.mountwilson.trustagent.commands.SetAssetTagWindows;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.model.TagWriteRequest;
+import com.intel.mtwilson.trustagent.tpmmodules.TpmModuleProvider;
+import gov.niarl.his.privacyca.TpmModule;
+import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -18,7 +23,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Hex;
-
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 /**
  *
  * @author jbuhacoff
@@ -30,16 +35,11 @@ public class Tag {
     
     @POST
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-    public void writeTag(TagWriteRequest tagInfo, @Context HttpServletResponse response) throws TAException {
-        log.debug("writeTag uuid {} sha1 {}", tagInfo.getHardwareUuid(), Hex.encodeHexString(tagInfo.getTag()));
-        TADataContext context = new TADataContext();
-        context.setAssetTagHash(Hex.encodeHexString(tagInfo.getTag()));
+    public void writeTag(TagWriteRequest tagInfo, @Context HttpServletResponse response) throws IOException, TpmModule.TpmModuleException {
+        log.debug("writeTag uuid {} sha1 {}", tagInfo.getHardwareUuid(), Hex.encodeHexString(tagInfo.getTag()));       
+        TrustagentConfiguration config = new TrustagentConfiguration(TAConfig.getConfiguration());        
         
-        String osName = System.getProperty("os.name");
-        if (osName.toLowerCase().contains("windows"))
-            new SetAssetTagWindows(context).execute();
-        else
-            new SetAssetTag(context).execute();
+        Tpm.getModule().setAssetTag(config.getTpmOwnerSecret(), tagInfo.getTag());                
         
         log.debug("writeTag returning 204 status");
         response.setStatus(Response.Status.NO_CONTENT.getStatusCode());

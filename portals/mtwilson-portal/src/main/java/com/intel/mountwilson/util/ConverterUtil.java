@@ -76,6 +76,7 @@ public class ConverterUtil {
 		hostRecord.HostName=dataVO.getHostName();
 		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
+                hostRecord.PcrBanks=dataVO.getPcrBank();
         if( dataVO.getTlsPolicyId() != null && !dataVO.getTlsPolicyId().isEmpty() ) {
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
             tlsPolicyChoice.setTlsPolicyId(dataVO.getTlsPolicyId());
@@ -414,6 +415,7 @@ public class ConverterUtil {
 				manifest = new HashMap<String, String>();
 				manifest.put("Name", manifestData.getName());
 				manifest.put("Value", manifestData.getValue());
+                                manifest.put("PcrBank", manifestData.getPcrBank());
 				list.add(manifest);
 			}
 		}
@@ -421,8 +423,9 @@ public class ConverterUtil {
 	}
 
 	private static List<ManifestData> getApiClientManifestData(List<Map<String, String>> manifestList) {
-		List<ManifestData> list = new ArrayList<ManifestData>();
+		List<ManifestData> list = null;
 		if (manifestList != null) {
+                    list = new ArrayList<ManifestData>();
 			for (Map<String,String> map : manifestList) {
 				list.add(new ManifestData(map.get("name"), map.get("value")));
 			}

@@ -49,6 +49,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import org.apache.commons.codec.binary.Base64;
 import com.intel.mtwilson.util.ASDataCipher;
 import java.io.IOException;
+import java.util.Map;
 import org.junit.BeforeClass;
 
 /**
@@ -151,9 +152,9 @@ public class TestVmwareEsxi51 {
                 My.jpa().mwSamlAssertion().destroy(samlRecord.getId());
             }
             // also delete the ONE host-specific module, if it was defined for this host.  done here and not below with other modules because 1) there can only be one host-specific module per host in mtwilson-1.1 -- which is weird, and 2) it is looked up by host id and after we delete the host we won't hav an id anymore...
-            TblHostSpecificManifest hostSpecificToDelete = My.jpa().mwHostSpecificManifest().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
+            List<TblHostSpecificManifest> hostSpecificToDelete = My.jpa().mwHostSpecificManifest().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
             if( hostSpecificToDelete != null ) {
-                My.jpa().mwHostSpecificManifest().destroy(hostSpecificToDelete.getId());
+                My.jpa().mwHostSpecificManifest().destroy(hostSpecificToDelete.get(0).getId());
             }
             My.jpa().mwHosts().destroy(host.getId());
         }
@@ -212,7 +213,7 @@ public class TestVmwareEsxi51 {
         String[] biosPcrList = bios.getRequiredManifestList().split(",");
         for(String biosPcrIndex : biosPcrList) {
             // first delete any pcr's already defined for this vmm, since we will redefine them now
-            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdName(bios.getId(), biosPcrIndex);
+            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdNamePcrBank(bios.getId(), biosPcrIndex, "SHA1");
             if( pcrWhitelist != null ) {
                 My.jpa().mwPcrManifest().destroy(pcrWhitelist.getId());
             }
@@ -230,7 +231,7 @@ public class TestVmwareEsxi51 {
         String[] vmmPcrList = vmm.getRequiredManifestList().split(","); // only 17, 18, 20  ... 19 is treated separately below for vmware
         for(String vmmPcrIndex : vmmPcrList) {
             // first delete any pcr's already defined for this vmm, since we will redefine them now
-            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdName(vmm.getId(), vmmPcrIndex);
+            TblPcrManifest pcrWhitelist = My.jpa().mwPcrManifest().findByMleIdNamePcrBank(vmm.getId(), vmmPcrIndex, "SHA1");
             if( pcrWhitelist != null ) {
                 My.jpa().mwPcrManifest().destroy(pcrWhitelist.getId());
             }
@@ -259,6 +260,7 @@ public class TestVmwareEsxi51 {
         ArrayList<TblHostSpecificManifest> hostSpecificEventLogEntries = new ArrayList<TblHostSpecificManifest>();
         List<Measurement> vmwareEvents = pcr19.getEventLog();
         for(Measurement m : vmwareEvents) {
+            Map<String, String> mInfo = m.getInfo();
             TblModuleManifest eventLogEntry = new TblModuleManifest();
             log.debug("Adding VMM module/event {} = {}", m.getLabel(), m.getValue().toString());
             
@@ -266,15 +268,15 @@ public class TestVmwareEsxi51 {
              eventLogEntry.setComponentName(m.getLabel());
 //            eventLogEntry.setComponentName(String.format("%s-%s", m.getInfo().get("PackageName"), m.getInfo().get("PackageVersion")));  // omitting PackageVendor because it's always VMware for vmware modules... and anyway this record is linked to an MLE which is a vmware MLE, so same name across different MLE's will not be a problem... and it's unlikely that the same mle will have two or more drivers by different vendors with the same name and version! but if it happens it won't be a problem, as long as the hashes are still different. 
             //m.getInfo().get("ComponentName") // in mtwilson 1.0 component name was something like "componentName.ata_pata.v02" even if the module name was really ata_pata_cmd64x and had a vesrion number like 0.2.5-3vmw10.0.0.799733 which was more than sufficient to distinguish it from other modules.
-            eventLogEntry.setDescription(m.getInfo().get("ComponentName"));
-            log.debug("Looking up event type {}", m.getInfo().get("EventName"));
-            eventLogEntry.setEventID(My.jpa().mwEventType().findEventTypeByName(m.getInfo().get("EventName"))); // XXX we really don't need these event types, they are too specific to vmware and not configurable anyway... what's the point of looking it up? ... and what we did with prefixing "Vim25Api." just makes it more confusing, because now OUR "Event Type" isn't the same text as VMWARE's "Event Type"
+            eventLogEntry.setDescription(mInfo.get("ComponentName"));
+            log.debug("Looking up event type {}", mInfo.get("EventName"));
+            eventLogEntry.setEventID(My.jpa().mwEventType().findEventTypeByName(mInfo.get("EventName"))); // XXX we really don't need these event types, they are too specific to vmware and not configurable anyway... what's the point of looking it up? ... and what we did with prefixing "Vim25Api." just makes it more confusing, because now OUR "Event Type" isn't the same text as VMWARE's "Event Type"
             eventLogEntry.setExtendedToPCR(PcrIndex.PCR19.toString());
             eventLogEntry.setMleId(vmm);
             eventLogEntry.setNameSpaceID(My.jpa().mwPackageNamespace().findTblPackageNamespace(1)); // XXX why do we have this package namespace?   it's too specific to vmware, not configurable, and we always use the same record. 
-            eventLogEntry.setPackageName(m.getInfo().get("PackageName"));
-            eventLogEntry.setPackageVendor(m.getInfo().get("PackageVendor"));
-            eventLogEntry.setPackageVersion(m.getInfo().get("PackageVersion"));
+            eventLogEntry.setPackageName(mInfo.get("PackageName"));
+            eventLogEntry.setPackageVendor(mInfo.get("PackageVendor"));
+            eventLogEntry.setPackageVersion(mInfo.get("PackageVersion"));
             // XXX TODO this magic belongs in the vmware-specific rule factory. only a vmware factory would know that the "HostTpmCommandEvent" value is different for every host because it contains the host's UUID.
             if( m.getInfo().get("EventType").equals("HostTpmCommandEvent") ) {
                 eventLogEntry.setUseHostSpecificDigestValue(true);

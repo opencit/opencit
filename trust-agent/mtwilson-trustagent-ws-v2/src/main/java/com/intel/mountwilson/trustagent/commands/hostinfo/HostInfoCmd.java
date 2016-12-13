@@ -202,7 +202,19 @@ public class HostInfoCmd implements ICommand {
                     return;
                 }
             }
+            log.debug("command stdout: {}", result.getStdout());
         }
+        /* catch (TAException | IOException ex) {
+            log.error("getVmmAndVersion: Error while running virsh command. {}", ex.getMessage());
+            if (ex.getMessage().contains("error=2, No such file or directory")) {
+                context.setVmmName("Host_No_VMM");
+                context.setVmmVersion("0.0");
+                return;
+            } else {
+                log.error("getVmmAndVersion: Unexpected error encountered while running virsh command on system that does not support VMM.");
+            }
+        }
+        */
 
         CommandLine command = new CommandLine("/opt/trustagent/bin/tagent");
         command.addArgument("system-info");
@@ -218,6 +230,8 @@ public class HostInfoCmd implements ICommand {
             context.setVmmName("Host_No_VMM");
             context.setVmmVersion("0.0");
             return;
+            
+            //throw new TAException(ErrorCode.ERROR, "Not able to get VMM name and version.");
         }
 
         if (result.getStdout() != null) {
@@ -242,6 +256,7 @@ public class HostInfoCmd implements ICommand {
                 if (virshCmdSupport.startsWith("The program 'virsh' is currently not installed")) {
                     context.setVmmName("Host_No_VMM");
                     context.setVmmVersion("0.0");
+                    //throw new TAException(ErrorCode.ERROR, "The program 'virsh' is currently not installed");
                 } else {
                     for (String str : resultArray) {
                         String[] parts = str.split(":");
@@ -261,6 +276,10 @@ public class HostInfoCmd implements ICommand {
                         }
                         log.debug("VMM Name: " + context.getVmmName());
                         log.debug("VMM Version: " + context.getVmmVersion());
+                    }
+                    if (context.getVmmName() == null) {
+                        context.setVmmName("Host_No_VMM");
+                        context.setVmmVersion("0.0");
                     }
                 }
             } else {

@@ -19,6 +19,15 @@ public class PCRWhiteList {
     private String osName; 
     private String osVersion; 
     private String oemName;
+    private String pcrBank = "sha1";
+
+    public String getPcrBank() {
+        return pcrBank;
+    }
+
+    public void setPcrBank(String pcrBank) {
+        this.pcrBank = pcrBank;
+    }
 
 
     /**

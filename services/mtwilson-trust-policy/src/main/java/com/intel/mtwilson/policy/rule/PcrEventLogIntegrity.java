@@ -6,12 +6,15 @@ package com.intel.mtwilson.policy.rule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
+import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
@@ -48,11 +51,13 @@ import org.slf4j.LoggerFactory;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogIntegrity extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
+    private DigestAlgorithm pcrBank;
     private PcrIndex pcrIndex;
     
     protected PcrEventLogIntegrity() { } // for desearializing jackson
     
-    public PcrEventLogIntegrity(PcrIndex pcrIndex) {
+    public PcrEventLogIntegrity(DigestAlgorithm bank, PcrIndex pcrIndex) {
+        this.pcrBank = bank;
         this.pcrIndex = pcrIndex;
     }
     
@@ -65,23 +70,23 @@ public class PcrEventLogIntegrity extends BaseRule {
             report.fault(new PcrManifestMissing());            
         }
         else {
-            Pcr actualValue = hostReport.pcrManifest.getPcr(pcrIndex);
+            Pcr actualValue = hostReport.pcrManifest.getPcr(pcrBank, pcrIndex);
             if( actualValue == null ) {
                 report.fault(new PcrValueMissing(pcrIndex));
             }
             else {
-                PcrEventLog eventLog = hostReport.pcrManifest.getPcrEventLog(pcrIndex);
+                PcrEventLog eventLog = hostReport.pcrManifest.getPcrEventLog(pcrBank, pcrIndex);
                 if( eventLog == null ) {
                     report.fault(new PcrEventLogMissing(pcrIndex));
                 }
                 else {
                     List<Measurement> measurements = eventLog.getEventLog();
                     if( measurements != null ) {
-                        Sha1Digest expectedValue = computeHistory(measurements); // calculate expected' based on history
+                        AbstractDigest expectedValue = computeHistory(measurements, pcrBank); // calculate expected' based on history
                         log.debug("PcrEventLogIntegrity: About to compare {} with {}.", actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
-                            report.fault(new PcrValueMismatch(pcrIndex, expectedValue, actualValue.getValue()) );
+                            report.fault(PcrValueMismatch.newInstance(pcrBank, pcrIndex, expectedValue, expectedValue));
                         }
                     }
                 }
@@ -90,12 +95,17 @@ public class PcrEventLogIntegrity extends BaseRule {
         return report;
     }
     
-    private Sha1Digest computeHistory(List<Measurement> list) {
+    private AbstractDigest computeHistory(List<Measurement> list, DigestAlgorithm bank) {         
         // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match
-        Sha1Digest result = Sha1Digest.ZERO;
+        AbstractDigest result = bank == DigestAlgorithm.SHA256 ? new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0}) : Sha1Digest.ZERO;
         for(Measurement m : list) {
             log.debug("computeHistory: About to extend {} with {}.", result.toString(), m.getValue().toString());
-            result = result.extend(m.getValue());
+            //result = result.extend(m.getValue());
+            if(bank == DigestAlgorithm.SHA256) {
+                result = ((Sha256Digest)result).extend(m.getValue().toByteArray());
+            } else {
+                result = ((Sha1Digest)result).extend(m.getValue().toByteArray());
+            }
             log.debug("computeHistory: Result of extension is {}.", result.toString());
         }
         return result;

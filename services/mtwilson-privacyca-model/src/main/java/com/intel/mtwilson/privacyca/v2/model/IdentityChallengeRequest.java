@@ -19,6 +19,24 @@ import org.bouncycastle.asn1.DEROctetString;
 public class IdentityChallengeRequest {
     private byte[] identityRequest;
     private byte[] endorsementCertificate;
+    private byte[] aikName;
+    private String tpmVersion;
+
+    public byte[] getAikName() {
+        return aikName;
+    }
+
+    public void setAikName(byte[] aikName) {
+        this.aikName = aikName;
+    }
+
+    public String getTpmVersion() {
+        return tpmVersion;
+    }
+
+    public void setTpmVersion(String tpmVersion) {
+        this.tpmVersion = tpmVersion;
+    }
 
     public void setIdentityRequest(byte[] identityRequest) {
         this.identityRequest = identityRequest;

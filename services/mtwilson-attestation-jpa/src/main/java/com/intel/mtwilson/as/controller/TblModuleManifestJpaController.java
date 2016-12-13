@@ -546,7 +546,7 @@ public class TblModuleManifestJpaController implements Serializable {
      * @param eventName
      * @return 
      */
-    public TblModuleManifest findByMleNameEventName(Integer mleId,String componentName, String eventName){
+    public List<TblModuleManifest> findByMleNameEventName(Integer mleId,String componentName, String eventName){
     
         EntityManager em = getEntityManager();
         try {
@@ -560,41 +560,64 @@ public class TblModuleManifestJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
             
-            TblModuleManifest tblModuleManifest= (TblModuleManifest) query.getSingleResult();
             
-            return tblModuleManifest;
+            return (List<TblModuleManifest>)query.getResultList();            
             
         } catch(NoResultException e){
         	log.error(String.format("Module Manifest for MLE %d Component %s Event %s  Not found in Database ", mleId,componentName, eventName), e);
         	return null;
         } finally {
             em.close();
-        }
-            	
+        }            	
+    }
+    
+    public TblModuleManifest findByMleNameEventNamePcrBank(Integer mleId,String componentName, String eventName, String pcrBank){
+    
+        EntityManager em = getEntityManager();
+        try {
+            log.debug(String.format("Module Manifest for MLE: %d Component: %s Event: %s", mleId,componentName, eventName));
+            Query query = em.createNamedQuery("TblModuleManifest.findByMleNameEventNamePcrBank");
+            query.setParameter("name", componentName);
+            query.setParameter("eventName", eventName);
+            query.setParameter("mleId", mleId);
+            query.setParameter("pcrBank", pcrBank);
+            
+            
+            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            
+            
+            return (TblModuleManifest)query.getSingleResult();            
+            
+        } catch(NoResultException e){
+        	log.error(String.format("Module Manifest for MLE %d Component %s Event %s PcrBank %s Not found in Database ", mleId,componentName, eventName, pcrBank), e);
+        	return null;
+        } finally {
+            em.close();
+        }            	
     }
 
     
-    public Integer findByMleIdEventId(Integer mleId, String componentName, Integer eventId){
+    public TblModuleManifest findByMleIdEventIdPcrBank(Integer mleId, String componentName, Integer eventId, String pcrBank){
     
         EntityManager em = getEntityManager();
         try {
             log.debug(String.format("Module Manifest for MLE: %d Component: %s Event: %s", mleId,componentName, eventId));
-            Query query = em.createNamedQuery("TblModuleManifest.findByMleIDEventID");
+            Query query = em.createNamedQuery("TblModuleManifest.findByMleIDEventIDPcrBank");
             query.setParameter("name", componentName);
             query.setParameter("eventId", eventId);
             query.setParameter("mleId", mleId);
+            query.setParameter("pcrBank", pcrBank);
             
             
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             
-            Integer componentId = (Integer) query.getSingleResult();
-            
-            return componentId;
+            return (TblModuleManifest) query.getSingleResult();                                    
             
         } catch(NoResultException e){
                 //log.error(String.format("Module Manifest for MLE %d Component %s Event %s  Not found in Database ", mleId,componentName, eventId), e);            
-        	log.info("Module Manifest for MLE {}, Component {} & Event {} not found in Database ", mleId, componentName, eventId);
+        	log.info("Module Manifest for MLE {}, Component {} & Event {} & PcrBank {} not found in Database ", mleId, componentName, eventId, pcrBank);
         	return null;
         } finally {
             em.close();

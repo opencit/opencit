@@ -387,13 +387,17 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         String queryString = "";
         ArrayList<String> params = new ArrayList<String>();
         for( String key : query.keySet() ) {
-            if( query.get(key) == null ) {
+            if( query.get(key) == null) {
                 params.add(key+"=");
             }
             else {
                 for( String value : query.get(key) ) {
                     try {
-                        params.add(key+"="+urlsafe.encode(value)); 
+                        if(value != null) {
+                            params.add(key + "=" + urlsafe.encode(value));
+                        } else {
+                            params.add(key + "=");
+                        }
                     } catch (EncoderException ex) {
                         log.error("Cannot encode query parameter: {}", value, ex);
                     }

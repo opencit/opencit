@@ -52,6 +52,7 @@ public class HostTrustPolicyManager {
         vendorFactoryMap.put("citrix", new CitrixHostTrustPolicyFactory(reader));
         vendorFactoryMap.put("vmware", new VmwareHostTrustPolicyFactory(reader));
         vendorFactoryMap.put("microsoft", new MicrosoftHostTrustPolicyFactory(reader));
+        vendorFactoryMap.put("intel-da", new IntelTpmDaHostTrustPolicyFactory(reader));
         this.entityManagerFactory = entityManagerFactory;
     }
     
@@ -185,6 +186,7 @@ public class HostTrustPolicyManager {
      * CALL THIS WHEN REGISTERING A NEW HOST.
      * @param host
      * @param policy 
+     * @return  
      */
     /*
     public void storeHostRulesForPolicy(TblHosts host, Policy policy) {
@@ -203,7 +205,12 @@ public class HostTrustPolicyManager {
         for(String vendorProtocol : vendorFactoryMap.keySet()) {
             String prefix = vendorProtocol.toLowerCase()+":"; // "INTEL" or "intel" becomes "intel:"
             if( host.getAddOnConnectionInfo().startsWith(prefix) ) {
-                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendorProtocol);
+                String vendorKey = vendorProtocol;
+                boolean useDaMode = "2.0".equals(host.getTpmVersion()) && host.getAddOnConnectionInfo().startsWith("intel:");
+                if(useDaMode) {
+                    vendorKey += "-da";
+                }
+                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendorKey);
                 if( factory != null ) {
                     return factory;
                 }

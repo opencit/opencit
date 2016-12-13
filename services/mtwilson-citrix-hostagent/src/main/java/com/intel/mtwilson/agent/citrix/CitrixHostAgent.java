@@ -16,6 +16,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
@@ -274,7 +275,7 @@ BwIDAQAB
          while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
                 Pcr pcr = (Pcr)pairs.getValue();
-                pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcr.getIndex().toString())), new Sha1Digest(pcr.getValue().toString())));
+                pcrManifest.setPcr(PcrFactory.newInstance(pcr.getPcrBank(), pcr.getIndex(), pcr.getValue().toByteArray()));                
                 //it.remove(); // avoids a ConcurrentModificationException
         }
          log.info("CitrixHostAgent: created PcrManifest");

@@ -149,8 +149,7 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 		$('#MainContent_tbDesc').val(response.mleDescription);
 		$('#MainContent_tbMleSourceHost').val(mleSourceHostName);
 		
-		if (response.attestation_Type == "Module" || response.attestation_Type == "MODULE") {
-			//$('#mainfestGKVSCheck').remove();
+					//$('#mainfestGKVSCheck').remove();
 			//$('#manifestListDiv').html('<div style="font-size: 14px;padding-top: 55px;width: 644px;">Please use the White List Manifest loader tool to load the manifest values to database.</div>');
 			//$('#mleVmmLableInfo').hide();
 			$('#mainfestGKVSCheck').show();
@@ -173,13 +172,6 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 				'<input type="button" class="button" value="Show Manifest" onclick="getModuleTypeMleList(\''+dataToSend+'\')"/></div></div>';
                         $('#moduleTypeManifestList').html(str);
 			
-		}else {
-			for ( var pcr in response.manifestList) {
-				fnToggelRegisterValue(true,'MainContent_tb'+response.manifestList[pcr].Name);
-				$('#MainContent_check'+response.manifestList[pcr].Name).attr('checked','checked');
-				$('#MainContent_tb'+response.manifestList[pcr].Name).attr('value',response.manifestList[pcr].Value);
-			}
-		}
                 
                 // Bug: 565 : For some reason dynamically changing the attribute of the button to call the UpdateMLE function 
                 // is not working. As a workaround, we will create 2 buttons to start with, one button for adding the MLE and 
@@ -213,35 +205,45 @@ function getModuleTypeMleListSuccess(responseJSON){
         str+='<div style="background-color: #3A4F63; color:#FFFFFF;"><table class="manifestModuleTypeTableHeader" width="100%" cellpadding="0" cellspacing="0">'+
               '<thead><tr>'+
               '<th class="manifestModuleTypeRow1">Component Name</th>'+
-              '<th class="manifestModuleTypeRow2">Digest Value</th>'+
-              '<th class="manifestModuleTypeRow3">Event Name</th>'+
-              '<th class="manifestModuleTypeRow4">Package Name</th>'+
-              '<th class="manifestModuleTypeRow5">Package Vendor</th>'+
-              '<th class="manifestModuleTypeRow6">Package Version</th>'+
+              '<th class="manifestModuleTypeRow2">Bank</th>' +
+              '<th class="manifestModuleTypeRow3">Digest Value</th>'+
+              '<th class="manifestModuleTypeRow4">Event Name</th>'+
+              '<th class="manifestModuleTypeRow5">Package Name</th>'+
+              '<th class="manifestModuleTypeRow6">Package Vendor</th>'+
+              '<th class="manifestModuleTypeRow7">Package Version</th>'+
               '</tr></thead></table></div>';
           
           str+='<div class="manifestModuleTypeTableContent" style="overflow: auto;">'+
               '<table width="100%" cellpadding="0" cellspacing="0"><tbody>';
-          
+        
+        listOfmanifest.sort(function(l, r) {
+           return (l.PcrBank + l.Name).localeCompare(r.PcrBank + r.Name);
+        });
         for(var mani in listOfmanifest){
             str+='<tr>'+
                 '<td class="manifestModuleTypeRow1" name="mleName">'+listOfmanifest[mani].Name+'</td>'+
-                '<td class="manifestModuleTypeRow2" name="mleName">'+listOfmanifest[mani].Value+'</td>'+
-                '<td class="manifestModuleTypeRow3" name="mleName">&nbsp;</td>'+
+                '<td class="manifestModuleTypeRow2" name="maleName">'+listOfmanifest[mani].PcrBank+'</td>'+
+                '<td class="manifestModuleTypeRow3" name="mleName">'+listOfmanifest[mani].Value+'</td>'+
                 '<td class="manifestModuleTypeRow4" name="mleName">&nbsp;</td>'+
                 '<td class="manifestModuleTypeRow5" name="mleName">&nbsp;</td>'+
                 '<td class="manifestModuleTypeRow6" name="mleName">&nbsp;</td>'+
+                '<td class="manifestModuleTypeRow7" name="mleName">&nbsp;</td>'+
                 '</tr>';
             
         }
+        
+        whiteList.sort(function(l, r) { 
+            return (l.pcrBank + l.componentName).localeCompare(r.pcrBank + r.componentName);
+        });
         for(var item in whiteList){
             str+='<tr>'+
                 '<td class="manifestModuleTypeRow1" name="mleName">'+whiteList[item].componentName+'</td>'+
-                '<td class="manifestModuleTypeRow2" name="mleName">'+whiteList[item].digestValue+'</td>'+
-                '<td class="manifestModuleTypeRow3" name="mleName">'+whiteList[item].eventName+'</td>'+
-                '<td class="manifestModuleTypeRow4" name="mleName">'+whiteList[item].packageName+'</td>'+
-                '<td class="manifestModuleTypeRow5" name="mleName">'+whiteList[item].packageVendor+'</td>'+
-                '<td class="manifestModuleTypeRow6" name="mleName">'+whiteList[item].packageVersion+'</td>'+
+                '<td class="manifestModuleTypeRow2" name="mleName">'+whiteList[item].pcrBank+'</td>'+
+                '<td class="manifestModuleTypeRow3" name="mleName">'+whiteList[item].digestValue+'</td>'+
+                '<td class="manifestModuleTypeRow4" name="mleName">'+whiteList[item].eventName+'</td>'+
+                '<td class="manifestModuleTypeRow5" name="mleName">'+whiteList[item].packageName+'</td>'+
+                '<td class="manifestModuleTypeRow6" name="mleName">'+whiteList[item].packageVendor+'</td>'+
+                '<td class="manifestModuleTypeRow7" name="mleName">'+whiteList[item].packageVersion+'</td>'+
                 '</tr>';
         }
         str+='</tbody> </table></div>';
@@ -253,8 +255,10 @@ function getModuleTypeMleListSuccess(responseJSON){
 }
 
 function updateMleInfo() {
-	var dataToSent = fnGetMleData(false);
-	if (dataToSent != "") {
+	var dataToSent = fnGetMleDataVO(false);
+        dataToSent.manifestList = null;
+        dataToSent = $.toJSON(dataToSent);
+	if (dataToSent !== "") {
 		if (confirm($("#alert_update_mle").text())) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=false", updateMleSuccess, null);

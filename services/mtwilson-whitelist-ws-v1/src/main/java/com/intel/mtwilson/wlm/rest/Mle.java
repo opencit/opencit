@@ -305,7 +305,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName, null);
+        return mleBO.deletePCRWhiteList(pcrName, "SHA1", mleName, mleVersion,osName, osVersion, oemName, null);
     }
 
      /**
@@ -370,6 +370,7 @@ public class Mle {
     public String deleteModuleWhiteList(
             @QueryParam("componentName") String componentName,
             @QueryParam("eventName") String eventName,
+            @QueryParam("pcrBank") String pcrBank,
             @QueryParam("mleName") String mleName, 
             @QueryParam("mleVersion") String mleVersion,
             @QueryParam("osName") String osName,
@@ -378,13 +379,14 @@ public class Mle {
         
         ValidationUtil.validate(componentName);
         ValidationUtil.validate(eventName);
+        ValidationUtil.validate(pcrBank);
         ValidationUtil.validate(mleName);
         ValidationUtil.validate(mleVersion);
         ValidationUtil.validate(osName);
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteModuleWhiteList(componentName, eventName, mleName, mleVersion, osName, osVersion, oemName, null);
+        return mleBO.deleteModuleWhiteList(componentName, eventName, pcrBank, mleName, mleVersion, osName, osVersion, oemName, null);
     }
 
     /**

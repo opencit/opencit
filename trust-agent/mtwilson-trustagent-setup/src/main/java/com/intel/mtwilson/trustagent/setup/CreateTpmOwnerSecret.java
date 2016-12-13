@@ -5,6 +5,9 @@
 package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.mtwilson.common.CommandResult;
+import com.intel.mtwilson.common.CommandUtil;
+import com.intel.mtwilson.common.TAException;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.IdentityOS;
@@ -53,7 +56,7 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
         getConfiguration().set(TrustagentConfiguration.TPM_OWNER_SECRET, tpmOwnerSecretHex);
     }
     
-    private boolean isTpmOwned() throws IOException {
+    private boolean isTpmOwned() throws IOException, TAException {
         log.debug("Identify the OS");
         if (IdentityOS.isWindows()) { 
             log.debug("It is Windows");
@@ -65,12 +68,12 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
         else { /* for Linux. Still need to distinguish between TPM 1.2 and TPM 2.0 */
             log.debug("It is Linux");
             File tpmOwned = new File("/sys/class/tpm/tpm0/device/owned");
-            if (!tpmOwned.exists()) {
-            	tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
+            if (tpmOwned.exists()) {
+                String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
+                Integer number = Integer.valueOf(text.trim());
+                return number == 1;
             }
-            String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
-            Integer number = Integer.valueOf(text.trim());
-            return number == 1;
+            return false;
         }
     }
 }

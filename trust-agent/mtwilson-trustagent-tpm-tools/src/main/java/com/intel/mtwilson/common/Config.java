@@ -40,7 +40,7 @@ public class Config {
 //        TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
 //		File propFile = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
         homeFolder = Folders.configuration();
-        LoggerFactory.getLogger(Config.class.getName()).warn("Home folder. Using " + homeFolder);
+        log.debug("Home folder. Using " + homeFolder);
     }
     
     public static boolean isDebug() {

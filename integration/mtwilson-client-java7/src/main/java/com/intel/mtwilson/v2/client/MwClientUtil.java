@@ -91,7 +91,7 @@ public class MwClientUtil {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
-        return createUserInResourceV2(resource, username, password, server, properties, comments, null, "TLS");
+        return createUserInResourceV2(resource, username, password, server, properties, comments, null, "TLSv1.2");
     }
 
     /*public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 

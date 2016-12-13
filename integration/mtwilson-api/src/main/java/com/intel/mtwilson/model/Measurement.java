@@ -6,46 +6,61 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.intel.dcsg.cpg.crypto.AbstractDigest;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.HashMap;
 import java.util.Map;
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
-
 /**
  *
  * @author jbuhacoff
+ * @param <T>
  * @since 1.2
  */
-public class Measurement extends ObjectModel {
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "digest_type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = MeasurementSha1.class),
+    @JsonSubTypes.Type(value = MeasurementSha256.class)
+})
+public abstract class Measurement<T extends AbstractDigest> extends ObjectModel {
 
-    private final Sha1Digest digest;
-    private final String label;
-    private final HashMap<String,String> info = new HashMap<>();
-    
-    public Measurement(Sha1Digest digest, String label) {
+    protected final T digest;
+    protected final String label;
+    protected final HashMap<String, String> info = new HashMap<>();
+
+    protected Measurement(T digest, String label) {
         this.digest = digest;
         this.label = label;
     }
 
     @JsonCreator
-    public Measurement(@JsonProperty("value") Sha1Digest digest, @JsonProperty("label") String label, @JsonProperty("info") Map<String,String> info) {
-        this.digest = digest;
-        this.label = label;
-        if( info != null ) {
+    protected Measurement(@JsonProperty("value") T digest, @JsonProperty("label") String label, @JsonProperty("info") Map<String, String> info) {
+        this(digest, label);
+        if (info != null) {
             this.info.putAll(info);
         }
     }
-    
-    public Sha1Digest getValue() { return digest; }
-    public String getLabel() { return label; } // intended to summarize the measurement's origin or purpose in one line... you can put additional information in "info"
-    public Map<String,String> getInfo() { return info; } // other information, such as what vmware provides with each measurement
-    
+
+    public T getValue() {
+        return digest;
+    }
+
+    public String getLabel() {
+        return label;
+    } // intended to summarize the measurement's origin or purpose in one line... you can put additional information in "info"
+
+    public Map<String, String> getInfo() {
+        return info;
+    } // other information, such as what vmware provides with each measurement
+
 //    @JsonValue
     @Override
     public String toString() {
         return String.format("%s %s", digest.toString(), label);
     }
-    
 
     @Override
     public int hashCode() {
@@ -54,8 +69,9 @@ public class Measurement extends ObjectModel {
 
     /**
      * Returns true only if the digest of this object and the other object are equal
+     *
      * @param obj
-     * @return 
+     * @return
      */
     @Override
     public boolean equals(Object obj) {
@@ -71,13 +87,18 @@ public class Measurement extends ObjectModel {
         }
         return true;
     }
-    
+
     @Override
-    protected void validate() {
-        if( digest == null ) { fault("SHA1 Digest is null"); }
-        //else if (!digest.isValid()) { fault(digest, "Invalid measurement value"); }
-        else if (!Sha1Digest.isValid(digest.toByteArray())) { fault("Invalid measurement value"); }
-        if( label == null ) { fault("Measurement label is null"); }
+    protected final void validate() {
+        if (digest == null) {
+            fault("Digest is null");
+        }
+        if (label == null) {
+            fault("Measurement label is null");
+        }
+        validateOverride();
     }
-    
+
+    protected abstract void validateOverride();
+
 }

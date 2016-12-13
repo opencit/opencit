@@ -15,7 +15,7 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
  * @author jbuhacoff
  * @since 1.2
  */
-public class SoftwareMeasurement extends Measurement {
+public class SoftwareMeasurement extends MeasurementSha1 {
 
     private final String vendor;
     private final String name;
@@ -66,8 +66,8 @@ public class SoftwareMeasurement extends Measurement {
     }
     
     @Override
-    protected void validate() {
-        super.validate();
+    protected void validateOverride() {     
+        super.validateOverride();
         if( vendor == null ) { fault("Software vendor is null"); }
         if( name == null ) { fault("Software name is null"); }
         if( version == null ) { fault("Software version is null"); }

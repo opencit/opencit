@@ -163,15 +163,13 @@ public class TblHostSpecificManifestJpaController implements Serializable {
         }
     }
     
-    public TblHostSpecificManifest findByHostID(int hostId) {
+    public List<TblHostSpecificManifest> findByHostID(int hostId) {
     	EntityManager em = getEntityManager();
         try {
             Query query = em.createNamedQuery("TblHostSpecificManifest.findByHostID");
             query.setParameter("hostID", hostId);
             
-            TblHostSpecificManifest tblHostSpecificManifest = (TblHostSpecificManifest) query.getSingleResult();
-            return tblHostSpecificManifest;
-
+           return (List<TblHostSpecificManifest>)query.getResultList();
         }catch (NoResultException e) {
             log.error("NoResultException: No Host specific manifest for Host [{}]", 
                     String.valueOf(hostId));
@@ -182,15 +180,14 @@ public class TblHostSpecificManifestJpaController implements Serializable {
     	    	
     }
 
-    public TblHostSpecificManifest findByModuleAndHostID(int hostId, int moduleID) {
+    public List<TblHostSpecificManifest> findByModuleAndHostID(int hostId, int moduleID) {
     	EntityManager em = getEntityManager();
         try {
             Query query = em.createNamedQuery("TblHostSpecificManifest.findByModuleAndHostID");
             query.setParameter("hostID", hostId);
             query.setParameter("Module_Manifest_ID", moduleID);
             
-            TblHostSpecificManifest tblHostSpecificManifest = (TblHostSpecificManifest) query.getSingleResult();
-            return tblHostSpecificManifest;
+            return (List<TblHostSpecificManifest>)query.getResultList();            
 
         }catch (NoResultException e) {
             log.error("NoResultException: No Host specific manifest for Host [{}]", 
@@ -198,8 +195,28 @@ public class TblHostSpecificManifestJpaController implements Serializable {
             return null;
         } finally {
             em.close();
+        }    	    	
+    }
+    
+    public TblHostSpecificManifest findByModuleIdHostIdPcrBank(int hostId, int moduleID, String pcrBank) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblHostSpecificManifest.findByModuleIdHostIdPcrBank");
+            query.setParameter("hostID", hostId);
+            query.setParameter("Module_Manifest_ID", moduleID);
+            query.setParameter("pcrBank", pcrBank);
+
+            TblHostSpecificManifest tblHostSpecificManifest = (TblHostSpecificManifest) query.getSingleResult();
+            return tblHostSpecificManifest;
+
+        } catch (NoResultException e) {
+            log.error("NoResultException: No Host specific manifest for Host [{}]",
+                    String.valueOf(hostId));
+            return null;
+        } finally {
+            em.close();
         }
-    	    	
+
     }
     
 }

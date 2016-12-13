@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -225,6 +226,35 @@ public class TrustAgentClient extends MtWilsonClient {
         TpmQuoteRequest tpmQuoteRequest = new TpmQuoteRequest();
         tpmQuoteRequest.setNonce(nonce);
         tpmQuoteRequest.setPcrs(pcrs);
+        log.debug("target: {}", getTarget().getUri().toString());
+        TpmQuoteResponse tpmQuoteResponse = getTarget()
+                .path("/tpm/quote")
+                .request()
+                .accept(MediaType.APPLICATION_XML)
+                .post(Entity.json(tpmQuoteRequest), TpmQuoteResponse.class);
+        return tpmQuoteResponse;
+    }
+    
+    public TpmQuoteResponse getTpmQuote(byte[] nonce, int[] pcrs, String pcrBank) {
+        TpmQuoteRequest tpmQuoteRequest = new TpmQuoteRequest();
+        tpmQuoteRequest.setNonce(nonce);
+        tpmQuoteRequest.setPcrs(pcrs);
+        tpmQuoteRequest.setPcrbanks(pcrBank);
+        log.debug("target: {}", getTarget().getUri().toString());
+        TpmQuoteResponse tpmQuoteResponse = getTarget()
+                .path("/tpm/quote")
+                .request()
+                .accept(MediaType.APPLICATION_XML)
+                .post(Entity.json(tpmQuoteRequest), TpmQuoteResponse.class);
+        return tpmQuoteResponse;
+    }
+    
+    public TpmQuoteResponse getTpmQuote(byte[] nonce, int[] pcrs, String[] pcrBanks) {
+        TpmQuoteRequest tpmQuoteRequest = new TpmQuoteRequest();
+        tpmQuoteRequest.setNonce(nonce);
+        tpmQuoteRequest.setPcrs(pcrs);
+                
+        tpmQuoteRequest.setPcrbanks(StringUtils.join(pcrBanks, " "));
         log.debug("target: {}", getTarget().getUri().toString());
         TpmQuoteResponse tpmQuoteResponse = getTarget()
                 .path("/tpm/quote")

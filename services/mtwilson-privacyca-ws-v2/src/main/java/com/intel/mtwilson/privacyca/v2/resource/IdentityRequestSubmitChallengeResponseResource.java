@@ -28,9 +28,10 @@ public class IdentityRequestSubmitChallengeResponseResource {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public byte[] identityChallengeResponse(byte[] challengeResponse) throws Exception {
-        IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
-        rpc.setChallengeResponse(challengeResponse);
-        return rpc.call();
+        throw new UnsupportedOperationException("Cannot use Octet Stream");
+        /*IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
+        rpc.setChallengeResponse(challengeResponse);        
+        return rpc.call().getIdentityBlob();*/
     }
 
     @POST
@@ -38,11 +39,10 @@ public class IdentityRequestSubmitChallengeResponseResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public IdentityBlob identityChallengeResponse(IdentityChallengeResponse challengeResponse) throws Exception {
         IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
+        rpc.setTpmVersion(challengeResponse.getTpmVersion());
+        rpc.setAikName(challengeResponse.getAikName());
         rpc.setChallengeResponse(challengeResponse.getChallengeResponse());
-        byte[] encryptedAik = rpc.call();
-        IdentityBlob identityBlob = new IdentityBlob();
-        identityBlob.setIdentityBlob(encryptedAik);
-        return identityBlob;
+        return rpc.call();
     }
 
 }

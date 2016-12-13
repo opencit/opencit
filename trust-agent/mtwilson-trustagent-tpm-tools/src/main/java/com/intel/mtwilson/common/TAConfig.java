@@ -60,14 +60,15 @@ public class TAConfig {
         config = gatherConfiguration(defaults);
     }
     
-    // for troubleshooting
+    /* for troubleshooting
     private void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[] { /*"app.path",*/ "debug", "trustagent.http.tls.port", "mtwilson.api.url" };
+        String keys[] = new String[] { "debug", "trustagent.http.tls.port", "mtwilson.api.url" };
         for(String key : keys) {
             String value = c.getString(key);
             System.out.println(String.format("TAConfig [%s]: %s=%s", label, key, value));
         }
     }
+    */
 
     private Configuration gatherConfiguration(Properties defaults)  {
         try {
@@ -76,16 +77,16 @@ public class TAConfig {
         // first priority is the configuration file
         File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
         PropertiesConfiguration standard = new PropertiesConfiguration(file);
-        dumpConfiguration(standard, "file:"+file.getAbsolutePath());
+        //dumpConfiguration(standard, "file:"+file.getAbsolutePath());
         composite.addConfiguration(standard);
         
         // second priority are the defaults that were passed in, we use them if no better source was found
         if( defaults != null ) {
             MapConfiguration defaultconfig = new MapConfiguration(defaults);
-            dumpConfiguration(defaultconfig, "default");
+            //dumpConfiguration(defaultconfig, "default");
             composite.addConfiguration(defaultconfig);
         }
-        dumpConfiguration(composite, "composite");
+        //dumpConfiguration(composite, "composite");
         return composite;
         }
         catch(ConfigurationException e) {
