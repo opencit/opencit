@@ -203,7 +203,7 @@ public class HostInfoCmd implements ICommand {
                 }
             }
             log.debug("command stdout: {}", result.getStdout());
-        //} 
+        }
         /* catch (TAException | IOException ex) {
             log.error("getVmmAndVersion: Error while running virsh command. {}", ex.getMessage());
             if (ex.getMessage().contains("error=2, No such file or directory")) {
@@ -254,10 +254,9 @@ public class HostInfoCmd implements ICommand {
             if (resultArray.length > 0) {
                 String virshCmdSupport = resultArray[0];
                 if (virshCmdSupport.startsWith("The program 'virsh' is currently not installed")) {
-                    /* context.setVmmName("Host_No_VMM");
+                    context.setVmmName("Host_No_VMM");
                     context.setVmmVersion("0.0");
-                    */
-                    throw new TAException(ErrorCode.ERROR, "The program 'virsh' is currently not installed");
+                    //throw new TAException(ErrorCode.ERROR, "The program 'virsh' is currently not installed");
                 } else {
                     for (String str : resultArray) {
                         String[] parts = str.split(":");
