@@ -1,5 +1,5 @@
 #!/bin/bash
-# makezip-auto.sh - create a zip archive
+# makebin-auto.sh - creates a self-extracting installer
 # how it works:
 # 1. in the maven pom.xml, you add a maven-dependency-plugin to copy into the target folder ${project.build.directory} all the artifacts to install
 # 2. in the maven pom.xml, you add a exec-maven-plugin to run this script
@@ -8,7 +8,6 @@
 
 # workspace is typically "target" and must contain the files to package in the installer including the setup script
 workspace="${1}"
-projectVersion="${2}"
 # installer name
 projectNameVersion=`basename "${workspace}"`
 # where to save the installer (parent of directory containing files)
@@ -24,42 +23,14 @@ fi
 if [ ! -d "$workspace" ]; then echo "Cannot find workspace '$workspace'"; exit 1; fi
 
 # ensure all executable files in the target folder have the x bit set
-chmod +x $workspace/*.sh 
+chmod +x $workspace/*.sh $workspace/*.bin
 
 # check for the makeself tool
-makezip=`which zip`
-if [ -z "$makezip" ]; then
-    echo "Missing zip tool"
+makeself=`which makeself`
+if [ -z "$makeself" ]; then
+    echo "Missing makeself tool"
     exit 1
 fi
-
-# unzip the trustagent-3.0-SNAPSHOT.zip since we are going to zip it again
-trustagentZip="trustagent-${projectVersion}.zip"
-cd $targetDir/${projectNameVersion}
-unzip -o ${trustagentZip}
-rm -rf ${trustagentZip}
-mv *.cmd bin/
-mv logback.xml.base configuration/
 
 export TMPDIR=~/.tmp
-
-# instead of making a zip file, we run makesis to generate the trustagent windows installer
-MAKENSIS=`which makensis`
-if [ -z "$MAKENSIS" ]; then
-    echo "Missing makensis tool"
-    exit 1
-fi
-
-cd $targetDir
-$MAKENSIS "${projectNameVersion}/nsis/trustagentinstallscript.nsi"
-if [ $? -ne 0 ]; then echo "Failed to make the NSI trustagent install script"; exit 2; fi
-
-if [ ! -f "${projectNameVersion}/nsis/Setup_TrustAgent.exe" ]; then
-  echo "${projectNameVersion}/nsis/Setup_TrustAgent.exe file does not exist"
-  exit 3
-fi
-
-mv "${projectNameVersion}/nsis/Setup_TrustAgent.exe" "${projectNameVersion}.exe"
-
-# This is not necessary, but to zip it
-$makezip -r "${projectNameVersion}.zip" "${projectNameVersion}"
+$makeself --follow --nocomp "$workspace" "$targetDir/${projectNameVersion}.bin" "$projectNameVersion" ./setup.sh

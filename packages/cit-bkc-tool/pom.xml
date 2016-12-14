@@ -1,0 +1,221 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.linux</groupId>
+    <artifactId>cit-bkc-tool</artifactId>
+    
+    <packaging>pom</packaging>
+    <description>Installs a tool to validate Intel Cloud Integrity Technology (CIT) with the Best Known Configuration (BKC)</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.packages</groupId>
+        <artifactId>mtwilson-packages</artifactId>
+        <version>2.2-SNAPSHOT</version>
+    </parent>
+    
+    <properties>
+        <makeself.basic>${project.build.directory}/${project.artifactId}-${project.version}</makeself.basic>
+    </properties>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/linux</directory>
+            </resource>
+        </resources>
+    </build>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            
+            <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
+            <dependencies>
+                <!-- Attestation Service -->
+
+
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-server</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                    <classifier>jdk_glassfish_monit</classifier>
+                </dependency>
+                <!-- Trust Agent -->
+                <!-- NOTE: in v2.1 we use the "mtwilson-trustagent" project for both ubuntu and redhat even though there is a "mtwilson-trustagent-rhel" project; ask Ryan for explanation -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-trustagent</artifactId>
+                    <version>${project.version}</version>
+                    <type>bin</type>
+                </dependency>
+
+                <!-- linux installer progress monitor script -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
+                    <version>${project.version}</version>
+                    <type>sh</type>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>mtwilson-linux-util</artifactId>
+                    <version>${project.version}</version>
+                    <type>sh</type>
+                </dependency>
+
+            </dependencies>
+            
+            <build>
+                <plugins>
+                    <!-- begin copy artifacts plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <id>copy-basic-artifacts</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <!-- Attestation Service -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-server</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                            <classifier>jdk_glassfish_monit</classifier>
+                                        </artifactItem>
+                                        <!-- Trust Agent -->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-trustagent</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>bin</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <destFileName>monitor.sh</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>mtwilson-linux-util</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>sh</type>
+                                            <destFileName>functions.sh</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${makeself.basic}</outputDirectory>
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy artifacts plugin -->
+                    
+                    <!-- begin copy other resources plugin -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources-basic</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.basic}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/linux</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end copy other resources plugin -->
+                    
+                    <!-- begin create self-extracting installer plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>create-single-installer-basic</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>makebin-auto.sh</argument>
+                                        <argument>${makeself.basic}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- end create self-extracting installer plugin -->
+                    
+                    <!-- begin deploy installers to repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                    </plugin>
+                    <!-- end deploy installers to repository -->
+                    
+                </plugins>
+                
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>build-helper-maven-plugin</artifactId>
+                            <version>1.5</version>
+                            <executions>                      
+                                <execution>
+                                    <id>attach-artifacts</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>attach-artifact</goal>
+                                    </goals>
+                                    <configuration>
+                                        <artifacts>
+                                            <artifact>
+                                                <file>${makeself.basic}.bin</file>
+                                                <type>bin</type>
+                                            </artifact>
+                                        </artifacts>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                
+            </build>
+        </profile>
+    </profiles>
+    
+</project>

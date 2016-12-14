@@ -20,6 +20,9 @@
 		<condition property="cmd.maven" value="mvn">
 			<os family="unix"/>
 		</condition>
+		<condition property="env.LINUX_TARGET" value="generic">
+			<not><isset property="env.LINUX_TARGET"/></not>
+		</condition>
 	</target>
 	
 	<target name="ready" depends="init">
@@ -55,6 +58,7 @@
 	<target name="clean" depends="init">
 		<!-- clean all projects -->
 		<exec executable="${cmd.maven}" resultproperty="mavenExitClean">
+			<env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
 			<arg value="-DskipTests=true"/>
 			<arg value="clean"/>
 		</exec>
@@ -63,6 +67,7 @@
 		</fail>
 		<!-- the packages -->
 		<exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitCleanPackages">
+			<env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
 			<arg value="clean"/>
 		</exec>
 		<fail message="Cannot clean project packages" status="${mavenExitCleanPackages}">
@@ -73,6 +78,7 @@
 	<target name="build" depends="init">
 		<!-- the root pom and all projects -->
 		<exec executable="${cmd.maven}" resultproperty="mavenExitInstall">
+			<env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
 		</exec>
@@ -84,6 +90,7 @@
 	<target name="javadoc" depends="init">
 		<!-- the root pom and all projects -->
 		<exec executable="${cmd.maven}" dir="integration/mtwilson-client-java7" resultproperty="mavenExitJavadoc">
+			<env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
 			<arg value="-Ddependency.locations.enabled=false"/>
 			<arg value="-Drelease"/>
             <arg value="-DskipTests=true"/>
@@ -99,6 +106,7 @@
 	<target name="packages" depends="init,javadoc">
 		<!-- the root pom and all projects -->
 		<exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitPackages">
+			<env key="LINUX_TARGET" value="${env.LINUX_TARGET}"/>
 			<arg value="-DskipTests=true"/>
 			<arg value="clean"/>
 			<arg value="install"/>

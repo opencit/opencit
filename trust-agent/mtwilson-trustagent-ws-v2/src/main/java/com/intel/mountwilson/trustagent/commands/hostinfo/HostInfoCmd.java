@@ -196,13 +196,13 @@ public class HostInfoCmd implements ICommand {
         }
         */
 
-        if (result == null || result.getStdout() == null || result.getStdout().isEmpty()) {
+        if (result.getStdout() == null || result.getStdout().isEmpty()) {
             log.info("getVmmAndVersion: empty virsh version file, assuming no VMM installed");
-            /* context.setVmmName("Host_No_VMM");
+            context.setVmmName("Host_No_VMM");
             context.setVmmVersion("0.0");
             return;
-            */
-            throw new TAException(ErrorCode.ERROR, "Not able to get VMM name and version.");
+            
+            //throw new TAException(ErrorCode.ERROR, "Not able to get VMM name and version.");
         }
 
         if (result.getStdout() != null) {
@@ -248,6 +248,10 @@ public class HostInfoCmd implements ICommand {
                         }
                         log.debug("VMM Name: " + context.getVmmName());
                         log.debug("VMM Version: " + context.getVmmVersion());
+                    }
+                    if (context.getVmmName() == null) {
+                        context.setVmmName("Host_No_VMM");
+                        context.setVmmVersion("0.0");
                     }
                 }
             } else {

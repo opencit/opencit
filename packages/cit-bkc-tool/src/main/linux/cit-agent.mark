@@ -1,0 +1,24 @@
+Uncompressing mtwilson-trustagent
+gcc -o hex2bin hex2bin.c
+Compiling TPM commands...
+Registering tagent in start up
+Updating system information
+Generated random keystore password
+Starting the process to configure the username and password.
+Created user
+Added permissions
+Generated well-known SRK secret
+Generated random AIK secret
+Create Identity...
+Starting the process to create the TCG standard binding key certificate
+Generated random Binding key secret
+Successfully created the Binding key TCG certificate
+Calling into MTW to certify the TCG standard binding key
+Starting the process to create the TCG standard signing key certificate
+Successfully created the signing key TCG certificate
+Starting the process to pre-register the host login and password with attestation service.
+Successfully registered the host access information with attestation service.
+Register TPM password with service to support asset tag automation?
+Stopped trust agent
+Started trust agent
+Trust Agent is running

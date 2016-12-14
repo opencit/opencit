@@ -12,7 +12,6 @@
         <module>AttestationServiceLinuxInstaller</module>
         <module>GlassfishLinuxInstaller</module>
         <module>JavaLinuxInstaller</module>
-        <module>LinuxUtil</module>
         <module>LogRotateLinuxInstaller</module>
         <module>ManagementServiceLinuxInstaller</module>
         <module>MonitLinuxInstaller</module>
