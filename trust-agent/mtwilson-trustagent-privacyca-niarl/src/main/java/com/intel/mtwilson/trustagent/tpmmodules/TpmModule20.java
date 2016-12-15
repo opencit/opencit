@@ -357,6 +357,11 @@ public class TpmModule20 implements TpmModuleProvider {
     }
     
     @Override
+    public HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
+    	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
     public String getPcrBanks() throws IOException, TpmModule.TpmModuleException {
         String[] args = {};
         CommandLineResult result = getShellExecutor().executeTpmCommand("tpm2-getpcrbanks", args, 1);

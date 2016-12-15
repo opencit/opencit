@@ -73,7 +73,12 @@ public class TpmModule12 implements TpmModuleProvider {
     public byte[] activateIdentity(byte[] ownerAuth, byte[] keyAuth, byte[] asymCaContents, byte[] symCaAttestation, int keyIndex) throws IOException, TpmModule.TpmModuleException {
         return TpmModule.activateIdentity(ownerAuth, keyAuth, asymCaContents, symCaAttestation, keyIndex);
     }
-
+    
+    @Override
+    public HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
+    	return TpmModule.certifyKey(keyType, keyAuth, keyIndex, aikAuth, aikIndex);
+    }
+    
     @Override
     public void setAssetTag(byte[] ownerAuth, byte[] assetTagHash) throws IOException, TpmModule.TpmModuleException {
         String index = getAssetTagIndex();

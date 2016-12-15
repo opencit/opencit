@@ -8,9 +8,7 @@ package com.intel.mtwilson.trustagent.tpmmodules;
 import com.intel.mtwilson.trustagent.shell.ShellExecutor;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmModule;
-import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
-import gov.niarl.his.privacyca.TpmUtils.TpmBytestreamResouceException;
-import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
+import gov.niarl.his.privacyca.TpmUtils;
 
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
@@ -35,7 +33,7 @@ public interface TpmModuleProvider {
     public byte[] readAssetTag(byte[] ownerAuth) throws IOException, TpmModule.TpmModuleException;    
     public String getAssetTagIndex() throws IOException, TpmModule.TpmModuleException;
     public String getPcrBanks() throws IOException, TpmModule.TpmModuleException;
-    public HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmModule.TpmBytestreamResouceException, TpmModule.TpmUnsignedConversionException;
+    public HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException;
     
     /* release and define require owner authorization */
     public void nvDefine(byte[] ownerAuth, byte[] indexPassword, String index, int size, String attributes) throws IOException, TpmModule.TpmModuleException;

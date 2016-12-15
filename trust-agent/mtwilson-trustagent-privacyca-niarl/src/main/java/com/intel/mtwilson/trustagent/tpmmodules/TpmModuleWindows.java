@@ -23,6 +23,8 @@ import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import gov.niarl.his.privacyca.TpmPubKey;
 import gov.niarl.his.privacyca.TpmSymmetricKey;
 import gov.niarl.his.privacyca.TpmUtils;
+import gov.niarl.his.privacyca.TpmUtils.TpmBytestreamResouceException;
+import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -375,7 +377,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
     }
     
     @Override
-    public HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmModule.TpmBytestreamResouceException, TpmModule.TpmUnsignedConversionException {
+    public HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex) throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
     	/*
          * Create Key (sign or bind)
          * NIARL_TPM_Module -mode 8 -key_type <"sign" | "bind"> -key_auth <40 char hex blob> -key_index <integer index>
@@ -407,21 +409,21 @@ public class TpmModuleWindows implements TpmModuleProvider {
 		String aikName = "HIS_Identity_Key";
 		String exportFile = keyType+"keyattestation";
 		String nonce = RandomUtil.randomHexString(20);
-		byte[] bNonce = null;
-		try {
-			bNonce = Hex.decodeHex(nonce.toCharArray());
-		} catch (DecoderException e) {
-			// TODO Auto-generated catch block
-			throw new IllegalArgumentException("Invalid nonce", e);
-		}
+//		byte[] bNonce = null;
+//		try {
+//			bNonce = Hex.decodeHex(nonce.toCharArray());
+//		} catch (DecoderException e) {
+//			// TODO Auto-generated catch block
+//			throw new IllegalArgumentException("Invalid nonce", e);
+//		}
 
 		String[] cmdArgsToGetKeyAttestation = {
-				keyType, aikName, exportFile,
-				TpmUtils.byteArrayToHexString(bNonce),
+				keyType, aikName, exportFile, nonce,
+				//TpmUtils.byteArrayToHexString(bNonce),
 				TpmUtils.byteArrayToHexString(keyAuth),
 				TpmUtils.byteArrayToHexString(aikAuth)
 		};
-		commandLineResult getKeyAttestationResult = getShellExecutor().executeTpmCommand("GetKeyAttestation", cmdArgsToGetKeyAttestation, 3);
+		CommandLineResult getKeyAttestationResult = getShellExecutor().executeTpmCommand("GetKeyAttestation", cmdArgsToGetKeyAttestation, 3);
 		if (getKeyAttestationResult.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.getKeyAttestation returned nonzero error", getKeyAttestationResult.getReturnCode());
 
 		log.info("Call to GetKeyAttestation was successful");
