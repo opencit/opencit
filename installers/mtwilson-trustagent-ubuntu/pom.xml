@@ -68,12 +68,6 @@
                     <type>bin</type>
                 </dependency>
                 
-                <!-- 
-                mtwilson-trustagent in cit-2.2 is for both ubuntu and
-                redhat even though there is a mtwilson-trustagent-rhel project
-                also... therefore both ubuntu and redhat dependencies are
-                included here for now.
-                -->
                 <dependency>
                     <groupId>net.sourceforge.tboot</groupId>
                     <artifactId>tboot</artifactId>
@@ -192,8 +186,6 @@
                                             <type>deb</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
-                                        
-                                        
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
                                     <overWriteReleases>false</overWriteReleases>

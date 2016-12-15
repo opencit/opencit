@@ -376,14 +376,14 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
 fi
 
 ### INSTALL MEASUREMENT AGENT --comment out for now for cit 2.2
-#echo "Installing measurement agent..."
-#TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
-#if [ -z "$TBOOTXM_PACKAGE" ]; then
-#  echo_failure "Failed to find measurement agent installer package"
-#  exit -1
-#fi
-#./$TBOOTXM_PACKAGE
-#if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
+echo "Installing measurement agent..."
+TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
+if [ -z "$TBOOTXM_PACKAGE" ]; then
+  echo_failure "Failed to find measurement agent installer package"
+  exit -1
+fi
+./$TBOOTXM_PACKAGE
+if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
 
 # Migrate any old data to the new locations  (should be rewritten in java)
 v1_aik=$TRUSTAGENT_V_1_2_CONFIGURATION/cert
