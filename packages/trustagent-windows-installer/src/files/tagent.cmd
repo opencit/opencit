@@ -87,7 +87,7 @@ if "%wcommand%"=="start" (
 ) ELSE IF "%wcommand%"=="status" (
   call:trustagent_status
 ) ELSE IF "%wcommand%"=="setup" (
-  call:trustagent_setup %cmdparams%dsf
+  call:trustagent_setup %cmdparams%
 ) ELSE IF "%wcommand%"=="authorize" (
   call:trustagent_authorize
 ) ELSE IF "%wcommand%"=="start-http-server" (

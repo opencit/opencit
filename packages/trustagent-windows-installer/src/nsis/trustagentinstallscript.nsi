@@ -29,6 +29,7 @@ var /Global MTWILSON_API_URL
 var /Global MTWILSON_API_USERNAME
 var /Global MTWILSON_API_PASSWORD
 var /Global MTWILSON_TLS_CERT_SHA1
+var /Global MTWILSON_TLS_CERT_SHA256
 
 !define Environ 'HKCU "Environment"'
 !define MUI_ICON "TAicon.ico"
@@ -583,18 +584,28 @@ Function EnvCustomPage
                 ReadINIStr $MTWILSON_API_USERNAME "$INIFILE" "TRUST_AGENT" "MTWILSON_API_USERNAME"
                 ReadINIStr $MTWILSON_API_PASSWORD "$INIFILE" "TRUST_AGENT" "MTWILSON_API_PASSWORD"
                 ReadINIStr $MTWILSON_TLS_CERT_SHA1 "$INIFILE" "TRUST_AGENT" "MTWILSON_TLS_CERT_SHA1"
-
+	        ReadINIStr $MTWILSON_TLS_CERT_SHA256 "$INIFILE" "TRUST_AGENT" "MTWILSON_TLS_CERT_SHA256"
+	
                 ${NSD_CreateLabel} 0 0 100% 20% "MTWILSON_API_URL : $MTWILSON_API_URL"
                 ${NSD_CreateLabel} 0 10% 100% 20% "MTWILSON_API_USERNAME : $MTWILSON_API_USERNAME"
                 ${NSD_CreateLabel} 0 20% 100% 20% "MTWILSON_API_PASSWORD : $MTWILSON_API_PASSWORD"
-                ${NSD_CreateLabel} 0 30% 100% 20% "MTWILSON_TLS_CERT_SHA1 : $MTWILSON_TLS_CERT_SHA1"
-            
+	        ${If} $MTWILSON_TLS_CERT_SHA1 == ""
+			${NSD_CreateLabel} 0 30% 100% 20% "MTWILSON_TLS_CERT_SHA256 : $MTWILSON_TLS_CERT_SHA256"
+		${ELSE}
+			${NSD_CreateLabel} 0 30% 100% 20% "MTWILSON_TLS_CERT_SHA1 : $MTWILSON_TLS_CERT_SHA1"
+                ${EndIf}
+
                 StrCpy $text1 ""
                 StrCpy $R1 ""
                 StrCpy $R1 "MTWILSON_API_URL=$MTWILSON_API_URL"
                 StrCpy $R1 "$R1$\r$\nMTWILSON_API_USERNAME=$MTWILSON_API_USERNAME"
                 StrCpy $R1 "$R1$\r$\nMTWILSON_API_PASSWORD=$MTWILSON_API_PASSWORD"
-                StrCpy $R1 "$R1$\r$\nMTWILSON_TLS_CERT_SHA1=$MTWILSON_TLS_CERT_SHA1"
+
+		${If} $MTWILSON_TLS_CERT_SHA1 == ""
+                	StrCpy $R1 "$R1$\r$\nMTWILSON_TLS_CERT_SHA256=$MTWILSON_TLS_CERT_SHA256"
+                ${ELSE}
+                	StrCpy $R1 "$R1$\r$\nMTWILSON_TLS_CERT_SHA1=$MTWILSON_TLS_CERT_SHA1"
+                ${EndIf}
 
                 StrCpy $text1 $R1
 
