@@ -7,6 +7,7 @@ package com.intel.mtwilson.trustagent.setup;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import gov.niarl.his.privacyca.TpmCertifyKey;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
@@ -74,8 +75,8 @@ public class CreateBindingKey extends AbstractSetupTask {
         getConfiguration().set(TrustagentConfiguration.BINDING_KEY_SECRET, bindingKeySecretHex);
         
         // Call into the TpmModule certifyKey function to create the binding key and certify the same using AIK to build the chain of trust.
-        HashMap<String, byte[]> certifyKey = TpmModule.certifyKey(TrustagentConfiguration.BINDING_KEY_NAME, trustagentConfiguration.getBindingKeySecret(), 
-                trustagentConfiguration.getBindingKeyIndex(), trustagentConfiguration.getAikSecret(), trustagentConfiguration.getAikIndex());
+        HashMap<String, byte[]> certifyKey = Tpm.getModule().createAndCertifyKey(TrustagentConfiguration.BINDING_KEY_NAME, trustagentConfiguration.getBindingKeySecret(), 
+                trustagentConfiguration.getBindingKeyIndex(), trustagentConfiguration.getAikSecret(), trustagentConfiguration.getAikHandle());
         
         bindingKeyBlob = trustagentConfiguration.getBindingKeyBlobFile();
         bindingKeyTCGCertificate = trustagentConfiguration.getBindingKeyTCGCertificateFile(); 

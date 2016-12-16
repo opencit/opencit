@@ -229,4 +229,10 @@ public class TpmModule12 implements TpmModuleProvider {
         return "SHA1";
     }
 
+    @Override
+    public HashMap<String, byte[]> createAndCertifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, String aikIndex) 
+            throws IOException, TpmModule.TpmModuleException, TpmUtils.TpmBytestreamResouceException, TpmUtils.TpmUnsignedConversionException {
+        return TpmModule.certifyKey(keyType, keyAuth, keyIndex, aikAuth, Integer.valueOf(aikIndex));
+    }
+
 }
