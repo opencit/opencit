@@ -347,6 +347,17 @@ IFS=$OIFS
 export PATH=${bin_directories_path}$PATH
 appendToUserProfileFile "export PATH=$bin_directories_path\$PATH" $profile_name
 
+# add openssl, tpm-tools and trousers library linking
+if [ "$(whoami)" == "root" ]; then
+  echo /opt/trustagent/share/openssl/lib > /etc/ld.so.conf.d/trustagent.conf
+  echo /opt/trustagent/share/tpmtools/lib >> /etc/ld.so.conf.d/trustagent.conf
+  echo /opt/trustagent/share/trousers/lib >> /etc/ld.so.conf.d/trustagent.conf
+  echo /opt/trustagent/share/trousers/var/lib >> /etc/ld.so.conf.d/trustagent.conf
+  ldconfig
+else
+  echo_warning "Installation user is not root, therefore skipping openssl, tpm-tools and trousers library linking"
+fi
+
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
   sed -e "s|<file>.*/trustagent.log</file>|<file>$TRUSTAGENT_LOGS/trustagent.log</file>|" $TRUSTAGENT_CONFIGURATION/logback.xml > $TRUSTAGENT_CONFIGURATION/logback.xml.edited
