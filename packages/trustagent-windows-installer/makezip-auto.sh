@@ -39,6 +39,7 @@ cd $targetDir/${projectNameVersion}
 unzip -o ${trustagentZip}
 rm -rf ${trustagentZip}
 mv *.cmd bin/
+mv *.exe bin/
 mv logback.xml.base configuration/
 
 export TMPDIR=~/.tmp
