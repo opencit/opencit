@@ -17,6 +17,7 @@ import gov.niarl.his.privacyca.TpmCertifyKey;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -93,7 +94,8 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
 
                 // Verify the encryption scheme, key flags etc
-                if( !CertifyKey.isBindingKey(new TpmCertifyKey(tpmCertifyKey))) {
+                TpmCertifyKey tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
+                if( !CertifyKey.isBindingKey(tpmCertKey)) {
                     throw new Exception("Not a valid binding key");
                 }
                 
@@ -143,6 +145,9 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 
+                ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+                byteBuffer.putShort(tpmCertKey.getKeyParms().getEncScheme());
+                
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
                         .commonName("CN=Binding_Key_Certificate")
@@ -156,6 +161,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         .randomSerial()
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
+                        .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_ENC_SCHEME_OID, byteBuffer.array())
                         .build();
 
                 if (bkCert != null) {
