@@ -140,17 +140,17 @@ install_tss2_tpmtools2() {
 
 install_openssl
 
+if is_tboot_installed; then
+  echo "tboot already installed"
+else
+  install_tboot_tpm2
+fi
+
 if [ "$TPM_VERSION" == "1.2" ]; then
-  if is_tboot_installed; then
-    echo "tboot already installed"
-  else
-    install_tboot
-  fi
   install_trousers
   install_tpm_tools
   #install_patched_tpm_tools
 elif [ "$TPM_VERSION" == "2.0" ]; then
-  install_tboot_tpm2
   install_tss2_tpmtools2
 elif [ -z "$TPM_VERSION" ]; then
   echo "Cannot detect TPM version"
