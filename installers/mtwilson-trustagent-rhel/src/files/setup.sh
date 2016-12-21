@@ -337,6 +337,9 @@ unzip -oq $TRUSTAGENT_ZIPFILE -d $TRUSTAGENT_HOME
 # add bin and sbin directories in trustagent home directory to path
 bin_directories=$(find_subdirectories ${TRUSTAGENT_HOME} bin; find_subdirectories ${TRUSTAGENT_HOME} sbin)
 bin_directories_path=$(join_by : ${bin_directories[@]})
+for directory in ${bin_directories[@]}; do
+  chmod -R 700 $directory
+done
 export PATH=$bin_directories_path:$PATH
 appendToUserProfileFile "export PATH=${bin_directories_path}:\$PATH" $profile_name
 
