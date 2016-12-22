@@ -187,9 +187,9 @@
                                     <target>
                                         <chmod perm="+x" file="${project.build.directory}/get-trustagent-dependency.sh"/>
                                         <exec executable="/bin/bash" dir="${makeself.basic}" failonerror="true">
-                                            <redirector output="${project.build.directory}/build.log" alwayslog="true"/>
-                                            <arg value="-c" />
-                                            <arg value="../get-trustagent-dependency.sh" />
+                                            <redirector output="${project.build.directory}/get-trustagent-dependency.log" alwayslog="true"/>
+                                            <arg value="-c"/>
+                                            <arg value="../get-trustagent-dependency.sh"/>
                                         </exec>
                                     </target>
                                 </configuration>
