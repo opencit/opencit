@@ -15,7 +15,7 @@ set TRUSTAGENT_HOME=%parentfolder%
 
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
 set logfile=%TRUSTAGENT_HOME%\logs\trustagent2.log
-set tasklogfile=%TRUSTAGENT_HOME%\logs\trustagent3.log
+set tasklogfile=%TRUSTAGENT_HOME%\logs\setup_tasks.log
 
 set JAVA_HOME=%TRUSTAGENT_HOME%\jre
 set JAVABIN=%JAVA_HOME%\bin\java
@@ -107,7 +107,7 @@ if "%wcommand%"=="start" (
     call:print_help
   ) ELSE (
     REM echo. Running command: %*
-    >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
+    >>"%tasklogfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
 GOTO:EOF
@@ -160,7 +160,7 @@ GOTO:EOF
       set tasklist=%TRUSTAGENT_SETUP_TASKS% --force
   )
   REM echo. %tasklist%
-  >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
+  >>"%tasklogfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
 GOTO:EOF
 
 :trustagent_authorize
