@@ -2,10 +2,10 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.intel.mtwilson.linux</groupId>
-    <artifactId>mtwilson-trustagent-ubuntu</artifactId>
+    <artifactId>mtwilson-trustagent</artifactId>
     
     <packaging>pom</packaging>
-    <name>Trust Agent Linux Installer Ubuntu</name>
+    <name>Trust Agent Linux Installer</name>
     <description>Self-extracting executable that installs Trust Agent and its bundled requirements</description>
     
     <parent>
@@ -54,6 +54,7 @@
                     <version>1.7.0_51</version>
                     <type>bin</type>
                 </dependency>
+                <!--
                 <dependency>
                     <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
                     <artifactId>tbootxm</artifactId>
@@ -61,13 +62,14 @@
                     <type>bin</type>
                     <classifier>ubuntu</classifier>
                 </dependency>
+                -->
                 <dependency>
                     <groupId>com.intel.mtwilson.trustagent</groupId>
                     <artifactId>mtwilson-tpm2-packages</artifactId>
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
-                
+                <!--
                 <dependency>
                     <groupId>net.sourceforge.tboot</groupId>
                     <artifactId>tboot</artifactId>
@@ -82,7 +84,8 @@
                     <classifier>amd64</classifier>
                     <type>deb</type>
                 </dependency>
-
+                -->
+                
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
@@ -154,6 +157,7 @@
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>java-1.7.0_51.bin</destFileName>
                                         </artifactItem>
+                                        <!--
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
                                             <artifactId>tbootxm</artifactId>
@@ -162,6 +166,7 @@
                                             <classifier>ubuntu</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
+                                        -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.trustagent</groupId>
                                             <artifactId>mtwilson-tpm2-packages</artifactId>
@@ -169,7 +174,7 @@
                                             <type>bin</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
-                                        
+                                        <!--
                                         <artifactItem>
                                             <groupId>net.sourceforge.tboot</groupId>
                                             <artifactId>tboot</artifactId>
@@ -186,6 +191,7 @@
                                             <type>deb</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
+                                        -->
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
                                     <overWriteReleases>false</overWriteReleases>
@@ -201,6 +207,25 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <version>2.5</version>
                         <executions>
+                            <execution>
+                                <id>copy-build-resources</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/build</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
                             <execution>
                                 <id>copy-resources</id>
                                 <phase>generate-resources</phase>
@@ -231,41 +256,58 @@
                     </plugin>
                     <!-- end copy other resources plugin -->
                     
-                    <!-- being create zipfile plugin -->
-                    <!--
+                    <!-- get tboot and tbootxm dependencies plugin -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.3</version>
+                        <version>1.8</version>
                         <executions>
                             <execution>
-                                <id>makezip</id>
-                                <phase>generate-resources</phase>
+                                <id>get-tboot-tbootxm-dependencies</id>
+                                <phase>process-resources</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
-                                        <zip destfile="${project.build.directory}/${project.build.finalName}.zip">
-                                            <fileset dir="${basedir}/src/etc">
-                                                <include name="*.properties" />
-                                                <include name="*.jks" />
-                                            </fileset>
-                                            <fileset dir="${project.build.directory}">
-                                                <include name="version" />
-                                                <include name="TrustAgent.jar" />
-                                            </fileset>
-                                            <fileset dir="${basedir}/src/linux-bin" />
-                                            <zipfileset dir="${basedir}/src/commands" prefix="commands" />
-                                            <zipfileset dir="${basedir}/src/commands-citrix-xen" prefix="commands-citrix-xen" />
-                                        </zip>
-                                    </tasks>
+                                    <target>
+                                        <chmod perm="+x" file="${project.build.directory}/get-dependencies.sh"/>
+                                        <exec executable="/bin/bash" dir="${makeself.directory}" failonerror="true">
+                                            <redirector output="${project.build.directory}/get-dependencies.log" alwayslog="true"/>
+                                            <arg value="-c"/>
+                                            <arg value="../get-dependencies.sh"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>attach-artifact</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <loadfile property="distro" srcFile="${project.build.directory}/distro"/>
+                                        <echo>DISTRO=${distro}</echo>
+                                        <move file="${project.build.directory}/${project.artifactId}-${project.version}.bin" tofile="${project.build.directory}/${project.artifactId}-${project.version}-${distro}.bin"/>
+                                        <attachartifact file="${project.build.directory}/${project.artifactId}-${project.version}-${distro}.bin" classifier="${distro}" type="bin"/>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant</artifactId>
+                                <version>1.8.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b3</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
-                    -->
-                    <!-- end create zipfile plugin -->
                     
                     <!-- begin create self-extracting installer plugin -->
                     <plugin>
@@ -290,43 +332,7 @@
                         </executions>
                     </plugin>
                     <!-- end create self-extracting installer plugin -->
-                    
-                    <!-- begin deploy installers to repository -->
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                    </plugin>
-                    <!-- end deploy installers to repository -->
                 </plugins>
-                
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>build-helper-maven-plugin</artifactId>
-                            <version>1.5</version>
-                            <executions>
-                                <execution>
-                                    <id>attach-artifacts</id>
-                                    <phase>package</phase>
-                                    <goals>
-                                        <goal>attach-artifact</goal>
-                                    </goals>
-                                    <configuration>
-                                        <artifacts>
-                                            <artifact>
-                                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
-                                                <type>bin</type>
-                                                <!-- this is the single self-extracting installer -->
-                                            </artifact>
-                                        </artifacts>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                
             </build>
         </profile>
         
