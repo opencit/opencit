@@ -330,7 +330,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
 
                             		if(TRUST_POLICY_VERSION_1.equals(policyVersion)){
                             		com.intel.mtwilson.trustpolicy1.xml.TrustPolicy vmTrustPolicy = jaxb.read(trustPolicyXml, com.intel.mtwilson.trustpolicy1.xml.TrustPolicy.class);
-                                    VMQuote vmQuote = jaxb.read(vmQuoteXml, VMQuote.class);
+                                    com.intel.mtwilson.vmquote.xml.VMQuote vmQuote = jaxb.read(vmQuoteXml, com.intel.mtwilson.vmquote.xml.VMQuote.class);
                                     
                                     String cumulativeHashFromQuote = vmQuote.getCumulativeHash();
                                     String vmInstanceIdFromQuote = vmQuote.getVmInstanceId();
@@ -446,7 +446,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     }
                             		}else if(TRUST_POLICY_VERSION_2.equals(policyVersion)){
                             			   com.intel.mtwilson.trustpolicy2.xml.TrustPolicy vmTrustPolicy = jaxb.read(trustPolicyXml, com.intel.mtwilson.trustpolicy2.xml.TrustPolicy.class);
-                                           VMQuote vmQuote = jaxb.read(vmQuoteXml, VMQuote.class);
+                                           com.intel.mtwilson.vmquote.xml.VMQuote vmQuote = jaxb.read(vmQuoteXml, com.intel.mtwilson.vmquote.xml.VMQuote.class);
                                            
                                            String cumulativeHashFromQuote = vmQuote.getCumulativeHash();
                                            String vmInstanceIdFromQuote = vmQuote.getVmInstanceId();
