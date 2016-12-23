@@ -476,11 +476,11 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                            actualModules = new VmMeasurementLog(measurementXml).getMeasurements();
 
                                            // creating Measurements Object which will be converted into measurement xml string
-                                           com.intel.mtwilson.measurement2.xml.Measurements whitelistObj = new com.intel.mtwilson.measurement2.xmlMeasurements();
+                                           com.intel.mtwilson.measurement2.xml.Measurements whitelistObj = new com.intel.mtwilson.measurement2.xml.Measurements();
                                            List<com.intel.mtwilson.measurement2.xml.MeasurementType> measurements = whitelistObj.getMeasurements();
                                            for (com.intel.mtwilson.trustpolicy2.xml.Measurement measurement: vmTrustPolicy.getWhitelist().getMeasurements()){
                                         	   com.intel.mtwilson.measurement2.xml.MeasurementType measurementType;
-                                               if(measurement instanceof DirectoryMeasurement){
+                                               if(measurement instanceof com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement){
                                             	   com.intel.mtwilson.measurement2.xml.DirectoryMeasurementType dirMeasurementType = new com.intel.mtwilson.measurement2.xml.DirectoryMeasurementType();
                                                    com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement dirMeasurement = (com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement) measurement;
                                                    dirMeasurementType.setExclude(dirMeasurement.getExclude());
