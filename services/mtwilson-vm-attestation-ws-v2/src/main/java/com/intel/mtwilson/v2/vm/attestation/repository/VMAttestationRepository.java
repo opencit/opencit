@@ -50,7 +50,7 @@ import com.intel.mtwilson.vmquote.VMQuote;
 //import com.intel.mtwilson.measurement1.xml.Measurements;
 import com.intel.mtwilson.model.VmMeasurement;
 import com.intel.mtwilson.model.VmMeasurementLog;
-import com.intel.mtwilson.vmquote.xml.VMQuote;
+//import com.intel.mtwilson.vmquote.xml.VMQuote;
 import gov.niarl.his.privacyca.TpmUtils;
 
 import java.io.ByteArrayInputStream;
@@ -360,11 +360,11 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     actualModules = new VmMeasurementLog(measurementXml).getMeasurements();
 
                                     // creating Measurements Object which will be converted into measurement xml string
-                                    com.intel.mtwilson.measurement1.xml.Measurements whitelistObj = com.intel.mtwilson.measurement1.xml.Measurements();
+                                    com.intel.mtwilson.measurement1.xml.Measurements whitelistObj = new com.intel.mtwilson.measurement1.xml.Measurements();
                                     List<com.intel.mtwilson.measurement1.xml.MeasurementType> measurements = whitelistObj.getMeasurements();
                                     for (com.intel.mtwilson.trustpolicy1.xml.Measurement measurement: vmTrustPolicy.getWhitelist().getMeasurements()){
                                     	com.intel.mtwilson.measurement1.xml.MeasurementType measurementType;
-                                        if(measurement instanceof com.intel.mtwilson.measurement1.xml.DirectoryMeasurement){
+                                        if(measurement instanceof com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement){
                                         	com.intel.mtwilson.measurement1.xml.DirectoryMeasurementType dirMeasurementType = new com.intel.mtwilson.measurement1.xml.DirectoryMeasurementType();
                                             com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement dirMeasurement = (com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement) measurement;
                                             dirMeasurementType.setExclude(dirMeasurement.getExclude());
