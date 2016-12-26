@@ -144,11 +144,10 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
                 
-                if (tpmVersion.equals("1.2")) {
-                    if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
-                        throw new CertificateException("The signature specified for the certifiy key does not match.");
-                    }
-                             
+                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                    throw new CertificateException("The signature specified for the certifiy key does not match.");
+                }
+                if (tpmVersion.equals("1.2")) {                             
                     boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
                     if (!validatePublicKeyDigest) {
                         throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
