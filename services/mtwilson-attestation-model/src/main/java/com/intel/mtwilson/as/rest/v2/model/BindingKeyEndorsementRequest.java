@@ -21,6 +21,15 @@ public class BindingKeyEndorsementRequest{
     private byte[] tpmCertifyKey;
     private byte[] tpmCertifyKeySignature;
     private byte[] aikDerCertificate;
+    private short encryptionScheme; // TPM Encryption Scheme
+
+    public short getEncryptionScheme() {
+        return encryptionScheme;
+    }
+
+    public void setEncryptionScheme(short encryptionScheme) {
+        this.encryptionScheme = encryptionScheme;
+    }
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;

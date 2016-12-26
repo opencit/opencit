@@ -17,6 +17,7 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 
 /**
  *
@@ -93,6 +94,16 @@ public class CertifyBindingKey extends AbstractSetupTask {
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(bindingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(bindingKeyTCGCertificate));
         obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(bindingKeyTCGCertificateSignature));
+        
+        // set encyrption scheme. This is especially used for TPM 2.0 since the encryption scheme is not included in the TPM_ST_ATTEST_CERTIFY
+        // Windows uses PKCS by default; Linux uses OAEP by default,
+        short TPM_ES_RSAESPKCSv15 = 0x0002;
+        short TPM_ES_RSAESOAEP_SHA1_MGF1 = 0x0003;
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("windows"))
+            obj.setEncryptionScheme(TPM_ES_RSAESPKCSv15); //Windows
+        else
+            obj.setEncryptionScheme(TPM_ES_RSAESOAEP_SHA1_MGF1); //Linux
         
         X509Certificate aikCert = X509Util.decodePemCertificate(FileUtils.readFileToString(aikPemCertificate));
         byte[] encodedAikDerCertificate = X509Util.encodeDerCertificate(aikCert);

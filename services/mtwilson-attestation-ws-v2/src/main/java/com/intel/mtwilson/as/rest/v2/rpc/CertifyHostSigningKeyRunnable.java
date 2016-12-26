@@ -24,6 +24,7 @@ import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.va
 import com.intel.mtwilson.util.tpm12.CertifyKey;
 import gov.niarl.his.privacyca.TpmCertifyKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.Arrays;
 
 /**
  *
@@ -84,6 +85,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
+        String tpmVersion = "";
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
 
@@ -93,9 +95,24 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
 
                 // Verify the encryption scheme, key flags etc
-//                validateCertifyKeyData(tpmCertifyKey, false);
-                if( !CertifyKey.isSigningKey(new TpmCertifyKey(tpmCertifyKey))) {
-                    throw new Exception("Not a valid signing key");
+                byte[] tpm20Magic = {(byte) 0xFF, (byte) 0x54, (byte) 0x43, (byte) 0x47}; //TPM2 TPMS_ATTEST starts with magic TPM_GENERATED_VALUE
+                byte[] tpm12Magic = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00}; //TPM1.2, TPM_CERTIFY_INFO starts with TPM_STRUCT_VER 
+                byte[] theMagic = Arrays.copyOfRange(tpmCertifyKey, 0, 4);
+                if (Arrays.equals(theMagic, tpm20Magic)) {
+                    log.debug("TPM 2.0 identified in certify-host-binding-key request");
+                    tpmVersion = "2.0";
+                }
+                else {
+                    tpmVersion = "1.2";
+                    log.debug("TPM 1.2 identified in certify-host-binding-key request");
+                }
+                
+                if (tpmVersion.equals("1.2")) {
+                    // Verify the encryption scheme, key flags etc
+                    // validateCertifyKeyData(tpmCertifyKey, false);
+                    if( !CertifyKey.isSigningKey(new TpmCertifyKey(tpmCertifyKey))) {
+                        throw new Exception("Not a valid signing key");
+                    }
                 }
                 
                 X509Certificate decodedAikDerCertificate = X509Util.decodeDerCertificate(aikDerCertificate);
@@ -114,15 +131,16 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
                 
-                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
-                    throw new CertificateException("The signature specified for the certifiy key does not match.");
-                }
-                
-                boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
-                if (!validatePublicKeyDigest) {
-                    throw new Exception("Public key specified does not map to the public key digest in the TCG signing key certificate");
-                }
+                if (tpmVersion.equals("1.2")) {
+                    if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                        throw new CertificateException("The signature specified for the certifiy key does not match.");
+                    }
 
+                    boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+                    if (!validatePublicKeyDigest) {
+                        throw new Exception("Public key specified does not map to the public key digest in the TCG signing key certificate");
+                    }
+                }
                 // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
                 byte[] pubExp = new byte[3];
                 pubExp[0] = (byte) (0x01 & 0xff);

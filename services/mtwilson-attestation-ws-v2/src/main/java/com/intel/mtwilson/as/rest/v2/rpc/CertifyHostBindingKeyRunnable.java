@@ -26,6 +26,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 
@@ -43,6 +44,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     private byte[] tpmCertifyKey;
     private byte[] tpmCertifyKeySignature;
     private byte[] aikDerCertificate;
+    private short encryptionScheme; // TPM Encryption Scheme
     private byte[] bindingKeyDerCertificate;
 
     public byte[] getPublicKeyModulus() {
@@ -77,6 +79,14 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         this.aikDerCertificate = aikDerCertificate;
     }
 
+    public short getEncryptionScheme() {
+        return encryptionScheme;
+    }
+
+    public void setEncryptionScheme(short encryptionScheme) {
+        this.encryptionScheme = encryptionScheme;
+    }
+    
     public byte[] getBindingKeyDerCertificate() {
         return bindingKeyDerCertificate;
     }
@@ -88,15 +98,31 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
+        String tpmVersion = "";
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
 
                 log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
 
                 // Verify the encryption scheme, key flags etc
-                TpmCertifyKey tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
-                if( !CertifyKey.isBindingKey(tpmCertKey)) {
-                    throw new Exception("Not a valid binding key");
+                byte[] tpm20Magic = {(byte) 0xFF, (byte) 0x54, (byte) 0x43, (byte) 0x47}; //TPM2 TPMS_ATTEST starts with magic TPM_GENERATED_VALUE
+                byte[] tpm12Magic = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00}; //TPM1.2, TPM_CERTIFY_INFO starts with TPM_STRUCT_VER 
+                byte[] theMagic = Arrays.copyOfRange(tpmCertifyKey, 0, 4);
+                if (Arrays.equals(theMagic, tpm20Magic)) {
+                    log.debug("TPM 2.0 identified in certify-host-binding-key request");
+                    tpmVersion = "2.0";
+                }
+                else {
+                    tpmVersion = "1.2";
+                    log.debug("TPM 1.2 identified in certify-host-binding-key request");
+                }
+                
+                TpmCertifyKey tpmCertKey = null;
+                if (tpmVersion.equals("1.2")) {
+                    tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
+                    if( !CertifyKey.isBindingKey(tpmCertKey)) {
+                       throw new Exception("Not a valid binding key");
+                    }
                 }
                 
                log.debug("Public key modulus {}, TpmCertifyKey data {}  & TpmCertifyKeySignature data {} are specified.",
@@ -118,15 +144,17 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
                 
-                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
-                    throw new CertificateException("The signature specified for the certifiy key does not match.");
+                if (tpmVersion.equals("1.2")) {
+                    if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                        throw new CertificateException("The signature specified for the certifiy key does not match.");
+                    }
+                             
+                    boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+                    if (!validatePublicKeyDigest) {
+                        throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
+                    }
                 }
                 
-                boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
-                if (!validatePublicKeyDigest) {
-                    throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
-                }
-
                 // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
                 byte[] pubExp = new byte[3];
                 pubExp[0] = (byte) (0x01 & 0xff);
@@ -146,7 +174,11 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 
                 ByteBuffer byteBuffer = ByteBuffer.allocate(2);
-                byteBuffer.putShort(tpmCertKey.getKeyParms().getEncScheme());
+                if (tpmVersion.equals("1.2")) {
+                    byteBuffer.putShort(tpmCertKey.getKeyParms().getEncScheme());
+                }
+                else
+                    byteBuffer.putShort(encryptionScheme);
                 
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
