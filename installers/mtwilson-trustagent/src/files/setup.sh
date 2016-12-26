@@ -347,7 +347,7 @@ appendToUserProfileFile "export PATH=${bin_directories_path}:\$PATH" $profile_na
 lib_directories=$(find_subdirectories ${TRUSTAGENT_HOME}/share lib)
 lib_directories_path=$(join_by : ${lib_directories[@]})
 export LD_LIBRARY_PATH=$lib_directories_path
-echo "LD_LIBRARY_PATH=${lib_directories_path}" > $TRUSTAGENT_ENV/trustagent-lib
+echo "export LD_LIBRARY_PATH=${lib_directories_path}" > $TRUSTAGENT_ENV/trustagent-lib
 openssl_conf_directory="/opt/mtwilson/share/openssl"
 mkdir -p $openssl_conf_directory
 rm -f $openssl_conf_directory/openssl.cnf 2>/dev/null
