@@ -334,29 +334,24 @@ echo "Extracting application..."
 TRUSTAGENT_ZIPFILE=`ls -1 trustagent-*.zip 2>/dev/null | head -n 1`
 unzip -oq $TRUSTAGENT_ZIPFILE -d $TRUSTAGENT_HOME
 
-OIFS=$IFS
-IFS=$'\n'
-bin_directories=($(find ${TRUSTAGENT_HOME} \( -name bin -type d \) -o \( -name sbin -type d \)))
-bin_directories_path=
+# add bin and sbin directories in trustagent home directory to path
+bin_directories=$(find_subdirectories ${TRUSTAGENT_HOME} bin; find_subdirectories ${TRUSTAGENT_HOME} sbin)
+bin_directories_path=$(join_by : ${bin_directories[@]})
 for directory in ${bin_directories[@]}; do
-  chmod -R 700 ${directory}
-  bin_directories_path+="${directory}:"
+  chmod -R 700 $directory
 done
-IFS=$OIFS
+export PATH=$bin_directories_path:$PATH
+appendToUserProfileFile "export PATH=${bin_directories_path}:\$PATH" $profile_name
 
-export PATH=${bin_directories_path}$PATH
-appendToUserProfileFile "export PATH=$bin_directories_path\$PATH" $profile_name
-
-# add openssl, tpm-tools and trousers library linking
-if [ "$(whoami)" == "root" ]; then
-  echo /opt/trustagent/share/openssl/lib > /etc/ld.so.conf.d/trustagent.conf
-  echo /opt/trustagent/share/tpmtools/lib >> /etc/ld.so.conf.d/trustagent.conf
-  echo /opt/trustagent/share/trousers/lib >> /etc/ld.so.conf.d/trustagent.conf
-  echo /opt/trustagent/share/trousers/var/lib >> /etc/ld.so.conf.d/trustagent.conf
-  ldconfig
-else
-  echo_warning "Installation user is not root, therefore skipping openssl, tpm-tools and trousers library linking"
-fi
+# add lib directories in trustagent home directory to LD_LIBRARY_PATH variable env file
+lib_directories=$(find_subdirectories ${TRUSTAGENT_HOME}/share lib)
+lib_directories_path=$(join_by : ${lib_directories[@]})
+export LD_LIBRARY_PATH=$lib_directories_path
+echo "export LD_LIBRARY_PATH=${lib_directories_path}" > $TRUSTAGENT_ENV/trustagent-lib
+openssl_conf_directory="/opt/mtwilson/share/openssl"
+mkdir -p $openssl_conf_directory
+rm -f $openssl_conf_directory/openssl.cnf 2>/dev/null
+ln -s $TRUSTAGENT_HOME/share/openssl/openssl.cnf $openssl_conf_directory/openssl.cnf
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then

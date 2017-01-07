@@ -2,8 +2,7 @@
 installers/mtwilson-client-java6/target/mtwilson-client-java6-3.1-SNAPSHOT.zip
 installers/mtwilson-client-java7/target/mtwilson-client-java7-3.1-SNAPSHOT.zip
 installers/mtwilson-server/target/mtwilson-server-3.1-SNAPSHOT-jdk_glassfish_monit.bin
-installers/mtwilson-trustagent-rhel/target/mtwilson-trustagent-rhel-3.1-SNAPSHOT.bin
-installers/mtwilson-trustagent-ubuntu/target/mtwilson-trustagent-ubuntu-3.1-SNAPSHOT.bin
+installers/mtwilson-trustagent/target/mtwilson-trustagent*.bin
 integration/mtwilson-client-java7/target/mtwilson-client-java7-3.1-SNAPSHOT-javadoc.jar
 integration/mtwilson-client-java7/target/mtwilson-client-java7-3.1-SNAPSHOT-javadoc.zip
 packages/cit-bkc-tool/target/cit-bkc-tool-3.1-SNAPSHOT*.bin
