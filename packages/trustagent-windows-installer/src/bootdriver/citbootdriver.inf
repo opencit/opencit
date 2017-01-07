@@ -1,9 +1,0 @@
-[Version]
-Signature="$WINDOWS NT$"
-DriverVer=10/09/2015,11.20.35.589
-
-[citbootdriver.NT.Wdf]
-KmdfService = citbootdriver, citbootdriver_Service_kmdfInst
-
-[citbootdriver_Service_kmdfInst]
-KmdfLibraryVersion = 1.11
