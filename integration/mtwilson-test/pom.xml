@@ -82,51 +82,38 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- note:  for this project junit is a dependency with regular scope, not test scope -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.5</version>
-            <scope>test</scope>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-        
         <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher</artifactId>        
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-extensions-cache</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2-client</artifactId>        
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-repository-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher</artifactId>        
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-rpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-rpc-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -138,23 +125,23 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-shiro</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-classpath</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -166,13 +153,17 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-shiro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
         
         <!-- mtwilson -->
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-api</artifactId>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -188,36 +179,36 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java7</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.trustagent</groupId>
-            <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
-            <version>${project.version}</version>        
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-hostagent-ext</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-vmware-hostagent</artifactId>
+            <artifactId>mtwilson-attestation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-audit-handler</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -227,38 +218,33 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-intel-hostagent</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-vm-attestation-ws-v2</artifactId>
+            <artifactId>mtwilson-management</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-util</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-ws-v2</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-setup</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-ws-v2</artifactId>
-            <version>${project.version}</version>        
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -267,103 +253,58 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-file-model</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-shiro-setup</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-file-ws-v2</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-shiro-ws-v2</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-file-client-jaxrs2</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-tag-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy-model</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-tag-dao-jooq</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy-factory</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tpm-endorsement-model</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tpm-endorsement-client-jaxrs2</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy-ws-v2</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-rpc</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-rpc-model</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-audit-handler</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-ws-v1</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-ws-v2</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-management</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.database</groupId>
-            <artifactId>mtwilson-mysql</artifactId>
+            <artifactId>mtwilson-tag-jdbi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>        
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-jdbi</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-tag-ws-v2</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-dao-jooq</artifactId>
-            <version>${project.version}</version>        
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-factory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-ws-v2</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -372,27 +313,58 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <artifactId>mtwilson-vmware-hostagent</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-vm-attestation-ws-v2</artifactId>
             <version>${project.version}</version>
         </dependency>
         
-        <!--
+        <!-- privacyca -->
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.11</version>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-tpm-endorsement-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.11</version>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-tpm-endorsement-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- trustagent -->
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent.features</groupId>
+            <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- note:  for this project junit is a dependency with regular scope, not test scope -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-xc</artifactId>
-            <version>1.9.11</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
-        -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -437,13 +409,6 @@
             <artifactId>jersey-media-multipart</artifactId>
         </dependency>
         <!-- unfortunately the jackson library used by jersey is 1.9  so we don't get jackson 2.0 features... -->
-        <!--
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-jackson</artifactId>
-            <version>2.4.1</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
@@ -513,15 +478,6 @@
             <version>9.1.0.RC2</version>
         </dependency>
         <!-- end jetty -->
-        
-        <!--
-        <dependency>  
-            <groupId>org.restlet.jse</groupId>  
-            <artifactId>org.restlet.ext.ssl</artifactId>  
-            <version>2.2-M4</version>
-        </dependency>
-        -->
-        
         <!-- end restlet (for test client) -->
     </dependencies>
     
