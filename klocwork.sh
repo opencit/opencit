@@ -13,7 +13,7 @@ export TABLES_DIRECTORY=/home/robot/kwtables
 export KLOCWORK_PROJECT=dcg_security-mtwilson
 export KLOCWORK_SERVER_URL=https://klocwork-jf18.devtools.intel.com:8160
 export MAIN_PROJECT_SPEC=mtwilson.out
-export KW_HOME=/home/robot/kw10.2/bin
+export KW_HOME=/home/robot/kw10.4/bin
 PATH=$PATH:$KW_HOME
 
 #Declare Associative Array for c projects
