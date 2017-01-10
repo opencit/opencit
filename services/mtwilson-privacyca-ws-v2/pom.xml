@@ -21,27 +21,17 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
         </dependency>
         
         <!-- mtwilson -->
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-privacyca-niarl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-privacyca-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tpm-endorsement-model</artifactId>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -49,9 +39,21 @@
             <artifactId>mtwilson-tpm-endorsement-jdbi</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <!-- privacyca -->
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-niarl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-tpm-endorsement-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         

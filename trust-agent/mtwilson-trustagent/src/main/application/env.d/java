@@ -1,4 +1,0 @@
-# Set the minimum required Java version.
-# Value can be major.minor, major.minor.patch, or major.minor.patch_update.
-# Examples: 1.7, 1.7.0, and 1.7.0_51
-JAVA_REQUIRED_VERSION=1.7

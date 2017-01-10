@@ -46,8 +46,6 @@
         <module>mtwilson-management</module>
         <module>mtwilson-management-jpa</module>
         <module>mtwilson-management-ws-v1</module>
-        <module>mtwilson-privacyca-model</module>
-        <module>mtwilson-privacyca-niarl</module>
         <module>mtwilson-privacyca-setup</module>
         <module>mtwilson-privacyca-ws-v2</module>
         <!--<module>mtwilson-repository-api</module>-->
@@ -76,12 +74,9 @@
         <module>mtwilson-tls-policy-jdbi</module>
         <module>mtwilson-tls-policy-model</module>
         <module>mtwilson-tls-policy-ws-v2</module>
-        <module>mtwilson-tpm-endorsement-client-jaxrs2</module>
         <module>mtwilson-tpm-endorsement-jdbi</module>
-        <module>mtwilson-tpm-endorsement-model</module>
         <module>mtwilson-tpm-endorsement-ws-v2</module>
         <module>mtwilson-trust-policy</module>
-        <module>mtwilson-trustagent-model</module>
         <module>mtwilson-user-management-client-jaxrs2</module>
         <module>mtwilson-user-management-model</module>
         <module>mtwilson-user-management-ws-v2</module>

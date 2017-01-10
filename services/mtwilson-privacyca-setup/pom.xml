@@ -52,13 +52,15 @@
         
         <!-- mtwilson -->
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-privacyca-niarl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- privacyca -->
+        <dependency>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-niarl</artifactId>
             <version>${project.version}</version>
         </dependency>
         

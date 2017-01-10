@@ -1,3 +1,0 @@
-check process tagent with pidfile /opt/trustagent/trustagent.pid
-        start program = "/etc/init.d/tagent start" with timeout 90 seconds
-        stop program  = "/etc/init.d/tagent stop
