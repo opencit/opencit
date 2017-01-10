@@ -47,12 +47,12 @@
                 </dependency>
                 <!-- Trust Agent -->
                 <!-- NOTE: in v2.1 we use the "mtwilson-trustagent" project for both ubuntu and redhat even though there is a "mtwilson-trustagent-rhel" project; ask Ryan for explanation -->
-                <dependency>
+<!--                <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-trustagent</artifactId>
                     <version>${project.version}</version>
                     <type>bin</type>
-                </dependency>
+                </dependency>-->
 
                 <!-- linux installer progress monitor script -->
                 <dependency>
@@ -96,12 +96,12 @@
                                             <classifier>jdk_glassfish_monit</classifier>
                                         </artifactItem>
                                         <!-- Trust Agent -->
-                                        <artifactItem>
+<!--                                        <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-trustagent</artifactId>
                                             <version>${project.version}</version>
                                             <type>bin</type>
-                                        </artifactItem>
+                                        </artifactItem>-->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-core-linux-progress-monitor</artifactId>
@@ -126,11 +126,30 @@
                     </plugin>
                     <!-- end copy artifacts plugin -->
                     
-                    <!-- begin copy other resources plugin -->
+                    <!-- copy resources plugin -->
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
                         <version>2.5</version>
                         <executions>
+                            <execution>
+                                <id>copy-build-resources</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/build</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
                             <execution>
                                 <id>copy-resources-basic</id>
                                 <phase>generate-resources</phase>
@@ -152,7 +171,58 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- end copy other resources plugin -->
+                    
+                    <!-- get trustagent dependency plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>get-trustagent-dependency</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <chmod perm="+x" file="${project.build.directory}/get-trustagent-dependency.sh"/>
+                                        <exec executable="/bin/bash" dir="${makeself.basic}" failonerror="true">
+                                            <redirector output="${project.build.directory}/get-trustagent-dependency.log" alwayslog="true"/>
+                                            <arg value="-c"/>
+                                            <arg value="../get-trustagent-dependency.sh"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>attach-artifact</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <loadfile property="distro" srcFile="${project.build.directory}/distro"/>
+                                        <echo>DISTRO=${distro}</echo>
+                                        <move file="${makeself.basic}.bin" tofile="${makeself.basic}-${distro}.bin"/>
+                                        <attachartifact file="${makeself.basic}-${distro}.bin" classifier="${distro}" type="bin"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant</artifactId>
+                                <version>1.8.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b3</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
                     
                     <!-- begin create self-extracting installer plugin -->
                     <plugin>
@@ -177,43 +247,7 @@
                         </executions>
                     </plugin>
                     <!-- end create self-extracting installer plugin -->
-                    
-                    <!-- begin deploy installers to repository -->
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                    </plugin>
-                    <!-- end deploy installers to repository -->
-                    
                 </plugins>
-                
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>build-helper-maven-plugin</artifactId>
-                            <version>1.5</version>
-                            <executions>                      
-                                <execution>
-                                    <id>attach-artifacts</id>
-                                    <phase>package</phase>
-                                    <goals>
-                                        <goal>attach-artifact</goal>
-                                    </goals>
-                                    <configuration>
-                                        <artifacts>
-                                            <artifact>
-                                                <file>${makeself.basic}.bin</file>
-                                                <type>bin</type>
-                                            </artifact>
-                                        </artifacts>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                
             </build>
         </profile>
     </profiles>
