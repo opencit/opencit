@@ -15,7 +15,7 @@ set TRUSTAGENT_HOME=%parentfolder%
 
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
 set logfile=%TRUSTAGENT_HOME%\logs\trustagent2.log
-set tasklogfile=%TRUSTAGENT_HOME%\logs\setup_tasks.log
+set tasklogfile=%TRUSTAGENT_HOME%\logs\trustagent3.log
 
 set JAVA_HOME=%TRUSTAGENT_HOME%\jre
 set JAVABIN=%JAVA_HOME%\bin\java
@@ -37,7 +37,7 @@ set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=create-binding-key certify-binding-key
 REM set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=
 set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user %TRUSTAGENT_TPM_TASKS% %TRUSTAGENT_AUTHORIZE_TASKS% %TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS% login-register
 
-ECHO. ==Running tagent service==
+REM ECHO. ==Running tagent service==
 REM # load environment variables (these may override the defaults set above)
 if exist "%TRUSTAGENT_ENV%\" (
 REM  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
@@ -55,11 +55,11 @@ REM # not including configure-from-environment because we are running it always 
 REM # not including register-tpm-password because we are prompting for it in the setup.sh
 
 set JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-set JAVA_OPTS=-Dlogback.confsdfigurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
+set JAVA_OPTS=-Dlogback.configurationFile="%TRUSTAGENT_CONF%"\logback.xml -Dfs.name=trustagent
 
 REM @###################################################################################################
 
-set TA_JARS=
+REM set TA_JARS=
 REM # generated variables
 REM for /f  "delims=" %%a in ('dir "%TRUSTAGENT_JAVA%" /s /b') do (
 REM  set TA_JARS=%%a;!TA_JARS!
@@ -107,7 +107,7 @@ if "%wcommand%"=="start" (
     call:print_help
   ) ELSE (
     REM echo. Running command: %*
-    >>"%tasklogfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
+    >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
 GOTO:EOF
@@ -160,7 +160,7 @@ GOTO:EOF
       set tasklist=%TRUSTAGENT_SETUP_TASKS% --force
   )
   REM echo. %tasklist%
-  >>"%tasklogfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
+  >>"%logfile%" "%JAVABIN%" %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
 GOTO:EOF
 
 :trustagent_authorize

@@ -27,6 +27,7 @@ public class CreateBindingKey extends AbstractSetupTask {
     private File bindingKeyModulus;
     private File bindingKeyTCGCertificate;
     private File bindingKeyTCGCertificateSignature;
+    private File bindingKeyOpaqueBlob;
     
     @Override
     protected void configure() throws Exception {
@@ -63,6 +64,11 @@ public class CreateBindingKey extends AbstractSetupTask {
             validation("Public component of binding key does not exist.");
         }
         
+        bindingKeyOpaqueBlob = trustagentConfiguration.getBindingKeyOpaqueBlobFile();
+        if (bindingKeyOpaqueBlob == null || !bindingKeyOpaqueBlob.exists()) {
+            validation("Opaque blob component of binding key does not exist.");
+        }
+        
     }
 
     @Override
@@ -84,16 +90,19 @@ public class CreateBindingKey extends AbstractSetupTask {
         bindingKeyTCGCertificate = trustagentConfiguration.getBindingKeyTCGCertificateFile(); 
         bindingKeyModulus = trustagentConfiguration.getBindingKeyModulusFile();
         bindingKeyTCGCertificateSignature = trustagentConfiguration.getBindingKeyTCGCertificateSignatureFile();
+        bindingKeyOpaqueBlob = trustagentConfiguration.getBindingKeyOpaqueBlobFile();
         
         log.debug("Blob path is : {}", bindingKeyBlob.getAbsolutePath());
         log.debug("TCG Cert path is : {}", bindingKeyTCGCertificate.getAbsolutePath());
         log.debug("TCG Cert signature path is : {}", bindingKeyTCGCertificateSignature.getAbsolutePath());
         log.debug("Public key modulus path is : {}", bindingKeyModulus.getAbsolutePath());
+        log.debug("Opaque blob path is : {}", bindingKeyOpaqueBlob.getAbsolutePath());
         
         FileUtils.writeByteArrayToFile(bindingKeyModulus, certifyKey.get("keymod"));
         FileUtils.writeByteArrayToFile(bindingKeyBlob, certifyKey.get("keyblob"));
         FileUtils.writeByteArrayToFile(bindingKeyTCGCertificate, certifyKey.get("keydata"));
         FileUtils.writeByteArrayToFile(bindingKeyTCGCertificateSignature, certifyKey.get("keysig"));
+        FileUtils.writeByteArrayToFile(bindingKeyOpaqueBlob, certifyKey.get("keyopaque"));
         
         TpmCertifyKey tpmCertifyKey = new TpmCertifyKey(certifyKey.get("keydata"));
         log.debug("TCG Binding Key contents: {} - {}", tpmCertifyKey.getKeyParms().getAlgorithmId(), tpmCertifyKey.getKeyParms().getTrouSerSmode());

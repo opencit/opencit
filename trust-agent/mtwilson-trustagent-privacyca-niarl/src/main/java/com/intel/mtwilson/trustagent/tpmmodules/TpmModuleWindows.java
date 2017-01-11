@@ -394,7 +394,8 @@ public class TpmModuleWindows implements TpmModuleProvider {
 				keyType,
                 TpmUtils.byteArrayToHexString(keyAuth),
         };
-        CommandLineResult result = getShellExecutor().executeTpmCommand(methodName, cmdArgs, 1);
+		log.info("UserName : {}", System.getProperty("user.name"));
+        CommandLineResult result = getShellExecutor().executeTpmCommand(methodName, cmdArgs, 2);
         if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows."+methodName+" returned nonzero error", result.getReturnCode());
         
         log.info("Call to "+methodName+" was successful");
@@ -402,6 +403,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
 		
 		HashMap<String, byte[]> response = new HashMap<String, byte[]>();
 		response.put("keymod", TpmUtils.hexStringToByteArray(result.getResult(0)));
+		response.put("keyopaque", TpmUtils.hexStringToByteArray(result.getResult(1)));
 		/*
 		 * Now call GetKeyAttestation to get 1) blob output 2) Certify Key
 		 * Signature 3) Certify Key Data
