@@ -26,30 +26,30 @@
     <dependencies>
         <!-- common-java -->
         <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbi</artifactId>        
         </dependency>
         
         <!-- mtwilson -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jdbi</artifactId>
-            <version>${project.version}</version>        
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tpm-endorsement-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>        
+        </dependency>
+        
+        <!-- privacyca -->
+        <dependency>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-tpm-endorsement-model</artifactId>
+            <version>${project.version}</version>
         </dependency>
         
         <dependency>

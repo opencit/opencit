@@ -30,7 +30,6 @@
         <module>plugins</module>
         <module>portals</module>
         <module>services</module>
-        <module>trust-agent</module>
         
         <module>packages</module>
     </modules>
