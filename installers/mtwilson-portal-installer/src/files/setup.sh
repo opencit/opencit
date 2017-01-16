@@ -32,7 +32,6 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
 #mysql_required_version=5.0
-#glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev mysql-client-5.1"
@@ -47,8 +46,6 @@ fi
 # detect the packages we have to install
 #APICLIENT_PACKAGE=`ls -1 MtWilsonLinuxUtil*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
-WAR_PACKAGE_GLASSFISH=`ls -1 mtwilson-portal-glassfish.war 2>/dev/null | tail -n 1`
 WAR_PACKAGE_TOMCAT=`ls -1 mtwilson-portal-tomcat.war 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
@@ -60,9 +57,7 @@ cp functions "${package_dir}"
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "${package_dir}"
 
 # select appropriate war file
-if using_glassfish; then
-  cp $WAR_PACKAGE_GLASSFISH "${package_dir}/mtwilson-portal.war"
-elif using_tomcat; then
+if using_tomcat; then
   cp $WAR_PACKAGE_TOMCAT "${package_dir}/mtwilson-portal.war"
 fi
 
@@ -92,7 +87,6 @@ chmod 700 "${package_var_dir}"
 #mysql_server_install
 #mysql_install
 #java_install $JAVA_PACKAGE
-#glassfish_install $GLASSFISH_PACKAGE
 
 
 # copy control script to /usr/local/bin and finish setup
@@ -107,11 +101,7 @@ chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
 /opt/mtwilson/bin/mtwilson-portal setup
 #register_startup_script /opt/mtwilson/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 
-if using_glassfish; then
-  glassfish_permissions "${intel_conf_dir}"
-  glassfish_permissions "${package_dir}"
-  glassfish_permissions "${package_var_dir}"
-elif using_tomcat; then
+if using_tomcat; then
   tomcat_permissions "${intel_conf_dir}"
   tomcat_permissions "${package_dir}"
   tomcat_permissions "${package_var_dir}"
