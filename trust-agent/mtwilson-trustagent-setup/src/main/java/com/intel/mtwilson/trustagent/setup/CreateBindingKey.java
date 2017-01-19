@@ -91,12 +91,6 @@ public class CreateBindingKey extends AbstractSetupTask {
         FileUtils.writeByteArrayToFile(bindingKeyModulus, certifyKey.get("keymod"));
         FileUtils.writeByteArrayToFile(bindingKeyBlob, certifyKey.get("keyblob"));
         FileUtils.writeByteArrayToFile(bindingKeyTCGCertificate, certifyKey.get("keydata"));
-        FileUtils.writeByteArrayToFile(bindingKeyTCGCertificateSignature, certifyKey.get("keysig"));
-        
-        TpmCertifyKey tpmCertifyKey = new TpmCertifyKey(certifyKey.get("keydata"));
-        log.debug("TCG Binding Key contents: {} - {}", tpmCertifyKey.getKeyParms().getAlgorithmId(), tpmCertifyKey.getKeyParms().getTrouSerSmode());
-
-        log.info("Successfully created the Binding key TCG certificate and the same has been stored at {}.", bindingKeyTCGCertificate.getAbsolutePath());
-                
+        FileUtils.writeByteArrayToFile(bindingKeyTCGCertificateSignature, certifyKey.get("keysig"));      
     }    
 }

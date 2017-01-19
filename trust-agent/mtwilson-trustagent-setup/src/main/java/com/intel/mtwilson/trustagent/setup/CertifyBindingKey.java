@@ -12,6 +12,7 @@ import com.intel.mtwilson.as.rest.v2.model.BindingKeyEndorsementRequest;
 import com.intel.mtwilson.attestation.client.jaxrs.HostTpmKeys;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -32,6 +33,7 @@ public class CertifyBindingKey extends AbstractSetupTask {
     private String password;
     private File keystoreFile;
     private String keystorePassword;
+    private File bindingKeyName;
     private File bindingKeyModulus;
     private File bindingKeyTCGCertificate;
     private File bindingKeyTCGCertificateSignature;
@@ -77,22 +79,27 @@ public class CertifyBindingKey extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
-
+        
         log.info("Calling into MTW to certify the TCG standard binding key");
         bindingKeyTCGCertificate = trustagentConfiguration.getBindingKeyTCGCertificateFile(); 
         bindingKeyModulus = trustagentConfiguration.getBindingKeyModulusFile();
         bindingKeyTCGCertificateSignature = trustagentConfiguration.getBindingKeyTCGCertificateSignatureFile();
         aikPemCertificate = trustagentConfiguration.getAikCertificateFile();
-                
+        bindingKeyName = trustagentConfiguration.getBindingKeyNameFile();
+
         log.debug("TCG Cert path is : {}", bindingKeyTCGCertificate.getAbsolutePath());
         log.debug("Public key modulus path is : {}", bindingKeyModulus.getAbsolutePath());
         log.debug("TCG Cert signature path is : {}", bindingKeyTCGCertificateSignature.getAbsolutePath());
         log.debug("AIK Certificate path is : {}", aikPemCertificate.getAbsolutePath());
+        log.debug("Key Name file path is : {}", bindingKeyName.getAbsolutePath());
 
         BindingKeyEndorsementRequest obj = new BindingKeyEndorsementRequest();
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(bindingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(bindingKeyTCGCertificate));
         obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(bindingKeyTCGCertificateSignature));
+        obj.setNameDigest(FileUtils.readFileToByteArray(bindingKeyName));
+        obj.setTpmVersion(Tpm.getTpmVersion());
+        log.debug("Detected TPM Version: {}", Tpm.getTpmVersion());
         
         X509Certificate aikCert = X509Util.decodePemCertificate(FileUtils.readFileToString(aikPemCertificate));
         byte[] encodedAikDerCertificate = X509Util.encodeDerCertificate(aikCert);

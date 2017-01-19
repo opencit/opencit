@@ -398,7 +398,11 @@ public class TrustagentConfiguration {
     public int getBindingKeyIndex() {
         return Integer.valueOf(conf.get(BINDING_KEY_INDEX, "3")); 
     }
-    
+    public File getBindingKeyNameFile() {
+        //return new File(Folders.configuration() + File.separator + "bindingkey.nam");        
+        return new File("/tmp/outputfilename.tmp");
+    }
+     
     public File getBindingKeyModulusFile() {
         return new File(Folders.configuration() + File.separator + "bindingkey.pub");        
     }
