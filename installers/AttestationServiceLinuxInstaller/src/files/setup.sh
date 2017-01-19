@@ -33,7 +33,6 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_features_dir=/opt/mtwilson/features
 aikqverify_dir=${package_features_dir}/aikqverify
 #mysql_required_version=5.0
-#glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 
 
@@ -48,8 +47,6 @@ fi
 
 # detect the packages we have to install
 #JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-#GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
-WAR_PACKAGE_GLASSFISH=`ls -1 mtwilson-glassfish.war 2>/dev/null | tail -n 1`
 WAR_PACKAGE_TOMCAT=`ls -1 mtwilson-tomcat.war 2>/dev/null | tail -n 1`
 WAR_PACKAGE_JETTY=`ls -1 mtwilson-jetty.war 2>/dev/null | tail -n 1`
 
@@ -63,9 +60,7 @@ cp functions "${package_dir}"
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "${package_dir}"
 
 # select appropriate war file
-if using_glassfish; then
-  cp $WAR_PACKAGE_GLASSFISH "${package_dir}/mtwilson.war"
-elif using_tomcat; then
+if using_tomcat; then
   cp $WAR_PACKAGE_TOMCAT "${package_dir}/mtwilson.war"
 fi
 
@@ -94,7 +89,6 @@ fi
 #  mysql_install
 #fi
 #java_install $JAVA_PACKAGE
-#glassfish_install $GLASSFISH_PACKAGE
 
 
 # copy control script to $MTWILSON_HOME/bin and finish setup
@@ -163,12 +157,7 @@ if [ `whoami` == "root" ]; then
  chmod -R 700 "${aikqverify_dir}"
  chmod -R 700 "${aikqverify_dir}/data"
 
-  if using_glassfish; then
-    glassfish_permissions "${intel_conf_dir}"
-    glassfish_permissions "${package_dir}"
-    #glassfish_permissions "${aikqverify_dir}"
-    #glassfish_permissions "${package_var_bin_dir}"
-  elif using_tomcat; then
+  if using_tomcat; then
     tomcat_permissions "${intel_conf_dir}"
     tomcat_permissions "${package_dir}"
     #tomcat_permissions "${aikqverify_dir}"

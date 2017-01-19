@@ -33,7 +33,6 @@ fi
 
 # detect the packages we have to install
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
 WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
@@ -94,11 +93,7 @@ chmod +x /usr/local/bin/tdctl
 /usr/local/bin/tdctl setup
 #register_startup_script /usr/local/bin/tdctl tdctl
 
-if using_glassfish; then
-  glassfish_permissions "${intel_conf_dir}"
-  glassfish_permissions "${package_dir}"
-  glassfish_permissions "${package_var_dir}"
-elif using_tomcat; then
+if using_tomcat; then
   tomcat_permissions "${intel_conf_dir}"
   tomcat_permissions "${package_dir}"
   tomcat_permissions "${package_var_dir}"

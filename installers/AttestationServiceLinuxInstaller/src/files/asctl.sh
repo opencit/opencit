@@ -16,7 +16,6 @@ config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
-#glassfish_required_version=4.0
 webservice_application_name=mtwilson
 #webservice_application_name=AttestationService
 #java_required_version=1.7.0_51
@@ -92,12 +91,9 @@ create_saml_key() {
 
   #saml.issuer=https://localhost:8181
   local saml_issuer=""
-  if using_glassfish; then
-    saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
-  else
-    saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8443"
+  saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8443"
     #saml_issuer=`echo $saml_issuer |  sed -e 's/\\//g'`
-  fi
+  
   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
 
 }
@@ -166,9 +162,7 @@ protect_privacyca_files() {
   # yet, it will be created later with 644 permissions which is fine since it's for public key
   # certificates.
   chmod 600 $PRIVACYCA_FILES
-  if using_glassfish; then
-    glassfish_permissions $PRIVACYCA_FILES
-  elif using_tomcat; then
+ if using_tomcat; then
     tomcat_permissions $PRIVACYCA_FILES
   fi
 }
@@ -211,13 +205,7 @@ setup_interactive_install() {
   create_data_encryption_key
   bootstrap_first_user
 
-  if [ -n "$GLASSFISH_HOME" ]; then
-    glassfish_running
-    if [ -z "$GLASSFISH_RUNNING" ]; then
-      #glassfish_start_report
-      /opt/mtwilson/bin/mtwilson start
-    fi
-  elif [ -n "$TOMCAT_HOME" ]; then
+ if [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
       #tomcat_start_report
@@ -230,15 +218,7 @@ setup_interactive_install() {
   else
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson.war
-    #if using_glassfish; then
-    #  sleep 60s
-    #  glassfish_restart
-    #elif using_tomcat; then
-    #  tomcat_restart
-    #fi
-      #echo -n "Waiting for ${webservice_application_name} to become accessible... "
-      #sleep 50s        
-      #echo "Done"
+   
       webservice_running_report_wait "${webservice_application_name}"
       mtwilson_running_report_wait
   fi
@@ -277,10 +257,7 @@ case "$1" in
         webservice_stop_report "${webservice_application_name}"
         ;;
   status)
-      if using_glassfish; then
-        glassfish_clear
-        glassfish_detect > /dev/null
-      elif using_tomcat; then
+      if using_tomcat; then
         tomcat_clear
         tomcat_detect > /dev/null
       fi
@@ -291,12 +268,7 @@ case "$1" in
         sleep 2
         webservice_start_report "${webservice_application_name}"
         ;;
-  glassfish-restart)
-        glassfish_restart
-        ;;
-  glassfish-stop)
-        glassfish_shutdown
-        ;;
+ 
   setup)
         setup
         ;;
