@@ -17,7 +17,6 @@ config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
-#glassfish_required_version=4.0
 webservice_application_name=ManagementService
 #java_required_version=1.7.0_51
 
@@ -145,13 +144,7 @@ setup_interactive_install() {
 
   configure_api_baseurl "${package_config_filename}"
   configure_keystore_dir
-  if [ -n "$GLASSFISH_HOME" ]; then
-    glassfish_running
-    if [ -z "$GLASSFISH_RUNNING" ]; then
-      #glassfish_start_report
-      /opt/mtwilson/bin/mtwilson start
-    fi
-  elif [ -n "$TOMCAT_HOME" ]; then
+  if [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
       #tomcat_start_report
@@ -173,10 +166,10 @@ setup_interactive_install() {
 
 
 setup() {
-  #mysql_clear; java_clear; glassfish_clear;
+  #mysql_clear; java_clear; 
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
+#  if [[ -z "$JAVA_HOME" || -z "$mysql" ]]; then
 #      echo_warning "Missing one or more required packages"
 #      print_env_summary_report
 #      exit 1
@@ -194,31 +187,7 @@ case "$1" in
   echo "Version ${VERSION:-Unknown}"
   echo "Build ${BUILD:-Unknown}"
         ;;
-  #start)
-  #      webservice_start_report "${webservice_application_name}"
-  #      ;;
-  #stop)
-  #      webservice_stop_report "${webservice_application_name}"
-  #      ;;
-  #status)
-  #      #if using_glassfish; then  
-  #      #  glassfish_running_report
-  #      #elif using_tomcat; then
-  #      #  tomcat_running_report
-  #      #fi
-  #      webservice_running_report "${webservice_application_name}"
-  #      ;;
-  #restart)
-  #      webservice_stop_report "${webservice_application_name}"
-  #      sleep 2
-  #      webservice_start_report "${webservice_application_name}"
-  #      ;;
-  glassfish-restart)
-        glassfish_restart
-        ;;
-  glassfish-stop)
-        glassfish_shutdown
-        ;;
+ 
   approve-user)
         shift
         bootstrap_ms_approve_user "$@"
