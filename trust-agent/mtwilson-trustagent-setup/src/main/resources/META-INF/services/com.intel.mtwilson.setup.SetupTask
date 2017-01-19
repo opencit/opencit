@@ -1,4 +1,0 @@
-# the configure-from-environment command must be available via the 
-# service extension loader because tagent automatically includes it
-# before any other setup command, including update-extensions-cache-file
-com.intel.mtwilson.trustagent.setup.ConfigureFromEnvironment

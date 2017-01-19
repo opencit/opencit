@@ -37,8 +37,8 @@ detect_os() {
 }
 
 maven_get_trustagent() {
-  local _group_id="com.intel.mtwilson.linux"
-  local _artifact_id="mtwilson-trustagent"
+  local _group_id="com.intel.mtwilson.trustagent.packages"
+  local _artifact_id="trustagent-linux"
   local _version="${TRUSTAGENT_VERSION}"
   local _packaging="bin"
   local _classifier=
