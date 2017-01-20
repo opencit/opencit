@@ -4,7 +4,6 @@
 # *** TABS will cause errors in some linux distributions
 
 export mysql_required_version=5.0
-#export glassfish_required_version=4.0
 #export java_required_version=1.7.0_51
 
 find_installer() {
@@ -16,7 +15,6 @@ find_installer() {
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 java_installer=`find_installer java`
-glassfish_installer=`find_installer glassfish`
 monit_installer=`find_installer monit`
 mtwilson_util=`find_installer MtWilsonLinuxUtil`
 management_service=`find_installer ManagementService`
@@ -55,7 +53,6 @@ if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a
 chmod +x *.bin
 ./$java_installer
 ./$mtwilson_util
-./$glassfish_installer
 ./$attestation_service
 ./$management_service
 ./$whitelist_service

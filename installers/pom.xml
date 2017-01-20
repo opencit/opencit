@@ -10,7 +10,6 @@
     
     <modules>
         <module>AttestationServiceLinuxInstaller</module>
-        <module>GlassfishLinuxInstaller</module>
         <module>JavaLinuxInstaller</module>
         <module>LogRotateLinuxInstaller</module>
         <module>ManagementServiceLinuxInstaller</module>
@@ -19,7 +18,6 @@
         <module>mtwilson-client-java7</module>
         <module>mtwilson-portal-installer</module>
         <module>mtwilson-server</module>
-        <module>mtwilson-trustagent</module>
         <module>TomcatLinuxInstaller</module>
         <module>WLMServiceLinuxInstaller</module>
     </modules>
