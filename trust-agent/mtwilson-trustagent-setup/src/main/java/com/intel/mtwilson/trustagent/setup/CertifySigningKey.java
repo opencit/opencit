@@ -17,6 +17,7 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 
 /**
  *
@@ -33,6 +34,7 @@ public class CertifySigningKey extends AbstractSetupTask {
     private File keystoreFile;
     private String keystorePassword;
     private File aikPemCertificate;
+    private File signingKeyName;
     private File signingKeyModulus;
     private File signingKeyTCGCertificate;
     private File signingKeyTCGCertificateSignature;
@@ -81,16 +83,21 @@ public class CertifySigningKey extends AbstractSetupTask {
         signingKeyTCGCertificate = trustagentConfiguration.getSigningKeyTCGCertificateFile(); 
         signingKeyModulus = trustagentConfiguration.getSigningKeyModulusFile();
         signingKeyTCGCertificateSignature = trustagentConfiguration.getSigningKeyTCGCertificateSignatureFile();
+        signingKeyName = trustagentConfiguration.getSigningKeyNameFile();
         
         log.debug("AIK Cert path is : {}", aikPemCertificate.getAbsolutePath());
         log.debug("TCG Cert path is : {}", signingKeyTCGCertificate.getAbsolutePath());
         log.debug("TCG Cert signature path is : {}", signingKeyTCGCertificateSignature.getAbsolutePath());        
         log.debug("Public key modulus path is : {}", signingKeyModulus.getAbsolutePath());
+        log.debug("Key Name file path is : {}", signingKeyName.getAbsolutePath());
                 
         SigningKeyEndorsementRequest obj = new SigningKeyEndorsementRequest();
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(signingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(signingKeyTCGCertificate));
         obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(signingKeyTCGCertificateSignature)); 
+        obj.setNameDigest(FileUtils.readFileToByteArray(signingKeyName));
+        obj.setTpmVersion(Tpm.getTpmVersion());
+        log.debug("Detected TPM Version Certify-Signing-Key: {}",Tpm.getTpmVersion());
         
         X509Certificate aikCert = X509Util.decodePemCertificate(FileUtils.readFileToString(aikPemCertificate));
         byte[] encodedAikDerCertificate = X509Util.encodeDerCertificate(aikCert);

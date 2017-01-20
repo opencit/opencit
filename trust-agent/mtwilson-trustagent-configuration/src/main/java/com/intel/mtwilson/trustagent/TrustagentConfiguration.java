@@ -402,6 +402,10 @@ public class TrustagentConfiguration {
         //return new File(Folders.configuration() + File.separator + "bindingkey.nam");        
         return new File("/tmp/outputfilename.tmp");
     }
+
+    public File getSigningKeyNameFile() {
+        return new File("/tmp/outputfilename.tmp");
+    }
      
     public File getBindingKeyModulusFile() {
         return new File(Folders.configuration() + File.separator + "bindingkey.pub");        
