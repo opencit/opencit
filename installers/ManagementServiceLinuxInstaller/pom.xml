@@ -43,12 +43,7 @@
                   <type>war</type>
                 </dependency>	
                 -->
-                <dependency>
-                    <groupId>com.intel.mtwilson.integration</groupId>
-                    <artifactId>mtwilson-launcher-glassfish4</artifactId>
-                    <version>${project.version}</version>
-                    <type>war</type>
-                </dependency>
+                
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-linux-util</artifactId>
@@ -94,14 +89,6 @@
                                 </goals>
                                 <configuration>
                                     <artifactItems>
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.integration</groupId>
-                                            <artifactId>mtwilson-launcher-glassfish4</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>war</type>
-                                            <outputDirectory>${makeself.directory}</outputDirectory>
-                                            <destFileName>ManagementService.war</destFileName>
-                                        </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-linux-util</artifactId>
