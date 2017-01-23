@@ -41,14 +41,7 @@
                     <artifactId>mtwilson-linux-util</artifactId>
                     <version>${project.parent.version}</version>
                     <type>sh</type>
-                </dependency>	
-                <dependency>
-                    <groupId>com.oracle</groupId>
-                    <artifactId>jdk</artifactId>
-                    <version>1.7.0_51</version>
-                    <type>tar.gz</type>
-                    <classifier>linux-x64</classifier>
-                </dependency>	
+                </dependency>		
             </dependencies>
             
             <build>
@@ -74,15 +67,6 @@
                                             <type>sh</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>functions</destFileName>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.oracle</groupId>
-                                            <artifactId>jdk</artifactId>
-                                            <version>1.7.0_51</version>
-                                            <type>tar.gz</type>
-                                            <classifier>linux-x64</classifier>
-                                            <outputDirectory>${makeself.directory}</outputDirectory>
-                                            <destFileName>jdk-7u51-linux-x64.tar.gz</destFileName>
                                         </artifactItem>
                                     </artifactItems>
                                     <overWriteReleases>false</overWriteReleases>

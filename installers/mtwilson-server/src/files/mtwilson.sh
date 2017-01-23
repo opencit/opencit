@@ -125,7 +125,7 @@ fi
 if using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.8}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
 call_apiclient() {
