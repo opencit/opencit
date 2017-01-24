@@ -363,33 +363,18 @@ echo "Loading configuration settings and defaults" >> $INSTALL_LOG_FILE
 load_conf
 load_defaults
 
-# mtwilson requires java 1.7 or later
-# detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+# mtwilson requires java 1.8 or later
 echo "Installing Java..."
-JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.8}
 # in 3.0, java home is now under trustagent home by default
-JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-# check if java is readable to the non-root user
-#if [ -z "$JAVA_HOME" ]; then
-#  java_detect >> $INSTALL_LOG_FILE
-#fi
-if [ -n "$JAVA_HOME" ]; then
-  if [ $(whoami) == "root" ]; then
-    JAVA_USER_READABLE=$(sudo -u $MTWILSON_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  else
-    JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  fi
-fi
-if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
-  JAVA_HOME=$MTWILSON_HOME/share/jdk1.7.0_51
-fi
-echo "Installing Java ($JAVA_PACKAGE) into $JAVA_HOME..." >> $INSTALL_LOG_FILE
-mkdir -p $JAVA_HOME
-java_install_in_home $JAVA_PACKAGE
+java_install_openjdk
+JAVA_CMD=$(type -p java | xargs readlink -f)
+JAVA_HOME=$(dirname $JAVA_CMD | xargs dirname | xargs dirname)
+JAVA_REQUIRED_VERSION=$(java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}')
 # store java location in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-java
 echo "export JAVA_HOME=$JAVA_HOME" >> $MTWILSON_ENV/mtwilson-java
-echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_CMD=$JAVA_CMD" >> $MTWILSON_ENV/mtwilson-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $MTWILSON_ENV/mtwilson-java
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
