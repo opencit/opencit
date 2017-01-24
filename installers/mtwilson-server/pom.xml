@@ -37,7 +37,6 @@
             
             <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
             <dependencies>
-                <!-- Java and Glassfish -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>tomcat-installer</artifactId>
