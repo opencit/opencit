@@ -39,13 +39,6 @@
             <dependencies>
                 <!-- Java and Glassfish -->
                 <dependency>
-                    <groupId>com.oracle</groupId>
-                    <artifactId>jdk</artifactId>
-                    <version>1.7.0_51</version>
-                    <type>tar.gz</type>
-                    <classifier>linux-x64</classifier>
-                </dependency>
-                <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>glassfish</artifactId>
                     <version>4.0</version>
@@ -238,14 +231,6 @@
                                 <configuration>
                                     <artifactItems>
                                         <!-- Java and glassfish -->
-                                        <artifactItem>
-                                            <groupId>com.oracle</groupId>
-                                            <artifactId>jdk</artifactId>
-                                            <version>1.7.0_51</version>
-                                            <type>tar.gz</type>
-                                            <classifier>linux-x64</classifier>
-                                            <destFileName>jdk-1.7.0_51-linux-x64.tar.gz</destFileName>
-                                        </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>glassfish</artifactId>
