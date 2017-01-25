@@ -17,7 +17,6 @@ config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
-#glassfish_required_version=4.0
 webservice_application_name=mtwilson-portal
 #java_required_version=1.7.0_51
 
@@ -91,14 +90,7 @@ setup_print_summary() {
   else
     echo "Java: not found"
   fi
-  if using_glassfish; then
-    if [ -n "$GLASSFISH_HOME" ]; then
-      GLASSFISH_VERSION=`glassfish_version`
-      echo "Glassfish: $GLASSFISH_VERSION"
-    else
-      echo "Glassfish: not found"
-    fi
-  fi
+  
 }
 
 setup_interactive_install() {
@@ -134,13 +126,7 @@ setup_interactive_install() {
     fi
   fi
   
-  if [ -n "$GLASSFISH_HOME" ]; then
-    glassfish_running
-    if [ -z "$GLASSFISH_RUNNING" ]; then
-      #glassfish_start_report
-      mtwilson start
-    fi
-  elif [ -n "$TOMCAT_HOME" ]; then
+  if [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
       #tomcat_start_report
@@ -167,11 +153,11 @@ setup_interactive_install() {
 
 
 setup() {
-  #mysql_clear; java_clear; glassfish_clear;
+  #mysql_clear; java_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
   #java_detect
-#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+#  if [[ -z "$JAVA_HOME" ]]; then
 #      echo_warning "Missing one or more required packages"
 #      setup_print_summary
 #      exit 1
@@ -196,30 +182,17 @@ case "$1" in
         webservice_stop_report "${webservice_application_name}"
         ;;
   status)
-        if using_glassfish; then
-          glassfish_clear
-          glassfish_detect > /dev/null
-        elif using_tomcat; then
+       if using_tomcat; then
           tomcat_clear
           tomcat_detect > /dev/null
         fi
-        #if using_glassfish; then  
-        #  glassfish_running_report
-        #elif using_tomcat; then
-        #  tomcat_running_report
-        #fi
+        
         webservice_running_report "${webservice_application_name}"
         ;;
   restart)
         webservice_stop_report "${webservice_application_name}"
         sleep 2
         webservice_start_report "${webservice_application_name}"
-        ;;
-  glassfish-restart)
-        glassfish_restart
-        ;;
-  glassfish-stop)
-        glassfish_shutdown
         ;;
   setup)
         setup

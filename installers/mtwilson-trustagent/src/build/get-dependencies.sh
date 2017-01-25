@@ -1,5 +1,6 @@
 #!/bin/bash
-TRUSTAGENT_VERSION="3.1-SNAPSHOT"
+TBOOT_VERSION="1.9.5"
+TBOOTXM_VERSION="3.1-SNAPSHOT"
 
 
 yum_detect() {
@@ -36,10 +37,34 @@ detect_os() {
   fi
 }
 
-maven_get_trustagent() {
-  local _group_id="com.intel.mtwilson.trustagent.packages"
-  local _artifact_id="trustagent-linux"
-  local _version="${TRUSTAGENT_VERSION}"
+maven_get_tboot() {
+  local _group_id="net.sourceforge.tboot"
+  local _artifact_id="tboot"
+  local _version="${TBOOT_VERSION}"
+  local _packaging=
+  local _classifier=
+  local _destination=
+  
+  # RHEL
+  if yum_detect; then
+    _packaging="rpm"
+    _classifier="x86_64"
+  # UBUNTU
+  elif aptget_detect; then
+    _packaging="deb"
+    _classifier="amd64"
+  else
+    echo "Unsupported OS: Cannot retrieve tboot package"
+    exit 1
+  fi
+  _destination="$(pwd)/${_artifact_id}-${_version}-${_classifier}.${_packaging}"
+  maven_get "${_group_id}" "${_artifact_id}" "${_version}" "${_packaging}" "${_classifier}" "${_destination}"
+}
+
+maven_get_tbootxm() {
+  local _group_id="com.intel.mtwilson.tbootxm.packages"
+  local _artifact_id="tbootxm"
+  local _version="${TBOOTXM_VERSION}"
   local _packaging="bin"
   local _classifier=
   local _destination=
@@ -51,7 +76,7 @@ maven_get_trustagent() {
   elif aptget_detect; then
     _classifier="ubuntu"
   else
-    echo "Unsupported OS: Cannot retrieve trustagent package"
+    echo "Unsupported OS: Cannot retrieve tbootxm package"
     exit 1
   fi
   _destination="$(pwd)/${_artifact_id}-${_version}-${_classifier}.${_packaging}"
@@ -59,4 +84,5 @@ maven_get_trustagent() {
 }
 
 detect_os
-maven_get_trustagent
+maven_get_tboot
+maven_get_tbootxm
