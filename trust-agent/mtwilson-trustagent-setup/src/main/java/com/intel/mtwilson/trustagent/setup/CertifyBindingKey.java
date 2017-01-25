@@ -81,23 +81,30 @@ public class CertifyBindingKey extends AbstractSetupTask {
     protected void execute() throws Exception {
         
         log.info("Calling into MTW to certify the TCG standard binding key");
+        String os = System.getProperty("os.name").toLowerCase();
         bindingKeyTCGCertificate = trustagentConfiguration.getBindingKeyTCGCertificateFile(); 
         bindingKeyModulus = trustagentConfiguration.getBindingKeyModulusFile();
         bindingKeyTCGCertificateSignature = trustagentConfiguration.getBindingKeyTCGCertificateSignatureFile();
-        aikPemCertificate = trustagentConfiguration.getAikCertificateFile();
-        bindingKeyName = trustagentConfiguration.getBindingKeyNameFile();
-
+        aikPemCertificate = trustagentConfiguration.getAikCertificateFile();        
+	if  ( !os.contains("win" ) & Tpm.getTpmVersion().equals("2.0")) //Linux and TPM 2.0
+            bindingKeyName = trustagentConfiguration.getBindingKeyNameFile();
+        
+        //ToDo: Need to verify OS and TPMVersion for the name digest file
         log.debug("TCG Cert path is : {}", bindingKeyTCGCertificate.getAbsolutePath());
         log.debug("Public key modulus path is : {}", bindingKeyModulus.getAbsolutePath());
         log.debug("TCG Cert signature path is : {}", bindingKeyTCGCertificateSignature.getAbsolutePath());
         log.debug("AIK Certificate path is : {}", aikPemCertificate.getAbsolutePath());
         log.debug("Key Name file path is : {}", bindingKeyName.getAbsolutePath());
-
+        
         BindingKeyEndorsementRequest obj = new BindingKeyEndorsementRequest();
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(bindingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(bindingKeyTCGCertificate));
         obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(bindingKeyTCGCertificateSignature));
-        obj.setNameDigest(FileUtils.readFileToByteArray(bindingKeyName));
+        //ToDo: Need to verify  TPMVersion for the name digest file
+        if  ( !os.contains("win" ) & Tpm.getTpmVersion().equals("2.0")) //Linux and TPM 2.0
+            obj.setNameDigest(FileUtils.readFileToByteArray(bindingKeyName));
+        else
+            obj.setNameDigest(null);
         obj.setTpmVersion(Tpm.getTpmVersion());
         log.debug("Detected TPM Version: {}", Tpm.getTpmVersion());
         

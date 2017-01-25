@@ -19,6 +19,7 @@ import gov.niarl.his.privacyca.TpmCertifyKey20;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -111,9 +112,12 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         try {
             log.debug("Public key modulus {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
                     TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature), TpmUtils.byteArrayToHexString(nameDigest));
-
-            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null && nameDigest != null) {
-
+            //ToDo: Need to verify nameDigest it only works on 2.0
+            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null ) {
+                //If it's TPM 2.0 we must receive the nameDigest, otherwise thrown exception
+                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null)
+                     throw new Exception("Invalid input specified or input value missing.");
+                    
                 log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
                 log.debug("Public key modulus {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature), TpmUtils.byteArrayToHexString(nameDigest));
@@ -160,10 +164,12 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
                     }
                 } else if (tpmVersion.equals("2.0")) {
+                    //ToDo:Distinguish Algorithm and OS on windows 2.0 uses sha1 as default
+                    
                     if (!CertifyKey20.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
                         throw new CertificateException("The signature specified for the certifiy key does not match.");
                     }
-                    //In TPM 2.0 we validate TPM name give to each key
+                    //In TPM 2.0 we validate TPM name given to each key
                     validatePublicKeyDigest = validateName(nameDigest, tpmCertifyKey);
                     if (!validatePublicKeyDigest) {
                         throw new Exception("TPM Key Name specified does not match name digest in the TCG binding certificate");
@@ -188,8 +194,14 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
                     RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                     X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
-
+                    //Read encryption scheme used in binding key
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+                    TpmCertifyKey20 tpmCertifyKey20 = new TpmCertifyKey20(tpmCertifyKey);
+                    short hashAlg = tpmCertifyKey20.getTpmuAttest().getTpmsCertifyInfoBlob().getTpmtHa().getHashAlg();
+                    byteBuffer.putShort(hashAlg);
+                    
                     X509Builder caBuilder = X509Builder.factory();
+                    //ToDo: Add encryption Scheme in certificate attribute
                     X509Certificate bkCert = caBuilder
                             .commonName("CN=Binding_Key_Certificate")
                             .subjectPublicKey(pubBk)
@@ -202,6 +214,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                             .randomSerial()
                             .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
                             .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
+                            .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_ENC_SCHEME_OID, byteBuffer.array())
                             .build();
 
                     if (bkCert != null) {
