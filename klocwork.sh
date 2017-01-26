@@ -52,6 +52,10 @@ buildProject() {
    eval $kwBuildProjectCommand
 }
 
+uploadResults() {
+  kwadmin --url "${KLOCWORK_SERVER_URL}" load "${KLOCWORK_PROJECT}" "${TABLES_DIRECTORY}"
+}
+
 usageCheck(){
    while [[ $# -gt 1 ]]
       do
