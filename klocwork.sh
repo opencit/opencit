@@ -11,43 +11,38 @@ TERM_COLOR_NORMAL="\\033[0;39m"
 export BUILD_SPECS_DIRECTORY=/home/robot/kw_build_specs
 export TABLES_DIRECTORY=/home/robot/kwtables
 export KLOCWORK_PROJECT=dcg_security-mtwilson
+export KLOCWORK_PROJECT=dcg_security-mtwilson
 export KLOCWORK_SERVER_URL=https://klocwork-jf18.devtools.intel.com:8160
 export MAIN_PROJECT_SPEC=mtwilson.out
-export KW_HOME=/home/robot/kw10.2/bin
+export KW_HOME=/home/robot/kw10.4/bin
 PATH=$PATH:$KW_HOME
 
 #Declare Associative Array for c projects
 declare -A projectsArray
 check=0
-#Assign key value pairs, which correspond to [specFileName] = projectPath
 projectsArray[aikqverify.out]="installers/AttestationServiceLinuxInstaller/src/files/aikqverify"
 projectsArray[aikqverify_services.out]="services/aikqverify/src/main/resources"
-
 
 #==========================================Functions==========================================
 initialize() {
    mkdir -p "${BUILD_SPECS_DIRECTORY}"
    mkdir -p "${TABLES_DIRECTORY}"
 }
-
 generateBuildSpecs() {
-   ant ready clean
-   kwmaven --output "${BUILD_SPECS_DIRECTORY}/${MAIN_PROJECT_SPEC}" -DskipTests=true install
-
-   #Iterate through each c project defined in cProjects string
-   for project in "${!projectsArray[@]}"; do
-      #split up path from specfile name
-      #IFS=':' read -r -a projectArray <<< "$project"
-      #echo "(cd ${projectsArray[$project]} && make clean)"
-      #echo "(cd ${projectsArray[$project]} && kwinject --output \"${BUILD_SPECS_DIRECTORY}/$project\" make)"
-      (cd ${projectsArray[$project]} && make clean)
-      (cd ${projectsArray[$project]} && kwinject --output "${BUILD_SPECS_DIRECTORY}/$project" make)
+  ant ready clean
+  kwmaven --output "${BUILD_SPECS_DIRECTORY}/${MAIN_PROJECT_SPEC}" -DskipTests=true install
+  
+  #Iterate through each c project defined in cProjects string
+    for project in "${!projectsArray[@]}"; do
+        (cd ${projectsArray[$project]} && make clean)
+        (cd ${projectsArray[$project]} && kwinject --output "${BUILD_SPECS_DIRECTORY}/$project" make)
    done
+
 }
 
 buildProject() {
    #Construct the kwbuildproject command with the cprojects appended
-   kwBuildProjectCommand="kwbuildproject --url \"${KLOCWORK_SERVER_URL}/${KLOCWORK_PROJECT}\" --tables-directory \"${TABLES_DIRECTORY}\" --force \"${BUILD_SPECS_DIRECTORY}/mtwilson.out\""
+   kwBuildProjectCommand="kwbuildproject --url \"${KLOCWORK_SERVER_URL}/${KLOCWORK_PROJECT}\" --tables-directory \"${TABLES_DIRECTORY}\" --force \"${BUILD_SPECS_DIRECTORY}/$MAIN_PROJECT_SPEC\""
    
    for project in "${!projectsArray[@]}"; do
       IFS=':' read -r -a projectArray <<< "$project"
@@ -202,4 +197,3 @@ exit -1; fi
 	uploadResults
 
 	echo_success "Finished execution..."
-
