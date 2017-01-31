@@ -26,7 +26,6 @@
         <module>mtwilson-launcher</module>
         <module>mtwilson-launcher-api</module>
         -->
-        <module>mtwilson-launcher-glassfish4</module>
         <module>mtwilson-launcher-jetty9</module>
         <module>mtwilson-launcher-tomcat7</module>
         <module>mtwilson-manifest-xml</module>

@@ -33,7 +33,6 @@ package_env_filename=${package_name}.env
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
 #mysql_required_version=5.0
-#glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev mysql-client-5.1"
@@ -50,7 +49,6 @@ fi
 
 # detect the packages we have to install
 #JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-#GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
 #WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
@@ -91,7 +89,7 @@ $mtwilson erase-users --user="$username" > /dev/null 2>&1
 #  mysql_install
 #fi
 #java_install $JAVA_PACKAGE
-#glassfish_install $GLASSFISH_PACKAGE
+
 
 # copy control script to /usr/local/bin and finish setup
 mkdir -p /opt/mtwilson/bin
@@ -105,10 +103,7 @@ chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
 /opt/mtwilson/bin/msctl setup
 #register_startup_script /opt/mtwilson/bin/msctl msctl >> $INSTALL_LOG_FILE
 
-if using_glassfish; then
-  glassfish_permissions "${intel_conf_dir}"
-  glassfish_permissions "${package_dir}"
-elif using_tomcat; then
+if using_tomcat; then
   tomcat_permissions "${intel_conf_dir}"
   tomcat_permissions "${package_dir}"
 fi

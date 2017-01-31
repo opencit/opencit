@@ -363,33 +363,18 @@ echo "Loading configuration settings and defaults" >> $INSTALL_LOG_FILE
 load_conf
 load_defaults
 
-# mtwilson requires java 1.7 or later
-# detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+# mtwilson requires java 1.8 or later
 echo "Installing Java..."
-JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.8}
 # in 3.0, java home is now under trustagent home by default
-JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-# check if java is readable to the non-root user
-#if [ -z "$JAVA_HOME" ]; then
-#  java_detect >> $INSTALL_LOG_FILE
-#fi
-if [ -n "$JAVA_HOME" ]; then
-  if [ $(whoami) == "root" ]; then
-    JAVA_USER_READABLE=$(sudo -u $MTWILSON_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  else
-    JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  fi
-fi
-if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
-  JAVA_HOME=$MTWILSON_HOME/share/jdk1.7.0_51
-fi
-echo "Installing Java ($JAVA_PACKAGE) into $JAVA_HOME..." >> $INSTALL_LOG_FILE
-mkdir -p $JAVA_HOME
-java_install_in_home $JAVA_PACKAGE
+java_install_openjdk
+JAVA_CMD=$(type -p java | xargs readlink -f)
+JAVA_HOME=$(dirname $JAVA_CMD | xargs dirname | xargs dirname)
+JAVA_REQUIRED_VERSION=$(java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}')
 # store java location in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-java
 echo "export JAVA_HOME=$JAVA_HOME" >> $MTWILSON_ENV/mtwilson-java
-echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_CMD=$JAVA_CMD" >> $MTWILSON_ENV/mtwilson-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $MTWILSON_ENV/mtwilson-java
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
@@ -448,7 +433,7 @@ if [ -d $MTWILSON_JAVA ]; then
 fi
 
 if [ -z "$INSTALL_PKGS" ]; then
-  #opt_postgres|opt_mysql opt_java opt_tomcat|opt_glassfish opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
+  #opt_postgres|opt_mysql opt_java opt_tomcat|opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
  INSTALL_PKGS="postgres tomcat privacyca SERVICES PORTALS"
 fi
 
@@ -477,9 +462,7 @@ if [ ! -z "$opt_services" ]; then
 fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-if [ -n "$opt_glassfish" ]; then
-  WEBSERVICE_VENDOR=glassfish
-elif [ -n "$opt_tomcat" ]; then
+if [ -n "$opt_tomcat" ]; then
   WEBSERVICE_VENDOR=tomcat
 fi
 if [ -n "$opt_postgres" ]; then
@@ -488,9 +471,7 @@ elif [ -n "$opt_mysql" ]; then
   DATABASE_VENDOR=mysql
 fi
 
-if using_glassfish; then
-  export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
-elif using_tomcat; then
+if using_tomcat; then
   export DEFAULT_API_PORT=$DEFAULT_TOMCAT_API_PORT;
 fi
 
@@ -514,7 +495,6 @@ fi
 
 export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
-export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 
 # extract mtwilson
@@ -634,7 +614,6 @@ echo "Configuring Mt Wilson Server Name..."
 echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
 This address will be used in the server SSL certificate and in all Mt Wilson URLs.
 For example, if you enter '$MTWILSON_SERVER_IP_ADDRESS' then the Mt Wilson URL is 
-https://$MTWILSON_SERVER_IP_ADDRESS:8181 (for Glassfish deployments) or 
 https://$MTWILSON_SERVER_IP_ADDRESS:8443 (for Tomcat deployments)
 Detected the following options on this server:"
 for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
@@ -681,14 +660,9 @@ management_service=`find_installer mtwilson-management-service` #ManagementServi
 whitelist_service=`find_installer mtwilson-whitelist-service` #WLMService`
 attestation_service=`find_installer mtwilson-attestation-service` #AttestationService`
 mtw_portal=`find_installer mtwilson-portal-installer`
-glassfish_installer=`find_installer glassfish`
 tomcat_installer=`find_installer tomcat`
 
 # Verify the installers we need are present before we start installing
-if [ -n "$opt_glassfish" ] && [ ! -e "$glassfish_installer" ]; then
-  echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
-  exit -1;
-fi
 if [ -n "$opt_tomcat" ] && [ ! -e "$tomcat_installer" ]; then
   echo_warning "Tomcat installer marked for install but missing. Please verify you are using the right installer"
   exit -1;
@@ -738,7 +712,8 @@ elif using_postgres; then
   fi
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ${MTWILSON_HOME}/.pgpass
   echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ${MTWILSON_HOME}/.pgpass
-  if [ $(whoami) == "root" ]; then cp ${MTWILSON_HOME}/.pgpass ~/.pgpass; fi
+  if [ $(whoami) == "root" ]; then cp ${MTWILSON_HOME}/.pgpass ~/.pgpass; 
+  fi
 fi
 
 # database root portion of executed code
@@ -968,51 +943,11 @@ chown mtwilson:mtwilson /opt/mtwilson/logs/mtwilson-audit.log
 export MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS=${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson'}
 call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 
-if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
+if [[ -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
-if using_glassfish; then
-  if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-    if [ ! glassfish_detect >/dev/null ]; then
-      portInUse=`netstat -lnput | grep -E "8080|8181"`
-      if [ -n "$portInUse" ]; then 
-        #glassfish ports in use. exit install
-        echo_failure "Glassfish ports in use. Aborting install."
-        exit 1
-      fi
-    fi
-    
-    echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
-    # glassfish install here
-    ./$glassfish_installer
-    if [ $? -ne 0 ]; then
-      echo_failure "Glassfish installation failed"
-      exit 1
-    fi
-    glassfish_create_ssl_cert_prompt
-    echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
-    # end glassfish installer
-  else
-    echo_warning "Relying on an existing glassfish installation" 
-  fi
 
-  glassfish_detect
-
-  echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV/glassfish
-  echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV/glassfish
-  echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV/glassfish
-
-  
-  if [ -e $glassfish_bin ]; then
-    echo "Disabling glassfish log rotation in place of system wide log rotation"
-      #$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0   ### THIS COMMAND DOES NOT WORK
-      gf_logging_properties=$(find "$GLASSFISH_HOME" -name logging.properties | head -1)
-      sed -i "s/com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=.*/com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0/g" "$gf_logging_properties"
-  else
-    echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
-    echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
-  fi
-elif using_tomcat; then
+if using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
     ./$tomcat_installer
     if [ $? -ne 0 ]; then
@@ -1024,7 +959,7 @@ elif using_tomcat; then
     echo_warning "Relying on an existing Tomcat installation"
   fi
   tomcat_detect
-
+fi
   #set jersey logging filter level to WARNING, instead of default value of INFO
   echo "org.glassfish.jersey.filter.LoggingFilter.level = WARNING" >> $TOMCAT_CONF/logging.properties
 
@@ -1032,7 +967,7 @@ elif using_tomcat; then
   echo "TOMCAT_CONF=$TOMCAT_CONF" >> $MTWILSON_ENV/tomcat
   echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV/tomcat
   echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV/tomcat
-fi
+
 
 set_owner_for_mtwilson_directories
 
@@ -1145,18 +1080,7 @@ fi
 mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
- echo "/opt/mtwilson/glassfish4/glassfish/domains/domain1/logs/server.log {
-    missingok
-    notifempty
-    rotate $LOG_OLD
-    size $LOG_SIZE
-    $LOG_ROTATION_PERIOD
-    $LOG_COMPRESS
-    $LOG_DELAYCOMPRESS
-    $LOG_COPYTRUNCATE
-}
-
-/opt/mtwilson/share/apache-tomcat-7.0.34/logs/catalina.out {
+ echo "/opt/mtwilson/share/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
 	notifempty
 	rotate $LOG_OLD
@@ -1178,27 +1102,6 @@ fi
 mkdir -p /opt/mtwilson/monit/conf.d
 
 # create the monit rc files
-
-#glassfish.mtwilson
-if [ -z "$NO_GLASSFISH_MONIT" ]; then 
-  if [ ! -a /opt/mtwilson/monit/conf.d/glassfish.mtwilson ]; then
-    echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-      check file gf_installed with path "/opt/mtwilson/glassfish4/bin/asadmin"
-      group gf_server
-      if does not exist then unmonitor
-
-      # MtWilson Glassfish services
-      check host mtwilson-version-glassfish with address 127.0.0.1
-      group gf_server
-      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
-      if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-        and request "/mtwilson/v2/version" for 2 cycles
-      then restart
-      if 3 restarts within 10 cycles then timeout
-      depends on gf_installed" > /opt/mtwilson/monit/conf.d/glassfish.mtwilson
-  fi
-fi
 
 #tomcat.mtwilson
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
@@ -1335,14 +1238,7 @@ chmod 700 "/var/opt/intel" "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/ai
 
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
-if using_glassfish; then
-  mtwilson config "mtwilson.webserver.vendor" "glassfish" >/dev/null
-  mtwilson config "glassfish.admin.username" "$WEBSERVICE_MANAGER_USERNAME" >/dev/null
-  mtwilson config "glassfish.admin.password" "$WEBSERVICE_MANAGER_PASSWORD" >/dev/null
-  glassfish_admin_user
-  #glassfish_restart
-  /opt/mtwilson/bin/mtwilson restart
-elif using_tomcat; then
+if using_tomcat; then
   mtwilson config "mtwilson.webserver.vendor" "tomcat" >/dev/null
   mtwilson config "tomcat.admin.username" "$WEBSERVICE_MANAGER_USERNAME" >/dev/null
   mtwilson config "tomcat.admin.password" "$WEBSERVICE_MANAGER_PASSWORD" >/dev/null

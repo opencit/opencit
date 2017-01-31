@@ -6,7 +6,7 @@
     
     <packaging>pom</packaging>
     <name>Mt Wilson Server Linux Installer</name>
-    <description>Installs MySQL, Java, Glassfish, Web Services, and UI Portals</description>
+    <description>Installs MySQL, Java, Web Services, and UI Portals</description>
     
     <parent>
         <groupId>com.intel.mtwilson.linux</groupId>
@@ -37,20 +37,6 @@
             
             <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
             <dependencies>
-                <!-- Java and Glassfish -->
-                <dependency>
-                    <groupId>com.oracle</groupId>
-                    <artifactId>jdk</artifactId>
-                    <version>1.7.0_51</version>
-                    <type>tar.gz</type>
-                    <classifier>linux-x64</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>com.intel.mtwilson.linux</groupId>
-                    <artifactId>glassfish</artifactId>
-                    <version>4.0</version>
-                    <type>bin</type>
-                </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>tomcat-installer</artifactId>
@@ -238,20 +224,6 @@
                                 <configuration>
                                     <artifactItems>
                                         <!-- Java and glassfish -->
-                                        <artifactItem>
-                                            <groupId>com.oracle</groupId>
-                                            <artifactId>jdk</artifactId>
-                                            <version>1.7.0_51</version>
-                                            <type>tar.gz</type>
-                                            <classifier>linux-x64</classifier>
-                                            <destFileName>jdk-1.7.0_51-linux-x64.tar.gz</destFileName>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>glassfish</artifactId>
-                                            <version>4.0</version>
-                                            <type>bin</type>
-                                        </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>tomcat-installer</artifactId>
