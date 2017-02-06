@@ -37,6 +37,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.codec.binary.Hex;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -116,12 +117,16 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
         String tpmVersion = "";
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
+				// Need to verify nameDigest it only works on 2.0
+                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null)
+                     throw new Exception("Invalid input specified or input value missing.");
 
                 log.debug("Starting to verify the Signing key TCG certificate and generate the MTW certified certificate.");
 
                 log.debug("Public key modulus {}, TpmCertifyKey data {} & TpmCertifyKeySignature data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
 
+			    if (tpmVersion == null || tpmVersion.equals("1.2")) {
                 // Verify the encryption scheme, key flags etc
                 byte[] tpm20Magic = {(byte) 0xFF, (byte) 0x54, (byte) 0x43, (byte) 0x47}; //TPM2 TPMS_ATTEST starts with magic TPM_GENERATED_VALUE
                 byte[] tpm12Magic = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00}; //TPM1.2, TPM_CERTIFY_INFO starts with TPM_STRUCT_VER 
@@ -134,14 +139,15 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                     tpmVersion = "1.2";
                     log.debug("TPM 1.2 identified in certify-host-binding-key request");
                 }
-                
+				
+                // Verify the encryption scheme, key flags etc
+                // validateCertifyKeyData(tpmCertifyKey, false);       
+				TpmCertifyKey tpmCertKey = null;
                 if (tpmVersion.equals("1.2")) {
-                    // Verify the encryption scheme, key flags etc
-                    // validateCertifyKeyData(tpmCertifyKey, false);
-                if (tpmVersion == null && tpmVersion.equals("1.2")) {
-                  if( !CertifyKey.isSigningKey(new TpmCertifyKey(tpmCertifyKey))) {
-                      throw new Exception("Not a valid signing key");
-                  }
+					tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
+					if( !CertifyKey.isSigningKey(tpmCertKey)) {
+						throw new Exception("Not a valid binding key");
+					}
                 }
                 
                 else if(tpmVersion.equals("2.0")) {
@@ -214,8 +220,15 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
                 RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
+				//Read encryption scheme used in binding key
+                ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+                TpmCertifyKey20 tpmCertifyKey20 = new TpmCertifyKey20(tpmCertifyKey);
+                short hashAlg = tpmCertifyKey20.getTpmuAttest().getTpmsCertifyInfoBlob().getTpmtHa().getHashAlg();
+                byteBuffer.putShort(hashAlg);
                 
                 X509Builder caBuilder = X509Builder.factory();
+                // Add encryption scheme
+				//ToDo: Add encryption Scheme in certificate attribute
                 X509Certificate bkCert = caBuilder
                         .commonName("CN=Signing_Key_Certificate")
                         .subjectPublicKey(pubBk)
@@ -228,6 +241,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         .randomSerial()
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
+						.noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_ENC_SCHEME_OID, byteBuffer.array())
                         .build();
 
                 if (bkCert != null) {
