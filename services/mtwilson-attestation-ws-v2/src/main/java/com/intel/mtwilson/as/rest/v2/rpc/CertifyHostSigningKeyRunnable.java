@@ -241,6 +241,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
             } else {
                 throw new Exception("Invalid input specified or input value missing.");
             }
+            }
         } catch (Exception ex) {
             log.error("Error during MTW signed signing key certificate.", ex);
             throw new RepositoryCreateException();

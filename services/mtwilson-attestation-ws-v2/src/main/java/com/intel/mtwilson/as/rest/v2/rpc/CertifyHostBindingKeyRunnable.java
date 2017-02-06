@@ -118,38 +118,23 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
-        String tpmVersion = "";
         try {
-            log.debug("Public key modulus {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
+            log.debug("Public key modulus: {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
                     TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature), TpmUtils.byteArrayToHexString(nameDigest));
             //ToDo: Need to verify nameDigest it only works on 2.0
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
                 //If it's TPM 2.0 we must receive the nameDigest, otherwise thrown exception
-                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null)
-                     throw new Exception("Invalid input specified or input value missing.");
+                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null){
+                    throw new Exception("Invalid input specified or input value missing.");
+                }
 
                 log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
                 log.debug("Public key modulus {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature), TpmUtils.byteArrayToHexString(nameDigest));
 
                 if (tpmVersion == null || tpmVersion.equals("1.2")) {
-                // Verify the encryption scheme, key flags etc
-                byte[] tpm20Magic = {(byte) 0xFF, (byte) 0x54, (byte) 0x43, (byte) 0x47}; //TPM2 TPMS_ATTEST starts with magic TPM_GENERATED_VALUE
-                byte[] tpm12Magic = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00}; //TPM1.2, TPM_CERTIFY_INFO starts with TPM_STRUCT_VER 
-                byte[] theMagic = Arrays.copyOfRange(tpmCertifyKey, 0, 4);
-                if (Arrays.equals(theMagic, tpm20Magic)) {
-                    log.debug("TPM 2.0 identified in certify-host-binding-key request");
-                    tpmVersion = "2.0";
-                }
-                else {
-                    tpmVersion = "1.2";
-                    log.debug("TPM 1.2 identified in certify-host-binding-key request");
-                }
-                
-                TpmCertifyKey tpmCertKey = null;
-                if (tpmVersion.equals("1.2")) {
-                    tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
-                    if( !CertifyKey.isBindingKey(tpmCertKey)) {
+                    // Verify the encryption scheme, key flags etc
+                    if (!CertifyKey.isBindingKey(new TpmCertifyKey(tpmCertifyKey))) {
                         throw new Exception("Not a valid binding key");
                     }
                 } else if (tpmVersion.equals("2.0")) {
@@ -160,106 +145,101 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 } else {
                     throw new Exception("Invalid TPM version detected...");
                 }
-                
-                
-                X509Certificate decodedAikDerCertificate = X509Util.decodeDerCertificate(aikDerCertificate);
-                log.debug("AIK Certificate {}", decodedAikDerCertificate.getIssuerX500Principal().getName());
-                
-                // Need to verify if the AIK is signed by the trusted Privacy CA, which would also ensure that the EK is verified.
-                byte[] privacyCAPemBytes;
-                try (FileInputStream privacyCAPemFile = new FileInputStream(My.configuration().getPrivacyCaIdentityCacertsFile())) {
-                    privacyCAPemBytes = IOUtils.toByteArray(privacyCAPemFile);
-                }
-                
-                X509Certificate privacyCACert = X509Util.decodePemCertificate(new String(privacyCAPemBytes));
-                log.debug("Privacy CA Certificate {}", privacyCACert.getIssuerX500Principal().getName());
-                
-                if (!isAikCertifiedByPrivacyCA(decodedAikDerCertificate, privacyCACert)) {
-                    throw new CertificateException("The specified AIK certificate is not trusted.");
-                }
-                ////////////////////////
-                boolean validatePublicKeyDigest = false;
-                if (tpmVersion == null || tpmVersion.equals("1.2")) {
-                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
-                    throw new CertificateException("The signature specified for the certifiy key does not match.");
-                }
-                    //In TPM 1.2 we validate TPM Public Key Digest
-                    validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
-                    if (!validatePublicKeyDigest) {
-                        throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
-                    }
-                } else if (tpmVersion.equals("2.0")) {
-                    //ToDo:Distinguish Algorithm and OS on windows 2.0 uses sha1 as default
-                    
-                    if (!CertifyKey20.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
-                        throw new CertificateException("The signature specified for the certifiy key does not match.");
-                    }
-                    //In TPM 2.0 we validate TPM name given to each key
-                    validatePublicKeyDigest = validateName(nameDigest, tpmCertifyKey);
-                    if (!validatePublicKeyDigest) {
-                        throw new Exception("TPM Key Name specified does not match name digest in the TCG binding certificate");
-                    }
-                }
 
-                // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
-                byte[] pubExp = new byte[3];
-                pubExp[0] = (byte) (0x01 & 0xff);
-                pubExp[1] = (byte) (0x00);
-                pubExp[2] = (byte) (0x01 & 0xff);
+                    X509Certificate decodedAikDerCertificate = X509Util.decodeDerCertificate(aikDerCertificate);
+                    log.debug("AIK Certificate {}", decodedAikDerCertificate.getIssuerX500Principal().getName());
+
+                    // Need to verify if the AIK is signed by the trusted Privacy CA, which would also ensure that the EK is verified.
+                    byte[] privacyCAPemBytes;
+                    try (FileInputStream privacyCAPemFile = new FileInputStream(My.configuration().getPrivacyCaIdentityCacertsFile())) {
+                        privacyCAPemBytes = IOUtils.toByteArray(privacyCAPemFile);
+                    }
+
+                    X509Certificate privacyCACert = X509Util.decodePemCertificate(new String(privacyCAPemBytes));
+                    log.debug("Privacy CA Certificate {}", privacyCACert.getIssuerX500Principal().getName());
+
+                    if (!isAikCertifiedByPrivacyCA(decodedAikDerCertificate, privacyCACert)) {
+                        throw new CertificateException("The specified AIK certificate is not trusted.");
+                    }
+                    ////////////////////////
+                    boolean validatePublicKeyDigest = false;
+                    if (tpmVersion == null || tpmVersion.equals("1.2")) {
+                        if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                            throw new CertificateException("The signature specified for the certifiy key does not match.");
+                        }
+                        //In TPM 1.2 we validate TPM Public Key Digest
+                        validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+                        if (!validatePublicKeyDigest) {
+                            throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
+                        }
+                    } else if (tpmVersion.equals("2.0")) {
+                        //ToDo:Distinguish Algorithm and OS on windows 2.0 uses sha1 as default
+
+                        if (!CertifyKey20.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                            throw new CertificateException("The signature specified for the certifiy key does not match.");
+                        }
+                        //In TPM 2.0 we validate TPM name given to each key
+                        validatePublicKeyDigest = validateName(nameDigest, tpmCertifyKey);
+                        if (!validatePublicKeyDigest) {
+                            throw new Exception("TPM Key Name specified does not match name digest in the TCG binding certificate");
+                        }
+                    }
+
+                    // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
+                    byte[] pubExp = new byte[3];
+                    pubExp[0] = (byte) (0x01 & 0xff);
+                    pubExp[1] = (byte) (0x00);
+                    pubExp[2] = (byte) (0x01 & 0xff);
                     //For TPM 1.2 & 2.0 we should always use publicKeyModulus to generate the certificate.
-                RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulus, pubExp);
+                    RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulus, pubExp);
 
-                if (pubBk != null) {
-                    log.debug("Successfully created the public key from the modulus specified");
-                } else {
-                    throw new Exception("Error during the creation of the public key from the modulus and exponent");
-                }
+                    if (pubBk != null) {
+                        log.debug("Successfully created the public key from the modulus specified");
+                    } else {
+                        throw new Exception("Error during the creation of the public key from the modulus and exponent");
+                    }
 
-                // first load the privacy ca key                
-                log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
-                RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
-                X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
+                    // first load the privacy ca key                
+                    log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
+                    RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
+                    X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                     //Read encryption scheme used in binding key
                     ByteBuffer byteBuffer = ByteBuffer.allocate(2);
                     TpmCertifyKey20 tpmCertifyKey20 = new TpmCertifyKey20(tpmCertifyKey);
-                    short hashAlg = tpmCertifyKey20.getTpmuAttest().getTpmsCertifyInfoBlob().getTpmtHa().getHashAlg();
-                    byteBuffer.putShort(hashAlg);
-                
-                ByteBuffer byteBuffer = ByteBuffer.allocate(2);
-                if (tpmVersion.equals("1.2")) {
-                    byteBuffer.putShort(tpmCertKey.getKeyParms().getEncScheme());
-                }
-                else
-                    byteBuffer.putShort(encryptionScheme);
-                
-                X509Builder caBuilder = X509Builder.factory();
+                    if (tpmVersion.equals("1.2")) {
+                        byteBuffer.putShort(new TpmCertifyKey(tpmCertifyKey).getKeyParms().getEncScheme());
+                    } else {
+                        byteBuffer.putShort(encryptionScheme);
+                    }
+
+                    X509Builder caBuilder = X509Builder.factory();
                     //ToDo: Add encryption Scheme in certificate attribute
-                X509Certificate bkCert = caBuilder
-                        .commonName("CN=Binding_Key_Certificate")
-                        .subjectPublicKey(pubBk)
-                        .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
-                        .issuerPrivateKey(cakey)
-                        .issuerName(cacert)
-                        .keyUsageKeyEncipherment()
-//                        .keyUsageDataEncipherment()
-                        .extKeyUsageIsCritical()
-                        .randomSerial()
-                        .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
-                        .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
+                    X509Certificate bkCert = caBuilder
+                            .commonName("CN=Binding_Key_Certificate")
+                            .subjectPublicKey(pubBk)
+                            .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
+                            .issuerPrivateKey(cakey)
+                            .issuerName(cacert)
+                            .keyUsageKeyEncipherment()
+                            //                        .keyUsageDataEncipherment()
+                            .extKeyUsageIsCritical()
+                            .randomSerial()
+                            .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
+                            .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
                             .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_ENC_SCHEME_OID, byteBuffer.array())
-                        .build();
+                            .build();
 
-                if (bkCert != null) {
-                    bindingKeyDerCertificate = X509Util.encodeDerCertificate(bkCert);
+                    if (bkCert != null) {
+                        bindingKeyDerCertificate = X509Util.encodeDerCertificate(bkCert);
+                    } else {
+                        throw new Exception("Error during creation of the MTW signed binding key certificate");
+                    }
+
+                    log.debug("Successfully created the MTW signed PEM certificate for binding key: {}.", X509Util.encodePemCertificate(bkCert));
+
                 } else {
-                    throw new Exception("Error during creation of the MTW signed binding key certificate");
+                    throw new Exception("Invalid input specified or input value missing.");
                 }
-
-                log.debug("Successfully created the MTW signed PEM certificate for binding key: {}.", X509Util.encodePemCertificate(bkCert));
-
-            } else {
-                throw new Exception("Invalid input specified or input value missing.");
-            }
         } catch (Exception ex) {
             log.error("Error during MTW signed binding key certificate.", ex);
             throw new RepositoryCreateException();
