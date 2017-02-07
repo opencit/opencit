@@ -114,7 +114,6 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
-        String tpmVersion = "";
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
 				// Need to verify nameDigest it only works on 2.0
@@ -126,20 +125,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 log.debug("Public key modulus {}, TpmCertifyKey data {} & TpmCertifyKeySignature data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
 
-			    if (tpmVersion == null || tpmVersion.equals("1.2")) {
-                // Verify the encryption scheme, key flags etc
-                byte[] tpm20Magic = {(byte) 0xFF, (byte) 0x54, (byte) 0x43, (byte) 0x47}; //TPM2 TPMS_ATTEST starts with magic TPM_GENERATED_VALUE
-                byte[] tpm12Magic = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00}; //TPM1.2, TPM_CERTIFY_INFO starts with TPM_STRUCT_VER 
-                byte[] theMagic = Arrays.copyOfRange(tpmCertifyKey, 0, 4);
-                if (Arrays.equals(theMagic, tpm20Magic)) {
-                    log.debug("TPM 2.0 identified in certify-host-binding-key request");
-                    tpmVersion = "2.0";
-                }
-                else {
-                    tpmVersion = "1.2";
-                    log.debug("TPM 1.2 identified in certify-host-binding-key request");
-                }
-				
+			    
                 // Verify the encryption scheme, key flags etc
                 // validateCertifyKeyData(tpmCertifyKey, false);       
 				TpmCertifyKey tpmCertKey = null;
@@ -254,8 +240,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
 
             } else {
                 throw new Exception("Invalid input specified or input value missing.");
-            }
-            }
+            }            
         } catch (Exception ex) {
             log.error("Error during MTW signed signing key certificate.", ex);
             throw new RepositoryCreateException();
