@@ -118,9 +118,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
-        try {
-            log.debug("Public key modulus: {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
-                    TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature), TpmUtils.byteArrayToHexString(nameDigest));
+        try {            
             //ToDo: Need to verify nameDigest it only works on 2.0
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
                 //If it's TPM 2.0 we must receive the nameDigest, otherwise thrown exception
@@ -129,9 +127,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 }
 
                 log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
-                log.debug("Public key modulus {}, TpmCertifyKey data {}, TpmCertifyKeySignature data {} & bindingKeyName data {} are specified.",
-                        TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature), TpmUtils.byteArrayToHexString(nameDigest));
-
+                
                 if (tpmVersion == null || tpmVersion.equals("1.2")) {
                     // Verify the encryption scheme, key flags etc
                     if (!CertifyKey.isBindingKey(new TpmCertifyKey(tpmCertifyKey))) {
