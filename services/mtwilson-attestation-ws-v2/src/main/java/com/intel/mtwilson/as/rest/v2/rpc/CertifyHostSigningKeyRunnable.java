@@ -6,6 +6,8 @@ package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
@@ -22,9 +24,20 @@ import org.apache.commons.io.IOUtils;
 import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.isAikCertifiedByPrivacyCA;
 import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.validatePublicKeyDigest;
 import com.intel.mtwilson.util.tpm12.CertifyKey;
+import com.intel.mtwilson.util.tpm20.CertifyKey20;
 import gov.niarl.his.privacyca.TpmCertifyKey;
+import gov.niarl.his.privacyca.TpmCertifyKey20;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
+import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.binary.Hex;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -41,6 +54,15 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     private byte[] signingKeyDerCertificate;
     private byte[] tpmCertifyKeySignature;
     private byte[] aikDerCertificate;
+    private byte[] nameDigest;
+    private String tpmVersion;
+
+    public byte[] getNameDigest() {
+        return nameDigest;
+    }
+    public void setNameDigest(byte[] nameDigest) {
+        this.nameDigest = nameDigest;
+    }
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;
@@ -82,37 +104,45 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
         this.aikDerCertificate = aikDerCertificate;
     }
 
+    public String getTpmVersion(){
+        return tpmVersion;
+    }
+    public void setTpmVersion(String tpmVersion){
+        this.tpmVersion = tpmVersion;
+    }
+
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
-        String tpmVersion = "";
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
+				// Need to verify nameDigest it only works on 2.0
+                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null)
+                     throw new Exception("Invalid input specified or input value missing.");
 
                 log.debug("Starting to verify the Signing key TCG certificate and generate the MTW certified certificate.");
 
                 log.debug("Public key modulus {}, TpmCertifyKey data {} & TpmCertifyKeySignature data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
 
+			    
                 // Verify the encryption scheme, key flags etc
-                byte[] tpm20Magic = {(byte) 0xFF, (byte) 0x54, (byte) 0x43, (byte) 0x47}; //TPM2 TPMS_ATTEST starts with magic TPM_GENERATED_VALUE
-                byte[] tpm12Magic = {(byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x00}; //TPM1.2, TPM_CERTIFY_INFO starts with TPM_STRUCT_VER 
-                byte[] theMagic = Arrays.copyOfRange(tpmCertifyKey, 0, 4);
-                if (Arrays.equals(theMagic, tpm20Magic)) {
-                    log.debug("TPM 2.0 identified in certify-host-binding-key request");
-                    tpmVersion = "2.0";
-                }
-                else {
-                    tpmVersion = "1.2";
-                    log.debug("TPM 1.2 identified in certify-host-binding-key request");
+                // validateCertifyKeyData(tpmCertifyKey, false);       
+				TpmCertifyKey tpmCertKey = null;
+                if (tpmVersion.equals("1.2")) {
+					tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
+					if( !CertifyKey.isSigningKey(tpmCertKey)) {
+						throw new Exception("Not a valid binding key");
+					}
                 }
                 
-                if (tpmVersion.equals("1.2")) {
-                    // Verify the encryption scheme, key flags etc
-                    // validateCertifyKeyData(tpmCertifyKey, false);
-                    if( !CertifyKey.isSigningKey(new TpmCertifyKey(tpmCertifyKey))) {
-                        throw new Exception("Not a valid signing key");
+                else if(tpmVersion.equals("2.0")) {
+                    if( !CertifyKey20.isSigningKey(new TpmCertifyKey20(tpmCertifyKey))) {
+                      throw new Exception("Not a valid signing key");
                     }
+                }
+                else {
+                    throw new Exception("Invalid TPM version detected...");
                 }
                 
                 X509Certificate decodedAikDerCertificate = X509Util.decodeDerCertificate(aikDerCertificate);
@@ -130,16 +160,35 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 if (!isAikCertifiedByPrivacyCA(decodedAikDerCertificate, privacyCACert)) {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
-                               
+
+                boolean validatePublicKeyDigest = false;
+
+                if(tpmVersion == null || tpmVersion.equals("1.2")) {
                 if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
                     throw new CertificateException("The signature specified for the certifiy key does not match.");
                 }
-                if (tpmVersion.equals("1.2")) {
-                    boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
-                    if (!validatePublicKeyDigest) {
-                        throw new Exception("Public key specified does not map to the public key digest in the TCG signing key certificate");
-                    }
+                  //In TPM 1.2 we validate TPM Public Key Digest
+                  validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+                  if (!validatePublicKeyDigest) {
+                      throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
+                  }
                 }
+                
+                else if(tpmVersion.equals("2.0")) {
+                  //validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+
+                if (!CertifyKey20.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                      throw new CertificateException("The signature specified for the certifiy key does not match.");
+                }
+
+
+                  //In TPM 2.0 we validate TPM unique name give to each key
+                  validatePublicKeyDigest = validateName(nameDigest, tpmCertifyKey);
+                  if (!validatePublicKeyDigest) {
+                      throw new Exception("TPM Key Name specified does not match name digest in the TCG binding certificate");
+                  }
+                }
+
                 // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
                 byte[] pubExp = new byte[3];
                 pubExp[0] = (byte) (0x01 & 0xff);
@@ -157,8 +206,15 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
                 RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
+				//Read encryption scheme used in binding key
+                ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+                TpmCertifyKey20 tpmCertifyKey20 = new TpmCertifyKey20(tpmCertifyKey);
+                short hashAlg = tpmCertifyKey20.getTpmuAttest().getTpmsCertifyInfoBlob().getTpmtHa().getHashAlg();
+                byteBuffer.putShort(hashAlg);
                 
                 X509Builder caBuilder = X509Builder.factory();
+                // Add encryption scheme
+				//ToDo: Add encryption Scheme in certificate attribute
                 X509Certificate bkCert = caBuilder
                         .commonName("CN=Signing_Key_Certificate")
                         .subjectPublicKey(pubBk)
@@ -171,6 +227,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         .randomSerial()
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
+						.noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_ENC_SCHEME_OID, byteBuffer.array())
                         .build();
 
                 if (bkCert != null) {
@@ -183,10 +240,107 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
 
             } else {
                 throw new Exception("Invalid input specified or input value missing.");
-            }
+            }            
         } catch (Exception ex) {
             log.error("Error during MTW signed signing key certificate.", ex);
             throw new RepositoryCreateException();
+        }
+    }
+    
+ /**
+     * Validates the public key digest in the CertifyKey against the public key specified.
+     * @param publicKeyModulus
+     * @param tcgCertificate
+     * @return
+     * @throws Exception 
+     */
+     protected static boolean validatePublicKeyDigest(byte[] publicKeyModulus, byte[] tcgCertificate) throws Exception {
+        try {
+            
+            log.debug("Validating the public key.");
+            byte[] calculatedModulusDigest = Sha1Digest.digestOf(publicKeyModulus).toByteArray();
+            
+            TpmCertifyKey certifiedKey = new TpmCertifyKey(tcgCertificate);
+            byte[] providedDigest = certifiedKey.getPublicKeyDigest();
+            
+            log.debug("Calculated public key digest is {} -- passed in public key digest is {}", 
+                    TpmUtils.byteArrayToHexString(calculatedModulusDigest), TpmUtils.byteArrayToHexString(certifiedKey.getPublicKeyDigest()));
+            
+            for (int i = 0; i < calculatedModulusDigest.length; i++) {
+                if(calculatedModulusDigest[i] != providedDigest[i])
+                    return false;
+}
+            
+            return true;
+        } catch (TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException ex) {
+            throw ex;
+        }        
+    }
+    
+    /**
+     * Validates the name digest in the CertifyKey against the name blob
+     * specified.
+     *
+     * @param nameDigest
+     * @param tcgCertificate
+     * @return
+     * @throws Exception
+     */
+    protected static boolean validateName(byte[] nameDigest, byte[] tcgCertificate) throws Exception {
+        try {
+            byte[] padding = Hex.decodeHex("2200000b".toCharArray());
+            byte[] endPadding = Hex.decodeHex("00000000000000000000000000000000000000000000000000000000000000000000".toCharArray());
+            log.debug("Validating the Name.");
+            TpmCertifyKey20 tpmCertifyKey = new TpmCertifyKey20(tcgCertificate);
+            byte[] providedName = tpmCertifyKey.getTpmuAttest().getTpmsCertifyInfoBlob().getTpmtHa().getDigest();
+            byte[] providedNameWithoutPadding = Arrays.copyOfRange(nameDigest, padding.length, nameDigest.length - endPadding.length);
+            log.debug("providedName is {} of size {}\nprovidedNameWithoutPadding is {} of size {}",
+                    TpmUtils.byteArrayToHexString(providedName), providedName.length, TpmUtils.byteArrayToHexString(providedNameWithoutPadding), providedNameWithoutPadding.length);
+
+            log.debug("Calculated public key digest is {} -- passed in public key digest is {}",
+                    TpmUtils.byteArrayToHexString(providedNameWithoutPadding), TpmUtils.byteArrayToHexString(providedNameWithoutPadding));
+
+            for (int i = 0; i < providedNameWithoutPadding.length; i++) {
+                log.debug("Comparing {} with {}", nameDigest[i], providedNameWithoutPadding[i]);
+                if (providedNameWithoutPadding[i] != providedNameWithoutPadding[i]) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException ex) {
+            throw ex;
+        }
+    }
+    
+    /**
+     * Verifies if the specified AIK certificate is issued by Privacy CA and is valid.
+     * @param aikCert
+     * @param privacyCACert
+     * @return
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws NoSuchProviderException
+     * @throws SignatureException 
+     */
+    protected static boolean isAikCertifiedByPrivacyCA(X509Certificate aikCert, X509Certificate privacyCACert) 
+            throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        try {
+            
+            log.debug("Verifying the AIK cert with public key {} with the Privacy CA {}.", TpmUtils.byteArrayToHexString(aikCert.getPublicKey().getEncoded()),
+                    TpmUtils.byteArrayToHexString(privacyCACert.getPublicKey().getEncoded()));
+            
+            if (aikCert != null && privacyCACert != null) {
+                aikCert.verify(privacyCACert.getPublicKey());
+                log.debug("Successfully verified the AIK signature against the Privacy CA");
+                return true;
+            }
+            log.debug("Error verifying the AIK signature against the Privacy CA");
+            return false;
+            
+        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException ex) {
+            log.error("Error during signature verification. {}", ex.getMessage());
+            throw ex;
         }
     }
     
