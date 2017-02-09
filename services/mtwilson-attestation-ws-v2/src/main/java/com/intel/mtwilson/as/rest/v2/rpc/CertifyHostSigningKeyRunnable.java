@@ -206,12 +206,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
                 RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
-				//Read encryption scheme used in binding key
-                ByteBuffer byteBuffer = ByteBuffer.allocate(2);
-                TpmCertifyKey20 tpmCertifyKey20 = new TpmCertifyKey20(tpmCertifyKey);
-                short hashAlg = tpmCertifyKey20.getTpmuAttest().getTpmsCertifyInfoBlob().getTpmtHa().getHashAlg();
-                byteBuffer.putShort(hashAlg);
-                
+				                
                 X509Builder caBuilder = X509Builder.factory();
                 // Add encryption scheme
 				//ToDo: Add encryption Scheme in certificate attribute
@@ -227,7 +222,6 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         .randomSerial()
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
                         .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
-						.noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_ENC_SCHEME_OID, byteBuffer.array())
                         .build();
 
                 if (bkCert != null) {
