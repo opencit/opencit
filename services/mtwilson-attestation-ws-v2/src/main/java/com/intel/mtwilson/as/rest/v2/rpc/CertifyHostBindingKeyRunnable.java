@@ -201,7 +201,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                     //Read encryption scheme used in binding key
                     ByteBuffer byteBuffer = ByteBuffer.allocate(2);
-                    TpmCertifyKey20 tpmCertifyKey20 = new TpmCertifyKey20(tpmCertifyKey);
+                    
                     if (tpmVersion.equals("1.2")) {
                         byteBuffer.putShort(new TpmCertifyKey(tpmCertifyKey).getKeyParms().getEncScheme());
                     } else {
