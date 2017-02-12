@@ -80,8 +80,8 @@ conf_dir=/etc/intel/cloudsecurity
 pid_dir=/var/run/mtwilson
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
-#java_required_version=1.7.0_51    
-MTWILSON_PID_FILE="" 
+#java_required_version=1.7.0_51
+MTWILSON_PID_FILE=""
 if [ -z $MTWILSON_PID_FILE ]; then
     if [ -d $pid_dir ] && [ -w $pid_dir ]; then
         MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
@@ -341,7 +341,7 @@ case "$1" in
   start)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then
-          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep "${MTWILSON_HOME}" | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
           if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
             # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
             if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
@@ -381,7 +381,7 @@ case "$1" in
   restart)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then
-          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep "${MTWILSON_HOME}" | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
           if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
             # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
             if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
