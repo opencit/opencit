@@ -1253,7 +1253,7 @@ mtwilson_confirmed() {
   mtwilson_portal_error_code=$?
   mtwilson_running_report_wait
   mtwilson_running_error_code=$?
-  if [[ mtwilson_error_code -ne 0 ]] || [[ mtwilson_portal_error_code -ne 0 ]] || [[ mtwilson_running_error_code -ne 0 ]]; then exit 10; fi
+  if [[ mtwilson_error_code -ne 0 ]] || [[ mtwilson_portal_error_code -ne 0 ]] || [[ mtwilson_running_error_code -ne 0 ]]; then return 10; fi
 }
 if ! mtwilson_confirmed; then
   echo "Restarting mtwilson services..."
