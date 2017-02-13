@@ -1609,7 +1609,7 @@ public class HostBO {
                                     //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                     moduleObj.setOemName(hostObj.BIOS_Oem);
                                 }
-                            } else if(pcr == 19 && !useDaMode) {
+                            } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))){
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
