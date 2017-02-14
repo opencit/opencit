@@ -1246,6 +1246,21 @@ if using_tomcat; then
   /opt/mtwilson/bin/mtwilson restart
 fi
 
+mtwilson_confirmed() {
+  webservice_running_report_wait mtwilson
+  mtwilson_error_code=$?
+  webservice_running_report_wait mtwilson-portal
+  mtwilson_portal_error_code=$?
+  mtwilson_running_report_wait
+  mtwilson_running_error_code=$?
+  if [[ mtwilson_error_code -ne 0 ]] || [[ mtwilson_portal_error_code -ne 0 ]] || [[ mtwilson_running_error_code -ne 0 ]]; then return 10; fi
+}
+if ! mtwilson_confirmed; then
+  echo "Restarting mtwilson services..."
+  mtwilson restart
+  mtwilson_confirmed
+fi
+
 echo "Log file for install is located at $INSTALL_LOG_FILE"
 if [ -n "$INSTALLED_MARKER_FILE" ]; then
  touch $INSTALLED_MARKER_FILE
