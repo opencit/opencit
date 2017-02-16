@@ -212,17 +212,17 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
     @Override
     @RequiresPermissions("vm_attestations:create")    
     public void create(VMAttestation item) {
-        log.debug("VMAttestation:Create - Got request to create VM attestation report.");  
+        log.debug("VMAttestation:Create - Got request to create VM attestation report.");
         
         String nonce;
-        JAXB jaxb = new JAXB();        
-        if (item.getId() == null) { item.setId(new UUID()); }        
-        ValidationUtil.validate(item); 
+        JAXB jaxb = new JAXB();
+        if (item.getId() == null) { item.setId(new UUID()); }
+        ValidationUtil.validate(item);
         
         try {
-            if (item.getHostName() != null && !item.getHostName().isEmpty() && 
+            if (item.getHostName() != null && !item.getHostName().isEmpty() &&
                     item.getVmInstanceId() != null && !item.getVmInstanceId().isEmpty()) {
-
+                log.debug("VMAttestation:Create - searching for host [{}] for VM with instance ID: {}", item.getHostName(), item.getVmInstanceId());
                 TblHostsJpaController jpaController = My.jpa().mwHosts();
                 TblHosts obj = jpaController.findByName(item.getHostName());
                 if (obj != null) {
