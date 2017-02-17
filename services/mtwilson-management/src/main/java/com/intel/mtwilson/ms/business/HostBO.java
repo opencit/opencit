@@ -1639,8 +1639,8 @@ public class HostBO {
                             }
                             if (!hostConfigObj.getOverWriteWhiteList()) {
                                 // add the module if we are to add a new bios or vmm mle
-                                boolean addModuleToBios = !moduleObj.getUseHostSpecificDigest() && hostConfigObj.addBiosWhiteList();
-                                boolean addModuleToVmm = moduleObj.getUseHostSpecificDigest() && hostConfigObj.addVmmWhiteList();
+                                boolean addModuleToBios = hostConfigObj.addBiosWhiteList();
+                                boolean addModuleToVmm = hostConfigObj.addVmmWhiteList();
                                 
                                 if(addModuleToBios || addModuleToVmm){
                                     mleBO.addModuleWhiteList(moduleObj, emt, null, null);
