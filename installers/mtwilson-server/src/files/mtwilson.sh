@@ -80,9 +80,8 @@ conf_dir=/etc/intel/cloudsecurity
 pid_dir=/var/run/mtwilson
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
-#glassfish_required_version=4.0
-#java_required_version=1.7.0_51    
-MTWILSON_PID_FILE="" 
+#java_required_version=1.7.0_51
+MTWILSON_PID_FILE=""
 if [ -z $MTWILSON_PID_FILE ]; then
     if [ -d $pid_dir ] && [ -w $pid_dir ]; then
         MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
@@ -117,19 +116,16 @@ load_defaults 2>&1 >/dev/null
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 #export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-#export WEBSERVICE_VENDOR=${WEBSERVICE_VENDOR:-glassfish}
 
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
 fi
-if using_glassfish; then
-    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-4.0}
-elif using_tomcat; then
+if using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.8}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
 call_apiclient() {
@@ -199,20 +195,17 @@ mtwilson_localhost_integration() {
 
 setup() {
   #java_detect; java_env_report > ${env_dir}/java
-  #if using_glassfish; then
-  #  glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
-  #elif using_tomcat; then
+ #if using_tomcat; then
   #  tomcat_detect; tomcat_env_report > ${env_dir}/tomcat
   #fi
   find_ctl_commands
 
-  # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to glassfish directly)
+  # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to tomcat directly)
   export MTWILSON_SETUP_NODEPLOY=1
 
   # Gather default configuration
   MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
   MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
-  GLASSFISH_SSL_CERT_CN=${GLASSFISH_SSL_CERT_CN:-"$MTWILSON_SERVER"}
   TOMCAT_SSL_CERT_CN=${TOMCAT_SSL_CERT_CN:-"$MTWILSON_SERVER"}
   
   # Prompt for installation settings
@@ -247,13 +240,7 @@ Detected the following options on this server:"
   # Attestation service auto-configuration
   export PRIVACYCA_SERVER=${MTWILSON_SERVER}
 
-  if using_glassfish; then
-    if [ -n "${GLASSFISH_SSL_CERT_CN}" ]; then
-      glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
-    else
-      glassfish_create_ssl_cert_prompt
-    fi
-  elif using_tomcat; then
+ if using_tomcat; then
     if [ -n "${TOMCAT_SSL_CERT_CN}" ]; then
       tomcat_create_ssl_cert "${TOMCAT_SSL_CERT_CN}"
     else
@@ -286,17 +273,12 @@ Detected the following options on this server:"
 }
 
 all_status() {
-  if using_glassfish; then
-    glassfish_clear
-    #glassfish_detect > /dev/null
-  elif using_tomcat; then
+ if using_tomcat; then
     tomcat_clear
     #tomcat_detect > /dev/null
   fi
 
-  if using_glassfish; then
-    glassfish_running_report
-  elif using_tomcat; then
+  if using_tomcat; then
     tomcat_running_report
   fi
   
@@ -328,13 +310,7 @@ setup_env() {
   fi
   echo "WEBSERVICE_VENDOR=$WEBSERVICE_VENDOR"
   echo "DATABASE_VENDOR=$DATABASE_VENDOR"
-  if using_glassfish; then
-    glassfish_detect > /dev/null
-    echo "GLASSFISH_HOME=$GLASSFISH_HOME"
-    echo "glassfish_bin=$glassfish_bin"
-    echo "glassfish=\"$glassfish\""
-    #export GLASSFISH_HOME glassfish_bin glassfish
-  elif using_tomcat; then
+  if using_tomcat; then
     tomcat_detect > /dev/null
     echo "TOMCAT_HOME=$TOMCAT_HOME"
     echo "tomcat_bin=$tomcat_bin"
@@ -346,7 +322,6 @@ setup_env() {
 
 print_help() {
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
-          "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
           "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat-sslcert|tomcat-status|\n" \
           "\t\tkey-backup|key-restore|restart|setup|start|status|stop|uninstall|version|zeroize}"
 }
@@ -366,7 +341,7 @@ case "$1" in
   start)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then
-          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep "${MTWILSON_HOME}" | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
           if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
             # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
             if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
@@ -378,12 +353,7 @@ case "$1" in
           fi
         fi
         touch $MTWILSON_PID_WAIT_FILE
-        if using_glassfish; then
-          glassfish_start
-          if [ -n "$GLASSFISH_PID" ]; then
-            echo $GLASSFISH_PID > $MTWILSON_PID_FILE
-          fi
-        elif using_tomcat; then
+       if using_tomcat; then
           tomcat_start
           if [ -n "$TOMCAT_PID" ]; then
             echo $TOMCAT_PID > $MTWILSON_PID_FILE
@@ -399,13 +369,7 @@ case "$1" in
   stop)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         touch $MTWILSON_PID_WAIT_FILE
-        if using_glassfish; then
-          glassfish_stop
-          #glassfish_shutdown
-          if [ -f $MTWILSON_PID_FILE ]; then
-            rm -f $MTWILSON_PID_FILE
-          fi
-        elif using_tomcat; then
+        if using_tomcat; then
           tomcat_stop
           #tomcat_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
@@ -417,7 +381,7 @@ case "$1" in
   restart)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then
-          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep "${MTWILSON_HOME}" | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
           if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
             # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
             if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
@@ -429,12 +393,7 @@ case "$1" in
           fi
         fi
         touch $MTWILSON_PID_WAIT_FILE
-        if using_glassfish; then
-          glassfish_restart
-          if [ -n "$GLASSFISH_PID" ]; then
-            echo $GLASSFISH_PID > $MTWILSON_PID_FILE
-          fi
-        elif using_tomcat; then
+        if using_tomcat; then
           tomcat_restart
           if [ -n "$TOMCAT_PID" ]; then
             echo $TOMCAT_PID > $MTWILSON_PID_FILE
@@ -442,40 +401,7 @@ case "$1" in
         fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
-  glassfish-detect)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        glassfish_detect ${2:-$GLASSFISH_REQUIRED_VERSION}
-        glassfish_env_report
-        ;;
-  glassfish-start)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        glassfish_require
-        glassfish_start_report
-        ;;
-  glassfish-stop)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        glassfish_require
-        glassfish_shutdown
-        ;;
-  glassfish-restart)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        glassfish_require
-        glassfish_restart
-        ;;
-  glassfish-status)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        glassfish_require
-        glassfish_running_report
-        glassfish_sslcert_report
-        ;;
-  glassfish-sslcert)
-        #echo_warning "This feature has been disabled: mtwilson glassfish-sslcert"
-        glassfish_create_ssl_cert_prompt
-        ;;
-  glassfish-enable-logging)
-        glassfish_enable_logging
-        ;;
-  tomcat-detect)
+   tomcat-detect)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         tomcat_detect ${2:-$TOMCAT_REQUIRED_VERSION}
         tomcat_env_report
@@ -541,15 +467,10 @@ case "$1" in
         fi
         ;;
   fingerprint)
-        # show server ssh fingerprint, glassfish ssl fingerprint, and saml cert fingerprint
+        # show server ssh fingerprint, ssl fingerprint, and saml cert fingerprint
         echo "== SSH HOST KEYS =="
         ssh_fingerprints
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        if using_glassfish; then
-          glassfish_require
-          echo "== GLASSFISH SSL CERTIFICATE =="
-          glassfish_sslcert_report
-        fi
         echo "== MT WILSON SAML CERTIFICATE =="
         mtwilson_saml_cert_report
         ;;
@@ -577,10 +498,7 @@ case "$1" in
   zeroize)
         configDir="/opt/mtwilson/configuration"
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-        if using_glassfish; then
-          glassfish_require
-          glassfish_async_stop
-        elif using_tomcat; then
+        if using_tomcat; then
           tomcat_require
           tomcat_async_stop
         fi
@@ -602,12 +520,7 @@ case "$1" in
   uninstall)
         if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         #load_default_env 1>/dev/null
-        if using_glassfish; then
-          glassfish_require
-          echo "Stopping Glassfish..."
-          glassfish_shutdown
-          #rm -rf /usr/share/glassfish4
-        elif using_tomcat; then
+       if using_tomcat; then
           tomcat_require
           echo "Stopping Tomcat..."
           tomcat_shutdown
@@ -662,7 +575,6 @@ case "$1" in
         # Finally, clear variables so that detection will work properly if mt wilson is re-installed  
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
         tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""
-        glassfish_clear; export GLASSFISH_HOME=""; export glassfish_bin=""; export glassfish=""
         postgres_clear; export POSTGRES_HOME=""; export psql=""
         mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"

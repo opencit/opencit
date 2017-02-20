@@ -21,6 +21,7 @@ import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.RuleResult;
+import com.intel.mtwilson.policy.fault.PcrEventLogInvalid;
 import com.intel.mtwilson.policy.fault.PcrEventLogMissing;
 import com.intel.mtwilson.policy.fault.PcrManifestMissing;
 import com.intel.mtwilson.policy.fault.PcrValueMismatch;
@@ -86,7 +87,7 @@ public class PcrEventLogIntegrity extends BaseRule {
                         log.debug("PcrEventLogIntegrity: About to compare {} with {}.", actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
-                            report.fault(PcrValueMismatch.newInstance(pcrBank, pcrIndex, expectedValue, expectedValue));
+                            report.fault(new PcrEventLogInvalid(pcrIndex));
                         }
                     }
                 }

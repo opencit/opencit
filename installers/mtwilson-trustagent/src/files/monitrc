@@ -1,7 +1,0 @@
-## Monit Process Monitor Config File
-## Configuration options and examples can be found here:
-## http://mmonit.com/monit/documentation/monit.html
-set daemon 60
-# Set path to log file
-set logfile /var/log/monit.log
-include /opt/mtwilson/monit/conf.d/*

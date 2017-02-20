@@ -1,8 +1,0 @@
-CFLAGS=-fstack-protector -fPIE -fPIC -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
-LDFLAGS=-z noexecstack -z relro -z now -pie
-
-g++ $(CFLAGS) -g   -c -o NIARL_TP2M_ModuleV2.o NIARL_TPM_ModuleV2.cpp $(LDFLAGS)
-g++ $(CFLAGS) -g   -c -o NIARL_Util_ByteBlob.o NIARL_Util_ByteBlob.cpp $(LDFLAGS)
-g++ $(CFLAGS) -g   -c -o NIARL_Util_Mask.o NIARL_Util_Mask.cpp $(LDFLAGS)
-g++ $(CFLAGS) -g   -c -o main.o main.cpp $(LDFLAGS)
-g++ $(CFLAGS) -g -o"NIARL_TPM_Module"  ./NIARL_TPM_ModuleV2.o ./NIARL_Util_ByteBlob.o ./NIARL_Util_Mask.o ./main.o   -ltspi $(LDFLAGS)
