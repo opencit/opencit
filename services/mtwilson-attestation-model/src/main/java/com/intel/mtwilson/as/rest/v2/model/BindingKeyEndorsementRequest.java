@@ -23,6 +23,7 @@ public class BindingKeyEndorsementRequest{
     private byte[] aikDerCertificate;
     private byte[] nameDigest;
     private String tpmVersion = null;
+    private String operatingSystem = null;
     
     public byte[] getNameDigest() {
         return nameDigest;
@@ -54,6 +55,13 @@ public class BindingKeyEndorsementRequest{
 
     public void setTpmCertifyKeySignature(byte[] tpmCertifyKeySignature) {
         this.tpmCertifyKeySignature = tpmCertifyKeySignature;
+    }
+    public String getOperatingSystem(){
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(String os){
+        this.operatingSystem=os;
     }
     
     public String getTpmVersion(){
