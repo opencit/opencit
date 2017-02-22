@@ -51,7 +51,8 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     private byte[] bindingKeyDerCertificate;
     private byte[] nameDigest;
     private String tpmVersion;
-
+    private String operatingSystem;
+    
     public byte[] getNameDigest() {
         return nameDigest;
     }
@@ -107,6 +108,14 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         this.bindingKeyDerCertificate = bindingKeyDerCertificate;
     }
     
+    public String getOperatingSystem() {
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(String os) {
+        operatingSystem = os;
+    }
+    
     public String getTpmVersion() {
         return tpmVersion;
     }
@@ -120,9 +129,10 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     public void run() {
         try {            
             //ToDo: Need to verify nameDigest it only works on 2.0
+            log.info("operatingSystem received: {}",operatingSystem);
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
-                //If it's TPM 2.0 we must receive the nameDigest, otherwise thrown exception
-                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null){
+                //If it's Linux TPM 2.0 we must receive the nameDigest, otherwise thrown exception
+                if(tpmVersion != null && tpmVersion.equals("2.0") && operatingSystem.equals("Linux") && nameDigest == null){
                     throw new Exception("Invalid input specified or input value missing.");
                 }
 
@@ -135,8 +145,10 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     }
                 } else if (tpmVersion.equals("2.0")) {
                     // Verify the encryption scheme, key flags etc
-                    if (!CertifyKey20.isBindingKey(new TpmCertifyKey20(tpmCertifyKey))) {
-                        throw new Exception("Not a valid binding key");
+                    if (operatingSystem.equals("Linux")){
+                        if (!CertifyKey20.isBindingKey(new TpmCertifyKey20(tpmCertifyKey))) {
+                            throw new Exception("Not a valid binding key");
+                        }
                     }
                 } else {
                     throw new Exception("Invalid TPM version detected...");
@@ -159,7 +171,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     }
                     ////////////////////////
                     boolean validatePublicKeyDigest = false;
-                    if (tpmVersion == null || tpmVersion.equals("1.2")) {
+                    if (tpmVersion == null || tpmVersion.equals("1.2") ) {
                         if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
                             throw new CertificateException("The signature specified for the certifiy key does not match.");
                         }
@@ -168,9 +180,8 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         if (!validatePublicKeyDigest) {
                             throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
                         }
-                    } else if (tpmVersion.equals("2.0")) {
-                        //ToDo:Distinguish Algorithm and OS on windows 2.0 uses sha1 as default
-
+                    } else if (tpmVersion.equals("2.0") && operatingSystem.equals("Linux")) {
+                        
                         if (!CertifyKey20.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
                             throw new CertificateException("The signature specified for the certifiy key does not match.");
                         }
@@ -179,6 +190,12 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         if (!validatePublicKeyDigest) {
                             throw new Exception("TPM Key Name specified does not match name digest in the TCG binding certificate");
                         }
+                    }else if( tpmVersion.equals("2.0") && operatingSystem.equals("Windows")){
+                        if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                            throw new CertificateException("The signature specified for the certifiy key does not match.");
+                        }                    
+                    }else{
+                        throw new Exception("Invalid TPM and Operating System versions detected...");
                     }
 
                     // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
