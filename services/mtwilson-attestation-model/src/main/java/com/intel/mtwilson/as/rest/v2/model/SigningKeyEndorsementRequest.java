@@ -23,6 +23,7 @@ public class SigningKeyEndorsementRequest{
     private byte[] aikDerCertificate;
     private byte[] nameDigest;
     private String tpmVersion = null;
+    private String operatingSystem = null;
     
     public byte[] getNameDigest() {
         return nameDigest;
@@ -61,6 +62,14 @@ public class SigningKeyEndorsementRequest{
 
     public void setAikDerCertificate(byte[] aikDerCertificate) {
         this.aikDerCertificate = aikDerCertificate;
+    }
+    
+    public String getOperatingSystem(){
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(String os){
+        this.operatingSystem=os;
     }
 
     public String getTpmVersion(){
