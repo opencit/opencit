@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
+import static java.util.Arrays.copyOfRange;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
@@ -203,8 +204,17 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     pubExp[0] = (byte) (0x01 & 0xff);
                     pubExp[1] = (byte) (0x00);
                     pubExp[2] = (byte) (0x01 & 0xff);
-                    //For TPM 1.2 & 2.0 we should always use publicKeyModulus to generate the certificate.
-                    RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulus, pubExp);
+                    
+                    //Set the publicKeyModules. for tpm1.2, trustagent sends the public key modulus                    
+                    byte[] publicKeyModulusRSA = publicKeyModulus;
+                    if (tpmVersion.equals("2.0") && operatingSystem.equals("Linux")) { // for tpm2.0 on Linux, trustagent sent the tpm2b_public structure, we need to extract the public modulus portion
+                        log.debug("received tpm2 binding key pub key modulus size: {}", publicKeyModulus.length);
+                        if (publicKeyModulus.length < 256) {
+                            throw new Exception("received tpm binding key pub modulus is less than 256 (expected is tpm2b_public structure)");
+                        }
+                        publicKeyModulusRSA = Arrays.copyOfRange(publicKeyModulus, publicKeyModulus.length-258, publicKeyModulus.length-2);
+                    }
+                    RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulusRSA, pubExp);
 
                     if (pubBk != null) {
                         log.debug("Successfully created the public key from the modulus specified");
@@ -219,7 +229,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     //Read encryption scheme used in binding key
                     ByteBuffer byteBuffer = ByteBuffer.allocate(2);
                     
-                    if (tpmVersion.equals("1.2")) {
+                    if (tpmVersion.equals("1.2") && operatingSystem.equals("Linux")) {
                         byteBuffer.putShort(new TpmCertifyKey(tpmCertifyKey).getKeyParms().getEncScheme());
                     } else {
                         byteBuffer.putShort(encryptionScheme);
