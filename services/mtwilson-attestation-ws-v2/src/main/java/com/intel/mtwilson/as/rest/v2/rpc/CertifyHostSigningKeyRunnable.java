@@ -56,6 +56,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     private byte[] aikDerCertificate;
     private byte[] nameDigest;
     private String tpmVersion;
+    private String operatingSystem;
 
     public byte[] getNameDigest() {
         return nameDigest;
@@ -103,6 +104,14 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     public void setAikDerCertificate(byte[] aikDerCertificate) {
         this.aikDerCertificate = aikDerCertificate;
     }
+    
+    public String getOperatingSystem() {
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(String os) {
+        operatingSystem = os;
+    }
 
     public String getTpmVersion(){
         return tpmVersion;
@@ -117,9 +126,9 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
 				// Need to verify nameDigest it only works on 2.0
-                if(tpmVersion != null && tpmVersion.equals("2.0") && nameDigest == null)
-                     throw new Exception("Invalid input specified or input value missing.");
-
+                 if(tpmVersion != null && tpmVersion.equals("2.0") && operatingSystem.equals("Linux") && nameDigest == null){
+                    throw new Exception("Invalid input specified or input value missing.");
+                }
                 log.debug("Starting to verify the Signing key TCG certificate and generate the MTW certified certificate.");
 
                 log.debug("Public key modulus {}, TpmCertifyKey data {} & TpmCertifyKeySignature data {} are specified.",
@@ -128,7 +137,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
 			    
                 // Verify the encryption scheme, key flags etc
                 // validateCertifyKeyData(tpmCertifyKey, false);       
-				TpmCertifyKey tpmCertKey = null;
+		TpmCertifyKey tpmCertKey = null;
                 if (tpmVersion.equals("1.2")) {
 					tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
 					if( !CertifyKey.isSigningKey(tpmCertKey)) {
@@ -137,8 +146,10 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 }
                 
                 else if(tpmVersion.equals("2.0")) {
-                    if( !CertifyKey20.isSigningKey(new TpmCertifyKey20(tpmCertifyKey))) {
-                      throw new Exception("Not a valid signing key");
+                    if (operatingSystem.equals("Linux")){
+                        if( !CertifyKey20.isSigningKey(new TpmCertifyKey20(tpmCertifyKey))) {
+                          throw new Exception("Not a valid signing key");
+                        }
                     }
                 }
                 else {
@@ -174,7 +185,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                   }
                 }
                 
-                else if(tpmVersion.equals("2.0")) {
+                else if(tpmVersion.equals("2.0") && operatingSystem.equals("Linux")) {
                   //validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
 
                 if (!CertifyKey20.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
@@ -187,7 +198,13 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                   if (!validatePublicKeyDigest) {
                       throw new Exception("TPM Key Name specified does not match name digest in the TCG binding certificate");
                   }
-                }
+                 }else if( tpmVersion.equals("2.0") && operatingSystem.equals("Windows")){
+                        if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
+                            throw new CertificateException("The signature specified for the certifiy key does not match.");
+                        }                    
+                    }else{
+                        throw new Exception("Invalid TPM and Operating System versions detected...");
+                    }
 
                 // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
                 byte[] pubExp = new byte[3];
