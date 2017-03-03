@@ -138,7 +138,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 // Verify the encryption scheme, key flags etc
                 // validateCertifyKeyData(tpmCertifyKey, false);       
 		TpmCertifyKey tpmCertKey = null;
-                if (tpmVersion.equals("1.2")) {
+                if (tpmVersion == null || tpmVersion.equals("1.2")) {
 					tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
 					if( !CertifyKey.isSigningKey(tpmCertKey)) {
 						throw new Exception("Not a valid binding key");
@@ -211,7 +211,17 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 pubExp[0] = (byte) (0x01 & 0xff);
                 pubExp[1] = (byte) (0x00);
                 pubExp[2] = (byte) (0x01 & 0xff);
-                RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulus, pubExp);
+
+                //Set the publicKeyModules. for tpm1.2, trustagent sends the public key modulus                    
+                byte[] publicKeyModulusRSA = publicKeyModulus;
+                if (tpmVersion.equals("2.0") && operatingSystem.equals("Linux")) { // for tpm2.0 on Linux, trustagent sent the tpm2b_public structure, we need to extract the public modulus portion
+                    log.debug("received tpm2 binding key pub key modulus size: {}", publicKeyModulus.length);
+                    if (publicKeyModulus.length < 256) {
+                        throw new Exception("received tpm binding key pub modulus is less than 256 (expected is tpm2b_public structure)");
+                    }
+                    publicKeyModulusRSA = Arrays.copyOfRange(publicKeyModulus, publicKeyModulus.length - 258, publicKeyModulus.length - 2);
+                }
+                RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulusRSA, pubExp);
 
                 if (pubBk != null) {
                     log.debug("Successfully created the public key from the modulus specified");
