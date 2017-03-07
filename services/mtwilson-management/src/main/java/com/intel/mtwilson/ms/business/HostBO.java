@@ -1521,7 +1521,7 @@ public class HostBO {
         emt.getTransaction().begin();
 
         // If in case we need to support additional pcrs for event logs, we need to just update this and add the new PCR
-        List<Integer> pcrsSupportedForEventLog = Arrays.asList(17, 19);
+        List<Integer> pcrsSupportedForEventLog = Arrays.asList(14, 17, 19);
         // Since the attestation report has all the PCRs we need to upload only the required PCR values into the white list tables.
         // Location PCR (22) is added by default. We will check if PCR 22 is configured or not. If the digest value for PCR 22 exists, then
         // we will configure the location table as well.
@@ -1577,7 +1577,7 @@ public class HostBO {
                             boolean useDaMode = hostConfigObj.getTxtHostRecord().getDaMode();
                             ModuleWhiteList moduleObj = new ModuleWhiteList();
                             if (pcr == 17 && useDaMode) {// bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
-                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+								if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
                                 } else {
@@ -1610,6 +1610,30 @@ public class HostBO {
                                     moduleObj.setOemName(hostObj.BIOS_Oem);
                                 }
                             } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))){
+								if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                                    moduleObj.setComponentName(" ");
+                                    log.info("uploadToDB: component name set to single-space");
+                                } else {
+                                    moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
+                                }
+                                moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
+                                moduleObj.setPcrBank(reader.getAttributeValue("", "DigestAlgorithm"));
+                                if(moduleObj.getPcrBank() == null) {
+                                    moduleObj.setPcrBank("SHA1");
+                                }
+                                moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
+                                moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
+                                moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
+                                moduleObj.setPackageVendor(reader.getAttributeValue("", "PackageVendor"));
+                                moduleObj.setPackageVersion(reader.getAttributeValue("", "PackageVersion"));
+                                moduleObj.setUseHostSpecificDigest(Boolean.valueOf(reader.getAttributeValue("", "UseHostSpecificDigest")));
+                                moduleObj.setDescription("");
+                                moduleObj.setMleName(hostObj.VMM_Name);
+                                moduleObj.setMleVersion(hostObj.VMM_Version);
+                                moduleObj.setOsName(hostObj.VMM_OSName);
+                                moduleObj.setOsVersion(hostObj.VMM_OSVersion);
+                                moduleObj.setOemName("");
+                            } else if(pcr == 14){
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
@@ -1633,7 +1657,8 @@ public class HostBO {
                                 moduleObj.setOsName(hostObj.VMM_OSName);
                                 moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                 moduleObj.setOemName("");
-                            } else {
+                            }  
+                            else {
                                 reader.next();
                                 continue;
                             }
