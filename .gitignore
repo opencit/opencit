@@ -18,3 +18,5 @@ derby.log
 ~*
 *.tmp
 /services/mtwilson-privacyca-niarl/nbproject/
+.idea/
+*.iml
