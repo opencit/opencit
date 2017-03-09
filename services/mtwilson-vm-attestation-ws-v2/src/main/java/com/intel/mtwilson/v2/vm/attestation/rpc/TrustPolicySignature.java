@@ -70,6 +70,8 @@ import org.xml.sax.SAXException;
 public class TrustPolicySignature {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustPolicySignature.class);
     
+    public static final String ALGO_SIGNATURE_RSA_SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    
     @POST
     @Consumes({MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_XML})
@@ -93,7 +95,7 @@ public class TrustPolicySignature {
         // generate the enveloped signature.
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
         Reference ref = fac.newReference
-         ("", fac.newDigestMethod(DigestMethod.SHA1, null),
+         ("", fac.newDigestMethod(DigestMethod.SHA256, null),
           Collections.singletonList
            (fac.newTransform
             (Transform.ENVELOPED, (TransformParameterSpec) null)),
@@ -104,7 +106,7 @@ public class TrustPolicySignature {
          (fac.newCanonicalizationMethod
           (CanonicalizationMethod.INCLUSIVE,
            (C14NMethodParameterSpec) null),
-            fac.newSignatureMethod(SignatureMethod.RSA_SHA1, null),
+            fac.newSignatureMethod(ALGO_SIGNATURE_RSA_SHA256, null),
              Collections.singletonList(ref));
        
            // Create the KeyInfo containing the X509Data.
