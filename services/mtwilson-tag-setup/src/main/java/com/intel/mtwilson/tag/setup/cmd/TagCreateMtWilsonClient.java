@@ -99,7 +99,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
 
         //approve users
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
-        String[] roles = new String[]{"Attestation", "Report", "Whitelist", "AssetTagManagement"};
+        String[] roles = new String[]{"AssetTagManagement"};
         try {
             ApiClientUpdateRequest updateRequest = new ApiClientUpdateRequest();
             updateRequest.enabled = true;
