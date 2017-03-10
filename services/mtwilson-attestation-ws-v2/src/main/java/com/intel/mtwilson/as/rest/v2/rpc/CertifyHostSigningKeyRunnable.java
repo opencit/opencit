@@ -138,7 +138,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 // Verify the encryption scheme, key flags etc
                 // validateCertifyKeyData(tpmCertifyKey, false);       
 		TpmCertifyKey tpmCertKey = null;
-                if (tpmVersion.equals("1.2")) {
+                if (tpmVersion == null || tpmVersion.equals("1.2")) {
 					tpmCertKey = new TpmCertifyKey(tpmCertifyKey);
 					if( !CertifyKey.isSigningKey(tpmCertKey)) {
 						throw new Exception("Not a valid binding key");
