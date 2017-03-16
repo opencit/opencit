@@ -39,7 +39,7 @@ public class TxtHost {
     private HostTrustStatus trustStatus;
     private String aikCertificate;  // may be null
     private String aikPublicKey;  // may be null
-    private String aikSha1;  // may be null
+    private String aikSha256;  // may be null
     private TlsPolicyChoice tlsPolicyChoice; // may be null; since mtwilson 2.0
     private String bindingKeyCertificate; // may be null;
     private String tpmVersion;
@@ -97,7 +97,7 @@ public class TxtHost {
         trustStatus = new HostTrustStatus(); //defaults to all false
         aikCertificate = host.AIK_Certificate; // may be null
         aikPublicKey = host.AIK_PublicKey; // may be null
-        aikSha1 = host.AIK_SHA1; // may be null
+        aikSha256 = host.AIK_SHA256; // may be null
         tlsPolicyChoice = host.tlsPolicyChoice;
         bindingKeyCertificate = null;
         tpmVersion = host.TpmVersion;
@@ -209,8 +209,8 @@ public class TxtHost {
         return aikPublicKey;
     }
 
-    public String getAikSha1() {
-        return aikSha1;
+    public String getAikSha256() {
+        return aikSha256;
     }
 
     final public boolean requiresConnectionString() {
