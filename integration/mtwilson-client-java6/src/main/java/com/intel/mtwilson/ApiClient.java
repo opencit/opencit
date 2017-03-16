@@ -892,8 +892,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }
 
     @Override
-    public HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
-        HostTrustResponse trust = fromJSON(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.json")), HostTrustResponse.class);
+    public HostTrustResponse getHostTrustByAik(Sha256Digest aikSha256) throws IOException, ApiException, SignatureException {
+        HostTrustResponse trust = fromJSON(httpGet(asurl("/hosts/aik-"+aikSha256.toString()+"/trust.json")), HostTrustResponse.class);
         return trust;
     }
 
@@ -1012,10 +1012,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }
     
     @Override
-    public String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException {
+    public String getSamlForHostByAik(Sha256Digest aikSha256, boolean forceVerify) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("force_verify", Boolean.toString(forceVerify));
-        String saml = text(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.saml", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        String saml = text(httpGet(asurl("/hosts/aik-"+aikSha256.toString()+"/trust.saml", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
         return saml;
     }
     

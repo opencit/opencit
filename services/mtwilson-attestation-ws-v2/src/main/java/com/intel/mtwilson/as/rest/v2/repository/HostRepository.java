@@ -335,7 +335,7 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
         convObj.setBiosMleUuid(obj.getBios_mle_uuid_hex());
         convObj.setVmmMleUuid(obj.getVmm_mle_uuid_hex());
         convObj.setAikCertificate(obj.getAIKCertificate());
-        convObj.setAikSha1(obj.getAikSha1());
+        convObj.setAikSha256(obj.getAikSha256());
         convObj.setHardwareUuid(obj.getHardwareUuid());
         convObj.setTlsPolicyId(obj.getTlsPolicyId());
         log.debug("------------------------------------" + obj.getHardwareUuid());
