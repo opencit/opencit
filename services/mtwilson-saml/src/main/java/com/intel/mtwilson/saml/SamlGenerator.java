@@ -419,11 +419,11 @@ public class SamlGenerator {
 
             if( host.getAikCertificate() != null ) {
                 attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
-                attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+                attrStatement.getAttributes().add(createStringAttribute("AIK_SHA256", host.getAikSha256()));
             }
             else if( host.getAikPublicKey() != null ) {
                 attrStatement.getAttributes().add(createStringAttribute("AIK_PublicKey", host.getAikPublicKey()));                
-                attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+                attrStatement.getAttributes().add(createStringAttribute("AIK_SHA256", host.getAikSha256()));
             }
             
             if (host.getBindingKeyCertificate() != null && !host.getBindingKeyCertificate().isEmpty()) {
@@ -580,10 +580,10 @@ public class SamlGenerator {
 
         if (host.getAikCertificate() != null) {
             attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
-            attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+            attrStatement.getAttributes().add(createStringAttribute("AIK_SHA256", host.getAikSha256()));
         } else if (host.getAikPublicKey() != null) {
             attrStatement.getAttributes().add(createStringAttribute("AIK_PublicKey", host.getAikPublicKey()));
-            attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+            attrStatement.getAttributes().add(createStringAttribute("AIK_SHA256", host.getAikSha256()));
         }
 
         if (vmMetaData != null && !vmMetaData.isEmpty()) {

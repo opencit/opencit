@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblHosts.findAll", query = "SELECT t FROM TblHosts t"),
     @NamedQuery(name = "TblHosts.findById", query = "SELECT t FROM TblHosts t WHERE t.id = :id"),
     @NamedQuery(name = "TblHosts.findByName", query = "SELECT t FROM TblHosts t WHERE t.name = :name"),
-    @NamedQuery(name = "TblHosts.findByAikSha1", query = "SELECT t FROM TblHosts t WHERE t.aikSha1 = :aikSha1"), 
-    @NamedQuery(name = "TblHosts.findByAikPublicKeySha1", query = "SELECT t FROM TblHosts t WHERE t.aikPublicKeySha1 = :aikPublicKeySha1"),
+    @NamedQuery(name = "TblHosts.findByAikSha256", query = "SELECT t FROM TblHosts t WHERE t.aikSha256 = :aikSha256"), 
+    @NamedQuery(name = "TblHosts.findByAikPublicKeySha256", query = "SELECT t FROM TblHosts t WHERE t.aikPublicKeySha256 = :aikPublicKeySha256"),
     @NamedQuery(name = "TblHosts.findByIPAddress", query = "SELECT t FROM TblHosts t WHERE t.iPAddress = :iPAddress"),
     @NamedQuery(name = "TblHosts.findByPort", query = "SELECT t FROM TblHosts t WHERE t.port = :port"),
     @NamedQuery(name = "TblHosts.findByDescription", query = "SELECT t FROM TblHosts t WHERE t.description = :description"),
@@ -96,13 +96,13 @@ public class TblHosts implements Serializable {
     @Lob
     @Column(name = "AIK_Certificate")
     private String aikCertificate;
-    @Column(name = "AIK_SHA1")
-    private String aikSha1;
+    @Column(name = "AIK_SHA256")
+    private String aikSha256;
     @Lob
     @Column(name = "AIK_PublicKey")
     private String aikPublicKey;
-    @Column(name = "aik_publickey_sha1")
-    private String aikPublicKeySha1;
+    @Column(name = "aik_publickey_sha256")
+    private String aikPublicKeySha256;
     @Column(name = "tls_policy_id")
     private String tlsPolicyId;
     @Transient
@@ -271,16 +271,16 @@ public class TblHosts implements Serializable {
     }
 
     /**
-     * The AIK SHA1 hash is ALWAYS a hash of the Public Key, NOT the Certificate
+     * The AIK SHA256 hash is ALWAYS a hash of the Public Key, NOT the Certificate
      *
      * @return
      */
-    public String getAikSha1() {
-        return aikSha1;
+    public String getAikSha256() {
+        return aikSha256;
     }
 
-    public String getAikPublicKeySha1() {
-        return aikPublicKeySha1;
+    public String getAikPublicKeySha256() {
+        return aikPublicKeySha256;
     }
 
     /**
@@ -293,12 +293,12 @@ public class TblHosts implements Serializable {
      *
      * @param aikSha1
      */
-    public void setAikSha1(String aikSha1) {
-        this.aikSha1 = aikSha1;
+    public void setAikSha256(String aikSha256) {
+        this.aikSha256 = aikSha256;
     }
 
-    public void setAikPublicKeySha1(String aikPublicKeySha1) {
-        this.aikPublicKeySha1 = aikPublicKeySha1;
+    public void setAikPublicKeySha256(String aikPublicKeySha256) {
+        this.aikPublicKeySha256 = aikPublicKeySha256;
     }
 
     public String getTlsPolicyId() {
