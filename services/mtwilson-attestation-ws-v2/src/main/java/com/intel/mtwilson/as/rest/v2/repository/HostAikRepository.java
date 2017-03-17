@@ -95,7 +95,7 @@ public class HostAikRepository implements DocumentRepository<HostAik, HostAikCol
         HostAik convObj = new HostAik();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
         convObj.setAikPublicKey(obj.getAikPublicKey());
-        convObj.setAikSha1(obj.getAikSha1());
+        convObj.setAikSha256(obj.getAikSha256());
         return convObj;
     }
     

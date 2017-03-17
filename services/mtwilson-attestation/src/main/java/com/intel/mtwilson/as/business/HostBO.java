@@ -197,9 +197,9 @@ public class HostBO {
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                             PublicKey publicKey = agent.getAik();
-                            String publicKeySha1 = Sha1Digest.valueOf(publicKey.getEncoded()).toString();
-                            if (My.jpa().mwHosts().findByAikPublicKeySha1(publicKeySha1) != null) {
-                                throw new ASException(ErrorCode.AS_DUPLICATE_AIK_PUBLIC_KEY, publicKeySha1);
+                            String publicKeySha256 = Sha256Digest.valueOf(publicKey.getEncoded()).toString();
+                            if (My.jpa().mwHosts().findByAikPublicKeySha256(publicKeySha256) != null) {
+                                throw new ASException(ErrorCode.AS_DUPLICATE_AIK_PUBLIC_KEY, publicKeySha256);
                             }
 
                                 // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
@@ -751,8 +751,8 @@ public class HostBO {
                         String certPem = X509Util.encodePemCertificate(cert);
                         tblHosts.setAIKCertificate(certPem);
                         tblHosts.setAikPublicKey(RsaUtil.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
-                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
-                        tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
+                        tblHosts.setAikSha256(Sha256Digest.valueOf(cert.getEncoded()).toString());
+                        tblHosts.setAikPublicKeySha256(Sha256Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                     }
                     catch(Exception e) {
                         log.error("Cannot encode AIK certificate: "+e.toString(), e);
@@ -763,8 +763,8 @@ public class HostBO {
                     String pem = RsaUtil.encodePemPublicKey(publicKey); 
                     tblHosts.setAIKCertificate(null);
                     tblHosts.setAikPublicKey(pem);
-                    tblHosts.setAikSha1(null);
-                    tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
+                    tblHosts.setAikSha256(null);
+                    tblHosts.setAikPublicKeySha256(Sha256Digest.valueOf(publicKey.getEncoded()).toString());
                 }
             }
  	}
@@ -1129,14 +1129,14 @@ public class HostBO {
         
         /**
          * 
-         * @param aik must be the SHA-1 digest of the  AIK PUBLIC KEY (not certificate)
+         * @param aik must be the SHA-256 digest of the  AIK PUBLIC KEY (not certificate)
          * @return
          * @throws CryptographyException
          * @throws IOException 
          */
-	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException, IOException { // datatype.Hostname
-        log.debug("getHostByAik calling findByAikPublicKeySha1 for aik {}", aik.toString());
-		TblHosts tblHosts = My.jpa().mwHosts().findByAikPublicKeySha1(aik.toString());
+	public TblHosts getHostByAik(Sha256Digest aik) throws CryptographyException, IOException { // datatype.Hostname
+        log.debug("getHostByAik calling findByAikPublicKeySha256 for aik {}", aik.toString());
+		TblHosts tblHosts = My.jpa().mwHosts().findByAikPublicKeySha256(aik.toString());
 		return tblHosts;
 	}
 

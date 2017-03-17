@@ -39,6 +39,7 @@ import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.mtwilson.model.Sha256Digest;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.SignatureException;
@@ -248,7 +249,7 @@ public interface MtWilson {
      * System.out.println("BIOS trust status: " + hostTrust.trust.bios + " Hypervisor trust status" + hostTrust.trust.vmm);
      * <p>
      * 
-     * @param aikSha1 {@link Sha1Digest} The SHA1 of the AIK Public Key (not certificate) of the host
+     * @param aikSha256 {@link Sha256Digest} The SHA256 of the AIK Public Key (not certificate) of the host
      * @return {@link HostTrustResponse} Trust status of BIOS and Hypervisor. Note that the location if for future use.
      * @throws IOException
      * @throws ApiException All the errors from the Mt.Wilson system would be thrown as ApiException. Users can access the 
@@ -256,7 +257,7 @@ public interface MtWilson {
      * @throws SignatureException 
      * @since MTW 1.0 Enterprise
      */
-    HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+    HostTrustResponse getHostTrustByAik(Sha256Digest aikSha256) throws IOException, ApiException, SignatureException;
     
     /**
      * Retrieves an X509 certificate for an RSA key that is sealed to the host's trusted platform configuration.
@@ -622,7 +623,7 @@ public interface MtWilson {
     HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException;
 
 
-    String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException;
+    String getSamlForHostByAik(Sha256Digest aikSha256, boolean forceVerify) throws IOException, ApiException, SignatureException;
     
     /**
      * Retrieves the trust status of the host specified as a SAML assertion, which can be verified by caller. The 

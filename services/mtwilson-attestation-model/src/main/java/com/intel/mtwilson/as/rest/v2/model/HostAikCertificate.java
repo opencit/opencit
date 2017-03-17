@@ -27,7 +27,7 @@ public class HostAikCertificate extends CertificateDocument {
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
     private String hostUuid;
-    private String aikSha1;
+    private String aikSha256;
     private byte[] certificate;
 
     public String getHostUuid() {
@@ -38,12 +38,12 @@ public class HostAikCertificate extends CertificateDocument {
         this.hostUuid = hostUuid;
     }
 
-    public String getAikSha1() {
-        return aikSha1;
+    public String getAikSha256() {
+        return aikSha256;
     }
 
-    public void setAikSha1(String aikSha1) {
-        this.aikSha1 = aikSha1;
+    public void setAikSha256(String aikSha256) {
+        this.aikSha256 = aikSha256;
     }
 
     public byte[] getCertificate() {
