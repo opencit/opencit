@@ -34,12 +34,12 @@ import org.slf4j.LoggerFactory;
 public class XmlMeasurementLogIntegrity extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private Sha1Digest expectedValue;
+    private Sha256Digest expectedValue;
     private PcrIndex pcrIndex;
     
     protected XmlMeasurementLogIntegrity() { } // for desearializing jackson
     
-    public XmlMeasurementLogIntegrity(Sha1Digest expectedValue, PcrIndex pcrIndex) {
+    public XmlMeasurementLogIntegrity(Sha256Digest expectedValue, PcrIndex pcrIndex) {
         this.expectedValue = expectedValue;
         this.pcrIndex = pcrIndex;
     }
@@ -79,13 +79,13 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
         return report;
     }
     
-    private Sha1Digest computeHistory(List<Measurement> list) {
+    private Sha256Digest computeHistory(List<Measurement> list) {
         // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match        
-            Sha1Digest result = Sha1Digest.ZERO;
+            Sha256Digest result = Sha256Digest.ZERO;
             for (Measurement m : list) {
                 //result = result.extend(m.getValue().toString().getBytes());
                 log.debug("XmlMeasurementLogIntegrity-computeHistory: Current value of result is {}", result.toString());
-                result = result.extend(Sha1Digest.valueOfHex(m.getValue().toString()));
+                result = result.extend(Sha256Digest.valueOfHex(m.getValue().toString()));
                 log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
             }
             return result;     
