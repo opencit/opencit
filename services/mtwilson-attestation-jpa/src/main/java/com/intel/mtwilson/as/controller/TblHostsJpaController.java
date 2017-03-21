@@ -319,15 +319,15 @@ public class TblHostsJpaController implements Serializable {
 
     }
     
-    public TblHosts findByAikSha1(String fingerprint) {
+    public TblHosts findByAikSha256(String fingerprint) {
 
         TblHosts host = null;
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("TblHosts.findByAikSha1");
+            Query query = em.createNamedQuery("TblHosts.findByAikSha256");
 
-            query.setParameter("aikSha1", fingerprint);
+            query.setParameter("aikSha256", fingerprint);
           
 
             List<TblHosts> list = query.getResultList();
@@ -343,15 +343,15 @@ public class TblHostsJpaController implements Serializable {
 
     }
     
-    public TblHosts findByAikPublicKeySha1(String fingerprint) {
+    public TblHosts findByAikPublicKeySha256(String fingerprint) {
 
         TblHosts host = null;
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("TblHosts.findByAikPublicKeySha1");
+            Query query = em.createNamedQuery("TblHosts.findByAikPublicKeySha256");
 
-            query.setParameter("aikPublicKeySha1", fingerprint);
+            query.setParameter("aikPublicKeySha256", fingerprint);
           
 
             List<TblHosts> list = query.getResultList();

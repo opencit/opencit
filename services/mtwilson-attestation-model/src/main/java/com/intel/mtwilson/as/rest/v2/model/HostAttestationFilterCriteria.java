@@ -25,9 +25,9 @@ public class HostAttestationFilterCriteria extends DefaultFilterCriteria impleme
     @QueryParam("nameEqualTo")
     public String nameEqualTo;
     @QueryParam("aik")
-    public String aikSha1;
-    @QueryParam("aik_public_key_sha1")
-    public String aikPublicKeySha1;
+    public String aikSha256;
+    @QueryParam("aik_public_key_sha256")
+    public String aikPublicKeySha256;
     @QueryParam("numberOfDays")
     public int numberOfDays;
     @QueryParam("fromDate")

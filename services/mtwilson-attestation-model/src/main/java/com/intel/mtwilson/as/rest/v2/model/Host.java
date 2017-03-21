@@ -35,7 +35,7 @@ public class Host extends Document {
     private String email;
     private String aikCertificate;  // may be null
     private String aikPublicKey;  // may be null
-    private String aikSha1;  // may be null
+    private String aikSha256;  // may be null
     private String tlsPolicyId; // may be null, a uuid reference to mw_tls_policy table, or special keyword INSECURE or TRUST_FIRST_CERTIFICATE
     private String hardwareUuid;
 
@@ -105,12 +105,12 @@ public class Host extends Document {
         this.aikPublicKey = aikPublicKey;
     }
 
-    public String getAikSha1() {
-        return aikSha1;
+    public String getAikSha256() {
+        return aikSha256;
     }
 
-    public void setAikSha1(String aikSha1) {
-        this.aikSha1 = aikSha1;
+    public void setAikSha256(String aikSha256) {
+        this.aikSha256 = aikSha256;
     }
 
     public String getTlsPolicyId() {

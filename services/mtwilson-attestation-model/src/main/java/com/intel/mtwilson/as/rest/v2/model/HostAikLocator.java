@@ -17,15 +17,15 @@ public class HostAikLocator implements Locator<HostAik> {
     @PathParam("host_id")
     public UUID hostUuid;
     @PathParam("id")
-    public String aikSha1;
+    public String aikSha256;
     
     @Override
     public void copyTo(HostAik item) {
         if (hostUuid != null) {
             item.setHostUuid(hostUuid.toString());
         }
-        if (aikSha1 != null) {
-            item.setAikSha1(aikSha1);
+        if (aikSha256 != null) {
+            item.setAikSha256(aikSha256);
         }
     }
     

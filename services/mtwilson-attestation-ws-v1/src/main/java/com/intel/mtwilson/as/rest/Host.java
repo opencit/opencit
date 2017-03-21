@@ -94,12 +94,12 @@ public class Host {
                 else {
         try {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
-            Sha1Digest aikId = new Sha1Digest(aikFingerprint);
+            Sha256Digest aikId = new Sha256Digest(aikFingerprint);
             if( aikId.isValid() ) {
                 HostTrustStatus trust = ASComponentFactory.getHostTrustBO().getTrustStatusByAik(aikId);
                 return new HostTrustResponse(new Hostname(aikId.toString()), trust);                
             }
-            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA256 digest");
         }
         catch(ASException e) {
             throw e;
@@ -123,12 +123,12 @@ public class Host {
         
         try {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
-            Sha1Digest aikId = new Sha1Digest(aikFingerprint);
+            Sha256Digest aikId = new Sha256Digest(aikFingerprint);
             if( aikId.isValid() ) {
                 log.debug("getSamlByAik calling getTrustWithSamlByAik for aik {} force_verify {}", aikFingerprint, forceVerify);
                 return ASComponentFactory.getHostTrustBO().getTrustWithSamlByAik(aikId, forceVerify);
             }
-            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA256 digest");
         }
         catch(ASException e) {
             throw e;
@@ -160,7 +160,7 @@ public class Host {
         else{
         try {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
-            Sha1Digest aikId = new Sha1Digest(aikFingerprint);
+            Sha256Digest aikId = new Sha256Digest(aikFingerprint);
             if( aikId.isValid() ) {
                 TblHosts host = ASComponentFactory.getHostBO().getHostByAik(aikId);
                 KeystoreCertificateRepository repository = new KeystoreCertificateRepository(host.getTlsKeystoreResource(),My.configuration().getTlsKeystorePassword()); 
@@ -173,7 +173,7 @@ public class Host {
                 }
                 throw new ASException(ErrorCode.HTTP_NOT_FOUND, "Host does not have a certificate under that AIK");
             }
-            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA256 digest");
         }
         catch(ASException e) {
             throw e;

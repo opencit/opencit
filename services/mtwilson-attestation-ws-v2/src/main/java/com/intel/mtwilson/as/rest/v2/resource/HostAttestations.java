@@ -81,16 +81,16 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                     log.error("Host specified with id {} is not valid.", criteria.hostUuid.toString());
                     throw new RepositoryInvalidInputException();
                 }
-            } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
-                obj = jpaController.findByAikSha1(criteria.aikSha1);
+            } else if (criteria.aikSha256 != null && !criteria.aikSha256.isEmpty()) {
+                obj = jpaController.findByAikSha256(criteria.aikSha256);
                 if (obj == null) {
-                    log.error("Host specified with aik sha1 {} is not valid.", criteria.aikSha1);
+                    log.error("Host specified with aik sha1 {} is not valid.", criteria.aikSha256);
                     throw new RepositoryInvalidInputException();
                 }
-            } else if (criteria.aikPublicKeySha1 != null && !criteria.aikPublicKeySha1.isEmpty()) {
-                obj = jpaController.findByAikPublicKeySha1(criteria.aikPublicKeySha1);
+            } else if (criteria.aikPublicKeySha256 != null && !criteria.aikPublicKeySha256.isEmpty()) {
+                obj = jpaController.findByAikPublicKeySha256(criteria.aikPublicKeySha256);
                 if (obj == null) {
-                    log.error("Host specified with aik pub key sha1 {} is not valid.", criteria.aikSha1);
+                    log.error("Host specified with aik pub key sha1 {} is not valid.", criteria.aikSha256);
                     throw new RepositoryInvalidInputException();
                 }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
