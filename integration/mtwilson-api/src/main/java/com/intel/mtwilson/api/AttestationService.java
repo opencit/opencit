@@ -33,7 +33,7 @@ public interface AttestationService {
     
     HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
 
-    HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+    HostTrustResponse getHostTrustByAik(Sha256Digest aikSha256) throws IOException, ApiException, SignatureException;
     
     //X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
 

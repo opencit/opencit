@@ -17,12 +17,12 @@ public class HostAikCertificateLocator implements Locator<HostAikCertificate> {
     @PathParam("host_id")
     public UUID hostUuid;
     @PathParam("id")
-    public String aikSha1;
+    public String aikSha256;
     
     @Override
     public void copyTo(HostAikCertificate item) {
         item.setHostUuid(hostUuid.toString());
-        item.setAikSha1(aikSha1);
+        item.setAikSha256(aikSha256);
     }
     
 }

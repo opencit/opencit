@@ -82,7 +82,7 @@ public class TxtHostRecord {
     @JsonProperty
     public String AIK_PublicKey;
     @JsonProperty
-    public String AIK_SHA1;
+    public String AIK_SHA256;
     @JsonProperty
     public String Processor_Info;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -124,7 +124,7 @@ public class TxtHostRecord {
         Location = input.getLocation();
         AIK_Certificate = input.getAikCertificate();
         AIK_PublicKey = input.getAikPublicKey();
-        AIK_SHA1 = input.getAikSha1();
+        AIK_SHA256 = input.getAikSha256();
         Hardware_Uuid = null;
         tlsPolicyChoice = input.getTlsPolicyChoice();
         TpmVersion = input.getTpmVersion();
@@ -136,7 +136,7 @@ public class TxtHostRecord {
     public TxtHostRecord(TxtHostRecord host) {
         this.AIK_Certificate = host.AIK_Certificate;
         this.AIK_PublicKey = host.AIK_PublicKey;
-        this.AIK_SHA1 = host.AIK_SHA1;
+        this.AIK_SHA256 = host.AIK_SHA256;
         this.AddOn_Connection_String = host.AddOn_Connection_String;
         this.BIOS_Name = host.BIOS_Name;
         this.BIOS_Oem = host.BIOS_Oem;

@@ -19,6 +19,6 @@ public class HostAikFilterCriteria extends DefaultFilterCriteria implements Filt
     @PathParam("host_id")
     public UUID hostUuid;
     @QueryParam("id")
-    public String aikSha1;
+    public String aikSha256;
     
 }

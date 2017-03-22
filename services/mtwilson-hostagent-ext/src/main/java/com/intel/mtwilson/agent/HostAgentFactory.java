@@ -42,7 +42,7 @@ public class HostAgentFactory {
         TxtHostRecord converted = new TxtHostRecord();
         converted.AIK_Certificate = input.getAIKCertificate();
         converted.AIK_PublicKey = input.getAikPublicKey();
-        converted.AIK_SHA1 = input.getAikSha1();
+        converted.AIK_SHA256 = input.getAikSha256();
         converted.AddOn_Connection_String = input.getAddOnConnectionInfo();
         converted.BIOS_Name = (input.getBiosMleId() == null ? null : input.getBiosMleId().getName());
         converted.BIOS_Version = (input.getBiosMleId() == null ? null : input.getBiosMleId().getVersion());

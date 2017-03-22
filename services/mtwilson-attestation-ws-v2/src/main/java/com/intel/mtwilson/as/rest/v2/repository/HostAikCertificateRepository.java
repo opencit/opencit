@@ -112,7 +112,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
         HostAikCertificate convObj = new HostAikCertificate();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
         convObj.setCertificate(obj.getAIKCertificate().getBytes());
-        convObj.setAikSha1(obj.getAikSha1());
+        convObj.setAikSha256(obj.getAikSha256());
         return convObj;
     }
     
