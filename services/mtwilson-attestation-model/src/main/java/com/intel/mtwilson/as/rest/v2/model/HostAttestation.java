@@ -19,8 +19,8 @@ public class HostAttestation extends Document {
     
     private String hostUuid;
     private String hostName;
-    private String aikSha1;
-    private String aikPublicKeySha1;
+    private String aikSha256;
+    private String aikPublicKeySha256;
     private String challengeHex;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
@@ -42,20 +42,20 @@ public class HostAttestation extends Document {
         this.hostName = hostName;
     }
 
-    public String getAikSha1() {
-        return aikSha1;
+    public String getAikSha256() {
+        return aikSha256;
     }
 
-    public void setAikSha1(String aikSha1) {
-        this.aikSha1 = aikSha1;
+    public void setAikSha256(String aikSha256) {
+        this.aikSha256 = aikSha256;
     }
 
-    public String getAikPublicKeySha1() {
-        return aikPublicKeySha1;
+    public String getAikPublicKeySha256() {
+        return aikPublicKeySha256;
     }
 
-    public void setAikPublicKeySha1(String aikPublicKeySha1) {
-        this.aikPublicKeySha1 = aikPublicKeySha1;
+    public void setAikPublicKeySha256(String aikPublicKeySha256) {
+        this.aikPublicKeySha256 = aikPublicKeySha256;
     }
     
     public String getChallenge() {

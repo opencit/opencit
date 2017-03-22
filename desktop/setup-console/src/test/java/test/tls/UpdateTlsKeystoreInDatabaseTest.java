@@ -23,6 +23,7 @@ import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.mtwilson.model.Sha256Digest;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
@@ -181,14 +182,14 @@ public class UpdateTlsKeystoreInDatabaseTest {
     }
     
     @Test
-    public void testUpdateAikSha1() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {
+    public void testUpdateAikSha256() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {
         byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"));
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         String certificatePem = host.getAIKCertificate();
         X509Certificate certificate = X509Util.decodePemCertificate(certificatePem);
-        Sha1Digest sha1 = Sha1Digest.valueOf(certificate.getEncoded());
-        host.setAikSha1(sha1.toString());
+        Sha256Digest sha256 = Sha256Digest.valueOf(certificate.getEncoded());
+        host.setAikSha256(sha256.toString());
         hostsJpa.edit(host);
     }
     
