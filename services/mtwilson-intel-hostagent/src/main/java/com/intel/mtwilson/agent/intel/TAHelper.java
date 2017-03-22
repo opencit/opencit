@@ -661,7 +661,7 @@ public class TAHelper {
                 for(Pcr p : e.getValue()) {
                     log.error("===Before If");
                     log.error( p.getValue().toString().toUpperCase() + " " + p.getIndex().toString() + " " + e.getKey().toString());
-                    if (this.host.TpmVersion.equals("2.0") && !this.isHostWindows && p.getValue().toString().equalsIgnoreCase("SHA1"))
+                    if (this.host.TpmVersion.equals("2.0") && !this.isHostWindows && e.getKey().toString().equalsIgnoreCase("SHA1"))
                         continue;
                     log.error("===After If");
                     log.error(e.getKey().toString());

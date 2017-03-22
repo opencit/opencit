@@ -70,7 +70,7 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
                 // make sure the expected pcr value matches the actual pcr value
                 if( !expectedValue.equals(actualValue) ) {
                     log.info("XmlMeasurementLogIntegrity: Mismatch in the expected final hash value for the XML Measurement log.");
-                    report.fault(XmlMeasurementValueMismatch.newInstance(DigestAlgorithm.SHA1, expectedValue, actualValue) );
+                    report.fault(XmlMeasurementValueMismatch.newInstance(DigestAlgorithm.SHA256, expectedValue, actualValue) );
                 } else {
                     log.debug("Verified the integrity of the XML measurement log successfully.");
                 }
