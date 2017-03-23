@@ -104,7 +104,7 @@ int main (int ac, char **av)
 	//UINT32		sigLen;
 	BYTE		*recvNonce = NULL;
 	UINT32		recvNonceLen;
-	BYTE		chalmd[20];
+	//BYTE		chalmd[20];
 	BYTE		md[32]; // SHA256 hash
 	BYTE		qinfo[8+20+20];
 	TPM2B_NAME	tpm2b_name;
@@ -154,11 +154,11 @@ int main (int ac, char **av)
 			exit (1);
 		}
 		fclose (f_in);
-		SHA1 (chal, chalLen, chalmd);
+		//SHA1 (chal, chalLen, chalmd);
 		//free (chal);
-	} else {
-		memset (chalmd, 0, sizeof(chalmd));
-	}
+	} //else {
+	//	memset (chalmd, 0, sizeof(chalmd));
+	//}
 
 
 	/* Read AIK from OpenSSL file */
