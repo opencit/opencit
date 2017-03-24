@@ -650,7 +650,6 @@ public class TAHelper {
         xtw.writeAttribute("Host_Name", hostName);
         xtw.writeAttribute("Host_VMM", vmmName);
         xtw.writeAttribute("TXT_Support", String.valueOf(true)); //String.valueOf(tpmSupport));
-        log.error("===XML Creation");
         
 
 //        if (tpmSupport == true) {
@@ -659,12 +658,8 @@ public class TAHelper {
             Map<DigestAlgorithm, List<Pcr>> pcrs = pcrManifest.getPcrsMap();
             for(Map.Entry<DigestAlgorithm, List<Pcr>> e : pcrs.entrySet()) {
                 for(Pcr p : e.getValue()) {
-                    log.error("===Before If");
-                    log.error( p.getValue().toString().toUpperCase() + " " + p.getIndex().toString() + " " + e.getKey().toString());
                     if (this.host.TpmVersion.equals("2.0") && !this.isHostWindows && e.getKey().toString().equalsIgnoreCase("SHA1"))
                         continue;
-                    log.error("===After If");
-                    log.error(e.getKey().toString());
                     xtw.writeStartElement("PCRInfo");
                     xtw.writeAttribute("ComponentName", p.getIndex().toString());
                     xtw.writeAttribute("DigestValue", p.getValue().toString().toUpperCase());
