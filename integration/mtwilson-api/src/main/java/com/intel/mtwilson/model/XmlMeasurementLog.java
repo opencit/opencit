@@ -2,7 +2,7 @@ package com.intel.mtwilson.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +72,7 @@ public class XmlMeasurementLog extends ObjectModel {
                             moduleInfo.put("Include", dirEntry.getInclude());
                             moduleInfo.put("Exclude", dirEntry.getExclude());
                             
-                            Measurement newDirModule = new MeasurementSha1(Sha1Digest.valueOfHex(dirEntry.getValue()), dirEntry.getPath(), moduleInfo);
+                            Measurement newDirModule = new MeasurementSha256(Sha256Digest.valueOfHex(dirEntry.getValue()), dirEntry.getPath(), moduleInfo);
                             this.measurements.add(newDirModule);
                         } else {
                             FileMeasurementType fileEntry = (FileMeasurementType) measurementLogEntry;
@@ -81,7 +81,7 @@ public class XmlMeasurementLog extends ObjectModel {
                             HashMap<String,String> moduleInfo = new HashMap<>();
                             moduleInfo.put("Type", FileMeasurementType.class.getSimpleName());
                             
-                            Measurement newFileModule = new MeasurementSha1(Sha1Digest.valueOfHex(fileEntry.getValue()), fileEntry.getPath(), moduleInfo);
+                            Measurement newFileModule = new MeasurementSha256(Sha256Digest.valueOfHex(fileEntry.getValue()), fileEntry.getPath(), moduleInfo);
                             this.measurements.add(newFileModule);
                         }                            
                     }
