@@ -12,6 +12,7 @@ import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import java.io.IOException;
@@ -233,7 +234,9 @@ public interface HostAgent {
     Map<String,String> getHostAttributes() throws IOException;
     
     
-    void setAssetTag(Sha1Digest tag) throws IOException;
+    void setAssetTagSha256(Sha256Digest tag) throws IOException;
+    
+    void setAssetTagSha1(Sha1Digest tag) throws IOException;
     
     X509Certificate getBindingKeyCertificate();    
     

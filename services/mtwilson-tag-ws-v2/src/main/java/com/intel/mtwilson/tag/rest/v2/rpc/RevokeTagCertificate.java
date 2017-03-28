@@ -55,7 +55,7 @@ public class RevokeTagCertificate implements Runnable{
                 log.debug("RPC: RevokeTagCertificate - Sha1 of the certificate about to be revoked is {}.", obj.getSha1());
                 dao.updateRevoked(certificateId, true);                
                 AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
-                request.setSha1OfAssetCert(obj.getSha1().toByteArray());
+                request.setSha256OfAssetCert(obj.getSha256().toByteArray());
                 Global.mtwilson().revokeAssetTagCertificate(request);
                 log.info("RPC: RevokeTagCertificate - Certificate with id {} has been revoked successfully.");
             } else {
