@@ -38,6 +38,7 @@ import sun.security.util.BigInt;
     @NamedQuery(name = "MwAssetTagCertificate.findByRevoked", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.revoked = :revoked"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotBefore", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notBefore = :notBefore"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotAfter", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notAfter = :notAfter"),
+    @NamedQuery(name = "MwAssetTagCertificate.findBySha256Hash", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.sHA256Hash = :sHA256Hash"),
     @NamedQuery(name = "MwAssetTagCertificate.findBySha1Hash", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.sHA1Hash = :sHA1Hash")
     //@NamedQuery(name = "MwAssetTagCertificate.findBySha256Hash", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.sHA256Hash = :sHA256Hash")
     })
@@ -57,6 +58,8 @@ public class MwAssetTagCertificate implements Serializable {
     @Column(name = "Certificate")
     private byte[] certificate;
     @Lob
+    @Column(name = "SHA256_Hash")
+    private byte[] sHA256Hash;
     @Column(name = "SHA1_Hash")
     private byte[] sHA1Hash;
     @Column(name = "uuid_hex")
@@ -124,6 +127,14 @@ public class MwAssetTagCertificate implements Serializable {
         this.certificate = certificate;
     }
 
+    public byte[] getSHA256Hash() {
+        return sHA256Hash;
+    }
+
+    public void setSHA256Hash(byte[] sHA256Hash) {
+        this.sHA256Hash = sHA256Hash;
+    }
+    
     public byte[] getSHA1Hash() {
         return sHA1Hash;
     }
