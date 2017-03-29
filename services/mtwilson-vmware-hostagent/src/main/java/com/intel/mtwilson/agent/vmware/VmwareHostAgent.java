@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
@@ -365,7 +367,7 @@ public class VmwareHostAgent implements HostAgent {
     }
 
     @Override
-    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+    public void setAssetTagSha256(com.intel.dcsg.cpg.crypto.Sha256Digest tag) throws IOException {
         throw new UnsupportedOperationException("Unsupported operation");
     }
 
@@ -381,6 +383,11 @@ public class VmwareHostAgent implements HostAgent {
 
     @Override
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+   @Override
+    public void setAssetTagSha1(Sha1Digest tag) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

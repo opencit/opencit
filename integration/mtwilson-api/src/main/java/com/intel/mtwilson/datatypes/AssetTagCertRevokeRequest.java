@@ -13,8 +13,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class AssetTagCertRevokeRequest {
 
+    private byte[] sha256OfAssetCert;
     private byte[] sha1OfAssetCert;
 
+
+    @JsonProperty("SHA256Hash")
+    public byte[] getSha256OfAssetCert() {
+        return sha256OfAssetCert;
+    }
+
+    @JsonProperty("SHA256Hash")
+    public void setSha256OfAssetCert(byte[] sha256OfAssetCert) {
+        this.sha256OfAssetCert = sha256OfAssetCert;
+    }
+    
     @JsonProperty("SHA1Hash")
     public byte[] getSha1OfAssetCert() {
         return sha1OfAssetCert;
