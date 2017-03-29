@@ -14,6 +14,7 @@ import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
@@ -401,7 +402,7 @@ public class SecurityTest {
             long currentTime = System.currentTimeMillis();
             dos.writeLong(currentTime);
 
-            SecureRandom r = new SecureRandom();
+            SecureRandom r = RandomUtil.getSecureRandom();
             byte[] nonce = new byte[16];
             r.nextBytes(nonce);
             dos.write(nonce);

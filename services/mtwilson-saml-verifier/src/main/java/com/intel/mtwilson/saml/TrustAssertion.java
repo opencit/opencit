@@ -289,7 +289,12 @@ public class TrustAssertion {
             X509Certificate cert = X509Util.decodePemCertificate(pem);
             return cert;
         }
-
+		
+		public String getVMMOSName() {
+            String vmm_osname = assertionMap.get("VMM_OSName");
+            return vmm_osname;
+        }
+		
         public boolean isHostTrusted() {
             String trusted = assertionMap.get("Trusted");
             return trusted != null && trusted.equalsIgnoreCase("true");

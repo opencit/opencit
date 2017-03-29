@@ -15,6 +15,7 @@ import com.intel.mtwilson.model.PcrIndex;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
@@ -84,6 +85,18 @@ public class PcrEventLogIntegrity extends BaseRule {
                     List<Measurement> measurements = eventLog.getEventLog();
                     if( measurements != null ) {
                         AbstractDigest expectedValue = computeHistory(measurements, pcrBank); // calculate expected' based on history
+						// For TPM 1.2 host, the tbootxm modules will be SHA256. Take SHA1 of tbootxm module before extending it for PCR19
+                        if (pcrBank.match("SHA1") && pcrIndex.toString().equalsIgnoreCase("19")){
+                            PcrEventLog eventLogforSHA256 = hostReport.pcrManifest.getPcrEventLog(DigestAlgorithm.SHA256, pcrIndex);
+                            if (eventLogforSHA256 != null){
+                                List<Measurement> measurementsforSHA256 = eventLogforSHA256.getEventLog();
+                                for (Measurement m : measurementsforSHA256){
+                                    if (m.getLabel().equalsIgnoreCase("tbootxm")){
+                                        expectedValue = ((Sha1Digest)expectedValue).extend(Digest.sha1().digest(m.getValue().toString().getBytes()).getBytes());
+                                    }
+                                }
+                            }
+                        }
                         log.debug("PcrEventLogIntegrity: About to compare {} with {}.", actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
