@@ -24,6 +24,7 @@ import com.intel.dcsg.cpg.x509.repository.HashSetMutablePublicKeyRepository;
 import com.intel.dcsg.cpg.x509.repository.MutableCertificateRepository;
 import com.intel.dcsg.cpg.x509.repository.MutablePublicKeyRepository;
 import com.intel.dcsg.cpg.x509.repository.PublicKeyRepository;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
@@ -213,7 +214,7 @@ public class TblHostsTlsPolicyFactoryTest {
         SSLContext sslContext = SSLContext.getInstance("TLS"); // for example: SSL, SSLv2, SSLv3, TLS, TLSv1
         KeyManager[] kms = null;
         TrustManager[] tms = new TrustManager[] { tlsPolicy.getTrustManager() };
-        sslContext.init(kms, tms, new java.security.SecureRandom());
+        sslContext.init(kms, tms, RandomUtil.getSecureRandom());
         // 3. create the ssl socket factory
         SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 

@@ -7,6 +7,7 @@ package com.intel.mtwilson.tag.client.jaxrs;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.My;
@@ -65,7 +66,7 @@ public class CertificateTest {
         ContentSigner authority = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded()));
         AttributeCertificateHolder holder = new AttributeCertificateHolder(new X500Name(new RDN[]{})); 
         AttributeCertificateIssuer issuer = new AttributeCertificateIssuer(new X500Name(new RDN[]{}));
-        BigInteger serialNumber = new BigInteger(64, new SecureRandom());
+        BigInteger serialNumber = new BigInteger(64, RandomUtil.getSecureRandom());
         Date notBefore = new Date();
         Date notAfter = new Date(notBefore.getTime() + TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
         X509v2AttributeCertificateBuilder builder = new X509v2AttributeCertificateBuilder(holder, issuer, serialNumber, notBefore, notAfter);
