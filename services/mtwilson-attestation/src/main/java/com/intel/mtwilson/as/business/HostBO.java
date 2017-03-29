@@ -1348,7 +1348,7 @@ public class HostBO {
                 TblHosts tblHost = My.jpa().mwHosts().findByName(host.getHostName().toString());
                 if (tblHost != null) {
                     AssetTagCertAssociateRequest atagMapRequest = new AssetTagCertAssociateRequest();
-                    atagMapRequest.setSha1OfAssetCert(atagCert.getSHA1Hash());
+                    atagMapRequest.setSha256OfAssetCert(atagCert.getSHA256Hash());
                     atagMapRequest.setHostID(tblHost.getId());
                     
                     boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHostById(atagMapRequest);

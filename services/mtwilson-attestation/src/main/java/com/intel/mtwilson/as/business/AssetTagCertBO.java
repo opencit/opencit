@@ -34,6 +34,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import java.security.cert.CertificateException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -82,8 +83,10 @@ public class AssetTagCertBO {
             atagCert.setNotBefore(x509AttrCert.getNotBefore());
             atagCert.setRevoked(false);
             //atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
+            atagCert.setSHA256Hash(Sha256Digest.digestOf(x509AttrCert.getEncoded()).toByteArray());
             atagCert.setSHA1Hash(Sha1Digest.digestOf(x509AttrCert.getEncoded()).toByteArray());
             log.debug("Certificate creation time is {}", x509AttrCert.getSerialNumber());
+            log.debug("Certificate SHA256 is {}", Sha256Digest.digestOf(x509AttrCert.getEncoded()).toHexString());
             log.debug("Certificate SHA1 is {}", Sha1Digest.digestOf(x509AttrCert.getEncoded()).toHexString());
             atagCert.setCreate_time(x509AttrCert.getSerialNumber());
             //atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
@@ -102,9 +105,9 @@ public class AssetTagCertBO {
             
             // here we need to check a config option, mtwilson.atag.associate.hosts.auto
             // now try to match a host to it
-            log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagCert.getSHA1Hash()));
+            log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagCert.getSHA256Hash()));
             AssetTagCertAssociateRequest request = new AssetTagCertAssociateRequest();
-            request.setSha1OfAssetCert(atagCert.getSHA1Hash());
+            request.setSha256OfAssetCert(atagCert.getSHA256Hash());
             //result = 
             mapAssetTagCertToHost(request);
             
@@ -132,9 +135,9 @@ public class AssetTagCertBO {
         AssetTagCertAssociateRequest request = new AssetTagCertAssociateRequest();
         try {
             My.initDataEncryptionKey(); // needed for connection string decryption
-            if (atagObj.getSha1OfAssetCert() != null) {
-                log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagObj.getSha1OfAssetCert()));
-                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
+            if (atagObj.getSha256OfAssetCert() != null) {
+                log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagObj.getSha256OfAssetCert()));
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha256Hash(atagObj.getSha256OfAssetCert());
                 // below code is for debugging.. we will delete it later.
                 // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
                 if (atagCerts.isEmpty() ) {
@@ -145,7 +148,7 @@ public class AssetTagCertBO {
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
                 } else {
                     MwAssetTagCertificate atagCert = atagCerts.get(0);
-                    request.setSha1OfAssetCert(atagCert.getSHA1Hash());
+                    request.setSha256OfAssetCert(atagCert.getSHA256Hash());
                     String uuid = atagCert.getUuid().toLowerCase().trim();
                     log.debug("searching using " + uuid);
                     TblHosts tblHost = My.jpa().mwHosts().findByHwUUID(uuid);
@@ -190,8 +193,8 @@ public class AssetTagCertBO {
         try {
             My.initDataEncryptionKey(); // needed for connection string decryption
             // Find the asset tag certificate for the specified Sha256Hash value
-            if (atagObj.getSha1OfAssetCert() != null) {
-                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
+            if (atagObj.getSha256OfAssetCert() != null) {
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha256Hash(atagObj.getSha256OfAssetCert());
                 // below code is for debugging.. we will delete it later.
                 // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
                 if (atagCerts.isEmpty() ) {
@@ -209,9 +212,9 @@ public class AssetTagCertBO {
                     
                     // Now that the mapping is done, we need to calculate what the expected PCR value should be and put it in
                     // the PCREvent column.
-                    Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
-                    log.debug("mapAssetTagCertToHostById : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
-                    Sha1Digest expectedHash = Sha1Digest.ZERO.extend(tag);
+                    Sha256Digest tag = Sha256Digest.digestOf(atagCert.getCertificate());
+                    log.debug("mapAssetTagCertToHostById : Sha256 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
+                    Sha256Digest expectedHash = Sha256Digest.ZERO.extend(tag);
                     log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
 
                     atagCert.setPCREvent(expectedHash.toByteArray());
@@ -220,7 +223,7 @@ public class AssetTagCertBO {
                     result = true;
                 }
             } else {
-                log.error("Sha1Hash for the asset tag is not specified.");
+                log.error("Sha256Hash for the asset tag is not specified.");
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
         } catch (ASException ase) {
@@ -295,11 +298,11 @@ public class AssetTagCertBO {
             if (uuid != null && !uuid.isEmpty()) {
                 log.debug("UUID {} is specified for revoking the asset tag certificate", uuid);
                 atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByUuid(uuid);
-            } else if (atagObj.getSha1OfAssetCert() != null) {
-                log.error("SHA1 {} is specified for revoking the asset tag certificate", atagObj.getSha1OfAssetCert());
-                atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
+            } else if (atagObj.getSha256OfAssetCert() != null) {
+                log.error("SHA256 {} is specified for revoking the asset tag certificate", atagObj.getSha256OfAssetCert());
+                atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha256Hash(atagObj.getSha256OfAssetCert());
             } else {
-                log.error("Sha1 for the asset tag is not specified.");
+                log.error("Sha256 for the asset tag is not specified.");
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
 
