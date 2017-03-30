@@ -16,6 +16,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.model.PcrFactory;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
@@ -303,7 +304,7 @@ BwIDAQAB
     }
     
     @Override
-    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+    public void setAssetTagSha1(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
         try {
             client.setAssetTag(tag);
         }
@@ -327,5 +328,9 @@ BwIDAQAB
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void setAssetTagSha256(Sha256Digest tag) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }

@@ -113,7 +113,7 @@ public class TagCertificateRepository implements DocumentRepository<TagCertifica
         log.debug("TagCertificate:Delete - Got request to revoke TagCertificate with id {}.", locator.id.toString());        
         AssetTagCertRevokeRequest obj = new AssetTagCertRevokeRequest();
         try {
-            obj.setSha1OfAssetCert(null);
+            obj.setSha256OfAssetCert(null);
             new AssetTagCertBO().revokeAssetTagCertificate(obj, locator.id.toString());
             log.debug("TagCertificate:Delete - Revoked the TagCertificate with id {} successfully.", locator.id.toString());        
         } catch (Exception ex) {

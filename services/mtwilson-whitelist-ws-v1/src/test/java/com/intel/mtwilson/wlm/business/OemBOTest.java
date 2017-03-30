@@ -6,6 +6,7 @@ package com.intel.mtwilson.wlm.business;
 
 import com.intel.mtwilson.wlm.business.OemBO;
 import com.intel.mtwilson.datatypes.OemData;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -21,7 +22,7 @@ import static org.junit.Assert.*;
  * @author dsmagadx
  */
 public class OemBOTest {
-    private SecureRandom rnd = new SecureRandom();
+    private SecureRandom rnd = RandomUtil.getSecureRandom();
     
     public OemBOTest() {
     }
