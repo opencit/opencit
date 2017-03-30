@@ -401,7 +401,7 @@ public class ReportsBO {
                 logger.debug("addManifestLogs - {} - {}", moduleManifest.getComponentName(), moduleManifest.getDigestValue());
 
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
-                        !moduleReports.containsKey(moduleManifest.getComponentName()) && registeredPcrBank.equals(moduleManifest.getPcrBank())){
+                        !moduleReports.containsKey(moduleManifest.getComponentName()) && (registeredPcrBank.equals(moduleManifest.getPcrBank()) || (moduleManifest.getComponentName().equalsIgnoreCase("tbootxm") && host.getTpmVersion().equalsIgnoreCase("1.2")))){
                     
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
                         // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
