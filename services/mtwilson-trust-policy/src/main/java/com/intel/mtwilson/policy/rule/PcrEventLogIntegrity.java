@@ -15,6 +15,7 @@ import com.intel.mtwilson.model.PcrIndex;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;

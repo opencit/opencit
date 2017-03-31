@@ -9,6 +9,7 @@ import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.BuilderModel;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import java.io.IOException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import java.math.BigInteger;
@@ -105,7 +106,7 @@ public class X509AttrBuilder extends BuilderModel {
     }
 
     public X509AttrBuilder randomSerial() {
-        serialNumber = new BigInteger(64, new SecureRandom());
+        serialNumber = new BigInteger(64, RandomUtil.getSecureRandom());
         return this;
     }
     

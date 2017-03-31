@@ -10,6 +10,7 @@ import com.intel.mtwilson.shiro.*;
 import com.intel.dcsg.cpg.net.NetUtils;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.shiro.authc.x509.Credential;
 import com.intel.mtwilson.shiro.authc.x509.Fingerprint;
 import com.intel.mtwilson.shiro.authc.x509.LoginCertificateId;
@@ -69,7 +70,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
     }
     
     private String getRandomNodeId() {
-        SecureRandom random = new SecureRandom();
+        SecureRandom random = RandomUtil.getSecureRandom();
         String id = String.valueOf(random.nextInt());
         return id;
     }
