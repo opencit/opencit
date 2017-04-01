@@ -208,7 +208,7 @@ public class JpaPolicyReader {
         
         if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
             //assetTagPCR = ;          
-            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA256Hash());
             tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagRule);   
         } else {       
@@ -249,7 +249,7 @@ public class JpaPolicyReader {
         //if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
         //    assetTagPCR = 23;
         //}           
-        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA256Hash());
 
         tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(tagRule);   
