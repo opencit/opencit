@@ -133,6 +133,6 @@ AIK Certificate: null
     @Test
     public void testDeployAssetTag() throws IOException {
         Sha1Digest tag = Sha1Digest.valueOfHex("0011223344556677889900112233445566778899"); // 20 bytes
-        agent.setAssetTag(tag);
+        agent.setAssetTagSha1(tag);
     }
 }

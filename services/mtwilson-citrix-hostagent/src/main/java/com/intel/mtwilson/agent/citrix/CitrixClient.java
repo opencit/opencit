@@ -17,6 +17,7 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrSha1;
@@ -344,32 +345,28 @@ public class CitrixClient {
     }
 
     public String generateNonce() {
-        try {
-            // Create a secure random number generator
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            // Get 1024 random bits
-            byte[] bytes = new byte[16];
-            sr.nextBytes(bytes);
+		// Create a secure random number generator
+		SecureRandom sr = RandomUtil.getSecureRandom();
+		// Get 1024 random bits
+		byte[] bytes = new byte[16];
+		sr.nextBytes(bytes);
 
 //            nonce = new BASE64Encoder().encode( bytes);
-            String nonce = Base64.encodeBase64String(bytes);
+		String nonce = Base64.encodeBase64String(bytes);
 
-            log.debug("Nonce Generated " + nonce);
-            return nonce;
-        } catch (NoSuchAlgorithmException e) {
-            throw new ASException(e);
-        }
+		log.debug("Nonce Generated " + nonce);
+		return nonce;
     }
 
-    private String generateSessionId() throws NoSuchAlgorithmException {
+    private String generateSessionId() {
 
         // Create a secure random number generator
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        SecureRandom sr = RandomUtil.getSecureRandom();
         // Get 1024 random bits
         byte[] seed = new byte[1];
         sr.nextBytes(seed);
 
-        sr = SecureRandom.getInstance("SHA1PRNG");
+        sr = RandomUtil.getSecureRandom();
         sr.setSeed(seed);
 
 

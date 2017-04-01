@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.net.InternetAddress;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -271,7 +272,7 @@ public class TAHelper {
             }
 
             // create DAA challenge secret
-            SecureRandom random = new SecureRandom();
+            SecureRandom random = RandomUtil.getSecureRandom();
             byte[] secret = new byte[20];
             random.nextBytes(secret);
             try(FileOutputStream outSecret = new FileOutputStream(new File(getDaaSecretFileName(sessionId)))) {
@@ -707,32 +708,28 @@ public class TAHelper {
     }
 
     public byte[] generateNonce() {
-        try {
-            // Create a secure random number generator
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            // Get 1024 random bits
-            byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address
-            sr.nextBytes(bytes);
+		// Create a secure random number generator
+		SecureRandom sr = RandomUtil.getSecureRandom();
+		// Get 1024 random bits
+		byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address
+		sr.nextBytes(bytes);
 
 //            nonce = new BASE64Encoder().encode( bytes);
 //            String nonce = Base64.encodeBase64String(bytes);
 
-            log.debug("Nonce Generated {}", Base64.encodeBase64String(bytes));
-            return bytes;
-        } catch (NoSuchAlgorithmException e) {
-            throw new ASException(e);
-        }
+		log.debug("Nonce Generated {}", Base64.encodeBase64String(bytes));
+		return bytes;
     }
 
-    private String generateSessionId() throws NoSuchAlgorithmException {
+    private String generateSessionId() {
 
         // Create a secure random number generator
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        SecureRandom sr = RandomUtil.getSecureRandom();
         // Get 1024 random bits
         byte[] seed = new byte[1];
         sr.nextBytes(seed);
 
-        sr = SecureRandom.getInstance("SHA1PRNG");
+        sr = RandomUtil.getSecureRandom();
         sr.setSeed(seed);
 
         int nextInt = sr.nextInt();
