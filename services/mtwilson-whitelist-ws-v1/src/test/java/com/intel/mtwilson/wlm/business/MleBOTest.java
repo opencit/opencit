@@ -11,6 +11,7 @@ import com.intel.mtwilson.datatypes.ManifestData;
 import com.intel.mtwilson.datatypes.MleData;
 import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.OsData;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.Random;
  * @author dsmagadx
  */
 public class MleBOTest {
-    private SecureRandom rnd = new SecureRandom();
+    private SecureRandom rnd = RandomUtil.getSecureRandom();
     
     public MleBOTest() {
     }
