@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -214,7 +216,7 @@ public class IntelHostAgent implements HostAgent {
     }
     
     @Override
-    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+    public void setAssetTagSha256(com.intel.dcsg.cpg.crypto.Sha256Digest tag) throws IOException {
         Map<String, String> hm = getHostAttributes();
         log.debug("calling trustAgentClient with " + tag.toHexString() + " | " +  hm.get("Host_UUID"));
         trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
@@ -233,6 +235,11 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setAssetTagSha1(Sha1Digest tag) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -6,6 +6,7 @@ package com.intel.mtwilson.wlm.business;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.OsData;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import java.security.SecureRandom;
 import java.util.List;
 import org.junit.AfterClass;
@@ -19,7 +20,7 @@ import org.junit.Test;
  * @author dsmagadx
  */
 public class OsBOTest {
-    private SecureRandom rnd = new SecureRandom();
+    private SecureRandom rnd = RandomUtil.getSecureRandom();
 
     public OsBOTest() {
     }
