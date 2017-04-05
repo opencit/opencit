@@ -395,18 +395,6 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <scope>test</scope>
         </dependency>
         
-		<dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>1.8.9</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>1.8.9</version>
-            <scope>compile</scope>
-        </dependency>
         <!--
         <dependency>
             <groupId>org.springframework</groupId>

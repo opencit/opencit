@@ -136,19 +136,7 @@
             <artifactId>jackson-module-mrbean</artifactId>
             <version>2.1.1</version>
             <scope>test</scope>
-        </dependency>    
-		<dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>1.8.9</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>1.8.9</version>
-            <scope>compile</scope>
-        </dependency>		
+        </dependency>    	
         <!-- end testing support -->
         
         <!-- javascript interpreter for dynamically computed expected pcr values ; when this is enabled we need to separate the trust policy model (rule and policy interfaces) from the execution engine (which would depend on rhino) -->

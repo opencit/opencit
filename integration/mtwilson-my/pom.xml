@@ -241,17 +241,5 @@
             <optional>true</optional>
             <scope>test</scope>
         </dependency>
-		<dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>1.8.9</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>1.8.9</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>  
 </project>
