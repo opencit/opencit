@@ -87,7 +87,7 @@ public class HostBO {
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18,19";
-    private static String OPENSOURCE_DA_PCRs = "17,18";
+    private static String OPENSOURCE_DA_PCRs = "17,18,19";
     private static String CITRIX_PCRs = "18"; //"17,18";
     private static String WINDOWS_BIOS_PCRs = "0";
     private static String WINDOWS_PCRs = "13,14";
@@ -1099,9 +1099,13 @@ public class HostBO {
             return false;
         }
 
+        /* commment out this check since for PCR19, the value can be 0 if not in TCB mode, and not 0 if in TCB value. 
+         * This should allow PCR 19 can be selected by default to accomodate both cases.
         if (modValue.matches(invalidWhiteList)) {
             return false;
         }
+        */
+        
         if (modValue.matches(hexadecimalRegEx)) {
             return true;
         } else {
