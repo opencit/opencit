@@ -87,7 +87,7 @@ public class HostBO {
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18,19";
-    private static String OPENSOURCE_DA_PCRs = "17,18";
+    private static String OPENSOURCE_DA_PCRs = "17,18,19";
     private static String CITRIX_PCRs = "18"; //"17,18";
     private static String WINDOWS_BIOS_PCRs = "0";
     private static String WINDOWS_PCRs = "13,14";
@@ -1099,9 +1099,13 @@ public class HostBO {
             return false;
         }
 
+        /* commment out this check since for PCR19, the value can be 0 if not in TCB mode, and not 0 if in TCB value. 
+         * This should allow PCR 19 can be selected by default to accomodate both cases.
         if (modValue.matches(invalidWhiteList)) {
             return false;
         }
+        */
+        
         if (modValue.matches(hexadecimalRegEx)) {
             return true;
         } else {
@@ -1550,6 +1554,13 @@ public class HostBO {
             StringReader sr = new StringReader(attestationReport);
             XMLStreamReader reader = xif.createXMLStreamReader(sr);
 
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("uploadToDB: About to use the host configuration - {}", mapper.writeValueAsString(hostConfigObj));
+            } catch (Exception e) {
+                log.error("uploadToDB cannot serialize input", e);
+            }
+            
             TblMle mleSearchObj = mleJpa.findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
             TblMle mleBiosSearchObj = mleJpa.findBiosMle(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
             // Process all the Event and PCR nodes in the attestation report.
@@ -1662,19 +1673,34 @@ public class HostBO {
                                 reader.next();
                                 continue;
                             }
-                            if (!hostConfigObj.getOverWriteWhiteList()) {
-                                // add the module if we are to add a new bios or vmm mle
-                                boolean addModuleToBios = hostConfigObj.addBiosWhiteList();
-                                boolean addModuleToVmm = hostConfigObj.addVmmWhiteList();
-                                
-                                if(addModuleToBios || addModuleToVmm){
+
+                            try {
+                                ObjectMapper mapper = new ObjectMapper();
+                                log.debug("uploadToDB: About to configure the Module with details - {}", mapper.writeValueAsString(moduleObj)); //This statement may contain clear text passwords
+                            } catch (Exception e) {
+                                log.error("uploadToDB cannot serialize input", e);
+                            }
+                            
+                            // add the module if we are to add a new bios or vmm mle
+                            boolean addModuleToBios = hostConfigObj.addBiosWhiteList();
+                            boolean addModuleToVmm = hostConfigObj.addVmmWhiteList();
+
+                            // Adding additional checks before creating the modules. We were seeing issues with creating BIOS modules when the user
+                            // had actually requested only for VMM modules or BIOS module was not needed since it matched an existing MLE.
+                            if (!hostConfigObj.getOverWriteWhiteList()) {                                
+                                if ((addModuleToBios && moduleObj.getOsName() == null) 
+                                        || (addModuleToVmm && moduleObj.getOsName() != null && !moduleObj.getOsName().isEmpty())) {
                                     mleBO.addModuleWhiteList(moduleObj, emt, null, null);
                                     log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
                                 }
+
                             } else {
                                 try {
-                                    mleBO.updateModuleWhiteList(moduleObj, emt, null);
-                                    log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                    if ((addModuleToBios && moduleObj.getOsName() == null)
+                                            || (addModuleToVmm && moduleObj.getOsName() != null && !moduleObj.getOsName().isEmpty())) {
+                                        mleBO.updateModuleWhiteList(moduleObj, emt, null);
+                                        log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                    }
                                 } catch (ASException ae) {
                                     if (ae.getErrorCode() == ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST) {
                                         mleBO.addModuleWhiteList(moduleObj, emt, null, null);
