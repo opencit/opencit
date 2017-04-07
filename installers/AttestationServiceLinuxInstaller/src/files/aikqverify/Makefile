@@ -1,7 +1,7 @@
 # Important! Ensure that the tabs are maintained.
 # Converting tabs to spaces is an error in Makefiles
 CC=gcc
-CFLAGS=-fstack-protector -fPIE -fPIC -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+CFLAGS=-fstack-protector-strong -fPIE -fPIC -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 LDFLAGS=-z noexecstack -z relro -z now -pie
 
 all:    clean aikqverify aikqverify2 aikqverifywin aikqverifywin2
