@@ -86,19 +86,20 @@ public class PcrEventLogIntegrity extends BaseRule {
                     List<Measurement> measurements = eventLog.getEventLog();
                     if( measurements != null ) {
                         AbstractDigest expectedValue = computeHistory(measurements, pcrBank); // calculate expected' based on history
-						// For TPM 1.2 host, the tbootxm modules will be SHA256. Take SHA1 of tbootxm module before extending it for PCR19
+                        // For TPM 1.2 host, the tbootxm modules will be SHA256. Take SHA1 of tbootxm module before extending it for PCR19
                         if (pcrBank.match("SHA1") && pcrIndex.toString().equalsIgnoreCase("19")){
                             PcrEventLog eventLogforSHA256 = hostReport.pcrManifest.getPcrEventLog(DigestAlgorithm.SHA256, pcrIndex);
                             if (eventLogforSHA256 != null){
                                 List<Measurement> measurementsforSHA256 = eventLogforSHA256.getEventLog();
                                 for (Measurement m : measurementsforSHA256){
                                     if (m.getLabel().equalsIgnoreCase("tbootxm")){
+                                        log.debug("computeHistory: tbootxm SHA256 measurement found for TPM 1.2 host, taking SHA1 digest of SHA256 value: {}", m.getValue().toString());
                                         expectedValue = ((Sha1Digest)expectedValue).extend(Digest.sha1().digest(m.getValue().toString().getBytes()).getBytes());
                                     }
                                 }
                             }
                         }
-                        log.debug("PcrEventLogIntegrity: About to compare {} with {}.", actualValue.getValue().toString(), expectedValue.toString());
+                        log.debug("PcrEventLogIntegrity: About to compare actual value [{}] with expected value [{}].", actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
                             report.fault(new PcrEventLogInvalid(pcrIndex));
@@ -114,7 +115,7 @@ public class PcrEventLogIntegrity extends BaseRule {
         // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match
         AbstractDigest result = bank == DigestAlgorithm.SHA256 ? new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0}) : Sha1Digest.ZERO;
         for(Measurement m : list) {
-            log.debug("computeHistory: About to extend {} with {}.", result.toString(), m.getValue().toString());
+            log.debug("computeHistory: Extending measurement [{}] to value [{}] for bank [{}].", m.getValue().toString(), result.toString(), bank.name());
             //result = result.extend(m.getValue());
             if(bank == DigestAlgorithm.SHA256) {
                 result = ((Sha256Digest)result).extend(m.getValue().toByteArray());
