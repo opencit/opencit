@@ -392,7 +392,7 @@ public class ProvisionTagCertificate  {
         try(FileOutputStream out = new FileOutputStream(encryptedFile)) {
             IOUtils.write(message, out);
         }
-        String tagCmdPath = Folders.application() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
+        String tagCmdPath = Folders.application() + File.separator + "bin"; //.getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"decrypt.sh -p PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 
