@@ -659,7 +659,7 @@ public class TAHelper {
             Map<DigestAlgorithm, List<Pcr>> pcrs = pcrManifest.getPcrsMap();
             for(Map.Entry<DigestAlgorithm, List<Pcr>> e : pcrs.entrySet()) {
                 for(Pcr p : e.getValue()) {
-                    if (this.host.TpmVersion.equals("2.0") && !this.isHostWindows && e.getKey().toString().equalsIgnoreCase("SHA1"))
+                    if (this.host != null && this.host.TpmVersion.equals("2.0") && !this.isHostWindows && e.getKey().toString().equalsIgnoreCase("SHA1"))
                         continue;
                     xtw.writeStartElement("PCRInfo");
                     xtw.writeAttribute("ComponentName", p.getIndex().toString());

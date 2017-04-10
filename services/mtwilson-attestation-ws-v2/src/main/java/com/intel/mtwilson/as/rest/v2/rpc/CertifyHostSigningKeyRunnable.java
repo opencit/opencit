@@ -214,7 +214,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
 
                 //Set the publicKeyModules. for tpm1.2, trustagent sends the public key modulus                    
                 byte[] publicKeyModulusRSA = publicKeyModulus;
-                if (tpmVersion.equals("2.0") && operatingSystem.equals("Linux")) { // for tpm2.0 on Linux, trustagent sent the tpm2b_public structure, we need to extract the public modulus portion
+                if (tpmVersion != null && tpmVersion.equals("2.0") && operatingSystem.equals("Linux")) { // for tpm2.0 on Linux, trustagent sent the tpm2b_public structure, we need to extract the public modulus portion
                     log.debug("received tpm2 binding key pub key modulus size: {}", publicKeyModulus.length);
                     if (publicKeyModulus.length < 256) {
                         throw new Exception("received tpm binding key pub modulus is less than 256 (expected is tpm2b_public structure)");
