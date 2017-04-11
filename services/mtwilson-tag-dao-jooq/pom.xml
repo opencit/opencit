@@ -110,7 +110,7 @@ Jooq code generation happens in asset-tag-dao.
                     <dependency>
                         <groupId>org.apache.ant</groupId>
                         <artifactId>ant</artifactId>
-                        <version>1.8.4</version>
+                        <version>1.10.0</version>
                     </dependency>
                     <dependency>
                         <groupId>ant-contrib</groupId>
@@ -121,7 +121,7 @@ Jooq code generation happens in asset-tag-dao.
                     <dependency>
                         <groupId>com.sun</groupId>
                         <artifactId>tools</artifactId>
-                        <version>1.6</version>
+                        <version>1.7</version>
                         <scope>system</scope>
                         <systemPath>${java.home}/../lib/tools.jar</systemPath>
                     </dependency>
@@ -195,6 +195,46 @@ Jooq code generation happens in asset-tag-dao.
                         </target>
                     </generator>
                 </configuration>
+            </plugin>
+			
+			<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.9</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+					<complianceLevel>1.7</complianceLevel>
+                    <showWeaveInfo>true</showWeaveInfo>
+                    <aspectLibraries>
+                        <!-- security framework -->
+                        <aspectLibrary>
+                            <groupId>org.apache.shiro</groupId>
+                            <artifactId>shiro-aspectj</artifactId>
+                        </aspectLibrary>
+                    </aspectLibraries>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>aspectj-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>                
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjrt</artifactId>
+                        <version>1.8.9</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjtools</artifactId>
+                        <version>1.8.9</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
