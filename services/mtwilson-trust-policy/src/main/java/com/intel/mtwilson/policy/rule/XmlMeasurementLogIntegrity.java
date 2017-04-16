@@ -12,6 +12,7 @@ import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
@@ -34,17 +35,17 @@ import org.slf4j.LoggerFactory;
 public class XmlMeasurementLogIntegrity extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private Sha256Digest expectedValue;
+    private String expectedValue;
     private PcrIndex pcrIndex;
     
     protected XmlMeasurementLogIntegrity() { } // for desearializing jackson
     
-    public XmlMeasurementLogIntegrity(Sha256Digest expectedValue, PcrIndex pcrIndex) {
+    public XmlMeasurementLogIntegrity(String expectedValue, PcrIndex pcrIndex) {
         this.expectedValue = expectedValue;
         this.pcrIndex = pcrIndex;
     }
     
-    public AbstractDigest getExpectedValue() { return expectedValue; }
+    public String getExpectedValue() { return expectedValue; }
 
     public PcrIndex getPcrIndex() {
         return pcrIndex;
@@ -65,12 +66,25 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
             List<Measurement> measurements = new XmlMeasurementLog(this.pcrIndex, hostReport.pcrManifest.getMeasurementXml()).getMeasurements();
             log.debug("XmlMeasurementLogIntegrity: Retrieved #{} of measurements from the log.", measurements.size());
             if( measurements.size() > 0 ) {
+                DigestAlgorithm finalDigestAlgorithm = DigestAlgorithm.SHA256;
+                AbstractDigest expectedValueDigest;
                 AbstractDigest actualValue = computeHistory(measurements); // calculate expected' based on history
-                log.debug("XmlMeasurementLogIntegrity: About to verify the calclated final hash {} with expected hash {}", actualValue.toString(), expectedValue.toString());
+                if (Sha1Digest.isValidHex(expectedValue)) {
+                    expectedValueDigest = Sha1Digest.valueOfHex(expectedValue);
+                } else {
+                    expectedValueDigest = Sha256Digest.valueOfHex(expectedValue);
+                }
+                // for linux TPM 1.2 and windows, module digest is SHA1, so take the SHA1 of the actual SHA256 value for comparison
+                if (Sha1Digest.isValidHex(expectedValue) && Sha256Digest.isValid(actualValue.toByteArray())) {
+                    log.debug("XmlMeasurementLogIntegrity: Expected value [{}] is SHA1, taking SHA1 digest of SHA256 actual value [{}] with byte length [{}]", expectedValueDigest.toString(), actualValue.toHexString(), actualValue.toByteArray().length);
+                    actualValue = Sha1Digest.valueOf(Digest.sha1().digestHex(actualValue.toHexString()).getBytes());
+                    finalDigestAlgorithm = DigestAlgorithm.SHA1;
+                }
+                log.debug("XmlMeasurementLogIntegrity: About to verify the calclated final hash {} with expected hash {}", actualValue.toString(), expectedValueDigest.toString());
                 // make sure the expected pcr value matches the actual pcr value
-                if( !expectedValue.equals(actualValue) ) {
+                if( !expectedValueDigest.equals(actualValue) ) {
                     log.info("XmlMeasurementLogIntegrity: Mismatch in the expected final hash value for the XML Measurement log.");
-                    report.fault(XmlMeasurementValueMismatch.newInstance(DigestAlgorithm.SHA256, expectedValue, actualValue) );
+                    report.fault(XmlMeasurementValueMismatch.newInstance(finalDigestAlgorithm, expectedValueDigest, actualValue));
                 } else {
                     log.debug("Verified the integrity of the XML measurement log successfully.");
                 }
@@ -84,9 +98,8 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
             Sha256Digest result = Sha256Digest.ZERO;
             for (Measurement m : list) {
                 //result = result.extend(m.getValue().toString().getBytes());
-                log.debug("XmlMeasurementLogIntegrity-computeHistory: Current value of result is {}", result.toString());
+                log.debug("XmlMeasurementLogIntegrity-computeHistory: Extending value [{}] to current value [{}]", m.getValue().toString(), result.toString());
                 result = result.extend(Sha256Digest.valueOfHex(m.getValue().toString()));
-                log.debug("XmlMeasurementLogIntegrity-computeHistory: Extended value of result is {}", result.toString());
             }
             return result;     
     }
