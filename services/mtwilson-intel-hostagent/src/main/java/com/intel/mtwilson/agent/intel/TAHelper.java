@@ -866,7 +866,7 @@ public class TAHelper {
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
-
+        log.debug("Verify quote command result: {}", StringUtils.join(result.iterator(), "\n"));
         // Sample output from command:
         //  1 3a3f780f11a4b49969fcaa80cd6e3957c33b2275
         //  17 bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8
@@ -958,10 +958,10 @@ public class TAHelper {
                         // Get the Module hash value
                         if (reader.getLocalName().equalsIgnoreCase("value")) {
                             digestValue = reader.getElementText();
-                        }                                                
-
-                        log.debug("Process module " + componentName + " getting extended to " + extendedToPCR);
-
+                        }
+                        
+                        log.debug("Process module [" + componentName + "] getting extended to [" + extendedToPCR + "] has value: " + digestValue);
+                        
                         // Attach the PcrEvent logs to the corresponding pcr indexes.
                         // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.                        
                         Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue, pcrBank);
@@ -981,7 +981,7 @@ public class TAHelper {
                 throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
-
+        
         return pcrManifest;
 
     }

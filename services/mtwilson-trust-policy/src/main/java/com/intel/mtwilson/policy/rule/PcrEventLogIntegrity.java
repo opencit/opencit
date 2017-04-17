@@ -71,35 +71,19 @@ public class PcrEventLogIntegrity extends BaseRule {
         RuleResult report = new RuleResult(this);
         if( hostReport.pcrManifest == null ) {
             report.fault(new PcrManifestMissing());            
-        }
-        else {
+        } else {
             Pcr actualValue = hostReport.pcrManifest.getPcr(pcrBank, pcrIndex);
             if( actualValue == null ) {
                 report.fault(new PcrValueMissing(pcrIndex));
-            }
-            else {
+            } else {
                 PcrEventLog eventLog = hostReport.pcrManifest.getPcrEventLog(pcrBank, pcrIndex);
                 if( eventLog == null ) {
                     report.fault(new PcrEventLogMissing(pcrIndex));
-                }
-                else {
+                } else {
                     List<Measurement> measurements = eventLog.getEventLog();
                     if( measurements != null ) {
-                        AbstractDigest expectedValue = computeHistory(measurements, pcrBank); // calculate expected' based on history
-                        // For TPM 1.2 host, the tbootxm modules will be SHA256. Take SHA1 of tbootxm module before extending it for PCR19
-                        if (pcrBank.match("SHA1") && pcrIndex.toString().equalsIgnoreCase("19")){
-                            PcrEventLog eventLogforSHA256 = hostReport.pcrManifest.getPcrEventLog(DigestAlgorithm.SHA256, pcrIndex);
-                            if (eventLogforSHA256 != null){
-                                List<Measurement> measurementsforSHA256 = eventLogforSHA256.getEventLog();
-                                for (Measurement m : measurementsforSHA256){
-                                    if (m.getLabel().equalsIgnoreCase("tbootxm")){
-                                        log.debug("computeHistory: tbootxm SHA256 measurement found for TPM 1.2 host, taking SHA1 digest of SHA256 value: {}", m.getValue().toString());
-                                        expectedValue = ((Sha1Digest)expectedValue).extend(Digest.sha1().digest(m.getValue().toString().getBytes()).getBytes());
-                                    }
-                                }
-                            }
-                        }
-                        log.debug("PcrEventLogIntegrity: About to compare actual value [{}] with expected value [{}].", actualValue.getValue().toString(), expectedValue.toString());
+                        AbstractDigest expectedValue = computeHistory(measurements, pcrBank); // calculate measured value
+                        log.debug("About to compare actual PCR [{}] value [{}] with expected value [{}].", pcrIndex.toString(), actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
                             report.fault(new PcrEventLogInvalid(pcrIndex));
