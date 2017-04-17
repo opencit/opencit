@@ -6,6 +6,7 @@ package com.intel.mtwilson.tag.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
@@ -93,7 +94,7 @@ public class DeployTagCertificate implements Runnable{
                     throw new RepositoryInvalidInputException(locator);
                 }
                 
-                deployAssetTagToHost(obj.getSha1(), hostRecord);
+                deployAssetTagToHost(obj.getSha256(), hostRecord);
             } else {
                 log.error("RPC: DeployTagCertificate - Failed to retreive certificate while trying to discover host by certificate ID.");
                 throw new RepositoryInvalidInputException(locator);
@@ -108,13 +109,13 @@ public class DeployTagCertificate implements Runnable{
         
     }
 
-    private void deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord) throws IOException {
+    private void deployAssetTagToHost(Sha256Digest tag, TxtHostRecord hostRecord) throws IOException {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         //ByteArrayResource tlsKeystore = new ByteArrayResource();
 //        ConnectionString connectionString = ConnectionString.from(hostRecord);
 //        HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
         HostAgent hostAgent = hostAgentFactory.getHostAgent(hostRecord);
-        hostAgent.setAssetTag(tag);
+        hostAgent.setAssetTagSha256(tag);
     }
     
 }

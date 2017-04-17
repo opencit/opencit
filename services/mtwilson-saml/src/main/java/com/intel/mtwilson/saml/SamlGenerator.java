@@ -5,6 +5,7 @@
 package com.intel.mtwilson.saml;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
@@ -394,7 +395,7 @@ public class SamlGenerator {
                 // add the asset tag attestation status and if the status is trusted, then add all the attributes. In order to uniquely
                 // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
                 attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
-                attrStatement.getAttributes().add(createStringAttribute("Asset_Tag_Certificate_Sha1", Sha1Digest.digestOf(tagCertificate.getEncoded()).toString()));
+                attrStatement.getAttributes().add(createStringAttribute("Asset_Tag_Certificate_Sha256", Sha256Digest.digestOf(tagCertificate.getEncoded()).toString()));
                 if( host.isAssetTagTrusted()) {
                     // get all microformat attributes
                     List<UTF8NameValueMicroformat> microformatAttributes = tagCertificate.getAttributes(UTF8NameValueMicroformat.class);

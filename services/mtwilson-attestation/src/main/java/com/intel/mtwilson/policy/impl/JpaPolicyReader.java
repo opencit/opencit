@@ -25,6 +25,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwMeasurementXmlJpaController;
@@ -207,7 +208,7 @@ public class JpaPolicyReader {
         
         if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
             //assetTagPCR = ;          
-            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA256Hash());
             tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagRule);   
         } else {       
@@ -248,7 +249,7 @@ public class JpaPolicyReader {
         //if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
         //    assetTagPCR = 23;
         //}           
-        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA256Hash());
 
         tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(tagRule);   
@@ -436,13 +437,13 @@ public class JpaPolicyReader {
 
         log.debug("loadXmlMeasurementLogRuleForVmm: Adding XmlMeasurementLogRules for verification");
         HashSet<Rule> list = new HashSet<>();
-        Sha1Digest finalXmlWhitelistValue = null;
+        Sha256Digest finalXmlWhitelistValue = null;
         
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
         Collection<TblModuleManifest> tblModuleManifestCollection = vmmMle.getTblModuleManifestCollection();
         for(TblModuleManifest moduleObj : tblModuleManifestCollection) {
             if (moduleObj.getComponentName().equalsIgnoreCase("tbootxm")) {
-                finalXmlWhitelistValue = Sha1Digest.valueOf(moduleObj.getDigestValue());
+                finalXmlWhitelistValue = Sha256Digest.valueOf(moduleObj.getDigestValue());
                 break;
             }                    
         }
