@@ -1588,7 +1588,7 @@ public class HostBO {
                             boolean useDaMode = hostConfigObj.getTxtHostRecord().getDaMode();
                             ModuleWhiteList moduleObj = new ModuleWhiteList();
                             if (pcr == 17 && useDaMode) {// bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
-								if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
                                 } else {
@@ -1620,8 +1620,9 @@ public class HostBO {
                                     //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                     moduleObj.setOemName(hostObj.BIOS_Oem);
                                 }
-                            } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))){
-								if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                            } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))) {
+                                log.debug("UploadToDB: MLE for PCR [{}] with component name [{}] for algorithm [{}] has value [{}]", pcr, reader.getAttributeValue("", "ComponentName"), reader.getAttributeValue("", "DigestAlgorithm"), reader.getAttributeValue("", "DigestValue"));
+                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
                                 } else {
@@ -1781,7 +1782,7 @@ public class HostBO {
                                 mleID = mleSearchObj.getId();
 
                                 // If the vendor is Citrix, then only we need to write the PCR 19. Otherwise we need to null it out. 
-                                if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix")) {
+                                if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix") && !hostObj.getDaMode()) {
                                     if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
                                         pcrObj.setPcrDigest("");
                                     }

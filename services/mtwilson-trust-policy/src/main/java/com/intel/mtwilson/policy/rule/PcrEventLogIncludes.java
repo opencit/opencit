@@ -19,6 +19,8 @@ import com.intel.mtwilson.policy.fault.PcrEventLogMissingExpectedEntries;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A TrustPolicy implementation that checks whether the HostReport contains
@@ -32,6 +34,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogIncludes extends BaseRule {
+    private Logger log = LoggerFactory.getLogger(getClass());
     private DigestAlgorithm pcrBank;
     private PcrIndex pcrIndex;
     private Set<Measurement> expected;
@@ -61,18 +64,15 @@ public class PcrEventLogIncludes extends BaseRule {
 //        report.check(getClass().getSimpleName()); // the minimum... show that the host was evaluated by this policy
         if( hostReport.pcrManifest == null ) {
             report.fault(new PcrEventLogMissing());
-        }
-        else {
+        } else {
             PcrEventLog pcrEventLog = hostReport.pcrManifest.getPcrEventLog(pcrBank, pcrIndex);
             if( pcrEventLog == null  ) {
                 report.fault(new PcrEventLogMissing(pcrIndex));
-            }
-            else {
+            } else {
                 List<Measurement> moduleManifest = pcrEventLog.getEventLog();
                 if( moduleManifest == null || moduleManifest.isEmpty() ) {
                     report.fault(new PcrEventLogMissing(pcrIndex));
-                }
-                else {
+                } else {
                     HashSet<Measurement> hostActualMissing = new HashSet<Measurement>(expected);
                     hostActualMissing.removeAll(moduleManifest); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
                     if( !hostActualMissing.isEmpty() ) {
