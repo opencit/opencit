@@ -209,8 +209,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tpm-endorsement-client-jaxrs2</artifactId>
+            <groupId>com.intel.mtwilson.privacyca.features</groupId>
+            <artifactId>mtwilson-privacyca-tpm-endorsement-client-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
         
@@ -385,7 +385,7 @@
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-model</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.trustagent:mtwilson-trustagent-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-vm-attestation-client-jaxrs2</dependencySourceInclude>
-                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tpm-endorsement-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.privacyca.features:mtwilson-privacyca-tpm-endorsement-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-file-client-jaxrs2</dependencySourceInclude>
                                     </dependencySourceIncludes>
                                 </configuration>
