@@ -23,6 +23,7 @@ import java.util.Set;
  * @author dczech
  */
 public class IntelTpmDaHostTrustPolicyFactory extends IntelHostTrustPolicyFactory {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IntelTpmDaHostTrustPolicyFactory.class);
     
     public IntelTpmDaHostTrustPolicyFactory(JpaPolicyReader util) {
         super(util);
@@ -67,14 +68,22 @@ public class IntelTpmDaHostTrustPolicyFactory extends IntelHostTrustPolicyFactor
             PcrMatchesConstant r = (PcrMatchesConstant) it.next();
             if (r.getExpectedPcr().getPcrBank() != DigestAlgorithm.valueOf(host.getPcrBank())) {
                 it.remove();
+            } else {
+                log.debug("IntelTpmDaHostTrustPolicyFactory: PcrMatchesConstant rule added for [{}] with measurement [{}]", r.getExpectedPcr().getIndex().toString(), r.getExpectedPcr().getValue().toHexString());
             }
         }
         
         rules.addAll(pcrConstantRules);
         
-        if(host.getVmmMleId().getRequiredManifestList().contains("17")) {
+        if(host.getVmmMleId().getRequiredManifestList().contains("17") || host.getVmmMleId().getRequiredManifestList().contains("19")) {
             Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmmDaMode(vmm,host);
             rules.addAll(pcrEventLogRules);
+        }
+        // Next we need to add all the modules
+        if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
+            // Add rules to verify the meaurement log which would contain modules for attesting application/data
+            Set<Rule> xmlMeasurementLogRules = reader.loadXmlMeasurementLogRuleForVmm(vmm, host);
+            rules.addAll(xmlMeasurementLogRules);
         }
         
         return rules;
