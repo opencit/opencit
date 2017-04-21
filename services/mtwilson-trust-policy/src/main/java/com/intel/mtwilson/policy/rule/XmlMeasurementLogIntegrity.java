@@ -98,8 +98,10 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
             Sha256Digest result = Sha256Digest.ZERO;
             for (Measurement m : list) {
                 //result = result.extend(m.getValue().toString().getBytes());
-                log.debug("XmlMeasurementLogIntegrity-computeHistory: Extending value [{}] to current value [{}]", m.getValue().toString(), result.toString());
-                result = result.extend(Sha256Digest.valueOfHex(m.getValue().toString()));
+                if (m.getValue() != null && m.getValue().toString() != null) {
+                    log.debug("XmlMeasurementLogIntegrity-computeHistory: Extending value [{}] to current value [{}]", m.getValue().toString(), result.toString());
+                    result = result.extend(Sha256Digest.valueOfHex(m.getValue().toString()));
+                }
             }
             return result;     
     }
