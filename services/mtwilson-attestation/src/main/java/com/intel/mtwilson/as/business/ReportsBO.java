@@ -425,8 +425,12 @@ public class ReportsBO {
                             List<Measurement> measurements = new XmlMeasurementLog(PcrIndex.valueOf(tblPcrManifest.getName()), findByMleId.getContent()).getMeasurements();
                             for(Measurement m : measurements) {
                                 logger.debug("addManifestLogs - Adding the sub module {} for tbootxm root module.", m.getLabel());                    
-                                
-                                ModuleLogReport subModuleLogReport = new ModuleLogReport(m.getLabel(), m.getValue().toString(), m.getValue().toString(),1);
+                                ModuleLogReport subModuleLogReport;
+                                if (m.getValue() == null || m.getValue().toString() == null) {
+                                    subModuleLogReport = new ModuleLogReport(m.getLabel(), "", "",1);
+                                } else {
+                                    subModuleLogReport = new ModuleLogReport(m.getLabel(), m.getValue().toString(), m.getValue().toString(),1);
+                                }
                                 if (!temptbootxmSubModuleReport.containsKey(subModuleLogReport.getComponentName()))
                                     temptbootxmSubModuleReport.put(subModuleLogReport.getComponentName(), subModuleLogReport);
                             }

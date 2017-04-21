@@ -95,8 +95,7 @@ public class XmlMeasurementLogEquals extends BaseRule {
 
                 log.debug("XmlMeasurementLogEquals: About to check host entries {} against the whitelist which has {} entries.", 
                         actualModules.size(), hostActualMissing.size());
-                log.debug("XmlMeasurementLogEquals: Verifying {} against {}", expected.toString(), actualModules.toString());
-
+//                log.debug("XmlMeasurementLogEquals: Verifying {} against {}", expected.toString(), actualModules.toString());  //throwing NPE if expected value empty
                 hostActualMissing.removeAll(actualModules); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
 
                 raiseFaultForModifiedEntries(hostActualUnexpected, hostActualMissing, report);
