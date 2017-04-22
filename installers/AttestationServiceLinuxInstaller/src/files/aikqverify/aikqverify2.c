@@ -153,6 +153,7 @@ int main (int ac, char **av)
 			exit (1);
 		}
 		fclose (f_in);
+	}
 
 
 	/* Read AIK from OpenSSL file */
