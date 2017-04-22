@@ -135,7 +135,9 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                         if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
                             log.debug("HostAttestation:Search - Retrieved {} of results.", tblSamlAssertionList.size());
                             for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
-                                hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(null, tblSamlAssertion));
+                                if (tblSamlAssertion.getTrustReport() != null) {
+                                    hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(null, tblSamlAssertion));
+                                }
                             }
                         }
                         
