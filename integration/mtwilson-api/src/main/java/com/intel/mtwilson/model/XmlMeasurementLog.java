@@ -11,6 +11,7 @@ import com.intel.mtwilson.measurement2.xml.Measurements;
 import com.intel.mtwilson.measurement2.xml.MeasurementType;
 import com.intel.mtwilson.measurement2.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.measurement2.xml.FileMeasurementType;
+import com.intel.mtwilson.measurement2.xml.SymlinkMeasurementType;
 import com.intel.dcsg.cpg.xml.JAXB;
 import java.io.IOException;
 import java.util.HashMap;
@@ -59,7 +60,6 @@ public class XmlMeasurementLog extends ObjectModel {
         JAXB measurementLogJaxb = new JAXB();        
         if (xmlMeasurements != null && !xmlMeasurements.isEmpty()) {
             try {
-                
                 Measurements measurements = measurementLogJaxb.read(xmlMeasurements, Measurements.class);
                 if (measurements.getMeasurements().size() > 0) {
                     for (MeasurementType measurementLogEntry : measurements.getMeasurements()) {
@@ -74,7 +74,7 @@ public class XmlMeasurementLog extends ObjectModel {
                             
                             Measurement newDirModule = new MeasurementSha256(Sha256Digest.valueOfHex(dirEntry.getValue()), dirEntry.getPath(), moduleInfo);
                             this.measurements.add(newDirModule);
-                        } else {
+                        } else if (measurementLogEntry.getClass().equals(FileMeasurementType.class)) {
                             FileMeasurementType fileEntry = (FileMeasurementType) measurementLogEntry;
                             log.debug("File details {} - {}", fileEntry.getPath(), fileEntry.getValue());
 
@@ -83,7 +83,21 @@ public class XmlMeasurementLog extends ObjectModel {
                             
                             Measurement newFileModule = new MeasurementSha256(Sha256Digest.valueOfHex(fileEntry.getValue()), fileEntry.getPath(), moduleInfo);
                             this.measurements.add(newFileModule);
-                        }                            
+                        } else if (measurementLogEntry.getClass().equals(SymlinkMeasurementType.class)) {
+                            SymlinkMeasurementType symlinkEntry = (SymlinkMeasurementType) measurementLogEntry;
+                            log.debug("Symlink details {} - {}", symlinkEntry.getPath(), symlinkEntry.getValue());
+
+                            HashMap<String,String> moduleInfo = new HashMap<>();
+                            moduleInfo.put("Type", SymlinkMeasurementType.class.getSimpleName());
+                            
+                            Measurement newFileModule = new MeasurementSha256(Sha256Digest.valueOfHex(symlinkEntry.getValue()), symlinkEntry.getPath(), moduleInfo);
+                            this.measurements.add(newFileModule);
+                        } else {
+                            log.warn("Cannot cast measurement with class [{}] to any known CIT measurement type", measurementLogEntry.getClass().getSimpleName());
+                            if (measurementLogEntry.getValue() != null && measurementLogEntry.getPath() != null) {
+                                log.warn("Uncastable measurement has value [{}] and path [{}]", measurementLogEntry.getValue(), measurementLogEntry.getPath());
+                            }
+                        }
                     }
                 }
                 
