@@ -62,8 +62,10 @@ public class MleBO {
         if (whiteList.length() != expectedSize) {
             return false;
         }
-        
         if (whiteList.matches(invalidWhiteList)) {
+            if ("SHA256".equalsIgnoreCase(pcrBank) && (Integer.parseInt(whiteList) == 0)){
+                return true; 
+            }
             return false;
         }
         if (whiteList.matches(hexadecimalRegEx)) {
