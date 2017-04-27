@@ -349,10 +349,12 @@ public class JpaPolicyReader {
                 eventLogIncludesRule.setMarkers(markers);
                 list.add(eventLogIncludesRule);
                 // integrity rule
-                log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
-                PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex);
-                integrityRule.setMarkers(markers);
-                list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity
+                if (!hostIsWindows) {
+                    log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
+                    PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex);
+                    integrityRule.setMarkers(markers);
+                    list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity
+                }
             }
         }
         
