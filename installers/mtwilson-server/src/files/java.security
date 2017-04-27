@@ -287,3 +287,5 @@ networkaddress.cache.negative.ttl=10
 #   krb5.kdc.bad.policy = tryLess:2,2000
 krb5.kdc.bad.policy = tryLast
 
+# To tempararily address the bug in openjdk1.8 "java.security.NoSuchAlgorithmException: EC AlgorithmParameters not available"
+jdk.tls.disabledAlgorithms=EC,ECDHE,ECDH

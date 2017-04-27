@@ -87,7 +87,7 @@ public class HostBO {
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18,19";
-    private static String OPENSOURCE_DA_PCRs = "17,18";
+    private static String OPENSOURCE_DA_PCRs = "17,18,19";
     private static String CITRIX_PCRs = "18"; //"17,18";
     private static String WINDOWS_BIOS_PCRs = "0";
     private static String WINDOWS_PCRs = "13,14";
@@ -1099,9 +1099,13 @@ public class HostBO {
             return false;
         }
 
+        /* commment out this check since for PCR19, the value can be 0 if not in TCB mode, and not 0 if in TCB value. 
+         * This should allow PCR 19 can be selected by default to accomodate both cases.
         if (modValue.matches(invalidWhiteList)) {
             return false;
         }
+        */
+        
         if (modValue.matches(hexadecimalRegEx)) {
             return true;
         } else {
@@ -1584,7 +1588,7 @@ public class HostBO {
                             boolean useDaMode = hostConfigObj.getTxtHostRecord().getDaMode();
                             ModuleWhiteList moduleObj = new ModuleWhiteList();
                             if (pcr == 17 && useDaMode) {// bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
-								if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
                                 } else {
@@ -1616,8 +1620,9 @@ public class HostBO {
                                     //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                     moduleObj.setOemName(hostObj.BIOS_Oem);
                                 }
-                            } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))){
-								if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                            } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))) {
+                                log.debug("UploadToDB: MLE for PCR [{}] with component name [{}] for algorithm [{}] has value [{}]", pcr, reader.getAttributeValue("", "ComponentName"), reader.getAttributeValue("", "DigestAlgorithm"), reader.getAttributeValue("", "DigestValue"));
+                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
                                 } else {
@@ -1777,7 +1782,7 @@ public class HostBO {
                                 mleID = mleSearchObj.getId();
 
                                 // If the vendor is Citrix, then only we need to write the PCR 19. Otherwise we need to null it out. 
-                                if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix")) {
+                                if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix") && !hostObj.getDaMode()) {
                                     if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
                                         pcrObj.setPcrDigest("");
                                     }

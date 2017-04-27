@@ -14,7 +14,7 @@ Copyright 2015 Intel Corporation. All rights reserved.
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
                     <xs:element name="File" type="fileMeasurementType"/>
                     <xs:element name="Dir" type="directoryMeasurementType"/>
-					<xs:element name="Symlink" type="symlinkMeasurementType"/>
+                    <xs:element name="Symlink" type="symlinkMeasurementType"/>
                 </xs:choice>
             </xs:sequence>
             <xs:attribute type="xs:string" name="DigestAlg"/>
@@ -23,9 +23,9 @@ Copyright 2015 Intel Corporation. All rights reserved.
     
     <xs:complexType name="measurementType" abstract="true">
         <xs:simpleContent>
-        <xs:extension base="xs:string">
-            <xs:attribute type="xs:string" name="Path" use="required"/>
-        </xs:extension>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="Path" use="required"/>
+            </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
 
@@ -35,7 +35,7 @@ Copyright 2015 Intel Corporation. All rights reserved.
         </xs:simpleContent>
     </xs:complexType>
 	
-	 <xs:complexType name="symlinkMeasurementType">
+    <xs:complexType name="symlinkMeasurementType">
         <xs:simpleContent>
             <xs:extension base="measurementType"/>
         </xs:simpleContent>
@@ -46,7 +46,7 @@ Copyright 2015 Intel Corporation. All rights reserved.
             <xs:extension base="measurementType">
                 <xs:attribute type="xs:string" name="Include" use="optional"/>
                 <xs:attribute type="xs:string" name="Exclude" use="optional"/>
-				<xs:attribute type="xs:string" name="FilterType" use="optional"/> 	
+                <xs:attribute type="xs:string" name="FilterType" use="optional"/> 	
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
