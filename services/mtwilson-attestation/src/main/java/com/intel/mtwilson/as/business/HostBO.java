@@ -1349,6 +1349,7 @@ public class HostBO {
                 if (tblHost != null) {
                     AssetTagCertAssociateRequest atagMapRequest = new AssetTagCertAssociateRequest();
                     atagMapRequest.setSha256OfAssetCert(atagCert.getSHA256Hash());
+                    atagMapRequest.setSha1OfAssetCert(atagCert.getSHA1Hash());
                     atagMapRequest.setHostID(tblHost.getId());
                     
                     boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHostById(atagMapRequest);
