@@ -212,9 +212,9 @@ public class AssetTagCertBO {
                     
                     // Now that the mapping is done, we need to calculate what the expected PCR value should be and put it in
                     // the PCREvent column.
-                    Sha256Digest tag = Sha256Digest.digestOf(atagCert.getCertificate());
+                    Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
                     log.debug("mapAssetTagCertToHostById : Sha256 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
-                    Sha256Digest expectedHash = Sha256Digest.ZERO.extend(tag);
+                    Sha1Digest expectedHash = Sha1Digest.ZERO.extend(tag);
                     log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
 
                     atagCert.setPCREvent(expectedHash.toByteArray());
