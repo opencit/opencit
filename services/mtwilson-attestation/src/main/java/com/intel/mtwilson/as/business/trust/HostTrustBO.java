@@ -827,7 +827,7 @@ public class HostTrustBO {
             log.debug("Checking if there are any asset tag certificates mapped to host with ID : {}", tblHosts.getId());
             // Load the asset tag certificate only if it is associated and valid.
             AssetTagCertBO atagCertBO = new AssetTagCertBO();
-            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getId());            
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getHardwareUuid());            
             if (atagCertForHost != null) {
                 log.debug("Asset tag certificate is associated to host {} with status {}.", tblHosts.getName(), atagCertForHost.getRevoked());
                 hostReport.tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
@@ -1920,7 +1920,8 @@ public class HostTrustBO {
             // by verifying in the asset tag certificate table. 
             X509AttributeCertificate tagCertificate; 
             AssetTagCertBO atagCertBO = new AssetTagCertBO();
-            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getHardwareUuid());
+            log.debug("The Value before in HostTrustBO2 is {}", tblSamlAssertion.getHostId().getId());
             if (atagCertForHost != null) {
                 log.debug("Host has been provisioned in the system with a TAG.");
                 tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());

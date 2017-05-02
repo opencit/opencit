@@ -130,7 +130,7 @@ public class HostTrustPolicyManager {
             if (host.getId() != null && host.getId() != 0) {
                 // Need to add the certificate whitelist only if the host is associated with a valid asset tag certificate.
                 AssetTagCertBO atagCertBO = new AssetTagCertBO();
-                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(host.getId());            
+                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(host.getHardwareUuid());            
                 if (atagCertForHost != null) { 
                     rules.addAll(factory.loadTrustRulesForAssetTag(atagCertForHost, host));
                 }
