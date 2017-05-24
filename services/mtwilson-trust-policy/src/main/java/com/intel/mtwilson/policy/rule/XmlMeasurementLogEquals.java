@@ -7,8 +7,10 @@ package com.intel.mtwilson.policy.rule;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.MeasurementSha1;
+import com.intel.mtwilson.model.MeasurementSha256;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.BaseRule;
@@ -93,8 +95,7 @@ public class XmlMeasurementLogEquals extends BaseRule {
 
                 log.debug("XmlMeasurementLogEquals: About to check host entries {} against the whitelist which has {} entries.", 
                         actualModules.size(), hostActualMissing.size());
-                log.debug("XmlMeasurementLogEquals: Verifying {} against {}", expected.toString(), actualModules.toString());
-
+//                log.debug("XmlMeasurementLogEquals: Verifying {} against {}", expected.toString(), actualModules.toString());  //throwing NPE if expected value empty
                 hostActualMissing.removeAll(actualModules); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
 
                 raiseFaultForModifiedEntries(hostActualUnexpected, hostActualMissing, report);
@@ -133,9 +134,14 @@ public class XmlMeasurementLogEquals extends BaseRule {
                         // We are storing the whitelist value and the actual value so that we do not need to compare again when generating the reports.
                         HashMap<String, String> tempHashMapToAdd = new HashMap<>();
                         tempHashMapToAdd.put("Actual_Value", tempUnexpected.getValue().toString());
-                        Measurement toMeasurementToAdd = new MeasurementSha1((Sha1Digest)tempMissing.getValue(), tempMissing.getLabel(), tempHashMapToAdd);
+                        Measurement measurementToAdd;
+                        if (Sha256Digest.isValid(tempMissing.getValue().toByteArray())) {
+                            measurementToAdd = new MeasurementSha256((Sha256Digest)tempMissing.getValue(), tempMissing.getLabel(), tempHashMapToAdd);
+                        } else {
+                            measurementToAdd = new MeasurementSha1((Sha1Digest)tempMissing.getValue(), tempMissing.getLabel(), tempHashMapToAdd);
+                        }
                         
-                        hostModifiedModules.add(toMeasurementToAdd);
+                        hostModifiedModules.add(measurementToAdd);
                         hostActualUnexpected.remove(tempUnexpected);
                         hostActualMissing.remove(tempMissing);
                     }

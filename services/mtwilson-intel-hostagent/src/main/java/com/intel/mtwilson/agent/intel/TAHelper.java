@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.net.InternetAddress;
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -271,7 +272,7 @@ public class TAHelper {
             }
 
             // create DAA challenge secret
-            SecureRandom random = new SecureRandom();
+            SecureRandom random = RandomUtil.getSecureRandom();
             byte[] secret = new byte[20];
             random.nextBytes(secret);
             try(FileOutputStream outSecret = new FileOutputStream(new File(getDaaSecretFileName(sessionId)))) {
@@ -650,6 +651,7 @@ public class TAHelper {
         xtw.writeAttribute("Host_Name", hostName);
         xtw.writeAttribute("Host_VMM", vmmName);
         xtw.writeAttribute("TXT_Support", String.valueOf(true)); //String.valueOf(tpmSupport));
+        
 
 //        if (tpmSupport == true) {
             
@@ -657,6 +659,8 @@ public class TAHelper {
             Map<DigestAlgorithm, List<Pcr>> pcrs = pcrManifest.getPcrsMap();
             for(Map.Entry<DigestAlgorithm, List<Pcr>> e : pcrs.entrySet()) {
                 for(Pcr p : e.getValue()) {
+                    if (this.host != null && this.host.TpmVersion.equals("2.0") && !this.isHostWindows && e.getKey().toString().equalsIgnoreCase("SHA1"))
+                        continue;
                     xtw.writeStartElement("PCRInfo");
                     xtw.writeAttribute("ComponentName", p.getIndex().toString());
                     xtw.writeAttribute("DigestValue", p.getValue().toString().toUpperCase());
@@ -704,32 +708,28 @@ public class TAHelper {
     }
 
     public byte[] generateNonce() {
-        try {
-            // Create a secure random number generator
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            // Get 1024 random bits
-            byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address
-            sr.nextBytes(bytes);
+		// Create a secure random number generator
+		SecureRandom sr = RandomUtil.getSecureRandom();
+		// Get 1024 random bits
+		byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address
+		sr.nextBytes(bytes);
 
 //            nonce = new BASE64Encoder().encode( bytes);
 //            String nonce = Base64.encodeBase64String(bytes);
 
-            log.debug("Nonce Generated {}", Base64.encodeBase64String(bytes));
-            return bytes;
-        } catch (NoSuchAlgorithmException e) {
-            throw new ASException(e);
-        }
+		log.debug("Nonce Generated {}", Base64.encodeBase64String(bytes));
+		return bytes;
     }
 
-    private String generateSessionId() throws NoSuchAlgorithmException {
+    private String generateSessionId() {
 
         // Create a secure random number generator
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        SecureRandom sr = RandomUtil.getSecureRandom();
         // Get 1024 random bits
         byte[] seed = new byte[1];
         sr.nextBytes(seed);
 
-        sr = SecureRandom.getInstance("SHA1PRNG");
+        sr = RandomUtil.getSecureRandom();
         sr.setSeed(seed);
 
         int nextInt = sr.nextInt();
@@ -866,7 +866,7 @@ public class TAHelper {
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
-
+        log.debug("Verify quote command result: {}", StringUtils.join(result.iterator(), "\n"));
         // Sample output from command:
         //  1 3a3f780f11a4b49969fcaa80cd6e3957c33b2275
         //  17 bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8
@@ -958,10 +958,10 @@ public class TAHelper {
                         // Get the Module hash value
                         if (reader.getLocalName().equalsIgnoreCase("value")) {
                             digestValue = reader.getElementText();
-                        }                                                
-
-                        log.debug("Process module " + componentName + " getting extended to " + extendedToPCR);
-
+                        }
+                        
+                        log.debug("Process module [" + componentName + "] getting extended to [" + extendedToPCR + "] has value: " + digestValue);
+                        
                         // Attach the PcrEvent logs to the corresponding pcr indexes.
                         // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.                        
                         Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue, pcrBank);
@@ -981,7 +981,7 @@ public class TAHelper {
                 throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
-
+        
         return pcrManifest;
 
     }

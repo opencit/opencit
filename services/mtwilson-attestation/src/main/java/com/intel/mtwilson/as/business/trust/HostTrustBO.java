@@ -142,7 +142,7 @@ public class HostTrustBO {
         return getTrustStatus(tblHosts, hostName.toString(), challenge);
     }
     
-    public HostTrustStatus getTrustStatusByAik(Sha1Digest aik) throws IOException {
+    public HostTrustStatus getTrustStatusByAik(Sha256Digest aik) throws IOException {
         if( aik == null ) { throw new IllegalArgumentException("missing AIK fingerprint"); }
         try {
             TblHosts tblHosts = getHostByAik(aik);
@@ -827,7 +827,7 @@ public class HostTrustBO {
             log.debug("Checking if there are any asset tag certificates mapped to host with ID : {}", tblHosts.getId());
             // Load the asset tag certificate only if it is associated and valid.
             AssetTagCertBO atagCertBO = new AssetTagCertBO();
-            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getId());            
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getHardwareUuid());            
             if (atagCertForHost != null) {
                 log.debug("Asset tag certificate is associated to host {} with status {}.", tblHosts.getName(), atagCertForHost.getRevoked());
                 hostReport.tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
@@ -892,7 +892,7 @@ public class HostTrustBO {
         to.VMM_OSVersion = from.getVmmMleId().getOsId().getVersion();
         to.AIK_Certificate = from.getAIKCertificate();
         to.AIK_PublicKey = from.getAikPublicKey();
-        to.AIK_SHA1 = from.getAikSha1();
+        to.AIK_SHA256 = from.getAikSha256();
         return to;
     }
 
@@ -1653,7 +1653,7 @@ public class HostTrustBO {
         }
     }
     
-    private TblHosts getHostByAik(Sha1Digest fingerprint) throws IOException  { // datatype.Hostname
+    private TblHosts getHostByAik(Sha256Digest fingerprint) throws IOException  { // datatype.Hostname
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         try {
             return hostBO.getHostByAik(fingerprint);
@@ -1920,7 +1920,8 @@ public class HostTrustBO {
             // by verifying in the asset tag certificate table. 
             X509AttributeCertificate tagCertificate; 
             AssetTagCertBO atagCertBO = new AssetTagCertBO();
-            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getHardwareUuid());
+            log.debug("The Value before in HostTrustBO2 is {}", tblSamlAssertion.getHostId().getId());
             if (atagCertForHost != null) {
                 log.debug("Host has been provisioned in the system with a TAG.");
                 tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
@@ -1972,7 +1973,7 @@ public class HostTrustBO {
         return saml;
     }
     
-    public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
+    public String getTrustWithSamlByAik(Sha256Digest aik, boolean forceVerify) throws IOException {
         if( ASDataCipher.cipher == null ) {
             log.warn("ASDataCipher was not initialized");
             My.initDataEncryptionKey();
@@ -2115,7 +2116,7 @@ public class HostTrustBO {
     
     public HostAttestation buildHostAttestation(TblHosts tblHosts, TblSamlAssertion tblSamlAssertion) throws IOException {
         HostAttestation hostAttestation = new HostAttestation();
-        hostAttestation.setAikSha1(tblSamlAssertion.getHostId().getAikSha1());
+        hostAttestation.setAikSha256(tblSamlAssertion.getHostId().getAikSha256());
         //hostAttestation.setChallenge(tblHosts.getChallenge());
         hostAttestation.setHostName(tblSamlAssertion.getHostId().getName());
         hostAttestation.setHostUuid(tblSamlAssertion.getHostId().getUuid_hex()); //.getHardwareUuid());

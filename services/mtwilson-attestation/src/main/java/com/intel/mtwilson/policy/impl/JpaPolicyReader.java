@@ -25,6 +25,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwMeasurementXmlJpaController;
@@ -207,7 +208,7 @@ public class JpaPolicyReader {
         
         if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
             //assetTagPCR = ;          
-            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+            AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA256Hash());
             tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
             rules.add(tagRule);   
         } else {       
@@ -248,7 +249,7 @@ public class JpaPolicyReader {
         //if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
         //    assetTagPCR = 23;
         //}           
-        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA1Hash());
+        AssetTagMatches tagRule = new AssetTagMatches(atagCert.getSHA256Hash());
 
         tagRule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(tagRule);   
@@ -262,18 +263,23 @@ public class JpaPolicyReader {
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
         info.put("HostSpecificModule", moduleInfo.getUseHostSpecificDigestValue().toString());
+        log.debug("Creating measurement for component: {}", moduleInfo.getComponentName());
 
         // Since we can call this function even without registering the host, the hostID will not be present. So, we need to skip adding this host specific module
         if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue()) {
+            log.debug("Component [{}] is host specific", moduleInfo.getComponentName());
             if (host.getId() != null && host.getId() != 0) {
                 TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleIdHostIdPcrBank(host.getId(), moduleInfo.getId(), moduleInfo.getPcrBank()); // returns null if not found;  
                 if( hostSpecificModule == null ) {
                     log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
                     Measurement m = MeasurementFactory.newInstance(host.getPcrBank(), "", "Missing host-specific module: " + moduleInfo.getComponentName(), info);
+                    log.debug("Component [{}] has measurement with label [{}] for algorithm [{}] with value: {}", moduleInfo.getComponentName(), m.getLabel(), m.getValue().algorithm(), m.getValue().toHexString());
                     return m;
                 }
                 else {
+                    log.debug("Found host specific measurement for bank [{}] with value [{}] for component [{}]", hostSpecificModule.getPcrBank(), hostSpecificModule.getDigestValue(), moduleInfo.getComponentName());
                     Measurement m = MeasurementFactory.newInstance(host.getPcrBank(), hostSpecificModule.getDigestValue(), moduleInfo.getComponentName(), info);
+                    log.debug("Component [{}] has measurement with label [{}] for algorithm [{}] with value: {}", moduleInfo.getComponentName(), m.getLabel(), m.getValue().algorithm(), m.getValue().toHexString());
                             //new MeasurementSha1(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
                     return m;
                 }
@@ -284,8 +290,15 @@ public class JpaPolicyReader {
             info.put("PackageName", moduleInfo.getPackageName());
             info.put("PackageVersion", moduleInfo.getPackageVersion());
             info.put("PackageVendor", moduleInfo.getPackageVendor());
-            Measurement m = MeasurementFactory.newInstance(host.getPcrBank(), moduleInfo.getDigestValue(), moduleInfo.getComponentName(), info);
-                    //new MeasurementSha1(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getComponentName(), info); 
+            DigestAlgorithm moduleDigestAlgorithm;
+            if (Sha256Digest.isValidHex(moduleInfo.getDigestValue())) {
+                moduleDigestAlgorithm = DigestAlgorithm.SHA256;
+            } else {
+                moduleDigestAlgorithm = DigestAlgorithm.SHA1;
+            }
+            Measurement m = MeasurementFactory.newInstance(moduleDigestAlgorithm, moduleInfo.getDigestValue(), moduleInfo.getComponentName(), info);
+                    //new MeasurementSha1(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getComponentName(), info);
+            log.debug("Component [{}] has measurement with label [{}] for algorithm [{}] with value: {}", moduleInfo.getComponentName(), m.getLabel(), m.getValue().algorithm(), m.getValue().toHexString());
             return m;
         }
     }
@@ -303,13 +316,12 @@ public class JpaPolicyReader {
         return rule;
     }
     
-    
     // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
     public Set<Rule> createPcrEventLogIncludesRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, TblHosts host, String... markers) {
         HashSet<Rule> list = new HashSet<Rule>();
         HashMap<PcrIndex,Set<Measurement>> measurements = new HashMap<PcrIndex,Set<Measurement>>();
         for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
-            if(!host.getPcrBank().equals(moduleInfo.getPcrBank())) {
+            if(!host.getPcrBank().equals(moduleInfo.getPcrBank()) && !moduleInfo.getComponentName().equalsIgnoreCase("tbootxm")) {
                 continue;
             }
             PcrIndex pcrIndex = PcrIndex.valueOf(Integer.valueOf(moduleInfo.getExtendedToPCR()));
@@ -324,17 +336,25 @@ public class JpaPolicyReader {
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
-            if( pcrIndex.toInteger() == 19 || pcrIndex.toInteger() == 17 ) {
+            Boolean hostIsWindows;
+            if (host.getVmmMleId() != null && host.getVmmMleId().getName() != null) {
+                hostIsWindows = host.getVmmMleId().getName().toLowerCase().contains("windows");
+            } else {
+                hostIsWindows = false;
+            }
+            if ((hostIsWindows && pcrIndex.toInteger() == 14) || (!hostIsWindows && (pcrIndex.toInteger() == 19 || pcrIndex.toInteger() == 17))) {
                 // event log rule
                 log.debug("Adding PcrEventLogIncludes rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
                 PcrEventLogIncludes eventLogIncludesRule = new PcrEventLogIncludes(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex, measurements.get(pcrIndex));
                 eventLogIncludesRule.setMarkers(markers);
                 list.add(eventLogIncludesRule);
                 // integrity rule
-                log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
-                PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex);
-                integrityRule.setMarkers(markers);
-                list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity            
+                if (!hostIsWindows) {
+                    log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
+                    PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(DigestAlgorithm.valueOf(host.getPcrBank()), pcrIndex);
+                    integrityRule.setMarkers(markers);
+                    list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity
+                }
             }
         }
         
@@ -373,9 +393,11 @@ public class JpaPolicyReader {
         Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();  
         for (Iterator<TblModuleManifest> it = pcrModuleInfoList.iterator(); it.hasNext();) {
             TblModuleManifest m = it.next();
-            if (!m.getUseHostSpecificDigestValue()) {
-                it.remove();
-            }
+            log.debug("Found PCR index [{}] module [{}] with value [{}]", m.getExtendedToPCR(), m.getComponentName(), m.getDigestValue());
+//            if (!m.getUseHostSpecificDigestValue()) {
+//                log.debug("Removing PcrEventLogIncludes rule for component [{}] because it is host specific", m.getComponentName());
+//                it.remove();
+//            }
         }
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.VMM.name());
     }
@@ -436,31 +458,47 @@ public class JpaPolicyReader {
 
         log.debug("loadXmlMeasurementLogRuleForVmm: Adding XmlMeasurementLogRules for verification");
         HashSet<Rule> list = new HashSet<>();
-        Sha1Digest finalXmlWhitelistValue = null;
+        String finalXmlWhitelistValueHex = null;
+        
+        // set pcrIndex equal to 14 for windows and 19 for linux
+        PcrIndex pcrIndex;
+        Boolean hostIsWindows;
+        if (tblHosts.getVmmMleId() != null && tblHosts.getVmmMleId().getName() != null) {
+            hostIsWindows = tblHosts.getVmmMleId().getName().toLowerCase().contains("windows");
+        } else {
+            hostIsWindows = false;
+        }
+        if (hostIsWindows) {
+            pcrIndex = PcrIndex.PCR14;
+        } else {
+            pcrIndex = PcrIndex.PCR19;
+        }
         
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
         Collection<TblModuleManifest> tblModuleManifestCollection = vmmMle.getTblModuleManifestCollection();
         for(TblModuleManifest moduleObj : tblModuleManifestCollection) {
+            log.debug("Found module [{}] with value [{}] with digest length: {}", moduleObj.getComponentName(), moduleObj.getDigestValue(), moduleObj.getDigestValue().length());
             if (moduleObj.getComponentName().equalsIgnoreCase("tbootxm")) {
-                finalXmlWhitelistValue = Sha1Digest.valueOf(moduleObj.getDigestValue());
+                finalXmlWhitelistValueHex = moduleObj.getDigestValue();
+                log.debug("tbootxm final XML whitelist value: {}", finalXmlWhitelistValueHex);
                 break;
-            }                    
+            }
         }
 
         MwMeasurementXml xmlMeasurement = measurementXmlJpaController.findByMleId(vmmMle.getId());
         
         // Ensure we have the final hash of measurement log and the measurement log itself is whitelisted before adding the
         // rules for verification
-        if (finalXmlWhitelistValue != null && xmlMeasurement != null && !xmlMeasurement.getContent().isEmpty()) {
+        if (finalXmlWhitelistValueHex != null && xmlMeasurement != null && !xmlMeasurement.getContent().isEmpty()) {
             // First lets add the measurement log verification rule
-            XmlMeasurementLog xmlMeasurementLog = new XmlMeasurementLog(PcrIndex.PCR19, xmlMeasurement.getContent());
+            XmlMeasurementLog xmlMeasurementLog = new XmlMeasurementLog(pcrIndex, xmlMeasurement.getContent());
             XmlMeasurementLogEquals xmlMeasurementLogEqualsRule = new XmlMeasurementLogEquals(xmlMeasurementLog);
             xmlMeasurementLogEqualsRule.setMarkers(TrustMarker.VMM.name());
             list.add(xmlMeasurementLogEqualsRule);
             
             // Next we should also verify the integrity of the measurement log by calculating the final hash and
             // comparing it to the whitelist value.
-            XmlMeasurementLogIntegrity xmlMeasurementLogIntegrityRule = new XmlMeasurementLogIntegrity(finalXmlWhitelistValue, PcrIndex.PCR19);
+            XmlMeasurementLogIntegrity xmlMeasurementLogIntegrityRule = new XmlMeasurementLogIntegrity(finalXmlWhitelistValueHex, pcrIndex);
             xmlMeasurementLogIntegrityRule.setMarkers(TrustMarker.VMM.name());
             list.add(xmlMeasurementLogIntegrityRule);
         }    

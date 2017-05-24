@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.model.Sha256Digest;
 import org.apache.commons.codec.binary.Base64;
 import com.intel.mtwilson.util.ASDataCipher;
 import java.io.IOException;
@@ -312,13 +313,13 @@ public class TestVmwareEsxi51 {
                 X509Certificate aikcert = agent.getAikCertificate();
                 host.setAIKCertificate(X509Util.encodePemCertificate(aikcert));
                 host.setAikPublicKey(RsaUtil.encodePemPublicKey(aikcert.getPublicKey()));
-                host.setAikSha1(Sha1Digest.valueOf(aikcert.getPublicKey().getEncoded()).toString());
+                host.setAikSha256(Sha256Digest.valueOf(aikcert.getPublicKey().getEncoded()).toString());
             }
             else {
                 PublicKey aikpubkey = agent.getAik();
                 host.setAIKCertificate(null);
                 host.setAikPublicKey(RsaUtil.encodePemPublicKey(aikpubkey));
-                host.setAikSha1(Sha1Digest.valueOf(aikpubkey.getEncoded()).toString());
+                host.setAikSha256(Sha256Digest.valueOf(aikpubkey.getEncoded()).toString());
             }
         }
         // create host with the mle id's

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.trustagent.model.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
@@ -229,7 +230,7 @@ public class IntelHostAgent2 implements HostAgent {
     }
 
     @Override
-    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+    public void setAssetTagSha256(com.intel.dcsg.cpg.crypto.Sha256Digest tag) throws IOException {
         Map<String, String> hm = getHostAttributes();
         log.debug("calling trustAgentClient with " + tag.toHexString() + " | " +  hm.get("Host_UUID"));
         //trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
@@ -273,5 +274,10 @@ public class IntelHostAgent2 implements HostAgent {
             log.error("Cannot retrieve VM attestation report: {}", e.toString(), e);
             throw e;
         }
+    }
+
+    @Override
+    public void setAssetTagSha1(Sha1Digest tag) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

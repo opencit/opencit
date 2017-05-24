@@ -36,6 +36,8 @@ public class SAMLSignature {
     private final XMLSignatureFactory factory;
     private final IssuerConfiguration issuerConfiguration;
     private final KeyInfo keyInfo;
+    
+    public static final String ALGO_SIGNATURE_RSA_SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
     /**
      * Loads a keystore and builds a stock key-info structure for use by base
@@ -69,14 +71,14 @@ public class SAMLSignature {
     public void signSAMLObject(Element target)
             throws GeneralSecurityException, XMLSignatureException, MarshalException {
         Reference ref = factory.newReference("#" + target.getAttribute("ID"),
-                factory.newDigestMethod(DigestMethod.SHA1, null),
+                factory.newDigestMethod(DigestMethod.SHA256, null),
                 Collections.singletonList(factory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)),
                 null,
                 null);
 
         SignedInfo signedInfo = factory.newSignedInfo(factory.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS,
                 (C14NMethodParameterSpec) null),
-                factory.newSignatureMethod(SignatureMethod.RSA_SHA1, null),
+                factory.newSignatureMethod(ALGO_SIGNATURE_RSA_SHA256, null),
                 Collections.singletonList(ref));
 
         XMLSignature signature = factory.newXMLSignature(signedInfo, keyInfo);

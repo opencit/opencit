@@ -87,7 +87,7 @@ public class HostBO {
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18,19";
-    private static String OPENSOURCE_DA_PCRs = "17,18";
+    private static String OPENSOURCE_DA_PCRs = "17,18,19";
     private static String CITRIX_PCRs = "18"; //"17,18";
     private static String WINDOWS_BIOS_PCRs = "0";
     private static String WINDOWS_PCRs = "13,14";
@@ -1011,8 +1011,8 @@ public class HostBO {
                     String certPem = X509Util.encodePemCertificate(cert);
                     tblHosts.setAIKCertificate(certPem);
                     tblHosts.setAikPublicKey(RsaUtil.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
-                    tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
-                    tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
+                    tblHosts.setAikSha256(Sha256Digest.valueOf(cert.getEncoded()).toString());
+                    tblHosts.setAikPublicKeySha256(Sha256Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                 } catch (Exception e) {
                     log.error("Cannot encode AIK certificate: " + e.toString(), e);
                 }
@@ -1021,8 +1021,8 @@ public class HostBO {
                 String pem = RsaUtil.encodePemPublicKey(publicKey);
                 tblHosts.setAIKCertificate(null);
                 tblHosts.setAikPublicKey(pem);
-                tblHosts.setAikSha1(null);
-                tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
+                tblHosts.setAikSha256(null);
+                tblHosts.setAikPublicKeySha256(Sha256Digest.valueOf(publicKey.getEncoded()).toString());
             }
         }
     }
@@ -1099,9 +1099,13 @@ public class HostBO {
             return false;
         }
 
+        /* commment out this check since for PCR19, the value can be 0 if not in TCB mode, and not 0 if in TCB value. 
+         * This should allow PCR 19 can be selected by default to accomodate both cases.
         if (modValue.matches(invalidWhiteList)) {
             return false;
         }
+        */
+        
         if (modValue.matches(hexadecimalRegEx)) {
             return true;
         } else {
@@ -1521,7 +1525,7 @@ public class HostBO {
         emt.getTransaction().begin();
 
         // If in case we need to support additional pcrs for event logs, we need to just update this and add the new PCR
-        List<Integer> pcrsSupportedForEventLog = Arrays.asList(17, 19);
+        List<Integer> pcrsSupportedForEventLog = Arrays.asList(14, 17, 19);
         // Since the attestation report has all the PCRs we need to upload only the required PCR values into the white list tables.
         // Location PCR (22) is added by default. We will check if PCR 22 is configured or not. If the digest value for PCR 22 exists, then
         // we will configure the location table as well.
@@ -1550,6 +1554,13 @@ public class HostBO {
             StringReader sr = new StringReader(attestationReport);
             XMLStreamReader reader = xif.createXMLStreamReader(sr);
 
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("uploadToDB: About to use the host configuration - {}", mapper.writeValueAsString(hostConfigObj));
+            } catch (Exception e) {
+                log.error("uploadToDB cannot serialize input", e);
+            }
+            
             TblMle mleSearchObj = mleJpa.findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
             TblMle mleBiosSearchObj = mleJpa.findBiosMle(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
             // Process all the Event and PCR nodes in the attestation report.
@@ -1609,7 +1620,8 @@ public class HostBO {
                                     //moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                     moduleObj.setOemName(hostObj.BIOS_Oem);
                                 }
-                            } else if(pcr == 19 && !useDaMode) {
+                            } else if(pcr == 19 && !useDaMode || (pcr == 19 && useDaMode && reader.getAttributeValue("", "ComponentName").equals("tbootxm"))) {
+                                log.debug("UploadToDB: MLE for PCR [{}] with component name [{}] for algorithm [{}] has value [{}]", pcr, reader.getAttributeValue("", "ComponentName"), reader.getAttributeValue("", "DigestAlgorithm"), reader.getAttributeValue("", "DigestValue"));
                                 if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                     moduleObj.setComponentName(" ");
                                     log.info("uploadToDB: component name set to single-space");
@@ -1633,23 +1645,63 @@ public class HostBO {
                                 moduleObj.setOsName(hostObj.VMM_OSName);
                                 moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                                 moduleObj.setOemName("");
-                            } else {
+                            } else if(pcr == 14){
+                                if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+                                    moduleObj.setComponentName(" ");
+                                    log.info("uploadToDB: component name set to single-space");
+                                } else {
+                                    moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
+                                }
+                                moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
+                                moduleObj.setPcrBank(reader.getAttributeValue("", "DigestAlgorithm"));
+                                if(moduleObj.getPcrBank() == null) {
+                                    moduleObj.setPcrBank("SHA1");
+                                }
+                                moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
+                                moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
+                                moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
+                                moduleObj.setPackageVendor(reader.getAttributeValue("", "PackageVendor"));
+                                moduleObj.setPackageVersion(reader.getAttributeValue("", "PackageVersion"));
+                                moduleObj.setUseHostSpecificDigest(Boolean.valueOf(reader.getAttributeValue("", "UseHostSpecificDigest")));
+                                moduleObj.setDescription("");
+                                moduleObj.setMleName(hostObj.VMM_Name);
+                                moduleObj.setMleVersion(hostObj.VMM_Version);
+                                moduleObj.setOsName(hostObj.VMM_OSName);
+                                moduleObj.setOsVersion(hostObj.VMM_OSVersion);
+                                moduleObj.setOemName("");
+                            }  
+                            else {
                                 reader.next();
                                 continue;
                             }
-                            if (!hostConfigObj.getOverWriteWhiteList()) {
-                                // add the module if we are to add a new bios or vmm mle
-                                boolean addModuleToBios = !moduleObj.getUseHostSpecificDigest() && hostConfigObj.addBiosWhiteList();
-                                boolean addModuleToVmm = moduleObj.getUseHostSpecificDigest() && hostConfigObj.addVmmWhiteList();
-                                
-                                if(addModuleToBios || addModuleToVmm){
+
+                            try {
+                                ObjectMapper mapper = new ObjectMapper();
+                                log.debug("uploadToDB: About to configure the Module with details - {}", mapper.writeValueAsString(moduleObj)); //This statement may contain clear text passwords
+                            } catch (Exception e) {
+                                log.error("uploadToDB cannot serialize input", e);
+                            }
+                            
+                            // add the module if we are to add a new bios or vmm mle
+                            boolean addModuleToBios = hostConfigObj.addBiosWhiteList();
+                            boolean addModuleToVmm = hostConfigObj.addVmmWhiteList();
+
+                            // Adding additional checks before creating the modules. We were seeing issues with creating BIOS modules when the user
+                            // had actually requested only for VMM modules or BIOS module was not needed since it matched an existing MLE.
+                            if (!hostConfigObj.getOverWriteWhiteList()) {                                
+                                if ((addModuleToBios && moduleObj.getOsName() == null) 
+                                        || (addModuleToVmm && moduleObj.getOsName() != null && !moduleObj.getOsName().isEmpty())) {
                                     mleBO.addModuleWhiteList(moduleObj, emt, null, null);
                                     log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
                                 }
+
                             } else {
                                 try {
-                                    mleBO.updateModuleWhiteList(moduleObj, emt, null);
-                                    log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                    if ((addModuleToBios && moduleObj.getOsName() == null)
+                                            || (addModuleToVmm && moduleObj.getOsName() != null && !moduleObj.getOsName().isEmpty())) {
+                                        mleBO.updateModuleWhiteList(moduleObj, emt, null);
+                                        log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                    }
                                 } catch (ASException ae) {
                                     if (ae.getErrorCode() == ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST) {
                                         mleBO.addModuleWhiteList(moduleObj, emt, null, null);
@@ -1730,7 +1782,7 @@ public class HostBO {
                                 mleID = mleSearchObj.getId();
 
                                 // If the vendor is Citrix, then only we need to write the PCR 19. Otherwise we need to null it out. 
-                                if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix")) {
+                                if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix") && !hostObj.getDaMode()) {
                                     if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
                                         pcrObj.setPcrDigest("");
                                     }

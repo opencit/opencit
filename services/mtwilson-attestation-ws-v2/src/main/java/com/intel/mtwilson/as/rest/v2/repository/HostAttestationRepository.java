@@ -61,10 +61,10 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                 TblHosts tblHosts;
                 if (criteria.hostUuid != null) {
                     tblHosts = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
-                } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
-                    tblHosts = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
-                } else if ( criteria.aikPublicKeySha1 != null && !criteria.aikPublicKeySha1.isEmpty()) {
-                    tblHosts = My.jpa().mwHosts().findByAikPublicKeySha1(criteria.aikPublicKeySha1);
+                } else if (criteria.aikSha256 != null && !criteria.aikSha256.isEmpty()) {
+                    tblHosts = My.jpa().mwHosts().findByAikSha256(criteria.aikSha256);
+                } else if ( criteria.aikPublicKeySha256 != null && !criteria.aikPublicKeySha256.isEmpty()) {
+                    tblHosts = My.jpa().mwHosts().findByAikPublicKeySha256(criteria.aikPublicKeySha256);
                 } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                     tblHosts = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
                 } else {
@@ -135,7 +135,9 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                         if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
                             log.debug("HostAttestation:Search - Retrieved {} of results.", tblSamlAssertionList.size());
                             for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
-                                hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(null, tblSamlAssertion));
+                                if (tblSamlAssertion.getTrustReport() != null) {
+                                    hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(null, tblSamlAssertion));
+                                }
                             }
                         }
                         
@@ -196,16 +198,16 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                     log.error("Host specified with id {} is not valid.", item.getHostUuid());
                     throw new RepositoryInvalidInputException();
                 }
-            } else if (item.getAikSha1() != null && !item.getAikSha1().isEmpty()) {
-                obj = jpaController.findByAikSha1(item.getAikSha1());
+            } else if (item.getAikSha256() != null && !item.getAikSha256().isEmpty()) {
+                obj = jpaController.findByAikSha256(item.getAikSha256());
                 if (obj == null) {
-                    log.error("Host specified with aik sha1 {} is not valid.", item.getAikSha1());
+                    log.error("Host specified with aik sha1 {} is not valid.", item.getAikSha256());
                     throw new RepositoryInvalidInputException();
                 }
-            } else if (item.getAikPublicKeySha1() != null && !item.getAikPublicKeySha1().isEmpty()) {
-                obj = jpaController.findByAikPublicKeySha1(item.getAikPublicKeySha1());
+            } else if (item.getAikPublicKeySha256() != null && !item.getAikPublicKeySha256().isEmpty()) {
+                obj = jpaController.findByAikPublicKeySha256(item.getAikPublicKeySha256());
                 if (obj == null) {
-                    log.error("Host specified with aik public key sha1 {} is not valid.", item.getAikPublicKeySha1());
+                    log.error("Host specified with aik public key sha1 {} is not valid.", item.getAikPublicKeySha256());
                     throw new RepositoryInvalidInputException();
                 }
             } else if (item.getHostName() != null && !item.getHostName().isEmpty()) {
@@ -231,7 +233,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                 hostAttestation = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), item.getId().toString(), true, challenge);
             }
             // issue #4978 use specified nonce, if available
-            item.setAikSha1(hostAttestation.getAikSha1());
+            item.setAikSha256(hostAttestation.getAikSha256());
             item.setChallenge(hostAttestation.getChallenge());
             item.setCreatedOn(hostAttestation.getCreatedOn());
             item.setEtag(hostAttestation.getEtag());

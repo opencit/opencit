@@ -8,6 +8,8 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.as.business.AssetTagCertBO;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.PlaintextFilenameFilter;
@@ -181,7 +183,9 @@ public class ProvisionTagCertificate  {
         Certificate latestCert = null;
         BigInteger latestCreateTime = BigInteger.ZERO;
         //  pick the most recently created cert that is currently valid and has the same attributes specified in the selection.  we evaluate the notBefore and notAfter fields of the certificate itself even though we already narrowed the search to currently valid certs using the search criteria. 
-        if( !results.getCertificates().isEmpty() ) {
+        AssetTagCertBO atagCertBO = new AssetTagCertBO();
+        MwAssetTagCertificate atagCert = atagCertBO.findValidAssetTagCertForHost(subject);
+        if( !results.getCertificates().isEmpty() && atagCert!=null) {
             for (Certificate certificate : results.getCertificates()) {
                 X509AttributeCertificate attributeCertificate = X509AttributeCertificate.valueOf(certificate.getCertificate());
                 if (today.before(attributeCertificate.getNotBefore())) {
@@ -392,7 +396,7 @@ public class ProvisionTagCertificate  {
         try(FileOutputStream out = new FileOutputStream(encryptedFile)) {
             IOUtils.write(message, out);
         }
-        String tagCmdPath = Folders.application() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
+        String tagCmdPath = Folders.application() + File.separator + "bin"; //.getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"decrypt.sh -p PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 
