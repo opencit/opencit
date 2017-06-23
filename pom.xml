@@ -3,7 +3,7 @@
     
     <groupId>com.intel.mtwilson</groupId>
     <artifactId>mtwilson-maven-build</artifactId>
-    <version>3.2-SNAPSHOT</version>
+    <version>3.2.1-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     

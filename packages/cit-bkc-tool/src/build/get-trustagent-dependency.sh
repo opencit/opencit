@@ -1,5 +1,5 @@
 #!/bin/bash
-TRUSTAGENT_VERSION="3.2-SNAPSHOT"
+TRUSTAGENT_VERSION="3.2.1-SNAPSHOT"
 
 
 yum_detect() {

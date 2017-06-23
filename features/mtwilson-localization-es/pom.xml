@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-core-application-zip</artifactId>
-        <version>3.2-SNAPSHOT</version>
+        <version>3.2.1-SNAPSHOT</version>
         <relativePath />
     </parent>
     
