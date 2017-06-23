@@ -62,12 +62,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tpm20</artifactId>
-            <version>3.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-shiro</artifactId>
-            <scope>test</scope>
         </dependency>
         
         <!-- mtwilson -->
