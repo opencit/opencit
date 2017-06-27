@@ -20,6 +20,10 @@
         <version>3.2.1-SNAPSHOT</version>
     </parent>
     
+    <properties>
+        <additionalparam>-Xdoclint:none</additionalparam>
+    </properties>
+    
     <build>
         <plugins>
             <plugin>
