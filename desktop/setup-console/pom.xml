@@ -450,6 +450,9 @@
                     <name>aspectj</name>
                 </property>
             </activation>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
             <build>
                 <plugins>
                     <plugin>

@@ -362,6 +362,9 @@
                     <name>release</name>  <!-- activate this profile with  -Drelease on the command line -->
                 </property>
             </activation>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
