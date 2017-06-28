@@ -844,6 +844,9 @@ reference : https://java.net/jira/browse/JERSEY-2325
                     <name>release</name>
                 </property>
             </activation>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
             <build>
                 <plugins>
                     <!-- begin website plugin -->
