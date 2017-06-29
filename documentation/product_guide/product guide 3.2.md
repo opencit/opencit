@@ -1,5 +1,5 @@
 # Contents
-
+ 
 * [1.0 Introduction](#10-introduction)
 	* [1.1 Overview](#11-overview)
 	* [1.2 The Chain of Trust](#12-the-chain-of-trust)
@@ -16,7 +16,7 @@
 	* [4.1 Installing the Attestation Server](#41-installing-the-attestation-server)
 		* [4.1.1 Installation Prerequisites](#411-installation-prerequisites)
 		* [4.1.2 Package Dependencies](#412-package-dependencies)
-		* [4.1.3 Installation](#413-installation)
+        * [4.1.3 Installation](#413-installation)
 	* [4.2 Installing the OpenStack Controller Extensions](#42-installing-the-openstack-controller-extensions)
 		* [4.2.1 Prerequisites](#421-prerequisites)
 		* [4.2.2 Minimum Requirements](#422-minimum-requirements)
@@ -262,16 +262,13 @@
 		* [14.1.1 Minimum Requirements](#1411-minimum-requirements)
 		* [14.1.2 Installing the Required Packages](#1412-installing-the-required-packages)
 		* [14.1.3 Installing the Java Development Kit (JDK)](#1413-installing-the-java-development-kit-jdk-for-ubuntu-and-rhel)
-		* [14.1.4 Installing Apache Maven 3.3.3](#1414-installing-apache-maven-333-for-ubuntu-and-rhel)
+        * [14.1.4 Installing Apache Maven](#1414-installing-apache-maven-for-ubuntu-and-rhel)
 		* [14.1.5 Editing setting.xml](#1415-editing-settingsxml)
 		* [14.1.6 Modifying Environment Files](#1416-modifying-environment-files)
 	* [14.2 Intel® CIT Source Code](#142-intel-cit-source-code)
 		* [14.2.1 Downloading the Source Code](#1421-downloading-the-source-code)
 		* [14.2.2 Building the Source Code](#1422-building-the-source-code)
-	* [14.3 Building External Artifacts](#143-building-external-artifacts)
-		* [14.3.1 Prerequisites](#1431-prerequisites)
-		* [14.3.2 Build](#1432-build)
-		* [14.3.3 Binary Locations](#1433-binary-locations)
+	* [14.3 Binary Locations](#143-binary-locations)
 * [15.0 TXT/TPM Prerequisites and Activation](#150-txttpm-prerequisites-and-activation)
 	* [15.1 Trusted Boot Provisioning](#151-trusted-boot-provisioning)
 * [16.0 Frequently Asked Questions](#160-frequently-asked-questions)
@@ -299,7 +296,7 @@ The *Chain of Trust* begins with Intel® TXT, which acts as an unchanging hardwa
 
 **Figure 2** shows a more detailed overview of the architecture.
 
-![](images/detailed architecture.jpg)
+![](images/ArchitectureDiagram.png)
 
 **Figure 2. Detailed Architecture Overview**
 
@@ -930,7 +927,7 @@ The following must be completed before installing the Trust Agent:
 
 **For Baremetal deployment**
 
-1. This procedure describes the steps to install the CIT component on a Baremetal Windows. Before executing the installer, create the system.ini configuration file in the same folder than the mtwilson-openstack-trusted-node-windows-3.2-SNAPSHOT.exe file (sample `system.ini` file provided below).
+1. This procedure describes the steps to install the CIT component on a Baremetal Windows. Before executing the installer, create the `system.ini` configuration file in the same folder than the `mtwilson-openstack-trusted-node-windows-3.2.1-SNAPSHOT.exe` file (sample `system.ini` file provided below).
 
        [COMMON]
 
@@ -956,39 +953,65 @@ The following must be completed before installing the Trust Agent:
 
 >**Note:** The MTWILSON_API_USERNAME and password required by the Trust Agent can be satisfied by the 	PRIVACYCA_DOWNLOAD_USERNAME user created during the installation of the Attestation Service.
 
-2.   Execute the mtwilson-openstack-trusted-node-windows-3.2-SNAPSHOT.exe file. The CIT-Compute-Node Setup orchestrator installer will be displayed. This orchestrator will conduct the installation of all the CIT components required for the Windows host depending on the option set in the system.ini file.
-	![](images/TAWindows01.PNG)
-3. 	Click Next. The install location screen. 
+2.   Execute the `mtwilson-openstack-trusted-node-windows-3.2.1-SNAPSHOT.exe` file. The CIT-Compute-Node Setup orchestrator installer will be displayed. This orchestrator will conduct the installation of all the CIT components required for the Windows host depending on the option set in the `system.ini` file.
+	
+    ![](images/TAWindows01.PNG)
+    
+3. 	Click Next. The install location screen.
+
 	![](images/TAWindows02.PNG)
+    
 4. 	Click Install. The Tbootxm Setup window will be displayed. 
+
  	![](images/TAWindows03.PNG)
+    
 5. 	Click Next and then in the next window Install.  A Microsoft Window will be displayed asking to restart the computer. NOTE: Do NOT click Restart Now.
+
 	![](images/TAWindows04.PNG)
+    
 6. 	Click Restart Later. The installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing Tbootxm Setup window will be displayed.
+
 	![](images/TAWindows05.PNG)
+    
 7. 	Click Finish. The Intel CIT Trust Agent Setup window will be displayed saying the Microsoft Visual C++ package is not installed.
+
 	![](images/TAWindows06.PNG)
+    
 8. 	Click OK. The required package will be installed then the Welcome to Intel CIT Trust Agent Setup window will be displayed.
+
 	![](images/TAWindows07.PNG)
+    
 9. 	Click Next. The Checking Environment for Installation window will be displayed. 
+
 	![](images/TAWindows08.PNG)
+    
 10. Click Next. The Install Location window will be displayed.
+
 	![](images/TAWindows09.PNG)
+    
 11. Click Next. The Setting up configuration window will be displayed.
+
 	![](images/TAWindows10.PNG)
+    
 12. Click Install. After some minutes the installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing CIT Trust Agent Setup window will be displayed.
+
 	![](images/TAWindows11.PNG)
+    
 13. Click Finish. Once this window disappears the Openstack-Extensions Setup installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing Openstack-Extensions Setup window will be displayed.
+
 	![](images/TAWindows23.PNG)
+    
 14. Click Finish. The CIT-Compute-Node Setup window will show the installation log and the Completed line. Make sure no errors are displayed in the log lines then click Next. The Completing CIT-Compute-Node Setup window will be displayed.
+
 	![](images/TAWindows24.PNG)
+    
 15. Select the desired option, Reboot Now or I want to manually reboot later, and then click  Finish. 
 
 > **Note:** A reboot is required before start using the CIT components already installed. 
 
 **For VM Attestation deployment**
 
-1. This procedure describes the steps to install the CIT component on a Windows compute node already attached to an Openstack controller. Before executing the installer, create the system.ini configuration file in the same folder than the mtwilson-openstack-trusted-node-windows-3.2-SNAPSHOT.exe file (sample `system.ini` file provided below).
+1. This procedure describes the steps to install the CIT component on a Windows compute node already attached to an Openstack controller. Before executing the installer, create the `system.ini` configuration file in the same folder than the `mtwilson-openstack-trusted-node-windows-3.2.1-SNAPSHOT.exe` file (sample `system.ini` file provided below).
 
        [COMMON]
 
@@ -1034,54 +1057,101 @@ The following must be completed before installing the Trust Agent:
 	   [MTWILSON_OPENSTACK_NODE]
 
 
-2. Execute the mtwilson-openstack-trusted-node-windows-3.2-SNAPSHOT.exe file. The CIT-Compute-Node Setup orchestrator installer will be displayed. This orchestrator will conduct the installation of all the CIT components required for the Windows host depending on the option set in the system.ini file.
+2. Execute the `mtwilson-openstack-trusted-node-windows-3.2.1-SNAPSHOT.exe` file. The CIT-Compute-Node Setup orchestrator installer will be displayed. This orchestrator will conduct the installation of all the CIT components required for the Windows host depending on the option set in the `system.ini` file.
+
 	![](images/TAWindows01.PNG)
+    
 3. 	Click Next. The install location screen. 
+
 	![](images/TAWindows02.PNG)
+    
 4. 	Click Install. The Tbootxm Setup window will be displayed. 
+
  	![](images/TAWindows03.PNG)
+    
 5. 	Click Next and then in the next window Install.  A Microsoft Window will be displayed asking to restart the computer. NOTE: Do NOT click Restart Now.
+
 	![](images/TAWindows04.PNG)
+    
 6. 	Click Restart Later. The installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing Tbootxm Setup window will be displayed.
+
 	![](images/TAWindows05.PNG)
+    
 7. 	Click Finish. The Intel CIT Trust Agent Setup window will be displayed saying the Microsoft Visual C++ package is not installed.
-	![](images/TAWindows06.PNG)
+
+	![](images/TAWindows06.PNG
+    
 8. 	Click OK. The required package will be installed then the Welcome to Intel CIT Trust Agent Setup window will be displayed.
-	![](images/TAWindows07.PNG)
+
+	![](images/TAWindows07.PNG
+    
 9. 	Click Next. The Checking Environment for Installation window will be displayed. 
+
 	![](images/TAWindows08.PNG)
+    
 10. Click Next. The Install Location window will be displayed.
+
 	![](images/TAWindows09.PNG)
+    
 11. Click Next. The Setting up configuration window will be displayed.
+
 	![](images/TAWindows10.PNG)
+    
 12. Click Install. After some minutes the installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing CIT Trust Agent Setup window will be displayed.
+
 	![](images/TAWindows11.PNG)
+    
 13. Click Finish. The Vrtm Setup window will be displayed.
+
 	![](images/TAWindows12.PNG)
+    
 14. Click Next and then Install in the next window.  The Vrtm Setup window will be displayed saying the Microsoft Visual C++ 2010 Redistributable package is not installed.
+
 	![](images/TAWindows13.PNG)
+    
 15. Click Ok. The required package will be installed then a new Vrtm Setup window will be displayed saying the Ext2Fsd driver is not installed.
+
 	![](images/TAWindows14.PNG)
+    
 16. Click OK. The required package will be installed then the Vrtm Setup Installation Complete window will be displayed and the installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing Vrtm Setup window will be displayed. 
+
 	![](images/TAWindows15.PNG)
+    
 17. Click Finish. The Welcome to Policyagent Setup window will be displayed. 
+
 	![](images/TAWindows16.PNG)
+    
 18. Click Next and then Next in the Install Location window. Windows describing information about the drive that is going to be use for encryption will be displayed.  NOTE: Since the drive/partition that is going to be use for encryption will be created/prepared and then encrypted by Bitlocker the Policyagent Setup windows could also show a Not Responding message. 
+
 	![](images/TAWindows17.PNG)
+    
 19. Once Bitlocker is done a Policyagent Setup window will be displayed saying the Bitlocker drive setup is completed.
+
 	![](images/TAWindows18.PNG)
+    
 20. Click OK. The Policyagent Setup installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing Policyagent Setup window will be displayed.
+
 	![](images/TAWindows19.PNG)
+    
 21. Click Finish. The Welcome to Openstack-Extensions Setup window will be displayed.
+
 	![](images/TAWindows20.PNG)
+    
 22. Click Finish. The Welcome to Openstack-Extensions Setup window will be displayed. 
+
 	![](images/TAWindows21.PNG)
+    
 23. Hit the Enter key. A second Windows command prompt window will be displayed asking for a confirmation to apply patches to some other files already installed.
 	![](images/TAWindows22.PNG)
+    
 24. Hit the Enter key. A third Windows command prompt window will be displayed for few second saying the nova-compute services are being restarted.  Once this window disappears the Openstack-Extensions Setup installation log will show the line Completed. Make sure no errors are displayed in the log lines then click Next. The Completing Openstack-Extensions Setup window will be displayed.
+
 	![](images/TAWindows23.PNG)
+    
 25. Click Finish. The CIT-Compute-Node Setup window will show the installation log and the Completed line. Make sure no errors are displayed in the log lines then click Next. The Completing CIT-Compute-Node Setup window will be displayed.
+
 	![](images/TAWindows24.PNG)
+    
 26. Select the desired option, Reboot Now or I want to manually reboot later, and then click  Finish. NOTE. A reboot is required before start using the CIT components already installed. 
 
 
@@ -2021,7 +2091,7 @@ Explicitly-selected files are measured separately from lock filters. If a file i
 
 	![](images/docker-choose-docker-image.png)
 
-5. Provide a name for the new Trust Policy. Select whether this image uses the **Hash Only** or **Hash and Enforce** launch control policy. Select **Encrypt Image** to encrypt the image. Click **Next**.
+5. Provide a name for the new Trust Policy. Select whether this image uses the **Hash Only** or **Hash and Enforce** launch control policy. Click **Next**.
 
 	![](images/docker-createpolicy-policy-metadata.png)
 
@@ -2072,7 +2142,7 @@ To  upload a Docker image to Docker hub, browse to the Trust Director portal and
 
 1. Select Images then **Add Images to the Trust Director**.
 
-	![](images/docker-upload-image-to-trustdirectory.png)
+	![](images/docker-add-images-trustdirector.png)
 
 2. Select the appropriate image type: **Docker** then click **Add**.
 
@@ -5289,18 +5359,31 @@ If the Trust Agent is re-installed after uninstallation, be sure to delete and r
 1. The CIT components can be uninstalled from the **Control Panel > Uninstall** by selecting the CIT-Compute-Node application and then clicking **Uninstall/Change**. Another way to do it is by executing the uninst.exe file under the home directory where the components were installed.
  
 2. A CIT-Compute-Node Uninstall window will be displayed. Click Yes.
+
 	![](images/RemoveTAWindows01.PNG)
+    
 3. Press any key
+
 	![](images/RemoveTAWindows02.PNG)
+    
 4. Press any key
+
 	![](images/RemoveTAWindows03.PNG)
+    
 5. Click Close.
+
 	![](images/RemoveTAWindows04.PNG)
+    
 6. Click Next.
+
 	![](images/RemoveTAWindows05.PNG)
+
 7. Reboot your system.
+
 	![](images/RemoveTAWindows06.PNG)
+
 8. A confirmation window will be displayed after uninstall.
+
 	![](images/RemoveTAWindows07.PNG)
 
 ## 12.3 Trust Director
@@ -5716,8 +5799,12 @@ To install the JDK, follow these steps:
  		# ln -s /etc/alternatives/java
  		# ln -s /etc/alternatives/javac
 
-### 14.1.4 Installing Apache Maven 3.3.3 for Ubuntu and RHEL
-To install Apache Maven 3.3.3, follow these steps:
+### 14.1.4 Installing Apache Maven for Ubuntu and RHEL
+To install Apache Maven, follow these steps:
+
+>**Note:** The Apache Maven version must be 3.3.1 or greater.
+
+This example is using Apache Maven 3.3.1
 
 1. Download the binary from repository with the following command:
 	
@@ -5753,8 +5840,8 @@ To modify the environment files, follow these steps:
    
         JAVA_HOME=/usr/lib/jvm/jdk1.7.0_51 
         export JAVA_HOME PATH=$PATH:$JAVA_HOME
-		export M2_HOME=/usr/local/apache-maven-3.3.1 
-		export M2=$M2_HOME/bin
+		export MAVEN_HOME=/usr/local/apache-maven-3.3.1 
+		export M2=$MAVEN_HOME/bin
 		export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=1024m" PATH=$PATH:$M2
 
 2. Restart your session so the environment variables are loaded correctly.
@@ -5809,6 +5896,8 @@ The source code must be downloaded at `/root`. When you clone, the default branc
     # git clone https://github.com/opencit/opencit-openstack-controller-extensions
     # git clone https://github.com/opencit/opencit-attestation-cache-hub
     # git clone https://github.com/opencit/opencit-quickstart
+    # git clone https://github.com/opencit/opencit-tpm-tools-windows
+
 	
 	
 #### 14.2.2 Building the Source Code
@@ -5851,7 +5940,7 @@ The source code must be built in the following order:
 
 **Fix:** change file permissions to `777` to the file that is being denied the access. Example: 
 
-    chmod +777 /cygdrive/c/repos/dcg_security_tboot-xm/windows_bootdriver/tbootxm_bootdriver_build.cmd
+    chmod +777 /cygdrive/c/repos/opencit_tboot-xm/windows_bootdriver/tbootxm_bootdriver_build.cmd
     
 **Cannot run program 'mvn.bat': CreateProcess error=2, The system cannot find the file specified**
 
@@ -5863,147 +5952,39 @@ The source code must be built in the following order:
 
 **Fix: we need to run cygwin as administrator, this error is resolved then.**
 
-> **Note:** External Artifacts requires steps to build see [Section 14.3](#143-building-external-artifacts) . You can also see the `Readme.md` file for more information on how to build this project.
+**Building External Artifacts**
 
-To build the source code, follow these steps:
-1. Run ant to build each project. Make sure to build the projects as `root`
-	
-    **For Ubuntu and RHEL**
-    
-		# cd /root/opencit-external-artifacts
-		# git checkout v1.0+cit-3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-contrib
-		# git checkout v1.0+cit-3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-util
-		# git checkout v1.0+cit-3.2
-		# ant
-		# cd ..	
-		# cd /root/opencit-privacyca
-		# git checkout v3.2
-		# ant
-		# cd /root/opencit-tboot-xm
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-trustagent
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit
-		# git checkout v3.2
-		# ant
-		# cd /root/opencit-vrtm
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-policyagent
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-docker-proxy
-		# git checkout v3.2
-		# ant
-		# cd /root/opencit-kms
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-director
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-openstack-extensions
-		# git checkout v3.2
-		# ant
-        # cd ..
-		# cd /root/opencit-openstack-controller-extensions
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-attestation-cache-hub
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-quickstart
-		# git checkout v3.2
-		# ant
-        
-    **For Windows**
-    
-        # cd /root/opencit-external-artifacts
-		# git checkout v1.0+cit-3.2
-		# ant
-        # cd ..
-        # cd /root/opencit-util
-		# git checkout v1.0+cit-3.2
-		# ant
-		# cd ..	
-        # cd /root/opencit-privacyca
-		# git checkout v3.2
-		# ant
-		# cd /root/opencit-tboot-xm
-		# git checkout v3.2
-		# ant
-		# cd ..
-        # cd /root/opencit-vrtm
-		# git checkout v3.2
-		# ant
-		# cd ..
-		# cd /root/opencit-policyagent
-		# git checkout v3.2
-		# ant
-		# cd ..
-        # cd /root/opencit-tpm-tools-windows
-		# git checkout v3.2
-		# ant
-		# cd ..
-        # cd /root/opencit-trustagent
-		# git checkout v3.2
-		# ant
-		# cd ..
-        # cd /root/opencit-openstack-extensions
-		# git checkout v3.2
-		# ant
-        # cd ..
-
-> **Note:** The openCIT APIs are documented in a Javadoc, which is generated automatically at **/root/opencit/integration/mtwilson-client-java7/target/mtwilson-client-java7-3.2-SNAPSHOT-javadoc.zip** when you run “ant” to build the code. Or can be generated separated by running “ant Javadoc”.
-
-2. Verify that all builds are successful.
-
-## 14.3 Building External Artifacts
 The Open CIT external artifacts project provides has several external dependencies required to successfully build Open CIT.
 
-## 14.3.1 Prerequisites
+**Prerequisites**
+
 To build this project, you must download a couple of artifacts and place them in specific directories so we can help you install to your local maven repo.
 
-1. After you clone the project, cd to the root directory of external artifacts.
+1. After you clone the project, `cd` to the `root` directory of external artifacts.
 	
-		# cd /root/dcg_security-external-artifacts
-		# git checkout release-cit-3.2
+		# cd /root/opencit-external-artifacts
+		# git checkout v1.0+cit-3.2.1 
 2. Download each artifact and prepare them to build the opencit-external-artifacts project.
 
 **Monit**
 
 Execute the following commands:
 
-	# wget https://mmonit.com/monit/dist/monit-5.5.tar.gz
+	# wget --no-check-certificate https://mmonit.com/monit/dist/monit-5.5.tar.gz
 	# mv monit-5.5.tar.gz monit/monit-5.5-linux-src.tgz
 
 **Tomcat**
 
 Execute the following commands:
 
-	# wget https://archive.apache.org/dist/tomcat/tomcat-7/v7.0.34/bin/apache-tomcat-7.0.34.tar.gz
+	# wget --no-check-certificate https://archive.apache.org/dist/tomcat/tomcat-7/v7.0.34/bin/apache-tomcat-7.0.34.tar.gz
 	# mv apache-tomcat-7.0.34.tar.gz apache-tomcat/apache-tomcat-7.0.34.tar.gz
 	
 **vijava**
 
 Execute the following commands:
 
-	# wget https://sourceforge.net/projects/vijava/files/vijava/VI%20Java%20API%205.5%20Beta/vijava55b20130927.zip
+	# wget --no-check-certificate https://sourceforge.net/projects/vijava/files/vijava/VI%20Java%20API%205.5%20Beta/vijava55b20130927.zip
 	# unzip vijava55b20130927.zip
 	# mv vijava55b20130927.jar vijava/vijava-5.5.jar
 **JDK**
@@ -6018,33 +5999,133 @@ Execute the following commands:
 
 Execute the following commands:
 
-	# wget https://sourceforge.net/projects/kmip4j/files/KMIP4J-V1.0/kmip4j-bin-1.0.zip
+	# wget --no-check-certificate https://sourceforge.net/projects/kmip4j/files/KMIP4J-V1.0/kmip4j-bin-1.0.zip
 	# unzip kmip4j-bin-1.0.zip
 	# mv jar/kmip4j.jar kmip4j/kmip4j-1.0.jar
 
 **ext2fsd**
 
-	# wget --no-check-certificate    https://sourceforge.net/projects/ext2fsd/files/Ext2fsd/0.62/Ext2Fsd-0.62.exe
+	# wget --no-check-certificate https://sourceforge.net/projects/ext2fsd/files/Ext2fsd/0.62/Ext2Fsd-0.62.exe
 	# mv Ext2Fsd-0.62.exe ext2fsd/Ext2Fsd-0.62.exe
 
 **TPM Tools** 	
 
 Execute the following commands:
 
-	# wget https://sourceforge.net/projects/trousers/files/tpm-tools/1.3.8/tpm-tools-1.3.8.tar.gz
+	# wget --no-check-certificate https://sourceforge.net/projects/trousers/files/tpm-tools/1.3.8/tpm-tools-1.3.8.tar.gz
 	# mv tpm-tools-1.3.8.tar.gz tpm-tools/tpm-tools-1.3.8.tar.gz
 
-Now clean up.
+Clean up.
 	
 	# rm -rf *.zip
 	# rm -rf *.jar
 	# rm -rf XenServer-SDK
-	
-### 14.3.2 Build
-Build using:
+
+Now, run `ant` to build the project
 
 	# ant
 
+**To build the rest of the projects, follow these steps:**
+
+1. Run `ant` to build each project. Make sure to build the projects as `root`
+	
+    **For Ubuntu and RHEL**
+    
+		# cd /root/opencit-contrib
+		# git checkout v1.0+cit-3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-util
+		# git checkout v1.0+cit-3.2.1
+		# ant
+		# cd ..	
+		# cd /root/opencit-privacyca
+		# git checkout v3.2.1
+		# ant
+		# cd /root/opencit-tboot-xm
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-trustagent
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit
+		# git checkout v3.2.1
+		# ant
+		# cd /root/opencit-vrtm
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-policyagent
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-docker-proxy
+		# git checkout v3.2.1
+		# ant
+		# cd /root/opencit-kms
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-director
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-openstack-extensions
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-openstack-controller-extensions
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-attestation-cache-hub
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-quickstart
+		# git checkout v3.2.1
+		# ant
+        
+    **For Windows**
+    
+        # cd /root/opencit-util
+		# git checkout v1.0+cit-3.2.1
+		# ant
+		# cd ..	
+        # cd /root/opencit-privacyca
+		# git checkout v3.2.1
+		# ant
+		# cd /root/opencit-tboot-xm
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+        # cd /root/opencit-vrtm
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+		# cd /root/opencit-policyagent
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+        # cd /root/opencit-tpm-tools-windows
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+        # cd /root/opencit-trustagent
+		# git checkout v3.2.1
+		# ant
+		# cd ..
+        # cd /root/opencit-openstack-extensions
+		# git checkout v3.2.1
+		# ant
+        # cd ..
+
+> **Note:** The openCIT APIs are documented in a Javadoc, which is generated automatically at **/root/opencit/integration/mtwilson-client-java7/target/mtwilson-client-java7-3.2.1-SNAPSHOT-javadoc.zip** when you run “ant” to build the code. Or can be generated separated by running “ant Javadoc”.
+
+2. Verify that all builds are successful.
+	
 ### 14.3.3 Binary Locations
 A list of significant binary artifacts can be found in the top of the repository in a file named `build.targets`.
 
