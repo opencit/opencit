@@ -5714,7 +5714,7 @@ To install the required packages, execute the following commands:
 	
 	# cd /root
 	# apt-get update
-	# apt-get install ssh ant makeself git make gcc g++ openssl libssl-dev unzip nsis zip –y
+	# apt-get install -y ssh ant makeself git make gcc g++ openssl libssl-dev unzip nsis zip 
 
 >**Note:** The **gcc** version has to be 4.9 and above. If you are using Ubuntu 14.04, you need to upgrade gcc version, as the package installer installs older version by default.
 
@@ -5724,7 +5724,7 @@ To install the required packages, execute the following commands:
 
 	# cd /root
 	# yum update
-	# yum install openssh ant git make gcc gcc-c++ openssl openssl-devel unzip zip patch –y
+	# yum install -y openssh ant git make gcc gcc-c++ openssl openssl-devel unzip zip patch 
 
 To install `makeself` and `nsis`
 
@@ -5732,7 +5732,7 @@ Add the **epel repository**
 
 	# wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
 	# rpm -ivh epel-release-7-9.noarch.rpm
-	# yum install makeself nsis -y
+	# yum install -y makeself nsis 
 
 **For Windows**
 
@@ -5774,7 +5774,7 @@ Select **Environment Variables** and edit the `PATH` variable by appending a sem
 
 `C:\cygwin64\bin`
  
-Install **Java** version 1.7
+Install **Java** version 1.8
 
 Install **ant** version 1.8
 
@@ -5785,16 +5785,16 @@ To install the JDK, follow these steps:
 
 1. Get the JDK from the following URL:
 
-		http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html#jdk-7u51-oth-JPR
-2. Download the `jdk-7u51-linux-x64.tar.gz` file.
+		http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+2. Download the `jdk-8u131-linux-x64.tar.gz` file.
 3. Systems usually come with a default Java. You must update at least the ones used by CIT compilation. Run the following commands to set it up correctly on the system:
  		
-		# mv jdk-7u51-linux-x64.tar.gz jdk-1.7.0_51-linux-x64.tar.gz
- 		# gzip -dc jdk-1.7.0_51-linux-x64.tar.gz | tar xf -
- 		# mv jdk1.7.0_51 /usr/lib/jvm #Create the jvm directory if it doesn’t exist already
+		# mv jdk-8u131-linux-x64.tar.gz jdk1.8.0_131-linux-x64.tar.gz
+ 		# gzip -dc jdk1.8.0_131-linux-x64.tar.gz | tar xf -
+ 		# mv jdk1.8.0_131 /usr/lib/jvm #Create the jvm directory if it doesn’t exist already
  		# cd /etc/alternatives/
- 		# ln -s /usr/lib/jvm/jdk1.7.0_51/bin/java
- 		# ln -s /usr/lib/jvm/jdk1.7.0_51/bin/javac
+ 		# ln -s /usr/lib/jvm/jdk1.8.0_131/bin/java
+ 		# ln -s /usr/lib/jvm/jdk1.8.0_131/bin/javac
  		# cd /usr/bin/
  		# ln -s /etc/alternatives/java
  		# ln -s /etc/alternatives/javac
@@ -5838,7 +5838,7 @@ To modify the environment files, follow these steps:
 
 1. Add environment variables to `~/.bashrc`.
    
-        JAVA_HOME=/usr/lib/jvm/jdk1.7.0_51 
+        JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131
         export JAVA_HOME PATH=$PATH:$JAVA_HOME
 		export MAVEN_HOME=/usr/local/apache-maven-3.3.1 
 		export M2=$MAVEN_HOME/bin
@@ -5987,13 +5987,6 @@ Execute the following commands:
 	# wget --no-check-certificate https://sourceforge.net/projects/vijava/files/vijava/VI%20Java%20API%205.5%20Beta/vijava55b20130927.zip
 	# unzip vijava55b20130927.zip
 	# mv vijava55b20130927.jar vijava/vijava-5.5.jar
-**JDK**
-
-1. Use the JDK downloaded in [Section 14.1.3](#1413-installing-the-java-development-kit-jdk-for-ubuntu-and-rhel) . If you do not have it, you can download it from:
-2.  http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html#jdk-7u51-oth-JPR
-3. Download the jdk-7u51-linux-x64.tar.gz file.
-4. Once you have the file, place it in the jdk directory of the opencit-external-artifactsproject
-5. `# mv jdk-7u51-linux-x64.tar.gz jdk/jdk-1.7.0_51-linux-x64.tar.gz`
 
 **kmip4j**
 
