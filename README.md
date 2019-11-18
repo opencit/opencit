@@ -1,4 +1,4 @@
-#Open Cloud Integrity Technology
+# ⛔️ DEPRECATED - Open Cloud Integrity Technology
 
 
 **The Open CIT project provides:** A cloud management tool software development kit (SDK) source code and binaries
