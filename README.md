@@ -1,5 +1,6 @@
 # ⛔️ DEPRECATED - Open Cloud Integrity Technology
 
+DEPRECATED. No new features or support will be provided. Please consider using Intel® Security Libraries for Data Center (Intel® SecL-DC). [Intel® SecL - DC libraries](https://01.org/intel-secl) will be the delivery mechanism for all future Intel Data Center security software components.
 
 **The Open CIT project provides:** A cloud management tool software development kit (SDK) source code and binaries
 
