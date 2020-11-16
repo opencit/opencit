@@ -488,7 +488,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>9.1.0.RC2</version>
+            <version>9.4.34.v20201102</version>
         </dependency>
         <!-- to direct all logging to slf4j , together with slf4j adapters for commons-logging, log4j etc -->
         <dependency>
