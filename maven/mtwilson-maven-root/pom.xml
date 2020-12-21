@@ -832,7 +832,7 @@ reference : https://java.net/jira/browse/JERSEY-2325
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
-                <version>1.4.7</version>
+                <version>1.4.15</version>
             </dependency>
         </dependencies>
     </dependencyManagement>  
